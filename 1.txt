@@ -1,0 +1,70 @@
+# PROJECT_OVERVIEW.md
+
+# Prince Parfait Personal Brand Website
+
+## Purpose
+
+This website is not a developer portfolio.
+
+It is a personal brand platform that presents Prince Parfait GANZA as a founder, strategist, consultant, and organizational problem solver.
+
+The website should communicate impact, credibility, leadership, vision, and execution.
+
+Visitors should leave understanding:
+
+* Who Prince is
+* What problems he helps solve
+* What impact he has created
+* What organizations he has worked with
+* What he believes
+* Where he is going
+
+The website should feel closer to a founder profile, executive website, or thought leadership platform than a freelance portfolio.
+
+---
+
+## Core Positioning
+
+Prince Parfait GANZA
+
+Founder • Systems Strategist • Transformation Consultant
+
+Helping organizations improve performance, strengthen operations, and unlock growth through strategy, execution, technology, data, and people development.
+
+---
+
+## Primary Audience
+
+* Business Owners
+* CEOs
+* NGO Leaders
+* Directors
+* Institutional Decision Makers
+* Investors
+* Partners
+* Recruiters
+* Future Collaborators
+
+---
+
+## Key Message
+
+Do not position Prince as a web developer.
+
+Position Prince as someone who solves organizational challenges and creates measurable outcomes.
+
+Technology is evidence.
+
+Impact is the message.
+
+---
+
+## Success Criteria
+
+A visitor should think:
+
+"This is someone who understands organizations, operations, leadership, transformation, and execution."
+
+Not:
+
+"This is someone who knows programming."

@@ -1,0 +1,116 @@
+# DESIGN_SYSTEM.md
+
+# Design Direction
+
+## Theme
+
+Premium Light Theme
+
+Avoid dark mode as the primary experience.
+
+The website should feel:
+
+* Modern
+* Clean
+* Executive
+* Sophisticated
+* Trustworthy
+* Premium
+* Minimal
+
+---
+
+## Inspiration
+
+Think:
+
+* Founder website
+* Executive profile
+* Modern consulting firm
+* Premium technology company
+* Thought leadership platform
+
+Not:
+
+* Freelancer portfolio
+* Developer showcase
+* Hacker aesthetic
+* Gaming design
+
+---
+
+## Typography
+
+Primary Font:
+
+Outfit
+
+Characteristics:
+
+* Clean
+* Modern
+* Professional
+* Readable
+
+---
+
+## Visual Style
+
+Large spacing.
+
+Strong typography.
+
+Minimal distractions.
+
+Elegant animations.
+
+Subtle motion.
+
+Generous white space.
+
+Premium image presentation.
+
+High quality project showcases.
+
+---
+
+## Color Direction
+
+Primary:
+
+White backgrounds
+
+Secondary:
+
+Soft gray surfaces
+
+Accent:
+
+Deep blue or premium neutral accent
+
+Avoid:
+
+Neon colors
+
+Excessive gradients
+
+Overly saturated palettes
+
+---
+
+## Animation Philosophy
+
+Animations should communicate quality.
+
+Never animate for decoration only.
+
+Use animation for:
+
+* Section reveals
+* Scroll transitions
+* Statistics
+* Timeline progression
+* Page transitions
+* Hover interactions
+
+Motion should feel intentional and professional.

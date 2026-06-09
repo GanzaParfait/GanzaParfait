@@ -1,0 +1,151 @@
+# SITE_ARCHITECTURE.md
+
+# Website Structure
+
+## Home
+
+* Hero
+* Executive Summary
+* Impact Highlights
+* Organizations
+* Featured Work
+* Philosophy
+* Call To Action
+
+---
+
+## About
+
+Sections:
+
+* Story
+* Journey
+* Principles
+* Values
+* Vision
+* Future Direction
+
+---
+
+## Impact
+
+Demonstrate real outcomes.
+
+Include:
+
+* Organizations Served
+* Systems Delivered
+* Training Initiatives
+* Consulting Engagements
+* Research Contributions
+
+---
+
+## Experience
+
+Professional timeline.
+
+Examples:
+
+* Lerony
+* Ethical Research Solutions
+* Caritas Rwanda
+* APN African Marketplace
+
+Each experience should focus on:
+
+Challenge
+
+Contribution
+
+Outcome
+
+Evidence
+
+---
+
+## Projects
+
+Not a project gallery.
+
+A case-study collection.
+
+Each project should contain:
+
+Context
+
+Challenge
+
+Approach
+
+Solution
+
+Outcome
+
+Lessons Learned
+
+Screenshots
+
+---
+
+## Knowledge & Expertise
+
+Categories:
+
+* Organizational Transformation
+* Business Operations
+* Strategy
+* Data & Analytics
+* Research Operations
+* Leadership
+* Entrepreneurship
+* Capacity Building
+* Digital Transformation
+* Process Optimization
+
+---
+
+## Insights
+
+Articles and thinking.
+
+Topics:
+
+* Leadership
+* Systems Thinking
+* Business Growth
+* Organizational Excellence
+* Entrepreneurship
+* Innovation
+
+---
+
+## Evidence
+
+Proof library.
+
+Contains:
+
+* Screenshots
+* Reports
+* Certifications
+* Testimonials
+* Recommendations
+* Recognition
+* Training Evidence
+
+---
+
+## Contact
+
+Professional contact page.
+
+Focus on:
+
+Partnerships
+
+Consulting
+
+Collaborations
+
+Opportunities
