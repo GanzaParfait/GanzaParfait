@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import LayoutShell from "@/components/layout/LayoutShell";
 import { siteConfig } from "@/data/site-data";
 
 export const metadata: Metadata = {
@@ -171,12 +172,7 @@ export default function RootLayout({
         <meta name="msapplication-config" content="/browserconfig.xml" />
       </head>
       <body className="antialiased">
-        <a href="#main-content" className="skip-link">Skip to main content</a>
-        <Navbar />
-        <main id="main-content" role="main" tabIndex={-1}>
-          {children}
-        </main>
-        <Footer />
+        <LayoutShell>{children}</LayoutShell>
       </body>
     </html>
   );

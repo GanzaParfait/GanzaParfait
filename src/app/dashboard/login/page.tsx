@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { RiLockPasswordLine, RiMailLine, RiShieldUserLine } from "react-icons/ri";
+import { RiLockPasswordLine, RiMailLine, RiShieldUserLine, RiArrowRightLine } from "react-icons/ri";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -17,7 +17,6 @@ export default function AdminLoginPage() {
     setError("");
     setLoading(true);
 
-    // Validate credentials: ganzaparfait7@gmail.com / 0000
     if (email.trim().toLowerCase() === "ganzaparfait7@gmail.com" && password === "0000") {
       if (typeof window !== "undefined") {
         localStorage.setItem("ppg_admin_auth", "true");
@@ -25,7 +24,7 @@ export default function AdminLoginPage() {
       }
       setTimeout(() => {
         router.push("/dashboard");
-      }, 400);
+      }, 300);
     } else {
       setLoading(false);
       setError("Invalid credentials. Please verify email and password.");
@@ -54,11 +53,11 @@ export default function AdminLoginPage() {
               className="object-contain"
             />
           </div>
-          <h1 style={{ fontSize: "1.25rem", fontWeight: 700, color: "var(--color-text)", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
+          <h1 style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--color-text)", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
             <RiShieldUserLine style={{ color: "var(--color-primary)" }} /> Admin Portal
           </h1>
           <p style={{ fontSize: "0.8125rem", color: "var(--color-text-3)", marginTop: "0.25rem" }}>
-            Sign in to manage portfolio content & layouts
+            Sign in to access Control Center & Analytics
           </p>
         </div>
 
@@ -70,7 +69,7 @@ export default function AdminLoginPage() {
 
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
           <div>
-            <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 500, color: "var(--color-text-2)", marginBottom: "0.375rem" }}>
+            <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, color: "var(--color-text-2)", marginBottom: "0.375rem" }}>
               Admin Email
             </label>
             <div style={{ position: "relative" }}>
@@ -96,7 +95,7 @@ export default function AdminLoginPage() {
           </div>
 
           <div>
-            <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 500, color: "var(--color-text-2)", marginBottom: "0.375rem" }}>
+            <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, color: "var(--color-text-2)", marginBottom: "0.375rem" }}>
               Password
             </label>
             <div style={{ position: "relative" }}>
@@ -125,9 +124,9 @@ export default function AdminLoginPage() {
             type="submit"
             disabled={loading}
             className="btn btn-primary"
-            style={{ width: "100%", justifyContent: "center", marginTop: "0.5rem", padding: "0.875rem" }}
+            style={{ width: "100%", justifyContent: "center", marginTop: "0.5rem", padding: "0.875rem", gap: "0.5rem" }}
           >
-            {loading ? "Authenticating..." : "Sign In to Dashboard"}
+            {loading ? "Authenticating..." : <>Sign In to Dashboard <RiArrowRightLine size={16} /></>}
           </button>
         </form>
 

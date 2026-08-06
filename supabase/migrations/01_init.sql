@@ -12,13 +12,14 @@ CREATE TABLE IF NOT EXISTS public.site_settings (
     location VARCHAR(100) DEFAULT 'Kigali, Rwanda',
     contact_email VARCHAR(255) DEFAULT 'ganzaparfait7@gmail.com',
     whatsapp_number VARCHAR(50) DEFAULT '250792054846',
+    header_social_limit INT DEFAULT 3,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Insert Default Site Settings
-INSERT INTO public.site_settings (banner_layout, site_title, site_subtitle)
-VALUES ('split', 'Prince Parfait GANZA', 'Founder • Software Engineer • AI Builder • Speaker • Entrepreneur')
+INSERT INTO public.site_settings (banner_layout, site_title, site_subtitle, header_social_limit)
+VALUES ('split', 'Prince Parfait GANZA', 'Founder • Software Engineer • AI Builder • Speaker • Entrepreneur', 3)
 ON CONFLICT DO NOTHING;
 
 -- 2. Social Links Table
@@ -51,25 +52,84 @@ CREATE TABLE IF NOT EXISTS public.projects (
     title VARCHAR(255) NOT NULL,
     slug VARCHAR(255) NOT NULL UNIQUE,
     description TEXT,
-    category VARCHAR(100),
+    category VARCHAR(100) DEFAULT 'web',
     tags TEXT[],
     image_url VARCHAR(500),
     live_url VARCHAR(500),
     github_url VARCHAR(500),
     featured BOOLEAN DEFAULT false,
+    status VARCHAR(50) DEFAULT 'live',
     display_order INT DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 4. Admin Users Table
+-- 4. Banners Table
+CREATE TABLE IF NOT EXISTS public.banners (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    title VARCHAR(255) NOT NULL,
+    subtitle TEXT,
+    image_url VARCHAR(500),
+    button_text VARCHAR(100) DEFAULT 'Explore Now',
+    button_link VARCHAR(500) DEFAULT '/projects',
+    page_location VARCHAR(100) DEFAULT 'main_carousel',
+    sort_order INT DEFAULT 0,
+    is_active BOOLEAN DEFAULT true,
+    layout_style VARCHAR(50) DEFAULT 'split',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 5. Blog Posts Table
+CREATE TABLE IF NOT EXISTS public.blog_posts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    title VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) NOT NULL UNIQUE,
+    excerpt TEXT,
+    content TEXT,
+    cover_image VARCHAR(500),
+    author VARCHAR(100) DEFAULT 'Prince Parfait GANZA',
+    tags TEXT[],
+    featured BOOLEAN DEFAULT false,
+    published BOOLEAN DEFAULT true,
+    views_count INT DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 6. Page Views & Live Analytics Table
+CREATE TABLE IF NOT EXISTS public.page_views (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    page_path VARCHAR(255) NOT NULL,
+    referrer VARCHAR(500),
+    country_code VARCHAR(10) DEFAULT 'RW',
+    country_name VARCHAR(100) DEFAULT 'Rwanda',
+    country_flag VARCHAR(10) DEFAULT '🇷🇼',
+    device VARCHAR(100) DEFAULT 'Desktop',
+    ip_address VARCHAR(100),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 7. Media Assets Table
+CREATE TABLE IF NOT EXISTS public.media_assets (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    title VARCHAR(255) NOT NULL,
+    url VARCHAR(500) NOT NULL,
+    asset_type VARCHAR(50) DEFAULT 'image',
+    size_bytes BIGINT DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 8. Admin Users Table
 CREATE TABLE IF NOT EXISTS public.admin_users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
+    name VARCHAR(255) DEFAULT 'Prince Parfait GANZA',
+    avatar_url VARCHAR(500) DEFAULT '/images/profile/hero-photo.png',
+    role VARCHAR(50) DEFAULT 'Super Admin',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Insert Initial Admin (Email: ganzaparfait7@gmail.com)
-INSERT INTO public.admin_users (email, password_hash)
-VALUES ('ganzaparfait7@gmail.com', '$2a$10$0000mockhashforganzaparfait0000')
-ON CONFLICT DO NOTHING;
+-- Insert Initial Admin
+INSERT INTO public.admin_users (email, password_hash, name, avatar_url)
+VALUES ('ganzaparfait7@gmail.com', '0000', 'Prince Parfait GANZA', '/images/profile/hero-photo.png')
+ON CONFLICT (email) DO NOTHING;

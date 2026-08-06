@@ -185,6 +185,8 @@ export type BlogPost = {
   featured: boolean;
   slug: string;
   tags: string[];
+  coverImage?: string;
+  content?: string;
 };
 
 export const blogPosts: BlogPost[] = [

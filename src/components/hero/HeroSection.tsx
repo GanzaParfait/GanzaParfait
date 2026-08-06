@@ -25,7 +25,7 @@ export default function HeroSection() {
     };
   }, []);
 
-  if (settings.bannerLayout === "tony_robbins") {
+  if (settings.bannerLayout === "featured_overlay") {
     return <TonyRobbinsHero settings={settings} />;
   }
 

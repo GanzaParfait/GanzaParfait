@@ -16,6 +16,7 @@ import {
 } from "react-icons/ri";
 import { siteConfig } from "@/data/site-data";
 import ThemeToggle from "@/components/ui/ThemeToggle";
+import { getLocalSettings, SiteSettings, DEFAULT_SETTINGS } from "@/lib/supabase";
 
 const navLinks = [
   { href: "/",         label: "Home" },
@@ -27,11 +28,12 @@ const navLinks = [
   { href: "/contact",  label: "Contact" },
 ];
 
-// Only 3 primary + "more" in header
-const primarySocials = [
-  { href: siteConfig.social.whatsapp,  label: "WhatsApp",  icon: RiWhatsappLine },
-  { href: siteConfig.social.linkedin,  label: "LinkedIn",  icon: RiLinkedinFill },
-  { href: siteConfig.social.instagram, label: "Instagram", icon: RiInstagramLine },
+const allSocials = [
+  { href: siteConfig.social.whatsapp,     label: "WhatsApp",        icon: RiWhatsappLine },
+  { href: siteConfig.social.linkedin,     label: "LinkedIn",        icon: RiLinkedinFill },
+  { href: siteConfig.social.instagram,    label: "Instagram",       icon: RiInstagramLine },
+  { href: siteConfig.social.github,       label: "GitHub",          icon: RiGithubFill },
+  { href: siteConfig.social.twitter,      label: "X / Twitter",     icon: RiTwitterXFill },
 ];
 
 export default function Navbar() {
@@ -40,6 +42,20 @@ export default function Navbar() {
   const [isScrolled,setIsScrolled]= useState(false);
   const [isDark,    setIsDark]    = useState(false);
   const [moreOpen,  setMoreOpen]  = useState(false);
+  const [settings,  setSettings]  = useState<SiteSettings>(DEFAULT_SETTINGS);
+
+  useEffect(() => {
+    setSettings(getLocalSettings());
+    const onUpdate = (e: CustomEvent<SiteSettings>) => {
+      if (e.detail) setSettings(e.detail);
+    };
+    window.addEventListener("site-settings-changed" as any, onUpdate);
+    return () => window.removeEventListener("site-settings-changed" as any, onUpdate);
+  }, []);
+
+  const limit = settings.headerSocialLimit || 3;
+  const primarySocials = allSocials.slice(0, limit);
+  const overflowSocials = allSocials.slice(limit);
 
   const handleScroll = useCallback(() => {
     setIsScrolled(window.scrollY > 20);
