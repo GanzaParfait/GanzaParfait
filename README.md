@@ -1,13 +1,13 @@
 <div align="center">
 
-<img src="site/public/brand/logos/logo-horizontal-blue.png" alt="Prince Parfait GANZA" width="400" />
+<img src="public/brand/logos/logo-horizontal-blue.png" alt="Prince Parfait GANZA" width="400" />
 
 <br />
 <br />
 
-# princeparfait.dev
+# princeparfait.com
 
-**Personal website of Prince Parfait GANZA — Software Engineer, AI Builder & Founder of Lerony.**
+**Personal website of Prince Parfait GANZA — Founder • Software Engineer • AI Builder • Speaker • Entrepreneur**
 
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org)
@@ -15,7 +15,7 @@
 [![Vercel](https://img.shields.io/badge/Deploy-Vercel-black?style=flat-square&logo=vercel)](https://vercel.com)
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
-[🌐 Live Site](https://princeparfait.dev) · [📬 Contact](https://princeparfait.dev/contact) · [💼 LinkedIn](https://linkedin.com/in/princeparfaitganza) · [🐙 GitHub](https://github.com/GanzaParfait)
+[🌐 Live Site](https://princeparfait.com) · [📬 Contact](https://princeparfait.com/contact) · [💼 LinkedIn](https://linkedin.com/in/ganza-prince-235816269) · [🐙 GitHub](https://github.com/GanzaParfait)
 
 </div>
 
@@ -23,7 +23,7 @@
 
 ## Overview
 
-This is the source code for **[princeparfait.dev](https://princeparfait.dev)** — a premium personal website built to feel more like a product than a traditional portfolio. It serves as the **digital headquarters** of Prince Parfait GANZA: software engineer, AI builder, and founder of [Lerony](https://lerony.com).
+This is the source code for **[princeparfait.com](https://princeparfait.com)** — a premium personal website built to feel more like a product than a traditional portfolio. It serves as the **digital headquarters** of Prince Parfait GANZA: founder, software engineer, AI builder, speaker, and entrepreneur.
 
 The site is designed to evolve over many years — growing from a V1 portfolio into a full digital identity hub with a blog, product listings, speaking page, media kit, client portal, and more.
 
@@ -48,47 +48,47 @@ The site is designed to evolve over many years — growing from a V1 portfolio i
 
 ```
 portfolio/
-├── site/                          # Next.js application
-│   ├── src/
-│   │   ├── app/                   # App Router pages
-│   │   │   ├── page.tsx           # Homepage
-│   │   │   ├── about/             # About page
-│   │   │   ├── projects/          # Projects listing
-│   │   │   ├── blog/              # Blog listing + [slug]
-│   │   │   ├── services/          # Services page
-│   │   │   ├── speaking/          # Speaking engagements
-│   │   │   ├── contact/           # Contact form
-│   │   │   ├── sitemap.ts         # Dynamic sitemap
-│   │   │   ├── robots.ts          # robots.txt
-│   │   │   ├── layout.tsx         # Root layout (metadata, SEO)
-│   │   │   ├── globals.css        # Design system + CSS tokens
-│   │   │   └── not-found.tsx      # Custom 404
-│   │   ├── components/
-│   │   │   ├── layout/            # Navbar, Footer
-│   │   │   └── ui/                # Reusable components
-│   │   └── data/
-│   │       └── site-data.ts       # Typed content data
-│   └── public/
-│       ├── brand/                 # Logos, icons (all variants)
-│       ├── images/                # Profile, projects, blog
-│       ├── favicon.ico            # Browser favicon
-│       ├── favicon.svg            # SVG favicon
-│       ├── favicon-96x96.png      # 96×96 PNG favicon
-│       ├── apple-touch-icon.png   # iOS home screen icon
-│       ├── web-app-manifest-192x192.png
-│       ├── web-app-manifest-512x512.png
-│       ├── site.webmanifest       # PWA manifest
-│       └── browserconfig.xml      # Windows tiles
-├── docs/                          # Strategy & documentation
-│   ├── BRAND_GUIDELINES.md
-│   ├── TECH_STACK.md
-│   ├── ROADMAP.md
-│   ├── DESIGN_SYSTEM.md
-│   ├── CONTENT_STRATEGY.md
-│   ├── DIGITAL_PRESENCE.md
-│   ├── ASSET_STRUCTURE.md
-│   └── SEO_STRATEGY.md
-└── prince_parfait_ganza_brand_assets/   # Master brand files
+├── src/
+│   ├── app/                   # App Router pages
+│   │   ├── page.tsx           # Homepage
+│   │   ├── about/             # About page
+│   │   ├── projects/          # Projects listing
+│   │   ├── blog/              # Blog listing + [slug]
+│   │   ├── services/          # Services page
+│   │   ├── speaking/          # Speaking engagements
+│   │   ├── contact/           # Contact form
+│   │   ├── sitemap.ts         # Dynamic sitemap
+│   │   ├── robots.ts          # robots.txt
+│   │   ├── layout.tsx         # Root layout (metadata, SEO)
+│   │   ├── globals.css        # Design system + CSS tokens
+│   │   └── not-found.tsx      # Custom 404
+│   ├── components/
+│   │   ├── layout/            # Navbar, Footer
+│   │   └── ui/                # Reusable components
+│   └── data/
+│       └── site-data.ts       # Typed content data (single source of truth)
+├── public/
+│   ├── brand/                 # Logos, icons (all variants)
+│   │   ├── logos/
+│   │   └── icons/
+│   ├── images/                # Profile, projects, blog
+│   ├── favicon.ico            # Browser favicon
+│   ├── favicon.svg            # SVG favicon
+│   ├── favicon-96x96.png      # 96×96 PNG favicon
+│   ├── apple-touch-icon.png   # iOS home screen icon
+│   ├── web-app-manifest-192x192.png
+│   ├── web-app-manifest-512x512.png
+│   ├── site.webmanifest       # PWA manifest
+│   └── browserconfig.xml      # Windows tiles
+└── docs/                      # Strategy & documentation
+    ├── BRAND_GUIDELINES.md
+    ├── TECH_STACK.md
+    ├── ROADMAP.md
+    ├── DESIGN_SYSTEM.md
+    ├── CONTENT_STRATEGY.md
+    ├── DIGITAL_PRESENCE.md
+    ├── ASSET_STRUCTURE.md
+    └── SEO_STRATEGY.md
 ```
 
 ---
@@ -159,7 +159,6 @@ git clone https://github.com/GanzaParfait/GanzaParfait.git
 cd GanzaParfait
 
 # Install dependencies
-cd site
 npm install
 
 # Start development server
@@ -171,7 +170,6 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ### Build for Production
 
 ```bash
-cd site
 npm run build
 npm start
 ```
@@ -227,6 +225,8 @@ This site is engineered to be the most authoritative online source for Prince Pa
 - Founder Lerony
 - Full Stack Developer Rwanda
 - React Developer Rwanda
+- Speaker Rwanda
+- Entrepreneur Rwanda
 
 ---
 
@@ -306,7 +306,7 @@ The site is installable as a Progressive Web App:
 
 ## 📁 Brand Assets
 
-All brand assets are maintained in `prince_parfait_ganza_brand_assets/` and served from `site/public/brand/`.
+All brand assets are served from `public/brand/`.
 
 | Variant                              | File                                    |
 |--------------------------------------|-----------------------------------------|
@@ -341,19 +341,24 @@ MIT License — feel free to use this as a reference. Attribution appreciated bu
 
 ## 👤 About
 
-**Prince Parfait GANZA** is a software engineer, AI builder, and founder of [Lerony](https://lerony.com) based in Kigali, Rwanda.
+**Prince Parfait GANZA** is a founder, software engineer, AI builder, speaker, and entrepreneur based in Kigali, Rwanda.
 
 He builds full-stack web applications and AI-powered tools that solve real-world problems across Africa and beyond. His work is driven by the belief that software is one of the most powerful tools for social and economic change.
 
-| Platform   | Link                                                   |
-|------------|--------------------------------------------------------|
-| Website    | [princeparfait.dev](https://princeparfait.dev)        |
-| GitHub     | [@GanzaParfait](https://github.com/GanzaParfait)      |
-| LinkedIn   | [Prince Parfait GANZA](https://linkedin.com/in/princeparfaitganza) |
-| X/Twitter  | [@GanzaParfait](https://twitter.com/GanzaParfait)     |
-| YouTube    | [@GanzaParfait](https://youtube.com/@GanzaParfait)    |
-| Instagram  | [@ganzaparfait](https://instagram.com/ganzaparfait)   |
-| Lerony     | [lerony.com](https://lerony.com)                      |
+| Platform      | Link                                                                       |
+|---------------|----------------------------------------------------------------------------|
+| Website       | [princeparfait.com](https://princeparfait.com)                             |
+| GitHub        | [@GanzaParfait](https://github.com/GanzaParfait)                          |
+| LinkedIn      | [ganza-prince-235816269](https://linkedin.com/in/ganza-prince-235816269)  |
+| X / Twitter   | [@prince_parfait1](https://x.com/prince_parfait1)                         |
+| YouTube       | [@prince_parfait](https://youtube.com/@prince_parfait)                     |
+| Instagram     | [@prince_parfait](https://www.instagram.com/prince_parfait)                |
+| TikTok        | [@prince_parfait](https://tiktok.com/@prince_parfait)                      |
+| Threads       | [@prince_parfait](https://www.threads.com/@prince_parfait)                 |
+| Luma           | [princeparfait](https://lu.ma/user/princeparfait)                         |
+| Buy Me a Coffee | [princeparfait](https://buymeacoffee.com/princeparfait)                  |
+| WhatsApp      | [+250 792 054 846](https://wa.me/250792054846)                             |
+| Lerony        | [lerony.com](https://lerony.com)                                           |
 
 ---
 

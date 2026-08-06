@@ -1,6 +1,0 @@
-Brand Assets
-
-Lerony Blue: #0E52A8
-Midnight Navy: #0B192C (approximate dark navy equivalent)
-White: #FFFFFF
-Silver Gray: #C0C0C0 (approximate standard silver gray equivalent)

@@ -1,6 +1,6 @@
 # Roadmap
 
-> The evolution plan for `princeparfait.dev` — from portfolio to digital headquarters.
+> The evolution plan for `princeparfait.com` — from portfolio to digital headquarters.
 
 ---
 

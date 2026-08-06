@@ -1,6 +1,6 @@
 # Technology Stack
 
-> The full technical specification for `princeparfait.dev` — rationale, versions, and conventions.
+> The full technical specification for `princeparfait.com` — rationale, versions, and conventions.
 
 ---
 
@@ -108,7 +108,7 @@ Framer Motion can be added in V2 if complex 3D/physics animations are needed.
 
 ```bash
 # Required for production
-NEXT_PUBLIC_SITE_URL=https://princeparfait.dev
+NEXT_PUBLIC_SITE_URL=https://princeparfait.com
 
 # Optional (for future newsletter/email integration)
 RESEND_API_KEY=re_...
@@ -139,7 +139,7 @@ NEXT_PUBLIC_VERCEL_ANALYTICS=true
 ```bash
 # 1. Clone and install
 git clone https://github.com/GanzaParfait/GanzaParfait.git
-cd GanzaParfait/site
+cd GanzaParfait
 npm install
 
 # 2. Start dev server

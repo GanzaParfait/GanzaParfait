@@ -144,13 +144,13 @@ This tagline should appear on:
 
 ### Social Media
 - Profile photo: Consistent across all platforms
-- Bio: "Software Engineer, AI Builder, Founder of Lerony. Building software that creates impact. 🇷🇼"
+- Bio: "Founder • Software Engineer • AI Builder • Speaker • Entrepreneur. Building software that creates impact. 🇷🇼"
 - Use horizontal wordmark for profile banners/covers
 - Use icon variant for profile pictures if no photo is available
 
 ### Email Signature
 ```
 Prince Parfait GANZA
-Software Engineer & Founder, Lerony
-hello@princeparfait.dev | princeparfait.dev
+Founder • Software Engineer • AI Builder
+hello@princeparfait.com | princeparfait.com
 ```

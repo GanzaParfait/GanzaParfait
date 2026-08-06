@@ -7,7 +7,7 @@
 ## Directory Structure
 
 ```
-site/public/
+public/
 ├── favicon.ico                          # Browser tab favicon (multi-size ICO)
 ├── favicon.svg                          # Modern browsers (scalable)
 ├── favicon-96x96.png                    # 96×96 PNG for legacy browsers
@@ -117,19 +117,10 @@ Every `<Image>` component must have:
 |-----------------|----------------------|--------|
 | Résumé / CV     | `public/resume.pdf`  | PDF    |
 | Media Kit       | `public/media-kit.pdf` | PDF  |
-| Brand Kit       | `prince_parfait_ganza_brand_assets/` | ZIP + PNG |
+| Brand Kit       | `public/brand/`                      | PNG       |
 
 ---
 
 ## Source Files
 
-Full-resolution master files are stored in:
-
-```
-prince_parfait_ganza_brand_assets/
-├── full_size/           # Full resolution (for print, press kits)
-├── favicon/             # All favicon variants (source)
-└── *.png                # Optimized web variants
-```
-
-> **Note:** The `full_size/` directory contains print-quality files (3000px+). Never serve these directly from `public/`. Always use the optimized variants.
+All web-optimized brand assets are stored in `public/brand/`. Full-resolution source files (print quality, 3000px+) are kept separately outside the repository and should never be committed to `public/`.
