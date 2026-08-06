@@ -35,7 +35,7 @@ export const siteConfig = {
     instagram: "https://www.instagram.com/prince_parfait",
     tiktok: "https://tiktok.com/@prince_parfait",
     threads: "https://www.threads.com/@prince_parfait",
-    luma: "https://lu.ma/user/princeparfait",
+    luma: "https://luma.com/user/princeparfait",
     buymeacoffee: "https://buymeacoffee.com/princeparfait",
     whatsapp: "https://wa.me/250792054846",
   },

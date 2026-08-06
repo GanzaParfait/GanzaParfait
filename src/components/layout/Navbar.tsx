@@ -4,23 +4,42 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { RiMenuLine, RiCloseLine, RiGithubFill, RiLinkedinFill, RiTwitterXFill } from "react-icons/ri";
+import {
+  RiMenuLine,
+  RiCloseLine,
+  RiGithubFill,
+  RiLinkedinFill,
+  RiTwitterXFill,
+  RiWhatsappLine,
+  RiInstagramLine,
+  RiMore2Line,
+} from "react-icons/ri";
 import { siteConfig } from "@/data/site-data";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 
 const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/about", label: "About" },
+  { href: "/",         label: "Home" },
+  { href: "/about",    label: "About" },
   { href: "/projects", label: "Projects" },
-  { href: "/blog", label: "Blog" },
+  { href: "/blog",     label: "Blog" },
   { href: "/services", label: "Services" },
   { href: "/speaking", label: "Speaking" },
-  { href: "/contact", label: "Contact" },
+  { href: "/contact",  label: "Contact" },
+];
+
+// Only 3 primary + "more" in header
+const primarySocials = [
+  { href: siteConfig.social.whatsapp,  label: "WhatsApp",  icon: RiWhatsappLine },
+  { href: siteConfig.social.linkedin,  label: "LinkedIn",  icon: RiLinkedinFill },
+  { href: siteConfig.social.instagram, label: "Instagram", icon: RiInstagramLine },
 ];
 
 export default function Navbar() {
-  const pathname = usePathname();
-  const [isOpen, setIsOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
+  const pathname   = usePathname();
+  const [isOpen,    setIsOpen]    = useState(false);
+  const [isScrolled,setIsScrolled]= useState(false);
+  const [isDark,    setIsDark]    = useState(false);
+  const [moreOpen,  setMoreOpen]  = useState(false);
 
   const handleScroll = useCallback(() => {
     setIsScrolled(window.scrollY > 20);
@@ -31,211 +50,337 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
+  // Sync dark state for logo switching
   useEffect(() => {
-    setIsOpen(false);
-  }, [pathname]);
+    const update = () => setIsDark(
+      document.documentElement.getAttribute("data-theme") === "dark"
+    );
+    update();
+    const observer = new MutationObserver(update);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    return () => observer.disconnect();
+  }, []);
 
-  // Prevent body scroll when menu is open
+  useEffect(() => { setIsOpen(false); setMoreOpen(false); }, [pathname]);
+
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
+    document.body.style.overflow = isOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
   }, [isOpen]);
+
+  const logoSrc = isDark
+    ? "/brand/logos/logo-horizontal-light.png"
+    : "/brand/logos/logo-horizontal-dark.png";
 
   return (
     <>
+      {/* ── TOP BAR ── */}
       <header
         role="banner"
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled
-            ? "py-3 bg-[rgba(5,8,22,0.85)] backdrop-blur-xl border-b border-[rgba(14,82,168,0.2)]"
-            : "py-5 bg-transparent"
-        }`}
+        style={{
+          position: "fixed",
+          top: 0, left: 0, right: 0,
+          zIndex: 50,
+          transition: "all 0.3s ease",
+          padding: isScrolled ? "0.625rem 0" : "1rem 0",
+          background: isScrolled ? "var(--nav-bg)" : "transparent",
+          backdropFilter: isScrolled ? "blur(20px)" : "none",
+          WebkitBackdropFilter: isScrolled ? "blur(20px)" : "none",
+          borderBottom: isScrolled ? "1px solid var(--nav-border)" : "none",
+        }}
       >
-        <div className="container flex items-center justify-between">
-          {/* Logo */}
-          <Link
-            href="/"
-            aria-label="Prince Parfait GANZA — Home"
-            className="flex items-center gap-3 group"
-          >
-            <div className="relative w-9 h-9 rounded-lg overflow-hidden flex-shrink-0">
+        <div className="container" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem" }}>
+
+          {/* Logo — horizontal, theme-aware, no text */}
+          <Link href="/" aria-label="Prince Parfait GANZA — Home" style={{ display: "flex", flexShrink: 0 }}>
+            <div style={{ position: "relative", width: "9rem", height: "2.5rem" }}>
               <Image
-                src="/brand/icons/icon-blue.png"
-                alt="Prince Parfait GANZA logo"
+                src={logoSrc}
+                alt="Prince Parfait GANZA"
                 fill
-                className="object-contain"
+                className="object-contain object-left"
                 priority
               />
             </div>
-            <span
-              className="font-heading font-semibold text-white hidden sm:block text-[0.9375rem] tracking-tight"
-              style={{ fontFamily: "var(--font-heading)" }}
-            >
-              Prince Parfait
-            </span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav
-            aria-label="Main navigation"
-            className="hidden lg:flex items-center gap-1"
-          >
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  pathname === link.href
-                    ? "text-white bg-[rgba(14,82,168,0.2)] border border-[rgba(14,82,168,0.3)]"
-                    : "text-slate-400 hover:text-white hover:bg-white/5"
-                }`}
-                aria-current={pathname === link.href ? "page" : undefined}
-              >
-                {link.label}
-              </Link>
-            ))}
+          {/* Desktop nav */}
+          <nav aria-label="Main navigation" className="hidden lg:flex" style={{ flex: 1, justifyContent: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.125rem" }}>
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  aria-current={pathname === link.href ? "page" : undefined}
+                  style={{
+                    padding: "0.5rem 0.875rem",
+                    borderRadius: "0.5rem",
+                    fontSize: "0.875rem",
+                    fontWeight: 500,
+                    textDecoration: "none",
+                    transition: "all 0.2s ease",
+                    color: pathname === link.href ? "var(--color-primary)" : "var(--color-text-2)",
+                    background: pathname === link.href ? "rgba(14,82,168,0.07)" : "transparent",
+                  }}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
           </nav>
 
           {/* Right actions */}
-          <div className="flex items-center gap-3">
-            {/* Social links — desktop */}
-            <div className="hidden lg:flex items-center gap-1">
-              <a
-                href={siteConfig.social.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="GitHub profile"
-                className="btn btn-ghost btn-icon text-slate-400 hover:text-white"
-              >
-                <RiGithubFill size={18} />
-              </a>
-              <a
-                href={siteConfig.social.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="LinkedIn profile"
-                className="btn btn-ghost btn-icon text-slate-400 hover:text-white"
-              >
-                <RiLinkedinFill size={18} />
-              </a>
-              <a
-                href={siteConfig.social.twitter}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="X (Twitter) profile"
-                className="btn btn-ghost btn-icon text-slate-400 hover:text-white"
-              >
-                <RiTwitterXFill size={16} />
-              </a>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", flexShrink: 0 }}>
+
+            {/* 3 primary social links + "more" — desktop only */}
+            <div className="hidden lg:flex" style={{ alignItems: "center", gap: "0.25rem", position: "relative" }}>
+              {primarySocials.map(({ href, label, icon: Icon }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  title={label}
+                  style={{
+                    width: "2rem",
+                    height: "2rem",
+                    borderRadius: "0.5rem",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "var(--color-text-2)",
+                    textDecoration: "none",
+                    transition: "all 0.2s ease",
+                  }}
+                  className="nav-social-icon"
+                >
+                  <Icon size={17} />
+                </a>
+              ))}
+
+              {/* More dropdown */}
+              <div style={{ position: "relative" }}>
+                <button
+                  onClick={() => setMoreOpen(!moreOpen)}
+                  aria-label="More social links"
+                  aria-expanded={moreOpen}
+                  style={{
+                    width: "2rem",
+                    height: "2rem",
+                    borderRadius: "0.5rem",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "var(--color-text-2)",
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                  }}
+                  className="nav-social-icon"
+                >
+                  <RiMore2Line size={17} />
+                </button>
+
+                {moreOpen && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "calc(100% + 0.5rem)",
+                      right: 0,
+                      background: "var(--color-bg)",
+                      border: "1px solid var(--color-border)",
+                      borderRadius: "0.75rem",
+                      padding: "0.5rem",
+                      boxShadow: "var(--shadow-lg)",
+                      minWidth: "10rem",
+                      zIndex: 100,
+                    }}
+                    role="menu"
+                  >
+                    {[
+                      { href: siteConfig.social.github,       label: "GitHub" },
+                      { href: siteConfig.social.twitter,      label: "X / Twitter" },
+                      { href: siteConfig.social.youtube,      label: "YouTube" },
+                      { href: siteConfig.social.tiktok,       label: "TikTok" },
+                      { href: siteConfig.social.threads,      label: "Threads" },
+                      { href: siteConfig.social.luma,         label: "Luma Events" },
+                      { href: siteConfig.social.buymeacoffee, label: "Buy Me a Coffee" },
+                    ].map(({ href, label }) => (
+                      <a
+                        key={label}
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        role="menuitem"
+                        style={{
+                          display: "block",
+                          padding: "0.5rem 0.75rem",
+                          fontSize: "0.8125rem",
+                          color: "var(--color-text-2)",
+                          textDecoration: "none",
+                          borderRadius: "0.5rem",
+                          transition: "all 0.15s ease",
+                          whiteSpace: "nowrap",
+                        }}
+                        className="nav-more-item"
+                      >
+                        {label}
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
+            {/* Divider */}
+            <div className="hidden lg:block" style={{ width: "1px", height: "1.25rem", background: "var(--color-border)" }} />
+
+            {/* Theme toggle */}
+            <ThemeToggle />
+
             {/* CTA */}
-            <Link
-              href="/contact"
-              className="btn btn-primary btn-sm hidden sm:inline-flex"
-            >
+            <Link href="/contact" className="btn btn-primary btn-sm hidden sm:inline-flex">
               Let&apos;s Talk
             </Link>
 
-            {/* Mobile menu toggle */}
+            {/* Mobile hamburger */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="btn btn-ghost btn-icon lg:hidden text-white"
+              className="lg:hidden"
+              style={{
+                width: "2.25rem",
+                height: "2.25rem",
+                borderRadius: "0.5rem",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "var(--color-text)",
+                background: "var(--color-surface)",
+                border: "1px solid var(--color-border)",
+                cursor: "pointer",
+              }}
               aria-expanded={isOpen}
               aria-controls="mobile-menu"
               aria-label={isOpen ? "Close menu" : "Open menu"}
             >
-              {isOpen ? <RiCloseLine size={22} /> : <RiMenuLine size={22} />}
+              {isOpen ? <RiCloseLine size={20} /> : <RiMenuLine size={20} />}
             </button>
           </div>
         </div>
       </header>
 
-      {/* Mobile Menu Overlay */}
+      {/* ── MOBILE BOTTOM SHEET ── */}
+      {/* Backdrop */}
+      <div
+        aria-hidden={!isOpen}
+        onClick={() => setIsOpen(false)}
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 40,
+          background: "rgba(0,0,0,0.4)",
+          backdropFilter: "blur(4px)",
+          transition: "opacity 0.3s ease",
+          opacity: isOpen ? 1 : 0,
+          pointerEvents: isOpen ? "auto" : "none",
+        }}
+        className="lg:hidden"
+      />
+
+      {/* Sheet */}
       <div
         id="mobile-menu"
         role="dialog"
         aria-modal="true"
         aria-label="Navigation menu"
-        className={`fixed inset-0 z-40 lg:hidden transition-all duration-300 ${
-          isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
+        className="lg:hidden"
+        style={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 50,
+          background: "var(--color-bg)",
+          borderTop: "1px solid var(--color-border)",
+          borderRadius: "1.5rem 1.5rem 0 0",
+          boxShadow: "0 -8px 40px rgba(0,0,0,0.15)",
+          transform: isOpen ? "translateY(0)" : "translateY(100%)",
+          transition: "transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)",
+          maxHeight: "85vh",
+          overflowY: "auto",
+          padding: "0 1.25rem 2rem",
+        }}
       >
-        {/* Backdrop */}
-        <div
-          className="absolute inset-0 bg-[rgba(5,8,22,0.95)] backdrop-blur-xl"
-          onClick={() => setIsOpen(false)}
-          aria-hidden="true"
-        />
+        {/* Handle */}
+        <div style={{ display: "flex", justifyContent: "center", padding: "0.75rem 0 1.25rem" }}>
+          <div style={{ width: "2.5rem", height: "4px", borderRadius: "2px", background: "var(--color-border)" }} />
+        </div>
 
-        {/* Menu content */}
-        <nav
-          className={`absolute top-0 right-0 bottom-0 w-full max-w-sm bg-[#050816] border-l border-[rgba(14,82,168,0.2)] flex flex-col pt-24 pb-8 px-8 transition-transform duration-300 ${
-            isOpen ? "translate-x-0" : "translate-x-full"
-          }`}
-          aria-label="Mobile navigation"
-        >
-          <div className="flex flex-col gap-1 flex-1">
+        {/* Nav links */}
+        <nav aria-label="Mobile navigation">
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
             {navLinks.map((link, i) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`flex items-center gap-3 px-4 py-3.5 rounded-xl text-base font-medium transition-all duration-200 ${
-                  pathname === link.href
-                    ? "text-white bg-[rgba(14,82,168,0.2)] border border-[rgba(14,82,168,0.3)]"
-                    : "text-slate-400 hover:text-white hover:bg-white/5"
-                }`}
-                style={{ transitionDelay: isOpen ? `${i * 40}ms` : "0ms" }}
                 aria-current={pathname === link.href ? "page" : undefined}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "0.875rem 1rem",
+                  borderRadius: "0.75rem",
+                  fontSize: "1rem",
+                  fontWeight: 500,
+                  textDecoration: "none",
+                  transitionDelay: isOpen ? `${i * 30}ms` : "0ms",
+                  color: pathname === link.href ? "var(--color-primary)" : "var(--color-text-2)",
+                  background: pathname === link.href ? "rgba(14,82,168,0.07)" : "transparent",
+                }}
               >
                 {link.label}
               </Link>
             ))}
           </div>
-
-          {/* Mobile social + CTA */}
-          <div className="flex flex-col gap-4 mt-8">
-            <Link href="/contact" className="btn btn-primary w-full justify-center">
-              Let&apos;s Talk
-            </Link>
-            <div className="flex items-center justify-center gap-4">
-              <a
-                href={siteConfig.social.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="GitHub"
-                className="text-slate-400 hover:text-white transition-colors"
-              >
-                <RiGithubFill size={22} />
-              </a>
-              <a
-                href={siteConfig.social.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="LinkedIn"
-                className="text-slate-400 hover:text-white transition-colors"
-              >
-                <RiLinkedinFill size={22} />
-              </a>
-              <a
-                href={siteConfig.social.twitter}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="X (Twitter)"
-                className="text-slate-400 hover:text-white transition-colors"
-              >
-                <RiTwitterXFill size={20} />
-              </a>
-            </div>
-          </div>
         </nav>
+
+        {/* Bottom actions */}
+        <div style={{ marginTop: "1.5rem", paddingTop: "1.5rem", borderTop: "1px solid var(--color-border)" }}>
+          <Link href="/contact" className="btn btn-primary" style={{ width: "100%", justifyContent: "center", marginBottom: "1rem" }}>
+            Let&apos;s Talk
+          </Link>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.75rem", flexWrap: "wrap" }}>
+            {[
+              { href: siteConfig.social.whatsapp,  label: "WhatsApp",  icon: RiWhatsappLine },
+              { href: siteConfig.social.linkedin,   label: "LinkedIn",  icon: RiLinkedinFill },
+              { href: siteConfig.social.instagram,  label: "Instagram", icon: RiInstagramLine },
+              { href: siteConfig.social.twitter,    label: "X",         icon: RiTwitterXFill },
+              { href: siteConfig.social.github,     label: "GitHub",    icon: RiGithubFill },
+            ].map(({ href, label, icon: Icon }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={label}
+                className="footer-social-icon"
+              >
+                <Icon size={18} />
+              </a>
+            ))}
+          </div>
+        </div>
       </div>
+
+      {/* Close "more" dropdown when clicking outside */}
+      {moreOpen && (
+        <div
+          style={{ position: "fixed", inset: 0, zIndex: 45 }}
+          onClick={() => setMoreOpen(false)}
+          aria-hidden="true"
+        />
+      )}
     </>
   );
 }

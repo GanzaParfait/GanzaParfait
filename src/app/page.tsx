@@ -4,15 +4,21 @@ import Image from "next/image";
 import {
   RiArrowRightLine,
   RiDownloadLine,
+  RiWhatsappLine,
+  RiGithubFill,
+  RiLinkedinFill,
+  RiTwitterXFill,
+  RiYoutubeFill,
+  RiInstagramLine,
+  RiTiktokFill,
   RiMapPinLine,
-  RiCodeSSlashLine,
-  RiBrainLine,
-  RiRocketLine,
 } from "react-icons/ri";
 import { siteConfig, projects, blogPosts, skills } from "@/data/site-data";
 import ProjectCard from "@/components/ui/ProjectCard";
 import BlogCard from "@/components/ui/BlogCard";
 import AnimatedSection from "@/components/ui/AnimatedSection";
+
+import HeroSection from "@/components/hero/HeroSection";
 
 export const metadata: Metadata = {
   title: "Prince Parfait GANZA — Founder • Software Engineer • AI Builder • Speaker • Entrepreneur",
@@ -21,165 +27,31 @@ export const metadata: Metadata = {
 };
 
 const featuredProjects = projects.filter((p) => p.featured);
-const featuredPosts = blogPosts.filter((p) => p.featured);
-
-const stats = [
-  { value: "3+", label: "Years Building" },
-  { value: "15+", label: "Projects Shipped" },
-  { value: "5+", label: "Products Live" },
-  { value: "1", label: "Company Founded" },
-];
+const featuredPosts    = blogPosts.filter((p) => p.featured);
 
 const pillars = [
   {
-    icon: RiCodeSSlashLine,
+    icon: "🛠️",
     title: "Full-Stack Engineering",
-    description:
-      "Building end-to-end web applications with Next.js, TypeScript, and modern backend technologies.",
+    description: "End-to-end web applications with Next.js, TypeScript, and modern backend technologies.",
   },
   {
-    icon: RiBrainLine,
+    icon: "🤖",
     title: "AI Integration",
-    description:
-      "Embedding AI capabilities into products to solve real-world problems and automate complex tasks.",
+    description: "Embedding AI into products to solve real-world problems and automate complex workflows.",
   },
   {
-    icon: RiRocketLine,
+    icon: "🚀",
     title: "Product Thinking",
-    description:
-      "Building software that solves genuine problems — from concept to shipped product with measurable impact.",
+    description: "Building software that solves genuine problems — from concept to shipped product.",
   },
 ];
 
 export default function HomePage() {
   return (
     <>
-      {/* ============================================================
-          HERO SECTION
-          ============================================================ */}
-      <section
-        className="relative min-h-screen flex items-center justify-center overflow-hidden dot-grid"
-        aria-label="Hero — Introduction"
-      >
-        {/* Background radial glow */}
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 bg-gradient-radial pointer-events-none"
-        />
-
-        {/* Blue sphere glow */}
-        <div
-          aria-hidden="true"
-          className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-10 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(circle, #0E52A8 0%, transparent 70%)",
-          }}
-        />
-
-        <div className="container relative z-10 pt-28 pb-16 text-center">
-          {/* Status badge */}
-          <AnimatedSection delay={0} direction="fade">
-            <div className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full mb-8 text-sm">
-              <span
-                className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"
-                aria-hidden="true"
-              />
-              <span className="text-slate-400">
-                Available for freelance &amp; consulting
-              </span>
-              <RiMapPinLine size={13} className="text-[#0E52A8]" />
-              <span className="text-slate-500 text-xs">Kigali, Rwanda</span>
-            </div>
-          </AnimatedSection>
-
-          {/* Headline */}
-          <AnimatedSection delay={100}>
-            <h1
-              className="font-bold leading-tight tracking-tight text-white mb-5 max-w-4xl mx-auto"
-              style={{ fontFamily: "var(--font-heading)" }}
-            >
-              Building software
-              <br />
-              <span className="text-[#0E52A8] glow-text">that creates impact.</span>
-            </h1>
-          </AnimatedSection>
-
-          {/* Subheadline */}
-          <AnimatedSection delay={200}>
-            <p className="text-lg text-slate-400 leading-relaxed max-w-2xl mx-auto mb-10">
-              I&apos;m <strong className="text-white font-medium">Prince Parfait GANZA</strong> — software engineer,
-              AI builder, and founder of{" "}
-              <a
-                href="https://lerony.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[#60a5fa] hover:underline"
-              >
-                Lerony
-              </a>
-              . I build full-stack products and integrate AI to solve real-world problems across Africa.
-            </p>
-          </AnimatedSection>
-
-          {/* CTAs */}
-          <AnimatedSection delay={300}>
-            <div className="flex flex-wrap items-center justify-center gap-4 mb-16">
-              <Link href="/projects" className="btn btn-primary btn-lg">
-                View My Work
-                <RiArrowRightLine size={18} />
-              </Link>
-              <Link href="/contact" className="btn btn-outline btn-lg">
-                Let&apos;s Collaborate
-              </Link>
-            </div>
-          </AnimatedSection>
-
-          {/* Logo */}
-          <AnimatedSection delay={400} direction="fade">
-            <div className="flex justify-center mb-16">
-              <div className="relative w-72 sm:w-96 h-24 opacity-60 hover:opacity-90 transition-opacity duration-300">
-                <Image
-                  src="/brand/logos/wordmark-horizontal-light.png"
-                  alt="Prince Parfait GANZA wordmark"
-                  fill
-                  className="object-contain"
-                  priority
-                />
-              </div>
-            </div>
-          </AnimatedSection>
-
-          {/* Stats */}
-          <AnimatedSection delay={500} direction="fade">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto">
-              {stats.map((stat) => (
-                <div
-                  key={stat.label}
-                  className="glass rounded-xl p-4 text-center"
-                >
-                  <p
-                    className="text-3xl font-bold text-white mb-0.5"
-                    style={{ fontFamily: "var(--font-heading)" }}
-                  >
-                    {stat.value}
-                  </p>
-                  <p className="text-xs text-slate-500 font-medium">{stat.label}</p>
-                </div>
-              ))}
-            </div>
-          </AnimatedSection>
-        </div>
-
-        {/* Scroll indicator */}
-        <div
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-40"
-          aria-hidden="true"
-        >
-          <span className="text-xs text-slate-600 uppercase tracking-widest">Scroll</span>
-          <div className="w-px h-8 bg-gradient-to-b from-[#0E52A8] to-transparent" />
-        </div>
-      </section>
+      {/* Dynamic Hero — Swappable between Split & Tony Robbins layouts */}
+      <HeroSection />
 
       {/* ============================================================
           WHAT I DO
@@ -188,32 +60,36 @@ export default function HomePage() {
         <div className="container">
           <AnimatedSection className="text-center mb-14">
             <p className="section-label justify-center">What I Do</p>
-            <h2
-              className="text-white mb-4"
-              style={{ fontFamily: "var(--font-heading)" }}
-            >
+            <h2 style={{ color: "var(--color-text)", marginBottom: "1rem" }}>
               Engineering with purpose.
             </h2>
-            <p className="text-slate-400 max-w-xl mx-auto">
-              I combine deep technical expertise with a product mindset to
-              build software that solves real problems and creates lasting impact.
+            <p style={{ color: "var(--color-text-2)", maxWidth: "38rem", margin: "0 auto" }}>
+              I combine deep technical expertise with a product mindset to build software that solves real problems.
             </p>
           </AnimatedSection>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {pillars.map((pillar, i) => (
               <AnimatedSection key={pillar.title} delay={i * 100} direction="up">
-                <div className="card glass-hover p-8 text-center h-full flex flex-col items-center">
-                  <div className="w-14 h-14 rounded-2xl bg-[rgba(14,82,168,0.15)] border border-[rgba(14,82,168,0.25)] flex items-center justify-center mb-5 text-[#60a5fa]">
-                    <pillar.icon size={26} />
+                <div className="card glass-hover" style={{ padding: "2rem", textAlign: "center", height: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                  <div style={{
+                    width: "3.5rem",
+                    height: "3.5rem",
+                    borderRadius: "1rem",
+                    background: "rgba(14,82,168,0.08)",
+                    border: "1px solid rgba(14,82,168,0.15)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: "1.25rem",
+                    fontSize: "1.5rem",
+                  }}>
+                    {pillar.icon}
                   </div>
-                  <h3
-                    className="text-white text-lg font-semibold mb-3"
-                    style={{ fontFamily: "var(--font-heading)" }}
-                  >
+                  <h3 style={{ color: "var(--color-text)", fontSize: "1.125rem", fontWeight: 600, marginBottom: "0.75rem" }}>
                     {pillar.title}
                   </h3>
-                  <p className="text-sm text-slate-400 leading-relaxed">
+                  <p style={{ fontSize: "0.9rem", color: "var(--color-text-2)", lineHeight: 1.7 }}>
                     {pillar.description}
                   </p>
                 </div>
@@ -228,25 +104,15 @@ export default function HomePage() {
           ============================================================ */}
       <section className="section" aria-label="Featured projects">
         <div className="container">
-          <AnimatedSection className="flex items-end justify-between mb-12 flex-wrap gap-4">
+          <AnimatedSection style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "3rem", flexWrap: "wrap", gap: "1rem" }}>
             <div>
               <p className="section-label">Featured Projects</p>
-              <h2
-                className="text-white"
-                style={{ fontFamily: "var(--font-heading)" }}
-              >
-                Things I&apos;ve built.
-              </h2>
+              <h2 style={{ color: "var(--color-text)" }}>Things I&apos;ve built.</h2>
             </div>
-            <Link
-              href="/projects"
-              className="btn btn-ghost text-slate-400 hover:text-white"
-            >
-              All Projects
-              <RiArrowRightLine size={16} />
+            <Link href="/projects" className="btn btn-ghost" style={{ color: "var(--color-text-2)" }}>
+              All Projects <RiArrowRightLine size={16} />
             </Link>
           </AnimatedSection>
-
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredProjects.map((project, i) => (
               <AnimatedSection key={project.id} delay={i * 80}>
@@ -264,18 +130,12 @@ export default function HomePage() {
         <div className="container">
           <AnimatedSection className="text-center mb-12">
             <p className="section-label justify-center">Technology</p>
-            <h2
-              className="text-white mb-4"
-              style={{ fontFamily: "var(--font-heading)" }}
-            >
-              The tools I work with.
-            </h2>
+            <h2 style={{ color: "var(--color-text)", marginBottom: "1rem" }}>The tools I work with.</h2>
           </AnimatedSection>
-
           <AnimatedSection direction="fade" delay={100}>
-            <div className="flex flex-wrap justify-center gap-2.5 max-w-3xl mx-auto">
+            <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "0.625rem", maxWidth: "48rem", margin: "0 auto" }}>
               {skills.map((skill) => (
-                <span key={skill.name} className="tech-tag text-sm px-3 py-1.5">
+                <span key={skill.name} className="tech-tag" style={{ fontSize: "0.8125rem", padding: "0.35rem 0.875rem" }}>
                   {skill.name}
                 </span>
               ))}
@@ -285,29 +145,19 @@ export default function HomePage() {
       </section>
 
       {/* ============================================================
-          BLOG POSTS
+          BLOG
           ============================================================ */}
       <section className="section" aria-label="Recent blog posts">
         <div className="container">
-          <AnimatedSection className="flex items-end justify-between mb-12 flex-wrap gap-4">
+          <AnimatedSection style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "3rem", flexWrap: "wrap", gap: "1rem" }}>
             <div>
               <p className="section-label">Blog</p>
-              <h2
-                className="text-white"
-                style={{ fontFamily: "var(--font-heading)" }}
-              >
-                Thoughts &amp; ideas.
-              </h2>
+              <h2 style={{ color: "var(--color-text)" }}>Thoughts &amp; ideas.</h2>
             </div>
-            <Link
-              href="/blog"
-              className="btn btn-ghost text-slate-400 hover:text-white"
-            >
-              All Posts
-              <RiArrowRightLine size={16} />
+            <Link href="/blog" className="btn btn-ghost" style={{ color: "var(--color-text-2)" }}>
+              All Posts <RiArrowRightLine size={16} />
             </Link>
           </AnimatedSection>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {featuredPosts.map((post, i) => (
               <AnimatedSection key={post.id} delay={i * 100}>
@@ -319,64 +169,82 @@ export default function HomePage() {
       </section>
 
       {/* ============================================================
-          CTA — WORK TOGETHER
+          CTA
           ============================================================ */}
       <section className="section" aria-label="Call to action">
         <div className="container">
           <AnimatedSection direction="up">
-            <div className="relative rounded-2xl overflow-hidden">
-              {/* Background */}
-              <div
-                className="absolute inset-0 bg-[#0B192C]"
-                aria-hidden="true"
-              />
-              <div
-                className="absolute inset-0"
-                style={{
-                  background:
-                    "radial-gradient(ellipse 60% 80% at 50% 50%, rgba(14, 82, 168, 0.2) 0%, transparent 70%)",
-                }}
-                aria-hidden="true"
-              />
-              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#0E52A8] to-transparent opacity-50" aria-hidden="true" />
+            <div style={{
+              position: "relative",
+              borderRadius: "1.5rem",
+              overflow: "hidden",
+              background: "var(--color-primary)",
+              padding: "4rem 3rem",
+              textAlign: "center",
+            }}>
+              {/* Decoration */}
+              <div aria-hidden="true" style={{
+                position: "absolute",
+                inset: 0,
+                background: "linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 60%)",
+              }} />
+              <div aria-hidden="true" style={{
+                position: "absolute",
+                top: 0, left: 0, right: 0,
+                height: "1px",
+                background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)",
+              }} />
 
-              {/* Content */}
-              <div className="relative z-10 p-12 md:p-16 text-center">
-                {/* PPG Icon */}
-                <div className="inline-flex mb-6">
-                  <div className="relative w-16 h-16">
-                    <Image
-                      src="/brand/icons/icon-blue.png"
-                      alt="Prince Parfait GANZA"
-                      fill
-                      className="object-contain"
-                    />
+              <div style={{ position: "relative", zIndex: 1 }}>
+                <div style={{ marginBottom: "1.5rem", display: "inline-flex" }}>
+                  <div style={{ position: "relative", width: "4rem", height: "4rem" }}>
+                    <Image src="/brand/icons/icon-white.png" alt="Prince Parfait GANZA" fill className="object-contain" />
                   </div>
                 </div>
-
-                <h2
-                  className="text-white mb-4 max-w-2xl mx-auto"
-                  style={{ fontFamily: "var(--font-heading)" }}
-                >
+                <h2 style={{ color: "#ffffff", marginBottom: "1rem", maxWidth: "30rem", margin: "0 auto 1rem" }}>
                   Have a project in mind?
                 </h2>
-                <p className="text-slate-400 max-w-xl mx-auto mb-8 text-lg">
-                  I&apos;m open to consulting, freelance, and collaboration
-                  opportunities. Let&apos;s build something meaningful together.
+                <p style={{ color: "rgba(255,255,255,0.8)", maxWidth: "30rem", margin: "0 auto 2rem", fontSize: "1.0625rem" }}>
+                  I&apos;m open to consulting, freelance, and collaboration opportunities. Let&apos;s build something meaningful.
                 </p>
-                <div className="flex flex-wrap items-center justify-center gap-4">
-                  <Link href="/contact" className="btn btn-primary btn-lg">
+                <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: "1rem" }}>
+                  <Link href="/contact" style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    background: "#ffffff",
+                    color: "var(--color-primary)",
+                    padding: "0.875rem 2rem",
+                    borderRadius: "0.75rem",
+                    fontWeight: 600,
+                    textDecoration: "none",
+                    fontSize: "1rem",
+                    transition: "all 0.2s ease",
+                  }}>
                     Start a Conversation
                     <RiArrowRightLine size={18} />
                   </Link>
                   <a
-                    href="/resume.pdf"
-                    download
-                    className="btn btn-outline btn-lg"
-                    aria-label="Download CV (PDF)"
+                    href={siteConfig.social.whatsapp}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                      background: "rgba(255,255,255,0.15)",
+                      color: "#ffffff",
+                      padding: "0.875rem 2rem",
+                      borderRadius: "0.75rem",
+                      fontWeight: 500,
+                      textDecoration: "none",
+                      fontSize: "1rem",
+                      border: "1px solid rgba(255,255,255,0.25)",
+                      transition: "all 0.2s ease",
+                    }}
                   >
-                    <RiDownloadLine size={18} />
-                    Download CV
+                    <RiWhatsappLine size={18} />
+                    WhatsApp Me
                   </a>
                 </div>
               </div>

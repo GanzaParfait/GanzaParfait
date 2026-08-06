@@ -38,7 +38,7 @@ export const metadata: Metadata = {
         url: siteConfig.ogImage,
         width: 1200,
         height: 630,
-        alt: "Prince Parfait GANZA — Software Engineer & AI Builder",
+        alt: "Prince Parfait GANZA — Founder & Software Engineer",
       },
     ],
   },
@@ -56,14 +56,10 @@ export const metadata: Metadata = {
       { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
     ],
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
-    other: [
-      { rel: "manifest", url: "/site.webmanifest" },
-    ],
+    other: [{ rel: "manifest", url: "/site.webmanifest" }],
   },
   manifest: "/site.webmanifest",
-  alternates: {
-    canonical: siteConfig.url,
-  },
+  alternates: { canonical: siteConfig.url },
 };
 
 export const viewport: Viewport = {
@@ -71,8 +67,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#050816" },
-    { media: "(prefers-color-scheme: light)", color: "#0E52A8" },
+    { media: "(prefers-color-scheme: dark)",  color: "#050816" },
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
   ],
 };
 
@@ -93,7 +89,7 @@ const structuredData = {
         width: 1200,
         height: 400,
       },
-      jobTitle: "Software Engineer & AI Builder",
+      jobTitle: "Founder • Software Engineer • AI Builder • Speaker • Entrepreneur",
       worksFor: {
         "@type": "Organization",
         name: "Lerony",
@@ -123,12 +119,10 @@ const structuredData = {
         "Next.js",
         "TypeScript",
         "Entrepreneurship",
+        "Public Speaking",
         "Technology",
       ],
-      nationality: {
-        "@type": "Country",
-        name: "Rwanda",
-      },
+      nationality: { "@type": "Country", name: "Rwanda" },
     },
     {
       "@type": "WebSite",
@@ -151,39 +145,37 @@ const structuredData = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" dir="ltr" id="top">
+    <html lang="en" dir="ltr" id="top" data-theme="light">
       <head>
+        {/* Anti-FOUC: apply saved theme before first paint */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('theme');document.documentElement.setAttribute('data-theme',t==='dark'?'dark':'light');}catch(e){}})();`,
+          }}
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
-        {/* Preconnect to Google Fonts */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        {/* Browserconfig for Windows tiles */}
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* Force site favicon — prevents platform-injected icons */}
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="shortcut icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <meta name="msapplication-TileColor" content="#0E52A8" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
       </head>
       <body className="antialiased">
-        {/* Skip to main content */}
-        <a href="#main-content" className="skip-link">
-          Skip to main content
-        </a>
-
+        <a href="#main-content" className="skip-link">Skip to main content</a>
         <Navbar />
-
         <main id="main-content" role="main" tabIndex={-1}>
           {children}
         </main>
-
         <Footer />
       </body>
     </html>

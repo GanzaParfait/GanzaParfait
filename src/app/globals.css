@@ -1,57 +1,115 @@
 @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap");
 @import "tailwindcss";
 
+/* ============================================================
+   LIGHT MODE — DEFAULT
+   ============================================================ */
 :root {
-  /* Brand Colors */
-  --color-primary: #0e52a8;
+  /* Brand */
+  --color-primary:       #0e52a8;
   --color-primary-light: #1a6dd4;
-  --color-primary-dark: #093d80;
-  --color-secondary: #0b192c;
-  --color-background: #050816;
-  --color-surface: #0a1628;
-  --color-surface-2: #0f2040;
-  --color-white: #ffffff;
-  --color-silver: #c0c0c0;
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #94a3b8;
-  --color-text-muted: #64748b;
-  --color-border: rgba(14, 82, 168, 0.2);
-  --color-border-hover: rgba(14, 82, 168, 0.5);
+  --color-primary-dark:  #093d80;
+
+  /* Backgrounds */
+  --color-bg:       #ffffff;
+  --color-bg-2:     #f3f6fb;
+  --color-bg-3:     #e8eef8;
+  --color-surface:  #f8faff;
+  --color-surface-2:#edf2fa;
+
+  /* Text */
+  --color-text:   #0b192c;
+  --color-text-2: #3d5173;
+  --color-text-3: #8496b0;
+
+  /* Borders */
+  --color-border:       rgba(14, 82, 168, 0.15);
+  --color-border-hover: rgba(14, 82, 168, 0.4);
+
+  /* Glass */
+  --glass-bg:     rgba(248, 250, 255, 0.85);
+  --glass-border: rgba(14, 82, 168, 0.12);
+
+  /* Nav */
+  --nav-bg:     rgba(255, 255, 255, 0.88);
+  --nav-border: rgba(14, 82, 168, 0.12);
+  --nav-text:   #0b192c;
+
+  /* Shadows */
+  --shadow-sm:     0 1px 3px rgba(11, 25, 44, 0.08);
+  --shadow-md:     0 4px 16px rgba(11, 25, 44, 0.1);
+  --shadow-lg:     0 8px 32px rgba(11, 25, 44, 0.15);
+  --shadow-glow:   0 0 40px rgba(14, 82, 168, 0.18);
+  --shadow-glow-sm:0 0 20px rgba(14, 82, 168, 0.1);
+
+  /* Hero gradient */
+  --hero-gradient: linear-gradient(135deg, #f0f6ff 0%, #ffffff 50%, #f5f0ff 100%);
+  --hero-orb-1:   rgba(14, 82, 168, 0.08);
+  --hero-orb-2:   rgba(99, 60, 180, 0.06);
+  --dot-color:    rgba(14, 82, 168, 0.08);
 
   /* Typography */
   --font-heading: "Space Grotesk", sans-serif;
-  --font-body: "Outfit", sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+  --font-body:    "Outfit", sans-serif;
+  --font-mono:    "JetBrains Mono", monospace;
 
-  /* Spacing */
-  --section-padding: 6rem 0;
-  --container-max: 1200px;
-  --container-padding: 1.5rem;
+  /* Layout */
+  --section-padding:    6rem 0;
+  --container-max:      1200px;
+  --container-padding:  1.5rem;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
-  --shadow-glow: 0 0 40px rgba(14, 82, 168, 0.25);
-  --shadow-glow-sm: 0 0 20px rgba(14, 82, 168, 0.15);
+  /* Radius */
+  --radius-sm:   0.375rem;
+  --radius-md:   0.75rem;
+  --radius-lg:   1rem;
+  --radius-xl:   1.5rem;
+  --radius-full: 9999px;
 
   /* Transitions */
   --transition-fast: 150ms ease;
   --transition-base: 250ms ease;
   --transition-slow: 400ms ease;
-
-  /* Border Radius */
-  --radius-sm: 0.375rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
-  --radius-full: 9999px;
 }
 
 /* ============================================================
-   BASE RESET & GLOBAL STYLES
+   DARK MODE
    ============================================================ */
+[data-theme="dark"] {
+  --color-bg:       #050816;
+  --color-bg-2:     #0b192c;
+  --color-bg-3:     #0f2040;
+  --color-surface:  #0a1628;
+  --color-surface-2:#0f2040;
 
+  --color-text:   #ffffff;
+  --color-text-2: #94a3b8;
+  --color-text-3: #64748b;
+
+  --color-border:       rgba(14, 82, 168, 0.2);
+  --color-border-hover: rgba(14, 82, 168, 0.5);
+
+  --glass-bg:     rgba(10, 22, 40, 0.7);
+  --glass-border: rgba(14, 82, 168, 0.2);
+
+  --nav-bg:     rgba(5, 8, 22, 0.88);
+  --nav-border: rgba(14, 82, 168, 0.2);
+  --nav-text:   #ffffff;
+
+  --shadow-sm:      0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md:      0 4px 16px rgba(0, 0, 0, 0.5);
+  --shadow-lg:      0 8px 32px rgba(0, 0, 0, 0.6);
+  --shadow-glow:    0 0 40px rgba(14, 82, 168, 0.25);
+  --shadow-glow-sm: 0 0 20px rgba(14, 82, 168, 0.15);
+
+  --hero-gradient: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(14,82,168,0.15) 0%, transparent 70%);
+  --hero-orb-1:   rgba(14, 82, 168, 0.12);
+  --hero-orb-2:   rgba(99, 60, 180, 0.08);
+  --dot-color:    rgba(14, 82, 168, 0.12);
+}
+
+/* ============================================================
+   BASE RESET
+   ============================================================ */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -68,14 +126,15 @@ html {
 
 body {
   font-family: var(--font-body);
-  background-color: var(--color-background);
-  color: var(--color-text-primary);
+  background-color: var(--color-bg);
+  color: var(--color-text);
   line-height: 1.6;
   min-height: 100vh;
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Reduced motion support */
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -88,13 +147,12 @@ body {
 /* ============================================================
    TYPOGRAPHY
    ============================================================ */
-
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
   font-weight: 600;
   line-height: 1.1;
   letter-spacing: -0.02em;
-  color: var(--color-text-primary);
+  color: var(--color-text);
 }
 
 h1 { font-size: clamp(2.25rem, 5vw, 4rem); }
@@ -104,7 +162,7 @@ h4 { font-size: clamp(1.1rem, 2vw, 1.375rem); }
 
 p {
   font-family: var(--font-body);
-  color: var(--color-text-secondary);
+  color: var(--color-text-2);
   line-height: 1.75;
 }
 
@@ -119,9 +177,8 @@ code, pre {
 }
 
 /* ============================================================
-   LAYOUT UTILITIES
+   LAYOUT
    ============================================================ */
-
 .container {
   max-width: var(--container-max);
   margin: 0 auto;
@@ -134,44 +191,46 @@ code, pre {
 }
 
 /* ============================================================
-   GRADIENT & MESH BACKGROUNDS
+   BACKGROUNDS
    ============================================================ */
+.bg-theme       { background-color: var(--color-bg); }
+.bg-theme-2     { background-color: var(--color-bg-2); }
+.bg-theme-surface { background-color: var(--color-surface); }
 
 .bg-gradient-radial {
-  background: radial-gradient(
-    ellipse 80% 60% at 50% 0%,
-    rgba(14, 82, 168, 0.15) 0%,
-    transparent 70%
-  );
+  background: var(--hero-gradient);
 }
 
 .bg-mesh {
   background-image:
-    radial-gradient(at 20% 50%, rgba(14, 82, 168, 0.08) 0px, transparent 50%),
-    radial-gradient(at 80% 20%, rgba(14, 82, 168, 0.06) 0px, transparent 50%),
-    radial-gradient(at 50% 80%, rgba(11, 25, 44, 0.1) 0px, transparent 50%);
+    radial-gradient(at 20% 50%, var(--hero-orb-1) 0px, transparent 50%),
+    radial-gradient(at 80% 20%, var(--hero-orb-2) 0px, transparent 50%),
+    radial-gradient(at 50% 80%, var(--hero-orb-1) 0px, transparent 50%);
+}
+
+.dot-grid {
+  background-image: radial-gradient(circle, var(--dot-color) 1px, transparent 1px);
+  background-size: 32px 32px;
 }
 
 /* ============================================================
-   GLASS MORPHISM
+   GLASS
    ============================================================ */
-
 .glass {
-  background: rgba(10, 22, 40, 0.6);
+  background: var(--glass-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--glass-border);
 }
 
 .glass-hover:hover {
-  background: rgba(14, 82, 168, 0.08);
+  background: rgba(14, 82, 168, 0.06);
   border-color: var(--color-border-hover);
 }
 
 /* ============================================================
    BUTTONS
    ============================================================ */
-
 .btn {
   display: inline-flex;
   align-items: center;
@@ -191,11 +250,10 @@ code, pre {
 
 .btn-primary {
   background: var(--color-primary);
-  color: var(--color-white);
+  color: #ffffff;
   padding: 0.75rem 1.75rem;
   box-shadow: 0 0 20px rgba(14, 82, 168, 0.3);
 }
-
 .btn-primary:hover {
   background: var(--color-primary-light);
   box-shadow: 0 0 30px rgba(14, 82, 168, 0.5);
@@ -206,45 +264,31 @@ code, pre {
   background: transparent;
   color: var(--color-primary);
   padding: 0.75rem 1.75rem;
-  border: 1px solid var(--color-primary);
+  border: 1.5px solid var(--color-primary);
 }
-
 .btn-outline:hover {
-  background: rgba(14, 82, 168, 0.1);
+  background: rgba(14, 82, 168, 0.08);
   box-shadow: var(--shadow-glow-sm);
   transform: translateY(-1px);
 }
 
 .btn-ghost {
   background: transparent;
-  color: var(--color-text-secondary);
+  color: var(--color-text-2);
   padding: 0.5rem 1rem;
 }
-
 .btn-ghost:hover {
-  color: var(--color-white);
-  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text);
+  background: rgba(14, 82, 168, 0.06);
 }
 
-.btn-sm {
-  font-size: 0.875rem;
-  padding: 0.5rem 1.25rem;
-}
-
-.btn-lg {
-  font-size: 1.0625rem;
-  padding: 1rem 2.25rem;
-}
-
-.btn-icon {
-  padding: 0.625rem;
-  border-radius: var(--radius-sm);
-}
+.btn-sm  { font-size: 0.875rem;  padding: 0.5rem 1.25rem; }
+.btn-lg  { font-size: 1.0625rem; padding: 1rem 2.25rem; }
+.btn-icon { padding: 0.625rem; border-radius: var(--radius-sm); }
 
 /* ============================================================
    BADGES
    ============================================================ */
-
 .badge {
   display: inline-flex;
   align-items: center;
@@ -259,35 +303,37 @@ code, pre {
 }
 
 .badge-primary {
-  background: rgba(14, 82, 168, 0.15);
-  color: #60a5fa;
-  border: 1px solid rgba(14, 82, 168, 0.3);
+  background: rgba(14, 82, 168, 0.1);
+  color: var(--color-primary);
+  border: 1px solid rgba(14, 82, 168, 0.25);
 }
 
 .badge-outline {
   background: transparent;
-  color: var(--color-text-muted);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--color-text-3);
+  border: 1px solid var(--color-border);
 }
 
 .badge-success {
   background: rgba(16, 185, 129, 0.1);
-  color: #34d399;
+  color: #059669;
   border: 1px solid rgba(16, 185, 129, 0.2);
 }
+
+[data-theme="dark"] .badge-primary { color: #60a5fa; }
+[data-theme="dark"] .badge-success  { color: #34d399; }
 
 /* ============================================================
    CARDS
    ============================================================ */
-
 .card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   overflow: hidden;
   transition: all var(--transition-slow);
+  box-shadow: var(--shadow-sm);
 }
-
 .card:hover {
   border-color: var(--color-border-hover);
   box-shadow: var(--shadow-glow-sm);
@@ -297,7 +343,6 @@ code, pre {
 /* ============================================================
    SECTION LABELS
    ============================================================ */
-
 .section-label {
   display: inline-flex;
   align-items: center;
@@ -310,7 +355,6 @@ code, pre {
   color: var(--color-primary);
   margin-bottom: 1rem;
 }
-
 .section-label::before {
   content: "";
   display: block;
@@ -321,9 +365,30 @@ code, pre {
 }
 
 /* ============================================================
-   DIVIDERS
+   TECH TAGS
    ============================================================ */
+.tech-tag {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--radius-sm);
+  background: rgba(14, 82, 168, 0.08);
+  color: var(--color-primary);
+  border: 1px solid rgba(14, 82, 168, 0.2);
+  transition: all var(--transition-fast);
+}
+.tech-tag:hover {
+  background: rgba(14, 82, 168, 0.15);
+  border-color: rgba(14, 82, 168, 0.35);
+}
+[data-theme="dark"] .tech-tag { color: #93c5fd; }
 
+/* ============================================================
+   DIVIDER
+   ============================================================ */
 .divider {
   width: 3rem;
   height: 3px;
@@ -333,163 +398,76 @@ code, pre {
 }
 
 /* ============================================================
-   SKILL TAGS
-   ============================================================ */
-
-.tech-tag {
-  display: inline-flex;
-  align-items: center;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  font-weight: 500;
-  padding: 0.3rem 0.75rem;
-  border-radius: var(--radius-sm);
-  background: rgba(14, 82, 168, 0.1);
-  color: #93c5fd;
-  border: 1px solid rgba(14, 82, 168, 0.2);
-  transition: all var(--transition-fast);
-}
-
-.tech-tag:hover {
-  background: rgba(14, 82, 168, 0.2);
-  border-color: rgba(14, 82, 168, 0.4);
-}
-
-/* ============================================================
    SCROLLBAR
    ============================================================ */
-
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--color-background);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-primary);
-  border-radius: var(--radius-full);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-primary-light);
-}
+::-webkit-scrollbar       { width: 6px; }
+::-webkit-scrollbar-track { background: var(--color-bg-2); }
+::-webkit-scrollbar-thumb { background: var(--color-primary); border-radius: var(--radius-full); }
+::-webkit-scrollbar-thumb:hover { background: var(--color-primary-light); }
 
 /* ============================================================
    SELECTION
    ============================================================ */
-
 ::selection {
-  background: rgba(14, 82, 168, 0.35);
-  color: var(--color-white);
+  background: rgba(14, 82, 168, 0.2);
+  color: var(--color-primary-dark);
 }
-
-/* ============================================================
-   ANIMATIONS
-   ============================================================ */
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-24px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
-}
-
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(14, 82, 168, 0.2); }
-  50% { box-shadow: 0 0 40px rgba(14, 82, 168, 0.4); }
-}
-
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-@keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
-
-.animate-fadeInUp {
-  animation: fadeInUp 0.6s ease forwards;
-}
-
-.animate-fadeIn {
-  animation: fadeIn 0.6s ease forwards;
-}
-
-.animate-float {
-  animation: float 4s ease-in-out infinite;
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 3s ease-in-out infinite;
-}
-
-.cursor-blink {
-  animation: blink 1s step-end infinite;
-}
-
-/* ============================================================
-   GRID PATTERNS
-   ============================================================ */
-
-.dot-grid {
-  background-image: radial-gradient(
-    circle,
-    rgba(14, 82, 168, 0.12) 1px,
-    transparent 1px
-  );
-  background-size: 32px 32px;
+[data-theme="dark"] ::selection {
+  background: rgba(14, 82, 168, 0.4);
+  color: #ffffff;
 }
 
 /* ============================================================
    GLOW EFFECTS
    ============================================================ */
-
-.glow-text {
-  text-shadow: 0 0 30px rgba(14, 82, 168, 0.5);
-}
-
-.glow-border {
-  box-shadow: 0 0 0 1px rgba(14, 82, 168, 0.3), var(--shadow-glow);
-}
+.glow-text { text-shadow: 0 0 30px rgba(14, 82, 168, 0.4); }
+.glow-border { box-shadow: 0 0 0 1px rgba(14, 82, 168, 0.3), var(--shadow-glow); }
 
 /* ============================================================
-   FOCUS STYLES (Accessibility)
+   ANIMATIONS
    ============================================================ */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(14, 82, 168, 0.15); }
+  50%       { box-shadow: 0 0 40px rgba(14, 82, 168, 0.35); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
 
+.animate-fadeInUp   { animation: fadeInUp 0.6s ease forwards; }
+.animate-fadeIn     { animation: fadeIn 0.6s ease forwards; }
+.animate-float      { animation: float 4s ease-in-out infinite; }
+.animate-pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
+.cursor-blink       { animation: blink 1s step-end infinite; }
+
+/* ============================================================
+   FOCUS (Accessibility)
+   ============================================================ */
 :focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 3px;
@@ -499,94 +477,167 @@ code, pre {
 /* ============================================================
    SKIP LINK
    ============================================================ */
-
 .skip-link {
   position: absolute;
   top: -100%;
   left: 1rem;
   padding: 0.5rem 1rem;
   background: var(--color-primary);
-  color: var(--color-white);
+  color: #ffffff;
   border-radius: 0 0 var(--radius-sm) var(--radius-sm);
   font-weight: 600;
   z-index: 9999;
   transition: top var(--transition-fast);
 }
+.skip-link:focus { top: 0; }
 
-.skip-link:focus {
-  top: 0;
+/* ============================================================
+   HERO — SPLIT LAYOUT
+   ============================================================ */
+.hero-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  background: var(--color-bg);
+}
+
+.hero-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.hero-name-gradient {
+  background: linear-gradient(135deg, var(--color-primary) 0%, #6366f1 50%, var(--color-primary-light) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-stat-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  padding: 1rem 1.5rem;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-md);
+}
+
+.social-icon-btn {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-2);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  transition: all var(--transition-base);
+  text-decoration: none;
+}
+.social-icon-btn:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background: rgba(14, 82, 168, 0.07);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow-sm);
 }
 
 /* ============================================================
-   PROSE (Blog content)
+   FOOTER SOCIAL ICON
    ============================================================ */
-
-.prose {
-  max-width: 65ch;
-  color: var(--color-text-secondary);
+.footer-social-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-2);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+.footer-social-icon:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background: rgba(14, 82, 168, 0.07);
+  transform: translateY(-2px);
 }
 
+.nav-social-icon:hover {
+  color: var(--color-primary);
+  background: rgba(14, 82, 168, 0.07);
+  border-radius: 0.5rem;
+}
+
+.nav-more-item:hover {
+  background: rgba(14, 82, 168, 0.07);
+  color: var(--color-primary);
+}
+
+.footer-nav-link:hover { color: var(--color-primary) !important; }
+
+/* Dark mode: show dark-arch, swap footer logos */
+[data-theme="dark"] .dark-arch { display: block !important; }
+[data-theme="dark"] .dark-arch + * { display: none; }  /* hide light arch */
+[data-theme="dark"] .footer-logo-dark  { display: none !important; }
+[data-theme="dark"] .footer-logo-light { display: block !important; }
+
+/* ============================================================
+   THEME TOGGLE
+   ============================================================ */
+.theme-toggle {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-2);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+.theme-toggle:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background: rgba(14, 82, 168, 0.07);
+}
+
+/* ============================================================
+   PROSE
+   ============================================================ */
+.prose {
+  max-width: 65ch;
+  color: var(--color-text-2);
+}
 .prose h1, .prose h2, .prose h3, .prose h4 {
   font-family: var(--font-heading);
-  color: var(--color-text-primary);
+  color: var(--color-text);
   margin-top: 2rem;
   margin-bottom: 1rem;
 }
-
-.prose p {
-  margin-bottom: 1.25rem;
-}
-
-.prose code {
-  background: var(--color-surface-2);
-  padding: 0.15em 0.4em;
-  border-radius: var(--radius-sm);
-  font-size: 0.875em;
-  color: #93c5fd;
-}
-
-.prose pre {
-  background: var(--color-surface-2);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: 1.25rem;
-  overflow-x: auto;
-  margin: 1.5rem 0;
-}
-
-.prose a {
-  color: var(--color-primary-light);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.prose a:hover {
-  color: var(--color-white);
-}
-
-.prose ul, .prose ol {
-  padding-left: 1.5rem;
-  margin-bottom: 1.25rem;
-}
-
-.prose li {
-  margin-bottom: 0.5rem;
-}
+.prose p       { margin-bottom: 1.25rem; }
+.prose code    { background: var(--color-surface-2); padding: 0.15em 0.4em; border-radius: var(--radius-sm); font-size: 0.875em; color: var(--color-primary); }
+.prose pre     { background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.25rem; overflow-x: auto; margin: 1.5rem 0; }
+.prose a       { color: var(--color-primary-light); text-decoration: underline; text-underline-offset: 3px; }
+.prose a:hover { color: var(--color-primary-dark); }
+.prose ul, .prose ol { padding-left: 1.5rem; margin-bottom: 1.25rem; }
+.prose li      { margin-bottom: 0.5rem; }
 
 /* ============================================================
-   RESPONSIVE ADJUSTMENTS
+   RESPONSIVE
    ============================================================ */
-
 @media (max-width: 768px) {
-  :root {
-    --section-padding: 4rem 0;
-    --container-padding: 1.25rem;
-  }
+  :root { --section-padding: 4rem 0; --container-padding: 1.25rem; }
 }
-
 @media (max-width: 480px) {
-  :root {
-    --section-padding: 3rem 0;
-    --container-padding: 1rem;
-  }
+  :root { --section-padding: 3rem 0; --container-padding: 1rem; }
 }

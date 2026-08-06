@@ -1,0 +1,33 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import SplitHero from "./SplitHero";
+import TonyRobbinsHero from "./TonyRobbinsHero";
+import { getLocalSettings, SiteSettings, DEFAULT_SETTINGS } from "@/lib/supabase";
+
+export default function HeroSection() {
+  const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
+
+  useEffect(() => {
+    // Sync initial settings
+    setSettings(getLocalSettings());
+
+    // Listen for live updates from admin dashboard
+    const handleUpdate = (e: CustomEvent<SiteSettings>) => {
+      if (e.detail) {
+        setSettings(e.detail);
+      }
+    };
+
+    window.addEventListener("site-settings-changed" as any, handleUpdate);
+    return () => {
+      window.removeEventListener("site-settings-changed" as any, handleUpdate);
+    };
+  }, []);
+
+  if (settings.bannerLayout === "tony_robbins") {
+    return <TonyRobbinsHero settings={settings} />;
+  }
+
+  return <SplitHero settings={settings} />;
+}
