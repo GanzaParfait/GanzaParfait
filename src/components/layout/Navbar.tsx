@@ -120,7 +120,7 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop nav */}
-          <nav aria-label="Main navigation" className="hidden lg:flex" style={{ flex: 1, justifyContent: "center" }}>
+          <nav aria-label="Main navigation" className="hidden md:flex" style={{ flex: 1, justifyContent: "center" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.125rem" }}>
               {navLinks.map((link) => (
                 <Link
@@ -148,7 +148,7 @@ export default function Navbar() {
           <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", flexShrink: 0 }}>
 
             {/* 3 primary social links + "more" — desktop only */}
-            <div className="hidden lg:flex" style={{ alignItems: "center", gap: "0.25rem", position: "relative" }}>
+            <div className="hidden md:flex" style={{ alignItems: "center", gap: "0.25rem", position: "relative" }}>
               {primarySocials.map(({ href, label, icon: Icon }) => (
                 <a
                   key={label}
@@ -250,7 +250,7 @@ export default function Navbar() {
             </div>
 
             {/* Divider */}
-            <div className="hidden lg:block" style={{ width: "1px", height: "1.25rem", background: "var(--color-border)" }} />
+            <div className="hidden md:block" style={{ width: "1px", height: "1.25rem", background: "var(--color-border)" }} />
 
             {/* Theme toggle */}
             <ThemeToggle />
@@ -263,7 +263,7 @@ export default function Navbar() {
             {/* Mobile hamburger */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="lg:hidden"
+              className="md:hidden"
               style={{
                 width: "2.25rem",
                 height: "2.25rem",
@@ -301,7 +301,7 @@ export default function Navbar() {
           opacity: isOpen ? 1 : 0,
           pointerEvents: isOpen ? "auto" : "none",
         }}
-        className="lg:hidden"
+        className="md:hidden"
       />
 
       {/* Sheet */}
@@ -310,7 +310,7 @@ export default function Navbar() {
         role="dialog"
         aria-modal="true"
         aria-label="Navigation menu"
-        className="lg:hidden"
+        className="md:hidden"
         style={{
           position: "fixed",
           bottom: 0,

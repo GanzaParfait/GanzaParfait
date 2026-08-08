@@ -92,7 +92,7 @@ export default function Footer() {
               >
                 <div style={{ position: "relative", width: "10rem", height: "2.5rem" }}>
                   <Image
-                    src="/brand/logos/logo-horizontal-dark.png"
+                    src="/brand/logos/logo-horizontal-blue.png"
                     alt="Prince Parfait GANZA"
                     fill
                     className="object-contain object-left footer-logo-dark"

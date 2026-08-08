@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import SubscribeWidget from "@/components/ui/SubscribeWidget";
 
 export default function LayoutShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -22,6 +23,7 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
         {children}
       </main>
       <Footer />
+      <SubscribeWidget />
     </>
   );
 }

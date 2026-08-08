@@ -11,7 +11,10 @@ import {
   RiInstagramLine,
   RiGithubFill,
   RiTwitterXFill,
+  RiMore2Line,
+  RiCloseLine,
 } from "react-icons/ri";
+import { useState, useEffect } from "react";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import { siteConfig } from "@/data/site-data";
 import { SiteSettings } from "@/lib/supabase";
@@ -25,8 +28,20 @@ const primarySocials = [
 ];
 
 export default function SplitHero({ settings }: { settings: SiteSettings }) {
+  const [isMoreOpen, setIsMoreOpen] = useState(false);
+  const roles = settings.siteSubtitle ? settings.siteSubtitle.split(" • ") : ["Founder", "Software Engineer", "AI Builder"];
+  const [currentRoleIndex, setCurrentRoleIndex] = useState(0);
+
+  useEffect(() => {
+    if (roles.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentRoleIndex((prev) => (prev + 1) % roles.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [roles.length]);
+
   return (
-    <section className="relative overflow-hidden pt-28 pb-16 lg:pt-36 lg:pb-24" aria-label="Hero Section">
+    <section className="relative overflow-hidden min-h-[100dvh] flex items-center pt-24 pb-16 lg:pt-28 lg:pb-24" aria-label="Hero Section">
       {/* Glow Orbs */}
       <div
         aria-hidden="true"
@@ -51,13 +66,10 @@ export default function SplitHero({ settings }: { settings: SiteSettings }) {
         }}
       />
 
-      <div className="container" style={{ position: "relative", zIndex: 10 }}>
-        <div
-          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "center" }}
-          className="grid-cols-1 lg:grid-cols-2"
-        >
+      <div className="container w-full" style={{ position: "relative", zIndex: 10 }}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           {/* ── LEFT — Text Content ── */}
-          <div>
+          <div className="order-2 lg:order-1">
             {/* Status badge */}
             <AnimatedSection delay={0} direction="fade">
               <div
@@ -95,7 +107,7 @@ export default function SplitHero({ settings }: { settings: SiteSettings }) {
                   fontWeight: 400,
                 }}
               >
-                Hi, I&apos;m 👋
+                Hi, I&apos;m
               </p>
             </AnimatedSection>
 
@@ -118,18 +130,42 @@ export default function SplitHero({ settings }: { settings: SiteSettings }) {
 
             {/* Role */}
             <AnimatedSection delay={220}>
-              <p
+              <div
                 style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  background: "var(--color-surface)",
+                  border: "1px solid var(--color-border)",
+                  borderRadius: "9999px",
+                  padding: "0.375rem 1.25rem",
+                  marginBottom: "1.25rem",
+                  boxShadow: "var(--shadow-sm)",
+                  color: "var(--color-text-2)",
                   fontFamily: "var(--font-body)",
                   fontSize: "clamp(0.9rem, 1.5vw, 1.05rem)",
                   fontWeight: 500,
-                  color: "var(--color-text-2)",
-                  marginBottom: "1.25rem",
                   letterSpacing: "0.01em",
                 }}
               >
-                {settings.siteSubtitle}
-              </p>
+                <div style={{ position: "relative", height: "1.5rem", overflow: "hidden", minWidth: "14rem", display: "flex", alignItems: "center" }}>
+                  {roles.map((role, idx) => (
+                    <span
+                      key={idx}
+                      style={{
+                        position: "absolute",
+                        left: 0,
+                        width: "100%",
+                        whiteSpace: "nowrap",
+                        transform: idx === currentRoleIndex ? "translateY(0)" : idx < currentRoleIndex ? "translateY(-100%)" : "translateY(100%)",
+                        opacity: idx === currentRoleIndex ? 1 : 0,
+                        transition: "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
+                      }}
+                    >
+                      {role}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </AnimatedSection>
 
             {/* Description */}
@@ -178,7 +214,8 @@ export default function SplitHero({ settings }: { settings: SiteSettings }) {
 
             {/* CTAs */}
             <AnimatedSection delay={420}>
-              <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
+              {/* Desktop CTAs */}
+              <div className="hidden lg:flex items-center gap-4 flex-wrap">
                 <Link href="/projects" className="btn btn-primary btn-lg">
                   View My Work
                   <RiArrowRightLine size={18} />
@@ -197,12 +234,28 @@ export default function SplitHero({ settings }: { settings: SiteSettings }) {
                   CV
                 </a>
               </div>
+
+              {/* Mobile CTAs */}
+              <div className="flex lg:hidden items-center gap-2 w-full mt-2">
+                <Link href="/projects" className="btn btn-primary flex-1 justify-center" style={{ height: "3rem" }}>
+                  View My Work
+                  <RiArrowRightLine size={18} />
+                </Link>
+                <button
+                  onClick={() => setIsMoreOpen(true)}
+                  className="btn btn-outline"
+                  style={{ padding: "0 1rem", height: "3rem" }}
+                  aria-label="More actions"
+                >
+                  <RiMore2Line size={20} />
+                </button>
+              </div>
             </AnimatedSection>
           </div>
 
           {/* ── RIGHT — Person Photo ── */}
-          <AnimatedSection delay={200} direction="fade" className="hidden lg:flex">
-            <div style={{ position: "relative", display: "flex", alignItems: "flex-end", justifyContent: "center", width: "100%", minHeight: "30rem" }}>
+          <AnimatedSection delay={200} direction="fade" className="flex justify-center order-1 lg:order-2 mb-2 lg:mb-0">
+            <div className="relative flex items-end justify-center w-full min-h-[24rem] lg:min-h-[35rem]">
               {/* Arch background shape */}
               <div
                 aria-hidden="true"
@@ -211,8 +264,8 @@ export default function SplitHero({ settings }: { settings: SiteSettings }) {
                   bottom: 0,
                   left: "50%",
                   transform: "translateX(-50%)",
-                  width: "22rem",
-                  height: "26rem",
+                  width: "min(75vw, 28rem)",
+                  height: "min(85vw, 32rem)",
                   borderRadius: "50% 50% 0 0 / 60% 60% 0 0",
                   background: "linear-gradient(135deg, #dbeafe 0%, #ede9fe 100%)",
                   zIndex: 0,
@@ -227,8 +280,8 @@ export default function SplitHero({ settings }: { settings: SiteSettings }) {
                   bottom: 0,
                   left: "50%",
                   transform: "translateX(-50%)",
-                  width: "22rem",
-                  height: "26rem",
+                  width: "min(75vw, 28rem)",
+                  height: "min(85vw, 32rem)",
                   borderRadius: "50% 50% 0 0 / 60% 60% 0 0",
                   background: "linear-gradient(135deg, rgba(14,82,168,0.15) 0%, rgba(99,60,180,0.12) 100%)",
                   zIndex: 0,
@@ -237,14 +290,14 @@ export default function SplitHero({ settings }: { settings: SiteSettings }) {
               />
 
               {/* Photo */}
-              <div style={{ position: "relative", zIndex: 1, width: "21rem", height: "27rem" }}>
+              <div style={{ position: "relative", zIndex: 1, width: "min(70vw, 26rem)", height: "min(90vw, 34rem)" }}>
                 <Image
-                  src="/images/profile/hero-photo.png"
+                  src="/images/profile/hero-photo-v3.png"
                   alt={`${settings.siteTitle} — ${settings.siteSubtitle}`}
                   fill
                   className="object-contain object-bottom"
                   priority
-                  sizes="(max-width: 1024px) 0px, 336px"
+                  sizes="(max-width: 1024px) 100vw, 400px"
                 />
               </div>
 
@@ -279,6 +332,67 @@ export default function SplitHero({ settings }: { settings: SiteSettings }) {
               </div>
             </div>
           </AnimatedSection>
+        </div>
+      </div>
+
+      {/* Mobile Actions Bottom Sheet */}
+      <div
+        aria-hidden={!isMoreOpen}
+        onClick={() => setIsMoreOpen(false)}
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 999,
+          background: "rgba(0,0,0,0.4)",
+          backdropFilter: "blur(4px)",
+          transition: "opacity 0.3s ease",
+          opacity: isMoreOpen ? 1 : 0,
+          pointerEvents: isMoreOpen ? "auto" : "none",
+        }}
+        className="lg:hidden"
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="More actions"
+        className="lg:hidden"
+        style={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1000,
+          background: "var(--color-bg)",
+          borderTop: "1px solid var(--color-border)",
+          borderRadius: "1.5rem 1.5rem 0 0",
+          boxShadow: "0 -8px 40px rgba(0,0,0,0.15)",
+          transform: isMoreOpen ? "translateY(0)" : "translateY(100%)",
+          transition: "transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)",
+          padding: "1.25rem 1.25rem 2rem",
+        }}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+          <h3 style={{ fontSize: "1.125rem", fontWeight: 600, color: "var(--color-text)" }}>More Actions</h3>
+          <button
+            onClick={() => setIsMoreOpen(false)}
+            style={{ width: "2rem", height: "2rem", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-surface)", borderRadius: "50%", border: "1px solid var(--color-border)" }}
+          >
+            <RiCloseLine size={20} />
+          </button>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+          <Link href="/contact" className="btn btn-outline" style={{ justifyContent: "center", width: "100%", height: "3rem" }}>
+            Let&apos;s Collaborate
+          </Link>
+          <a
+            href="/resume.pdf"
+            download
+            className="btn btn-ghost"
+            style={{ justifyContent: "center", width: "100%", height: "3rem", color: "var(--color-text)", border: "1px solid var(--color-border)" }}
+          >
+            <RiDownloadLine size={18} style={{ marginRight: "0.5rem" }} />
+            Download CV
+          </a>
         </div>
       </div>
     </section>
