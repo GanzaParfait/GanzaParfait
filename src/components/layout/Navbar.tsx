@@ -7,6 +7,8 @@ import { usePathname } from "next/navigation";
 import {
   RiMenuLine,
   RiCloseLine,
+  RiMenuFoldLine,
+  RiMenuUnfoldLine,
   RiGithubFill,
   RiLinkedinFill,
   RiTwitterXFill,
@@ -79,14 +81,11 @@ export default function Navbar() {
 
   useEffect(() => { setIsOpen(false); setMoreOpen(false); }, [pathname]);
 
-  useEffect(() => {
-    document.body.style.overflow = isOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
-  }, [isOpen]);
+  // Removed scroll lock effect because it breaks scrolling when resizing to desktop
 
   const logoSrc = isDark
     ? "/brand/logos/logo-horizontal-light.png"
-    : "/brand/logos/logo-horizontal-dark.png";
+    : "/brand/logos/logo-horizontal-blue.png";
 
   return (
     <>
@@ -281,7 +280,7 @@ export default function Navbar() {
               aria-controls="mobile-menu"
               aria-label={isOpen ? "Close menu" : "Open menu"}
             >
-              {isOpen ? <RiCloseLine size={20} /> : <RiMenuLine size={20} />}
+              {isOpen ? <RiMenuFoldLine size={20} /> : <RiMenuUnfoldLine size={20} />}
             </button>
           </div>
         </div>

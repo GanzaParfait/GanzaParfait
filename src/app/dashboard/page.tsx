@@ -23,12 +23,12 @@ import {
   RiEditLine,
   RiAddLine,
   RiSearchLine,
-  RiArrowRightLine,
   RiDeleteBinLine,
   RiMenuLine,
   RiCloseLine,
   RiMenuFoldLine,
   RiMenuUnfoldLine,
+  RiImageLine,
 } from "react-icons/ri";
 
 import {
@@ -43,12 +43,14 @@ import {
   getLocalSettings,
   saveLocalSettings,
   SiteSettings,
+  DEFAULT_SETTINGS,
   HeroLayoutType,
   MOCK_ANALYTICS,
   AnalyticsMetrics,
 } from "@/lib/supabase";
 
 import MediaManagerModal from "@/components/dashboard/MediaManagerModal";
+import MediaManagerPage from "@/app/dashboard/media/page";
 import AdminProfileModal, { AdminProfile } from "@/components/dashboard/AdminProfileModal";
 import BlogEditorModal from "@/components/dashboard/BlogEditorModal";
 import ProjectEditorModal from "@/components/dashboard/ProjectEditorModal";
@@ -85,25 +87,29 @@ export default function DashboardPage() {
   const router = useRouter();
 
   // Navigation & UI States
-  const [activeTab, setActiveTab] = useState<"overview" | "banners" | "blogs" | "projects" | "socials" | "settings">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "banners" | "blogs" | "projects" | "socials" | "media" | "settings">("overview");
   
-  // Desktop & Mobile Sidebar Toggles (20% sidebar / 80% content ratio)
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false); // Desktop collapse toggle
-  const [sidebarOpen, setSidebarOpen] = useState(false); // Mobile drawer toggle
+  // Single sidebar toggle — works for both desktop collapse and mobile drawer
+  const [sidebarOpen, setSidebarOpen] = useState(true); // default open on desktop
   const [savedMessage, setSavedMessage] = useState("");
 
   // Search & Global State
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
-  // Settings & Profile Data
-  const [settings, setSettings] = useState<SiteSettings>(getLocalSettings());
+  // Settings & Profile Data — initialized via useEffect to avoid SSR hydration mismatch
+  const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
   const [profile, setProfile] = useState<AdminProfile>({
     name: "Prince Parfait GANZA",
     email: "ganzaparfait7@gmail.com",
     avatarUrl: "/images/profile/hero-photo.png",
     role: "Super Admin",
   });
+
+  // Load settings client-side only to avoid SSR mismatch
+  useEffect(() => {
+    setSettings(getLocalSettings());
+  }, []);
 
   // Content Items (Real-time CRUD)
   const [bannersList, setBannersList] = useState<BannerItem[]>(DEFAULT_BANNERS);
@@ -253,7 +259,7 @@ export default function DashboardPage() {
   return (
     <div style={{ height: "100vh", display: "flex", flexDirection: "column", background: "#f8fafc", color: "#0f172a", overflow: "hidden" }}>
 
-      {/* 100% STANDALONE ADMIN TOPBAR */}
+      {/* Standalone Admin Topbar — no website nav/footer */}
       <header
         style={{
           height: "4rem",
@@ -268,40 +274,30 @@ export default function DashboardPage() {
           flexShrink: 0,
         }}
       >
-        {/* Left: Toggler Button (Works on Desktop & Mobile) & Brand Logo */}
+        {/* Left: Single Toggler + Blue Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          {/* Desktop Toggler */}
-          <button
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="hidden md:flex btn btn-ghost btn-sm"
-            style={{ padding: "0.375rem", borderRadius: "0.375rem" }}
-            title={sidebarCollapsed ? "Expand Sidebar (20%)" : "Collapse Sidebar"}
-          >
-            {sidebarCollapsed ? <RiMenuUnfoldLine size={20} /> : <RiMenuFoldLine size={20} />}
-          </button>
-
-          {/* Mobile Toggler */}
+          {/* ONE toggler — works for both desktop & mobile */}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="md:hidden btn btn-ghost btn-sm"
-            style={{ padding: "0.375rem", borderRadius: "0.375rem" }}
-            aria-label="Toggle Mobile Navigation"
+            style={{ padding: "0.375rem", borderRadius: "0.375rem", border: "none", background: "none", cursor: "pointer", color: "#475569", display: "flex", alignItems: "center" }}
+            title={sidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
+            aria-label="Toggle Sidebar"
           >
-            {sidebarOpen ? <RiCloseLine size={22} /> : <RiMenuLine size={22} />}
+            {sidebarOpen ? <RiMenuFoldLine size={20} /> : <RiMenuUnfoldLine size={20} />}
           </button>
 
-          <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-            <div style={{ position: "relative", width: "8rem", height: "2rem" }}>
+          <Link href="/dashboard" style={{ display: "flex", alignItems: "center" }}>
+            <div style={{ position: "relative", width: "8.5rem", height: "2.25rem" }}>
               <Image
-                src="/brand/logos/logo-horizontal-dark.png"
+                src="/brand/logos/logo-horizontal-blue.png"
                 alt="Prince Parfait GANZA"
                 fill
                 className="object-contain object-left"
               />
             </div>
           </Link>
-          <span style={{ height: "1rem", width: "1px", background: "#cbd5e1" }} className="hidden sm:block" />
-          <span style={{ fontSize: "0.6875rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.05em", background: "#eff6ff", color: "#1d4ed8", padding: "0.15rem 0.5rem", borderRadius: "0.25rem" }} className="hidden sm:inline-block">
+          <span style={{ height: "1rem", width: "1px", background: "#cbd5e1" }} />
+          <span style={{ fontSize: "0.6875rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.05em", background: "#eff6ff", color: "#1d4ed8", padding: "0.15rem 0.5rem", borderRadius: "0.25rem" }}>
             Control Center
           </span>
         </div>
@@ -408,62 +404,37 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      {/* Saved Toast Notification */}
-      {savedMessage && (
-        <div
-          style={{
-            position: "fixed",
-            bottom: "1.5rem",
-            right: "1.5rem",
-            zIndex: 300,
-            background: "#16a34a",
-            color: "#ffffff",
-            padding: "0.75rem 1rem",
-            borderRadius: "0.375rem", // Small radius
-            boxShadow: "0 6px 18px rgba(0,0,0,0.15)",
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem",
-            fontSize: "0.8125rem",
-            fontWeight: 700,
-          }}
-        >
-          <RiCheckLine size={16} />
-          {savedMessage}
-        </div>
-      )}
+      {/* ─── BODY: SIDEBAR + MAIN (fills remaining height) ─── */}
+      <div style={{ flex: 1, display: "flex", overflow: "hidden", minHeight: 0 }}>
 
-      {/* MAIN CONTAINER BODY (Sidebar ~20% width / Content ~80% width) */}
-      <div style={{ flex: 1, display: "flex", overflow: "hidden", position: "relative" }}>
-
-        {/* BOLD DARK NAVY SIDEBAR (20% width on Desktop, Collapsible, Bold Scheme #0b1329) */}
+        {/* SIDEBAR — dark navy, always 100% of its parent height */}
         <aside
           style={{
-            width: sidebarCollapsed ? "4.5rem" : "20%", // 20% ratio as requested
-            minWidth: sidebarCollapsed ? "4.5rem" : "15rem",
-            maxWidth: sidebarCollapsed ? "4.5rem" : "18rem",
+            width: sidebarOpen ? "16rem" : "0",
+            minWidth: 0,
             height: "100%",
-            background: "#0b1329", // Bold Navy Dark background
+            background: "#0b1329",
             color: "#ffffff",
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
-            padding: sidebarCollapsed ? "1.25rem 0.5rem" : "1.25rem 0.875rem",
+            padding: sidebarOpen ? "1.25rem 0.875rem" : "0",
             flexShrink: 0,
             zIndex: 40,
-            transition: "all 0.25s ease",
+            transition: "width 0.25s ease, padding 0.25s ease",
+            overflow: "hidden",
           }}
-          className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 fixed md:relative left-0 top-0 bottom-0`}
         >
           {/* Navigation Links */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", opacity: sidebarOpen ? 1 : 0, transition: "opacity 0.2s ease" }}>
             {[
               { id: "overview", label: "Analytics Overview", icon: RiDashboardLine },
               { id: "banners", label: "Banners & Hero Layouts", icon: RiLayoutGridLine },
               { id: "blogs", label: "Blog Articles", icon: RiBookOpenLine },
-              { id: "projects", label: "Portfolio Projects", icon: RiFolderLine },
-              { id: "socials", label: "Social Links Controls", icon: RiShareLine },
-              { id: "settings", label: "Site Information", icon: RiSettings4Line },
+              { id: "projects", label: "Projects", icon: RiFolderLine },
+              { id: "media", label: "Media Library", icon: RiImageLine },
+              { id: "socials", label: "Social Links", icon: RiShareLine },
+              { id: "settings", label: "Site Settings", icon: RiSettings4Line },
             ].map((tab) => {
               const Icon = tab.icon;
               const active = activeTab === tab.id;
@@ -472,16 +443,14 @@ export default function DashboardPage() {
                   key={tab.id}
                   onClick={() => {
                     setActiveTab(tab.id as any);
-                    setSidebarOpen(false);
                   }}
-                  title={sidebarCollapsed ? tab.label : undefined}
                   style={{
                     display: "flex",
                     alignItems: "center",
                     gap: "0.75rem",
-                    padding: sidebarCollapsed ? "0.75rem" : "0.75rem 0.875rem",
-                    justifyContent: sidebarCollapsed ? "center" : "flex-start",
-                    borderRadius: "0.375rem", // Small radius
+                    padding: "0.75rem 0.875rem",
+                    justifyContent: "flex-start",
+                    borderRadius: "0.375rem",
                     fontSize: "0.8125rem",
                     fontWeight: active ? 700 : 500,
                     border: "none",
@@ -489,11 +458,13 @@ export default function DashboardPage() {
                     color: active ? "#ffffff" : "#94a3b8",
                     cursor: "pointer",
                     textAlign: "left",
+                    width: "100%",
                     transition: "all 0.15s ease",
+                    whiteSpace: "nowrap",
                   }}
                 >
                   <Icon size={18} />
-                  {!sidebarCollapsed && <span>{tab.label}</span>}
+                  <span>{tab.label}</span>
                 </button>
               );
             })}
@@ -503,37 +474,36 @@ export default function DashboardPage() {
           <div
             onClick={() => setIsProfileModalOpen(true)}
             style={{
-              padding: sidebarCollapsed ? "0.5rem" : "0.75rem",
-              borderRadius: "0.375rem", // Small radius
+              padding: "0.75rem",
+              borderRadius: "0.375rem",
               background: "rgba(255, 255, 255, 0.06)",
               border: "1px solid rgba(255, 255, 255, 0.1)",
               display: "flex",
               alignItems: "center",
               gap: "0.625rem",
-              justifyContent: sidebarCollapsed ? "center" : "flex-start",
               cursor: "pointer",
               transition: "all 0.15s ease",
+              flexShrink: 0,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
             }}
-            className="hover:bg-white/10"
-            title="Click to update Profile & Avatar"
+            title="Update Profile & Avatar"
           >
             <div style={{ position: "relative", width: "2.25rem", height: "2.25rem", borderRadius: "50%", overflow: "hidden", background: "#1e293b", flexShrink: 0 }}>
               <Image src={profile.avatarUrl} alt={profile.name} fill className="object-cover" />
             </div>
-            {!sidebarCollapsed && (
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: "0.75rem", fontWeight: 700, color: "#ffffff", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
-                  {profile.name}
-                </p>
-                <p style={{ fontSize: "0.65rem", color: "#94a3b8", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
-                  {profile.email}
-                </p>
-              </div>
-            )}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ fontSize: "0.75rem", fontWeight: 700, color: "#ffffff", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
+                {profile.name}
+              </p>
+              <p style={{ fontSize: "0.65rem", color: "#94a3b8", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
+                {profile.email}
+              </p>
+            </div>
           </div>
         </aside>
 
-        {/* MAIN DASHBOARD CONTENT VIEW (80% ratio on Desktop, Flush small border radius everywhere) */}
+      {/* MAIN DASHBOARD CONTENT */}
         <main style={{ flex: 1, height: "100%", overflowY: "auto", padding: "1.5rem 1.75rem" }}>
           
           {/* TAB 1: REAL-TIME ANALYTICS OVERVIEW */}
@@ -1003,6 +973,13 @@ export default function DashboardPage() {
                   <RiSaveLine size={16} /> Save Settings
                 </button>
               </form>
+            </div>
+          )}
+
+          {/* TAB: MEDIA LIBRARY */}
+          {activeTab === "media" && (
+            <div style={{ height: "calc(100vh - 4rem - 1.5rem * 2)", borderRadius: "0.375rem", overflow: "hidden", border: "1px solid #e2e8f0" }}>
+              <MediaManagerPage />
             </div>
           )}
 

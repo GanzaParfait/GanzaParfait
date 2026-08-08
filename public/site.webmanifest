@@ -34,6 +34,13 @@
       "purpose": "any"
     }
   ],
-  "screenshots": [],
+  "screenshots": [
+    {
+      "src": "/og-image.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "label": "Prince Parfait GANZA — Founder & Software Engineer"
+    }
+  ],
   "related_applications": []
 }

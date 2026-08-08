@@ -16,12 +16,17 @@ export const metadata: Metadata = {
   authors: [{ name: "Prince Parfait GANZA", url: siteConfig.url }],
   creator: "Prince Parfait GANZA",
   publisher: "Prince Parfait GANZA",
+  category: "technology",
+  classification: "Portfolio, Software Engineering, AI",
+  referrer: "origin-when-cross-origin",
   robots: {
     index: true,
     follow: true,
+    nocache: false,
     googleBot: {
       index: true,
       follow: true,
+      noimageindex: false,
       "max-video-preview": -1,
       "max-image-preview": "large",
       "max-snippet": -1,
@@ -29,26 +34,36 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    locale: siteConfig.locale,
+    locale: "en_US",
     url: siteConfig.url,
-    title: siteConfig.title,
+    title: "Prince Parfait GANZA — Founder • Software Engineer • AI Builder",
     description: siteConfig.description,
-    siteName: siteConfig.name,
+    siteName: "Prince Parfait GANZA",
     images: [
       {
-        url: siteConfig.ogImage,
+        url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Prince Parfait GANZA — Founder & Software Engineer",
+        alt: "Prince Parfait GANZA — Founder, Software Engineer, AI Builder, Speaker & Entrepreneur from Rwanda",
+        type: "image/png",
+        secureUrl: `${siteConfig.url}/og-image.png`,
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: siteConfig.title,
+    site: "@prince_parfait1",
+    title: "Prince Parfait GANZA — Founder • Software Engineer • AI Builder",
     description: siteConfig.description,
     creator: "@prince_parfait1",
-    images: [siteConfig.ogImage],
+    images: [
+      {
+        url: "/og-image.png",
+        alt: "Prince Parfait GANZA — Founder, Software Engineer, AI Builder",
+        width: 1200,
+        height: 630,
+      },
+    ],
   },
   icons: {
     icon: [
@@ -61,6 +76,14 @@ export const metadata: Metadata = {
   },
   manifest: "/site.webmanifest",
   alternates: { canonical: siteConfig.url },
+  other: {
+    // WhatsApp-specific — WhatsApp uses og:image but needs absolute URL
+    "og:image:width": "1200",
+    "og:image:height": "630",
+    "og:image:type": "image/png",
+    // LinkedIn
+    "linkedin:owner": "ganza-prince-235816269",
+  },
 };
 
 export const viewport: Viewport = {

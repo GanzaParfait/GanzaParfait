@@ -12,10 +12,10 @@
 
   /* Backgrounds */
   --color-bg:       #ffffff;
-  --color-bg-2:     #f3f6fb;
-  --color-bg-3:     #e8eef8;
-  --color-surface:  #f8faff;
-  --color-surface-2:#edf2fa;
+  --color-bg-2:     #f8fafc;
+  --color-bg-3:     #f1f5f9;
+  --color-surface:  #ffffff;
+  --color-surface-2:#f8fafc;
 
   /* Text */
   --color-text:   #0b192c;
