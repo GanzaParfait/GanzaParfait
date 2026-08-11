@@ -30,6 +30,7 @@ import {
   RiMenuUnfoldLine,
   RiImageLine,
 } from "react-icons/ri";
+import { Smartphone, Monitor, Tablet } from "lucide-react";
 
 import {
   siteConfig,
@@ -609,18 +610,33 @@ export default function DashboardPage() {
                   </p>
 
                   <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                    {analytics.deviceBreakdown.map((d) => (
-                      <div key={d.device} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.75rem 0.875rem", borderRadius: "0.375rem", background: "#f8fafc", border: "1px solid #e2e8f0" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
-                          <span style={{ fontSize: "1.125rem" }}>{d.icon}</span>
-                          <div>
-                            <p style={{ fontSize: "0.8125rem", fontWeight: 700, color: "#0f172a" }}>{d.device}</p>
-                            <p style={{ fontSize: "0.65rem", color: "#64748b" }}>Responsive view</p>
+                    {analytics.deviceBreakdown.map((d) => {
+                      const DeviceIcon = d.icon === "mobile" ? Smartphone
+                        : d.icon === "desktop" ? Monitor
+                        : Tablet;
+                      const color = d.icon === "mobile" ? "#0e52a8"
+                        : d.icon === "desktop" ? "#6366f1"
+                        : "#0ea5e9";
+                      return (
+                        <div key={d.device} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.75rem 0.875rem", borderRadius: "0.375rem", background: "#f8fafc", border: "1px solid #e2e8f0" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+                            <div style={{ width: "2rem", height: "2rem", borderRadius: "0.375rem", background: `${color}12`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                              <DeviceIcon size={16} color={color} strokeWidth={2} />
+                            </div>
+                            <div>
+                              <p style={{ fontSize: "0.8125rem", fontWeight: 700, color: "#0f172a" }}>{d.device}</p>
+                              <p style={{ fontSize: "0.65rem", color: "#64748b" }}>Responsive view</p>
+                            </div>
+                          </div>
+                          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.125rem" }}>
+                            <span style={{ fontSize: "1.125rem", fontWeight: 800, color }}>{d.percentage}%</span>
+                            <div style={{ width: "4rem", height: "4px", borderRadius: "9999px", background: "#e2e8f0", overflow: "hidden" }}>
+                              <div style={{ width: `${d.percentage}%`, height: "100%", background: color, borderRadius: "9999px" }} />
+                            </div>
                           </div>
                         </div>
-                        <span style={{ fontSize: "1.125rem", fontWeight: 800, color: "#1d4ed8" }}>{d.percentage}%</span>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -920,59 +936,161 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* TAB 6: SITE INFORMATION */}
+          {/* TAB 6: SITE SETTINGS */}
           {activeTab === "settings" && (
-            <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "0.375rem", padding: "1.5rem", boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
-              <form onSubmit={handleSettingsSave}>
-                <h2 style={{ fontSize: "1.375rem", fontWeight: 800, color: "#0f172a", marginBottom: "0.15rem" }}>
-                  Site & Brand Settings
-                </h2>
-                <p style={{ fontSize: "0.8125rem", color: "#64748b", marginBottom: "1.25rem" }}>
-                  Update global founder titles, location, and bio.
+            <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+
+              {/* Hero Layout Card */}
+              <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "0.375rem", padding: "1.5rem", boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
+                <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "#0f172a", marginBottom: "0.25rem" }}>
+                  Hero Layout
+                </h3>
+                <p style={{ fontSize: "0.75rem", color: "#64748b", marginBottom: "1rem" }}>
+                  Choose which homepage hero layout visitors see.
                 </p>
-
-                <div style={{ display: "grid", gap: "1rem" }}>
-                  <div>
-                    <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.25rem" }}>
-                      Display Name / Title
-                    </label>
-                    <input
-                      type="text"
-                      value={settings.siteTitle}
-                      onChange={(e) => setSettings({ ...settings, siteTitle: e.target.value })}
-                      style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "#f8fafc", border: "1px solid #cbd5e1", fontSize: "0.8125rem", color: "#0f172a" }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.25rem" }}>
-                      Roles & Tagline
-                    </label>
-                    <input
-                      type="text"
-                      value={settings.siteSubtitle}
-                      onChange={(e) => setSettings({ ...settings, siteSubtitle: e.target.value })}
-                      style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "#f8fafc", border: "1px solid #cbd5e1", fontSize: "0.8125rem", color: "#0f172a" }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.25rem" }}>
-                      Bio Summary
-                    </label>
-                    <textarea
-                      rows={3}
-                      value={settings.bio}
-                      onChange={(e) => setSettings({ ...settings, bio: e.target.value })}
-                      style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "#f8fafc", border: "1px solid #cbd5e1", fontSize: "0.8125rem", color: "#0f172a", outline: "none" }}
-                    />
-                  </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+                  {([
+                    { id: "split_portrait" as const, label: "Split Portrait", desc: "Image right, content left — cinematic two-column layout." },
+                    { id: "featured_overlay" as const, label: "Full Banner Overlay", desc: "Full-width image with gradient overlay and text." },
+                  ]).map((opt) => {
+                    const isActive = (settings.bannerLayout || "split_portrait") === opt.id;
+                    return (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => handleLayoutChange(opt.id)}
+                        style={{
+                          padding: "1rem", borderRadius: "0.375rem",
+                          border: `2px solid ${isActive ? "#1d4ed8" : "#e2e8f0"}`,
+                          background: isActive ? "#eff6ff" : "#f8fafc",
+                          cursor: "pointer", textAlign: "left",
+                          transition: "all 0.15s ease",
+                        }}
+                      >
+                        <p style={{ fontSize: "0.875rem", fontWeight: 700, color: isActive ? "#1d4ed8" : "#0f172a", marginBottom: "0.25rem", display: "flex", alignItems: "center", gap: "0.375rem" }}>
+                          {isActive && <RiCheckLine size={14} />}
+                          {opt.label}
+                        </p>
+                        <p style={{ fontSize: "0.75rem", color: "#64748b" }}>{opt.desc}</p>
+                      </button>
+                    );
+                  })}
                 </div>
+              </div>
 
-                <button type="submit" className="btn btn-primary btn-sm" style={{ marginTop: "1.25rem", gap: "0.375rem", borderRadius: "0.375rem" }}>
-                  <RiSaveLine size={16} /> Save Settings
-                </button>
-              </form>
+              {/* Site Information Form */}
+              <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "0.375rem", padding: "1.5rem", boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
+                <form onSubmit={handleSettingsSave}>
+                  <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "#0f172a", marginBottom: "0.25rem" }}>
+                    Site &amp; Brand Information
+                  </h3>
+                  <p style={{ fontSize: "0.75rem", color: "#64748b", marginBottom: "1.25rem" }}>
+                    Update global site identity fields shown across the portfolio.
+                  </p>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                    <div>
+                      <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.25rem" }}>
+                        Display Name
+                      </label>
+                      <input type="text" value={settings.siteTitle}
+                        onChange={(e) => setSettings({ ...settings, siteTitle: e.target.value })}
+                        style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "#f8fafc", border: "1px solid #cbd5e1", fontSize: "0.8125rem", color: "#0f172a", outline: "none" }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.25rem" }}>
+                        Location
+                      </label>
+                      <input type="text" value={settings.location}
+                        onChange={(e) => setSettings({ ...settings, location: e.target.value })}
+                        placeholder="e.g. Kigali, Rwanda"
+                        style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "#f8fafc", border: "1px solid #cbd5e1", fontSize: "0.8125rem", color: "#0f172a", outline: "none" }}
+                      />
+                    </div>
+
+                    <div style={{ gridColumn: "1 / -1" }}>
+                      <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.25rem" }}>
+                        Roles &amp; Tagline <span style={{ color: "#94a3b8", fontWeight: 400 }}>(separated by " • ")</span>
+                      </label>
+                      <input type="text" value={settings.siteSubtitle}
+                        onChange={(e) => setSettings({ ...settings, siteSubtitle: e.target.value })}
+                        placeholder="Founder • Software Engineer • AI Builder"
+                        style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "#f8fafc", border: "1px solid #cbd5e1", fontSize: "0.8125rem", color: "#0f172a", outline: "none" }}
+                      />
+                    </div>
+
+                    <div style={{ gridColumn: "1 / -1" }}>
+                      <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.25rem" }}>
+                        Bio Summary
+                      </label>
+                      <textarea rows={3} value={settings.bio}
+                        onChange={(e) => setSettings({ ...settings, bio: e.target.value })}
+                        style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "#f8fafc", border: "1px solid #cbd5e1", fontSize: "0.8125rem", color: "#0f172a", outline: "none", resize: "vertical" }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.25rem" }}>
+                        Contact Email
+                      </label>
+                      <input type="email" value={settings.contactEmail}
+                        onChange={(e) => setSettings({ ...settings, contactEmail: e.target.value })}
+                        placeholder="hello@princeparfait.com"
+                        style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "#f8fafc", border: "1px solid #cbd5e1", fontSize: "0.8125rem", color: "#0f172a", outline: "none" }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.25rem" }}>
+                        WhatsApp Number <span style={{ color: "#94a3b8", fontWeight: 400 }}>(digits only)</span>
+                      </label>
+                      <input type="text" value={settings.whatsappNumber}
+                        onChange={(e) => setSettings({ ...settings, whatsappNumber: e.target.value })}
+                        placeholder="250792054846"
+                        style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "#f8fafc", border: "1px solid #cbd5e1", fontSize: "0.8125rem", color: "#0f172a", outline: "none" }}
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1.25rem" }}>
+                    <button type="submit" className="btn btn-primary btn-sm" style={{ gap: "0.375rem", borderRadius: "0.375rem" }}>
+                      <RiSaveLine size={16} /> Save Settings
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              {/* Social Icons Limit */}
+              <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "0.375rem", padding: "1.5rem", boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
+                <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "#0f172a", marginBottom: "0.25rem" }}>
+                  Header Social Icons Limit
+                </h3>
+                <p style={{ fontSize: "0.75rem", color: "#64748b", marginBottom: "1rem" }}>
+                  How many icons appear directly in the top nav before overflow menu.
+                </p>
+                <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                  {[1, 2, 3, 4, 5].map((num) => (
+                    <button
+                      key={num}
+                      type="button"
+                      onClick={() => handleSocialLimitChange(num)}
+                      style={{
+                        padding: "0.5rem 1.125rem", borderRadius: "0.375rem",
+                        fontWeight: 700, fontSize: "0.8125rem",
+                        border: "1px solid #cbd5e1",
+                        background: (settings.headerSocialLimit || 3) === num ? "#1d4ed8" : "#ffffff",
+                        color: (settings.headerSocialLimit || 3) === num ? "#ffffff" : "#0f172a",
+                        cursor: "pointer", transition: "all 0.15s ease",
+                      }}
+                    >
+                      {num} {num === 1 ? "Icon" : "Icons"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
             </div>
           )}
 

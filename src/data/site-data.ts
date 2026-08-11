@@ -369,7 +369,7 @@ export const services: Service[] = [
       "Performance optimization",
       "Responsive & mobile-first",
     ],
-    icon: "🌐",
+    icon: "globe",
   },
   {
     id: "ai-integration",
@@ -383,7 +383,7 @@ export const services: Service[] = [
       "Data analysis tools",
       "Voice AI applications",
     ],
-    icon: "🤖",
+    icon: "brain-circuit",
   },
   {
     id: "consulting",
@@ -397,7 +397,7 @@ export const services: Service[] = [
       "Team mentoring",
       "Growth strategy",
     ],
-    icon: "🧩",
+    icon: "puzzle",
   },
   {
     id: "speaking",
@@ -411,6 +411,6 @@ export const services: Service[] = [
       "Podcast appearances",
       "Panel discussions",
     ],
-    icon: "🎙️",
+    icon: "mic",
   },
 ];

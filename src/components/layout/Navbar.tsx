@@ -119,7 +119,6 @@ export default function Navbar() {
             </div>
           </Link>
 
-          {/* Desktop nav */}
           <nav aria-label="Main navigation" className="hidden md:flex" style={{ flex: 1, justifyContent: "center" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.125rem" }}>
               {navLinks.map((link) => (
@@ -130,12 +129,13 @@ export default function Navbar() {
                   style={{
                     padding: "0.5rem 0.875rem",
                     borderRadius: "0.5rem",
-                    fontSize: "0.875rem",
-                    fontWeight: 500,
+                    fontSize: "0.9rem",
+                    fontWeight: pathname === link.href ? 700 : 500,
                     textDecoration: "none",
                     transition: "all 0.2s ease",
                     color: pathname === link.href ? "var(--color-primary)" : "var(--color-text-2)",
-                    background: pathname === link.href ? "rgba(14,82,168,0.07)" : "transparent",
+                    background: pathname === link.href ? "rgba(14,82,168,0.08)" : "transparent",
+                    letterSpacing: pathname === link.href ? "-0.01em" : "0",
                   }}
                 >
                   {link.label}
@@ -256,7 +256,7 @@ export default function Navbar() {
             <ThemeToggle />
 
             {/* CTA */}
-            <Link href="/contact" className="btn btn-primary btn-sm hidden sm:inline-flex">
+            <Link href="/contact" className="btn btn-primary btn-sm hidden sm:inline-flex" style={{ fontWeight: 700, letterSpacing: "-0.01em" }}>
               Let&apos;s Talk
             </Link>
 

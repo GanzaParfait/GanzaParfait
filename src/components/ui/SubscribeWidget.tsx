@@ -114,7 +114,7 @@ export default function SubscribeWidget() {
             style={{ margin: "0 auto 1rem", animation: "float 3s ease-in-out infinite" }}
           />
           <h4 style={{ fontSize: "1.25rem", fontWeight: 700, color: "var(--color-text)", marginBottom: "0.5rem" }}>
-            You're In! 🎉
+            You&apos;re In! ✓
           </h4>
           <p style={{ fontSize: "0.875rem", color: "var(--color-text-2)" }}>
             Thanks for joining. I'll keep you updated with my latest projects and insights.

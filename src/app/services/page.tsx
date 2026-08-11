@@ -3,6 +3,22 @@ import { siteConfig, services } from "@/data/site-data";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import Link from "next/link";
 import { RiArrowRightLine, RiCheckLine } from "react-icons/ri";
+import { Globe, BrainCircuit, Puzzle, Mic } from "lucide-react";
+import type { ElementType } from "react";
+
+const SERVICE_ICONS: Record<string, ElementType> = {
+  globe: Globe,
+  "brain-circuit": BrainCircuit,
+  puzzle: Puzzle,
+  mic: Mic,
+};
+
+const SERVICE_COLORS: Record<string, string> = {
+  globe: "#0e52a8",
+  "brain-circuit": "#6366f1",
+  puzzle: "#0ea5e9",
+  mic: "#10b981",
+};
 
 export const metadata: Metadata = {
   title: "Services",
@@ -48,9 +64,21 @@ export default function ServicesPage() {
                   className="card glass-hover p-8 h-full"
                   aria-label={service.title}
                 >
-                  <div className="text-4xl mb-4" aria-hidden="true">
-                    {service.icon}
-                  </div>
+                  {(() => {
+                    const Icon = SERVICE_ICONS[service.icon] || Globe;
+                    const color = SERVICE_COLORS[service.icon] || "#0e52a8";
+                    return (
+                      <div style={{
+                        width: "3.5rem", height: "3.5rem", borderRadius: "1rem",
+                        background: `${color}12`,
+                        border: `1px solid ${color}25`,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        marginBottom: "1rem",
+                      }}>
+                        <Icon size={22} color={color} strokeWidth={1.75} />
+                      </div>
+                    );
+                  })()}
                   <h2
                     className="text-white text-xl font-semibold mb-3"
                     style={{ fontFamily: "var(--font-heading)" }}

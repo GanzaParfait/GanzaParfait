@@ -63,9 +63,9 @@ export const MOCK_ANALYTICS: AnalyticsMetrics = {
     { path: "/contact", name: "Contact Page", views: 1850 },
   ],
   deviceBreakdown: [
-    { device: "Mobile", icon: "📱", percentage: 58 },
-    { device: "Desktop", icon: "💻", percentage: 38 },
-    { device: "Tablet", icon: "タブレット", percentage: 4 },
+    { device: "Mobile", icon: "mobile", percentage: 58 },
+    { device: "Desktop", icon: "desktop", percentage: 38 },
+    { device: "Tablet", icon: "tablet", percentage: 4 },
   ],
   recentLogs: [
     { id: "1", time: "2 mins ago", country: "Rwanda", flag: "🇷🇼", page: "/", device: "Mobile (Safari)", ip: "197.243.0.12" },
