@@ -5,7 +5,7 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOi
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-export type HeroLayoutType = "split_portrait" | "featured_overlay";
+export type HeroLayoutType = "split_portrait" | "featured_overlay" | "minimal_centered";
 
 export interface SiteSettings {
   bannerLayout: HeroLayoutType;
@@ -77,6 +77,7 @@ export const MOCK_ANALYTICS: AnalyticsMetrics = {
 };
 
 const SETTINGS_STORAGE_KEY = "ppg_site_settings";
+export const SIDEBAR_STORAGE_KEY = "ppg_sidebar_open";
 
 export function getLocalSettings(): SiteSettings {
   if (typeof window === "undefined") return DEFAULT_SETTINGS;

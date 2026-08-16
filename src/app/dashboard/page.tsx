@@ -48,6 +48,7 @@ import {
   HeroLayoutType,
   MOCK_ANALYTICS,
   AnalyticsMetrics,
+  SIDEBAR_STORAGE_KEY,
 } from "@/lib/supabase";
 
 import MediaManagerModal from "@/components/dashboard/MediaManagerModal";
@@ -90,8 +91,8 @@ export default function DashboardPage() {
   // Navigation & UI States
   const [activeTab, setActiveTab] = useState<"overview" | "banners" | "blogs" | "projects" | "socials" | "media" | "settings">("overview");
   
-  // Single sidebar toggle — works for both desktop collapse and mobile drawer
-  const [sidebarOpen, setSidebarOpen] = useState(true); // default open on desktop
+  // Single sidebar toggle — persisted to localStorage so it survives refresh
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [savedMessage, setSavedMessage] = useState("");
 
   // Search & Global State
@@ -107,9 +108,16 @@ export default function DashboardPage() {
     role: "Super Admin",
   });
 
-  // Load settings client-side only to avoid SSR mismatch
+  // Load settings + sidebar state client-side only to avoid SSR mismatch
   useEffect(() => {
     setSettings(getLocalSettings());
+    // Restore persisted sidebar state
+    try {
+      const savedSidebar = localStorage.getItem(SIDEBAR_STORAGE_KEY);
+      if (savedSidebar !== null) {
+        setSidebarOpen(savedSidebar === "true");
+      }
+    } catch {}
   }, []);
 
   // Content Items (Real-time CRUD)
@@ -157,10 +165,22 @@ export default function DashboardPage() {
   };
 
   // Hero Layout Switcher
+  const layoutLabels: Record<HeroLayoutType, string> = {
+    split_portrait: "Split Portrait Layout",
+    featured_overlay: "Gradient Overlay Banner",
+    minimal_centered: "Minimal Centered Layout",
+  };
   const handleLayoutChange = (layout: HeroLayoutType) => {
     const updated = saveLocalSettings({ bannerLayout: layout });
     setSettings(updated);
-    showNotification(`Hero layout updated to ${layout === "split_portrait" ? "Split Portrait Layout" : "Gradient Overlay Banner"}`);
+    showNotification(`Hero layout updated to ${layoutLabels[layout]}`);
+  };
+
+  // Sidebar toggle with persistence
+  const toggleSidebar = () => {
+    const next = !sidebarOpen;
+    setSidebarOpen(next);
+    try { localStorage.setItem(SIDEBAR_STORAGE_KEY, String(next)); } catch {}
   };
 
   // Header Social Limit
@@ -279,7 +299,7 @@ export default function DashboardPage() {
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
           {/* ONE toggler — works for both desktop & mobile */}
           <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
+            onClick={toggleSidebar}
             style={{ padding: "0.375rem", borderRadius: "0.375rem", border: "none", background: "none", cursor: "pointer", color: "#475569", display: "flex", alignItems: "center" }}
             title={sidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
             aria-label="Toggle Sidebar"
@@ -948,10 +968,11 @@ export default function DashboardPage() {
                 <p style={{ fontSize: "0.75rem", color: "#64748b", marginBottom: "1rem" }}>
                   Choose which homepage hero layout visitors see.
                 </p>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.75rem" }}>
                   {([
                     { id: "split_portrait" as const, label: "Split Portrait", desc: "Image right, content left — cinematic two-column layout." },
                     { id: "featured_overlay" as const, label: "Full Banner Overlay", desc: "Full-width image with gradient overlay and text." },
+                    { id: "minimal_centered" as const, label: "Minimal Centered", desc: "Text-focused centered layout with avatar circle — clean & modern." },
                   ]).map((opt) => {
                     const isActive = (settings.bannerLayout || "split_portrait") === opt.id;
                     return (

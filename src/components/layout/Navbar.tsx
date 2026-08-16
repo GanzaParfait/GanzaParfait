@@ -21,7 +21,6 @@ import ThemeToggle from "@/components/ui/ThemeToggle";
 import { getLocalSettings, SiteSettings, DEFAULT_SETTINGS } from "@/lib/supabase";
 
 const navLinks = [
-  { href: "/",         label: "Home" },
   { href: "/about",    label: "About" },
   { href: "/projects", label: "Projects" },
   { href: "/blog",     label: "Blog" },
@@ -87,6 +86,24 @@ export default function Navbar() {
     ? "/brand/logos/logo-horizontal-light.png"
     : "/brand/logos/logo-horizontal-blue.png";
 
+  // Theme-adaptive pill colors
+  const pillBg = isDark ? "rgba(10, 22, 40, 0.92)" : "rgba(255, 255, 255, 0.97)";
+  const pillBorder = isDark ? "rgba(14, 82, 168, 0.2)" : "rgba(0, 0, 0, 0.06)";
+  const pillShadow = isScrolled
+    ? isDark
+      ? "0 4px 24px rgba(0,0,0,0.4), 0 1px 4px rgba(0,0,0,0.3)"
+      : "0 4px 24px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06)"
+    : isDark
+      ? "0 2px 12px rgba(0,0,0,0.3)"
+      : "0 2px 12px rgba(0,0,0,0.06)";
+
+  const navLinkColor = (active: boolean) =>
+    active ? "var(--color-primary)" : "var(--color-text-2)";
+  const navLinkBg = (active: boolean) =>
+    active ? (isDark ? "rgba(14,82,168,0.15)" : "rgba(14,82,168,0.08)") : "transparent";
+  const iconColor = "var(--color-text-3)";
+  const dividerColor = isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)";
+
   return (
     <>
       {/* ── TOP BAR ── */}
@@ -97,18 +114,30 @@ export default function Navbar() {
           top: 0, left: 0, right: 0,
           zIndex: 50,
           transition: "all 0.3s ease",
-          padding: isScrolled ? "0.625rem 0" : "1rem 0",
-          background: isScrolled ? "var(--nav-bg)" : "transparent",
-          backdropFilter: isScrolled ? "blur(20px)" : "none",
-          WebkitBackdropFilter: isScrolled ? "blur(20px)" : "none",
-          borderBottom: isScrolled ? "1px solid var(--nav-border)" : "none",
+          padding: "0.5rem 0.75rem",
         }}
       >
-        <div className="container" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem" }}>
+        <div
+          className="container"
+          style={{
+            background: pillBg,
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+            borderRadius: "9999px",
+            padding: "0.375rem 0.75rem",
+            boxShadow: pillShadow,
+            border: `1px solid ${pillBorder}`,
+            transition: "box-shadow 0.3s ease, background 0.3s ease, border-color 0.3s ease",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "0.5rem",
+          }}
+        >
 
-          {/* Logo — horizontal, theme-aware, no text */}
+          {/* Logo — horizontal, theme-aware */}
           <Link href="/" aria-label="Prince Parfait GANZA — Home" style={{ display: "flex", flexShrink: 0 }}>
-            <div style={{ position: "relative", width: "9rem", height: "2.5rem" }}>
+            <div style={{ position: "relative", width: "clamp(6rem, 18vw, 9rem)", height: "2.25rem" }}>
               <Image
                 src={logoSrc}
                 alt="Prince Parfait GANZA"
@@ -127,14 +156,14 @@ export default function Navbar() {
                   href={link.href}
                   aria-current={pathname === link.href ? "page" : undefined}
                   style={{
-                    padding: "0.5rem 0.875rem",
+                    padding: "0.4rem 0.75rem",
                     borderRadius: "0.5rem",
-                    fontSize: "0.9rem",
+                    fontSize: "0.85rem",
                     fontWeight: pathname === link.href ? 700 : 500,
                     textDecoration: "none",
                     transition: "all 0.2s ease",
-                    color: pathname === link.href ? "var(--color-primary)" : "var(--color-text-2)",
-                    background: pathname === link.href ? "rgba(14,82,168,0.08)" : "transparent",
+                    color: navLinkColor(pathname === link.href),
+                    background: navLinkBg(pathname === link.href),
                     letterSpacing: pathname === link.href ? "-0.01em" : "0",
                   }}
                 >
@@ -145,10 +174,10 @@ export default function Navbar() {
           </nav>
 
           {/* Right actions */}
-          <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", flexShrink: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.25rem", flexShrink: 0 }}>
 
-            {/* 3 primary social links + "more" — desktop only */}
-            <div className="hidden md:flex" style={{ alignItems: "center", gap: "0.25rem", position: "relative" }}>
+            {/* Primary social links + "more" — desktop only */}
+            <div className="hidden lg:flex" style={{ alignItems: "center", gap: "0.125rem", position: "relative" }}>
               {primarySocials.map(({ href, label, icon: Icon }) => (
                 <a
                   key={label}
@@ -158,19 +187,19 @@ export default function Navbar() {
                   aria-label={label}
                   title={label}
                   style={{
-                    width: "2rem",
-                    height: "2rem",
+                    width: "1.875rem",
+                    height: "1.875rem",
                     borderRadius: "0.5rem",
                     display: "inline-flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    color: "var(--color-text-2)",
+                    color: iconColor,
                     textDecoration: "none",
                     transition: "all 0.2s ease",
                   }}
                   className="nav-social-icon"
                 >
-                  <Icon size={17} />
+                  <Icon size={16} />
                 </a>
               ))}
 
@@ -181,13 +210,13 @@ export default function Navbar() {
                   aria-label="More social links"
                   aria-expanded={moreOpen}
                   style={{
-                    width: "2rem",
-                    height: "2rem",
+                    width: "1.875rem",
+                    height: "1.875rem",
                     borderRadius: "0.5rem",
                     display: "inline-flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    color: "var(--color-text-2)",
+                    color: iconColor,
                     background: "transparent",
                     border: "none",
                     cursor: "pointer",
@@ -195,7 +224,7 @@ export default function Navbar() {
                   }}
                   className="nav-social-icon"
                 >
-                  <RiMore2Line size={17} />
+                  <RiMore2Line size={16} />
                 </button>
 
                 {moreOpen && (
@@ -250,13 +279,13 @@ export default function Navbar() {
             </div>
 
             {/* Divider */}
-            <div className="hidden md:block" style={{ width: "1px", height: "1.25rem", background: "var(--color-border)" }} />
+            <div className="hidden lg:block" style={{ width: "1px", height: "1.25rem", background: dividerColor }} />
 
             {/* Theme toggle */}
             <ThemeToggle />
 
             {/* CTA */}
-            <Link href="/contact" className="btn btn-primary btn-sm hidden sm:inline-flex" style={{ fontWeight: 700, letterSpacing: "-0.01em" }}>
+            <Link href="/contact" className="btn btn-primary btn-sm hidden sm:inline-flex" style={{ fontWeight: 700, letterSpacing: "-0.01em", padding: "0.4rem 1rem", fontSize: "0.8125rem" }}>
               Let&apos;s Talk
             </Link>
 
@@ -265,8 +294,8 @@ export default function Navbar() {
               onClick={() => setIsOpen(!isOpen)}
               className="md:hidden"
               style={{
-                width: "2.25rem",
-                height: "2.25rem",
+                width: "2.125rem",
+                height: "2.125rem",
                 borderRadius: "0.5rem",
                 display: "inline-flex",
                 alignItems: "center",
@@ -280,7 +309,7 @@ export default function Navbar() {
               aria-controls="mobile-menu"
               aria-label={isOpen ? "Close menu" : "Open menu"}
             >
-              {isOpen ? <RiMenuFoldLine size={20} /> : <RiMenuUnfoldLine size={20} />}
+              {isOpen ? <RiMenuFoldLine size={18} /> : <RiMenuUnfoldLine size={18} />}
             </button>
           </div>
         </div>
@@ -319,23 +348,23 @@ export default function Navbar() {
           zIndex: 50,
           background: "var(--color-bg)",
           borderTop: "1px solid var(--color-border)",
-          borderRadius: "1.5rem 1.5rem 0 0",
-          boxShadow: "0 -8px 40px rgba(0,0,0,0.15)",
+          borderRadius: "1.25rem 1.25rem 0 0",
+          boxShadow: "0 -4px 24px rgba(0,0,0,0.12)",
           transform: isOpen ? "translateY(0)" : "translateY(100%)",
           transition: "transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)",
-          maxHeight: "85vh",
+          maxHeight: "55dvh",
           overflowY: "auto",
-          padding: "0 1.25rem 2rem",
+          padding: "0 1rem 1.25rem",
         }}
       >
         {/* Handle */}
-        <div style={{ display: "flex", justifyContent: "center", padding: "0.75rem 0 1.25rem" }}>
-          <div style={{ width: "2.5rem", height: "4px", borderRadius: "2px", background: "var(--color-border)" }} />
+        <div style={{ display: "flex", justifyContent: "center", padding: "0.5rem 0 0.625rem" }}>
+          <div style={{ width: "2rem", height: "3px", borderRadius: "2px", background: "var(--color-border)" }} />
         </div>
 
-        {/* Nav links */}
+        {/* Nav links — compact grid for very small screens */}
         <nav aria-label="Mobile navigation">
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.0625rem" }}>
             {navLinks.map((link, i) => (
               <Link
                 key={link.href}
@@ -344,9 +373,9 @@ export default function Navbar() {
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  padding: "0.875rem 1rem",
-                  borderRadius: "0.75rem",
-                  fontSize: "1rem",
+                  padding: "0.5rem 0.75rem",
+                  borderRadius: "0.5rem",
+                  fontSize: "0.875rem",
                   fontWeight: 500,
                   textDecoration: "none",
                   transitionDelay: isOpen ? `${i * 30}ms` : "0ms",
@@ -361,11 +390,11 @@ export default function Navbar() {
         </nav>
 
         {/* Bottom actions */}
-        <div style={{ marginTop: "1.5rem", paddingTop: "1.5rem", borderTop: "1px solid var(--color-border)" }}>
-          <Link href="/contact" className="btn btn-primary" style={{ width: "100%", justifyContent: "center", marginBottom: "1rem" }}>
+        <div style={{ marginTop: "0.5rem", paddingTop: "0.5rem", borderTop: "1px solid var(--color-border)" }}>
+          <Link href="/contact" className="btn btn-primary btn-sm" style={{ width: "100%", justifyContent: "center", marginBottom: "0.5rem" }}>
             Let&apos;s Talk
           </Link>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.75rem", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", flexWrap: "wrap" }}>
             {[
               { href: siteConfig.social.whatsapp,  label: "WhatsApp",  icon: RiWhatsappLine },
               { href: siteConfig.social.linkedin,   label: "LinkedIn",  icon: RiLinkedinFill },
@@ -381,7 +410,7 @@ export default function Navbar() {
                 aria-label={label}
                 className="footer-social-icon"
               >
-                <Icon size={18} />
+                <Icon size={16} />
               </a>
             ))}
           </div>

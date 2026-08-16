@@ -58,10 +58,10 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    site: "@prince_parfait1",
+    site: "@_prince_parfait_1",
     title: "Prince Parfait GANZA — Founder • Software Engineer • AI Builder",
     description: siteConfig.description,
-    creator: "@prince_parfait1",
+    creator: "@_prince_parfait_1",
     images: [
       {
         url: "/og-image.png",
@@ -92,7 +92,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   themeColor: [
-    { media: "(prefers-color-scheme: dark)",  color: "#050816" },
+    { media: "(prefers-color-scheme: dark)", color: "#050816" },
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
   ],
 };

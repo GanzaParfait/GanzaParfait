@@ -36,12 +36,12 @@ CREATE TABLE IF NOT EXISTS public.social_links (
 INSERT INTO public.social_links (platform, url, is_primary, display_order) VALUES
 ('whatsapp', 'https://wa.me/250792054846', true, 1),
 ('linkedin', 'https://www.linkedin.com/in/ganza-prince-235816269', true, 2),
-('instagram', 'https://www.instagram.com/prince_parfait', true, 3),
+('instagram', 'https://www.instagram.com/_prince_parfait_', true, 3),
 ('github', 'https://github.com/GanzaParfait', false, 4),
-('twitter', 'https://x.com/prince_parfait1', false, 5),
-('youtube', 'https://youtube.com/@prince_parfait', false, 6),
-('tiktok', 'https://tiktok.com/@prince_parfait', false, 7),
-('threads', 'https://www.threads.com/@prince_parfait', false, 8),
+('twitter', 'https://x.com/_prince_parfait_1', false, 5),
+('youtube', 'https://youtube.com/@_prince_parfait_', false, 6),
+('tiktok', 'https://tiktok.com/@_prince_parfait_', false, 7),
+('threads', 'https://www.threads.com/@_prince_parfait_', false, 8),
 ('luma', 'https://luma.com/user/princeparfait', false, 9),
 ('buymeacoffee', 'https://buymeacoffee.com/princeparfait', false, 10)
 ON CONFLICT (platform) DO UPDATE SET url = EXCLUDED.url;

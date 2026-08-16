@@ -350,11 +350,11 @@ He builds full-stack web applications and AI-powered tools that solve real-world
 | Website       | [princeparfait.com](https://princeparfait.com)                             |
 | GitHub        | [@GanzaParfait](https://github.com/GanzaParfait)                          |
 | LinkedIn      | [ganza-prince-235816269](https://linkedin.com/in/ganza-prince-235816269)  |
-| X / Twitter   | [@prince_parfait1](https://x.com/prince_parfait1)                         |
-| YouTube       | [@prince_parfait](https://youtube.com/@prince_parfait)                     |
-| Instagram     | [@prince_parfait](https://www.instagram.com/prince_parfait)                |
-| TikTok        | [@prince_parfait](https://tiktok.com/@prince_parfait)                      |
-| Threads       | [@prince_parfait](https://www.threads.com/@prince_parfait)                 |
+| X / Twitter   | [@_prince_parfait_1](https://x.com/_prince_parfait_1)                         |
+| YouTube       | [@_prince_parfait_](https://youtube.com/@_prince_parfait_)                     |
+| Instagram     | [@_prince_parfait_](https://www.instagram.com/_prince_parfait_)                |
+| TikTok        | [@_prince_parfait_](https://tiktok.com/@_prince_parfait_)                      |
+| Threads       | [@_prince_parfait_](https://www.threads.com/@_prince_parfait_)                 |
 | Luma           | [princeparfait](https://lu.ma/user/princeparfait)                         |
 | Buy Me a Coffee | [princeparfait](https://buymeacoffee.com/princeparfait)                  |
 | WhatsApp      | [+250 792 054 846](https://wa.me/250792054846)                             |
