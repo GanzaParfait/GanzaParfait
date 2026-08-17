@@ -199,14 +199,23 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
 
                     {/* Links */}
                     <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginTop: "0.25rem" }}>
+                      <Link
+                        href={`/projects/${project.id}`}
+                        className="btn btn-primary btn-sm"
+                        style={{ fontWeight: 700 }}
+                      >
+                        Read Case Study
+                        <RiArrowRightLine size={14} />
+                      </Link>
+                      
                       {project.links.live && (
                         <a
                           href={project.links.live}
                           target="_blank" rel="noopener noreferrer"
-                          className="btn btn-primary btn-sm"
-                          style={{ fontWeight: 700 }}
+                          className="btn btn-outline btn-sm"
+                          style={{ fontWeight: 600 }}
                         >
-                          Visit Project
+                          Visit Live
                           <RiExternalLinkLine size={14} />
                         </a>
                       )}

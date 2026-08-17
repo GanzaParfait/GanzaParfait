@@ -1,5 +1,7 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import {
   RiGithubFill,
   RiLinkedinFill,
@@ -10,9 +12,11 @@ import {
   RiWhatsappLine,
   RiCupLine,
   RiThreadsLine,
+  RiArrowRightLine
 } from "react-icons/ri";
 import { siteConfig } from "@/data/site-data";
 import BackToTop from "@/components/ui/BackToTop";
+import { getLocalSettings, SiteSettings, DEFAULT_SETTINGS } from "@/lib/supabase";
 
 const navGroups = [
   {
@@ -48,6 +52,16 @@ const socialLinks = [
 
 export default function Footer() {
   const year = new Date().getFullYear();
+  const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
+
+  useEffect(() => {
+    setSettings(getLocalSettings());
+    const handleSettingsChange = (e: any) => {
+      setSettings(e.detail);
+    };
+    window.addEventListener("site-settings-changed", handleSettingsChange);
+    return () => window.removeEventListener("site-settings-changed", handleSettingsChange);
+  }, []);
 
   return (
     <>
@@ -74,35 +88,34 @@ export default function Footer() {
           }}
         />
 
-        <div className="container" style={{ padding: "3.5rem 1.5rem 2rem" }}>
-          {/* Main grid — responsive */}
+        <div className="container" style={{ padding: "4rem 1.5rem 2rem" }}>
+          {/* Main Top Flex */}
           <div style={{
-            display: "grid",
-            gap: "2.5rem",
-            gridTemplateColumns: "repeat(1, 1fr)",
-          }}
-            className="sm:grid-cols-2 lg:grid-cols-4"
-          >
-            {/* Brand */}
-            <div className="sm:col-span-2 lg:col-span-2">
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "3rem",
+            justifyContent: "space-between",
+            marginBottom: "3rem"
+          }}>
+            {/* First Section: Brand */}
+            <div style={{ flex: "1 1 300px", maxWidth: "28rem" }}>
               <Link
                 href="/"
-                style={{ display: "inline-flex", alignItems: "center", marginBottom: "1rem", textDecoration: "none" }}
+                style={{ display: "inline-flex", alignItems: "center", marginBottom: "1.25rem", textDecoration: "none" }}
                 aria-label="Home"
               >
-                <div style={{ position: "relative", width: "10rem", height: "2.5rem" }}>
-                  <Image
+                <div style={{ position: "relative", width: "11rem", height: "2.75rem" }}>
+                  <img
                     src="/brand/logos/logo-horizontal-blue.png"
-                    alt="Prince Parfait GANZA"
-                    fill
-                    className="object-contain object-left footer-logo-dark"
+                    alt={settings.siteTitle}
+                    className="footer-logo-dark"
+                    style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "left" }}
                   />
-                  <Image
+                  <img
                     src="/brand/logos/logo-horizontal-light.png"
-                    alt="Prince Parfait GANZA"
-                    fill
-                    className="object-contain object-left footer-logo-light"
-                    style={{ display: "none" }}
+                    alt={settings.siteTitle}
+                    className="footer-logo-light"
+                    style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "left", display: "none" }}
                   />
                 </div>
               </Link>
@@ -111,11 +124,9 @@ export default function Footer() {
                 fontSize: "0.875rem",
                 color: "var(--color-text-2)",
                 lineHeight: 1.75,
-                maxWidth: "26rem",
-                marginBottom: "1.5rem",
+                marginBottom: "2rem",
               }}>
-                Founder, Software Engineer & AI Builder based in Kigali, Rwanda 🇷🇼.
-                Building technology that creates real impact across Africa and beyond.
+                {settings.bio}
               </p>
 
               {/* Social icons */}
@@ -130,51 +141,93 @@ export default function Footer() {
                     title={label}
                     className="footer-social-icon"
                   >
-                    <Icon size={15} />
+                    <Icon size={16} />
                   </a>
                 ))}
               </div>
             </div>
 
-            {/* Nav groups */}
-            {navGroups.map((group) => (
-              <div key={group.label}>
-                <h3 style={{
-                  fontFamily: "var(--font-heading)",
-                  fontSize: "0.8125rem",
-                  fontWeight: 600,
-                  color: "var(--color-text)",
-                  marginBottom: "1rem",
-                  letterSpacing: "-0.01em",
-                }}>
-                  {group.label}
+            {/* Second & Third Sections: Nav groups */}
+            <div style={{ display: "flex", gap: "4rem", flexWrap: "wrap", flex: "1 1 auto", justifyContent: "flex-end" }} className="md:justify-start">
+              {navGroups.map((group) => (
+                <div key={group.label} style={{ minWidth: "8rem" }}>
+                  <h3 style={{
+                    fontFamily: "var(--font-heading)",
+                    fontSize: "0.875rem",
+                    fontWeight: 700,
+                    color: "var(--color-text)",
+                    marginBottom: "1.25rem",
+                    letterSpacing: "-0.01em",
+                  }}>
+                    {group.label}
+                  </h3>
+                  <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.75rem" }} role="list">
+                    {group.links.map((link) => (
+                      <li key={link.href}>
+                        <Link
+                          href={link.href}
+                          className="footer-nav-link"
+                          style={{
+                            fontSize: "0.875rem",
+                            color: "var(--color-text-2)",
+                            textDecoration: "none",
+                            transition: "color 0.15s ease",
+                            display: "inline-block",
+                          }}
+                        >
+                          {link.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Featured Middle Section */}
+          <div style={{
+            position: "relative",
+            width: "100%",
+            borderRadius: "1rem",
+            overflow: "hidden",
+            background: "linear-gradient(135deg, #0e52a8 0%, #050816 100%)",
+            marginBottom: "3rem",
+            boxShadow: "0 10px 30px -10px rgba(14,82,168,0.3)"
+          }}>
+            <div style={{ 
+              display: "flex", 
+              flexDirection: "column",
+              gap: "2rem",
+              padding: "2rem"
+            }} className="md:flex-row md:items-center md:justify-between md:padding-3rem">
+              
+              <div style={{ flex: 1, zIndex: 10, maxWidth: "26rem", textAlign: "left" }}>
+                <span style={{ display: "inline-block", padding: "0.25rem 0.75rem", background: "rgba(255,255,255,0.1)", color: "#ffffff", borderRadius: "1rem", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: "1rem" }}>
+                  Featured Insight
+                </span>
+                <h3 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#ffffff", marginBottom: "1.25rem", lineHeight: 1.2 }}>
+                  Building Scalable AI Solutions
                 </h3>
-                <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.5rem" }} role="list">
-                  {group.links.map((link) => (
-                    <li key={link.href}>
-                      <Link
-                        href={link.href}
-                        className="footer-nav-link"
-                        style={{
-                          fontSize: "0.875rem",
-                          color: "var(--color-text-2)",
-                          textDecoration: "none",
-                          transition: "color 0.15s ease",
-                          display: "inline-block",
-                        }}
-                      >
-                        {link.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+                <Link href="/blog" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", color: "#ffffff", fontWeight: 600, fontSize: "0.875rem", textDecoration: "none", padding: "0.625rem 1.25rem", background: "var(--color-primary)", borderRadius: "0.5rem", transition: "transform 0.2s ease" }} className="hover:scale-105">
+                  Read Article <RiArrowRightLine />
+                </Link>
               </div>
-            ))}
+
+              {/* Big Image right side / background */}
+              <div style={{ flex: 1, position: "relative", minHeight: "12rem", borderRadius: "0.75rem", overflow: "hidden" }} className="md:min-height-[16rem]">
+                <img 
+                  src="/images/blog/blog-placeholder.png" 
+                  alt="Featured Article Foreground" 
+                  style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", borderRadius: "0.75rem", boxShadow: "0 20px 40px -10px rgba(0,0,0,0.5)" }} 
+                  className="scale-95 origin-right hover:scale-100 transition-transform duration-500"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Bottom bar */}
           <div style={{
-            marginTop: "3rem",
             paddingTop: "1.5rem",
             borderTop: "1px solid var(--color-border)",
             display: "flex",
@@ -184,22 +237,23 @@ export default function Footer() {
             gap: "1rem",
             flexWrap: "wrap",
           }}>
-            <p style={{ fontSize: "0.75rem", color: "var(--color-text-3)" }}>
+            <p style={{ fontSize: "0.75rem", color: "var(--color-text-3)", fontWeight: 500 }}>
               © {year}{" "}
-              <a href={siteConfig.url} style={{ color: "inherit", textDecoration: "none" }}>
-                Prince Parfait GANZA
-              </a>
+              <Link href="/" style={{ color: "var(--color-text)", textDecoration: "none", fontWeight: 700 }}>
+                {settings.siteTitle}
+              </Link>
               . All rights reserved.
             </p>
             <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
-              <Link href="/contact" style={{ fontSize: "0.75rem", color: "var(--color-text-3)", textDecoration: "none" }}>
+              <Link href="/contact" style={{ fontSize: "0.75rem", color: "var(--color-text-3)", textDecoration: "none", fontWeight: 500 }} className="hover:text-primary">
                 Privacy
               </Link>
               <a
                 href={siteConfig.social.buymeacoffee}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ fontSize: "0.75rem", color: "var(--color-text-3)", textDecoration: "none" }}
+                style={{ display: "flex", alignItems: "center", gap: "0.375rem", fontSize: "0.75rem", color: "var(--color-text)", textDecoration: "none", fontWeight: 600, padding: "0.375rem 0.75rem", background: "var(--color-bg)", border: "1px solid var(--color-border)", borderRadius: "2rem" }}
+                className="hover:border-primary transition-colors"
               >
                 ☕ Buy me a coffee
               </a>

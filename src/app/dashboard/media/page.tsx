@@ -32,13 +32,7 @@ export interface MediaAsset {
 // Persist media in localStorage for cross-modal access
 const MEDIA_STORAGE_KEY = "ppg_media_assets";
 
-const DEFAULT_ASSETS: MediaAsset[] = [
-  { id: "m1", name: "hero-photo.png", url: "/images/profile/hero-photo.png", type: "image", uploadedAt: "2025-07-15", alt: "Prince Parfait GANZA portrait" },
-  { id: "m2", name: "logo-horizontal-blue.png", url: "/brand/logos/logo-horizontal-blue.png", type: "image", uploadedAt: "2025-07-15", alt: "PPG Blue Logo" },
-  { id: "m3", name: "logo-horizontal-dark.png", url: "/brand/logos/logo-horizontal-dark.png", type: "image", uploadedAt: "2025-07-15", alt: "PPG Dark Logo" },
-  { id: "m4", name: "logo-horizontal-light.png", url: "/brand/logos/logo-horizontal-light.png", type: "image", uploadedAt: "2025-07-15", alt: "PPG Light Logo" },
-  { id: "m5", name: "og-image.png", url: "/og-image.png", type: "image", uploadedAt: "2025-08-08", alt: "OG Social Share Image" },
-];
+const DEFAULT_ASSETS: MediaAsset[] = [];
 
 export function getMediaAssets(): MediaAsset[] {
   if (typeof window === "undefined") return DEFAULT_ASSETS;
@@ -83,6 +77,7 @@ export default function MediaManagerPage({ onSelect, asModal }: MediaManagerPage
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [newName, setNewName] = useState("");
   const [newUrl, setNewUrl] = useState("");
   const [newAlt, setNewAlt] = useState("");
@@ -141,27 +136,38 @@ export default function MediaManagerPage({ onSelect, asModal }: MediaManagerPage
       size: (f.size / 1024).toFixed(1) + " KB",
       uploadedAt: new Date().toISOString().split("T")[0],
     }));
-    setTimeout(() => {
-      const allUpdated = [...newAssets, ...assets];
-      setAssets(allUpdated);
-      localStorage.setItem(MEDIA_STORAGE_KEY, JSON.stringify(allUpdated));
-      setIsUploading(false);
-    }, 800);
+    let progress = 0;
+    setUploadProgress(0);
+    const interval = setInterval(() => {
+      progress += Math.random() * 20;
+      if (progress >= 100) {
+        clearInterval(interval);
+        setUploadProgress(100);
+        const allUpdated = [...newAssets, ...assets];
+        setAssets(allUpdated);
+        localStorage.setItem(MEDIA_STORAGE_KEY, JSON.stringify(allUpdated));
+        setTimeout(() => setIsUploading(false), 300);
+      } else {
+        setUploadProgress(Math.min(progress, 99));
+      }
+    }, 150);
+    
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const selectedAsset = assets.find((a) => a.id === selectedId);
 
   return (
-    <div
-      style={{
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        background: "#ffffff",
-        overflow: "hidden",
-      }}
-    >
+    <div style={{ height: "calc(100vh - 4rem - 1.5rem * 2)", borderRadius: "0.375rem", overflow: "hidden", border: "1px solid #e2e8f0" }}>
+      <div
+        style={{
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          background: "#ffffff",
+          overflow: "hidden",
+        }}
+      >
       {/* Sticky Header */}
       <div
         style={{
@@ -214,11 +220,18 @@ export default function MediaManagerPage({ onSelect, asModal }: MediaManagerPage
           </button>
 
           {/* Upload Files */}
-          <label style={{ display: "flex", alignItems: "center", gap: "0.375rem", padding: "0.375rem 0.875rem", borderRadius: "0.375rem", border: "none", background: "#1d4ed8", color: "#ffffff", cursor: "pointer", fontSize: "0.8125rem", fontWeight: 700 }}>
-            {isUploading ? <RiLoader4Line size={14} className="animate-spin" /> : <RiUploadCloud2Line size={14} />}
-            {isUploading ? "Uploading..." : "Upload"}
-            <input ref={fileInputRef} type="file" multiple accept="image/*,video/*" className="hidden" onChange={handleFileUpload} disabled={isUploading} />
-          </label>
+          <div style={{ position: "relative" }}>
+            <label style={{ display: "flex", alignItems: "center", gap: "0.375rem", padding: "0.375rem 0.875rem", borderRadius: "0.375rem", border: "none", background: "#1d4ed8", color: "#ffffff", cursor: "pointer", fontSize: "0.8125rem", fontWeight: 700, overflow: "hidden", position: "relative" }}>
+              {isUploading && (
+                <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, background: "rgba(255,255,255,0.2)", width: `${uploadProgress}%`, transition: "width 0.2s ease" }} />
+              )}
+              <span style={{ position: "relative", display: "flex", alignItems: "center", gap: "0.375rem", zIndex: 1 }}>
+                {isUploading ? <RiLoader4Line size={14} className="animate-spin" /> : <RiUploadCloud2Line size={14} />}
+                {isUploading ? `Uploading... ${Math.round(uploadProgress)}%` : "Upload"}
+              </span>
+              <input ref={fileInputRef} type="file" multiple accept="image/*,video/*" style={{ display: "none" }} onChange={handleFileUpload} disabled={isUploading} />
+            </label>
+          </div>
         </div>
       </div>
 
@@ -304,7 +317,7 @@ export default function MediaManagerPage({ onSelect, asModal }: MediaManagerPage
                   }}
                 >
                   <div style={{ position: "relative", width: "100%", height: "6.5rem", background: "#e2e8f0" }}>
-                    <Image src={asset.url} alt={asset.alt || asset.name} fill className="object-cover" unoptimized />
+                    <img src={asset.url} alt={asset.alt || asset.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                     {selectedId === asset.id && (
                       <div style={{ position: "absolute", top: "0.375rem", right: "0.375rem", width: "1.25rem", height: "1.25rem", borderRadius: "50%", background: "#1d4ed8", display: "flex", alignItems: "center", justifyContent: "center" }}>
                         <RiCheckLine size={10} color="#ffffff" />
@@ -335,7 +348,7 @@ export default function MediaManagerPage({ onSelect, asModal }: MediaManagerPage
                   }}
                 >
                   <div style={{ position: "relative", width: "2.75rem", height: "2.25rem", borderRadius: "0.25rem", overflow: "hidden", background: "#e2e8f0", flexShrink: 0 }}>
-                    <Image src={asset.url} alt={asset.name} fill className="object-cover" unoptimized />
+                    <img src={asset.url} alt={asset.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontSize: "0.8125rem", fontWeight: 700, color: "#0f172a", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>{asset.name}</p>
@@ -383,7 +396,7 @@ export default function MediaManagerPage({ onSelect, asModal }: MediaManagerPage
 
             <div style={{ padding: "1rem", flex: 1 }}>
               <div style={{ position: "relative", width: "100%", height: "10rem", borderRadius: "0.375rem", overflow: "hidden", background: "#f1f5f9", marginBottom: "1rem" }}>
-                <Image src={selectedAsset.url} alt={selectedAsset.alt || selectedAsset.name} fill className="object-contain" unoptimized />
+                <img src={selectedAsset.url} alt={selectedAsset.alt || selectedAsset.name} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", fontSize: "0.8125rem" }}>
@@ -449,6 +462,7 @@ export default function MediaManagerPage({ onSelect, asModal }: MediaManagerPage
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 }

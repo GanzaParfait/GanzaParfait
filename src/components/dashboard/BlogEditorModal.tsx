@@ -4,6 +4,11 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { RiCloseLine, RiSaveLine, RiImageAddLine, RiBookOpenLine } from "react-icons/ri";
 import { BlogPost } from "@/data/site-data";
+import dynamic from "next/dynamic";
+import "@uiw/react-md-editor/markdown-editor.css";
+import "@uiw/react-markdown-preview/markdown.css";
+
+const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
 
 interface BlogEditorModalProps {
   isOpen: boolean;
@@ -175,17 +180,19 @@ export default function BlogEditorModal({
             />
           </div>
 
-          <div>
+          <div data-color-mode="light">
             <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--color-text-2)", marginBottom: "0.25rem" }}>
-              Article Content (Markdown / Text)
+              Article Content (Markdown)
             </label>
-            <textarea
-              rows={6}
-              placeholder="Write your article content here..."
-              value={formData.content}
-              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-              style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "var(--color-bg)", border: "1px solid var(--color-border)", color: "var(--color-text)", fontSize: "0.8125rem", outline: "none", fontFamily: "monospace" }}
-            />
+            <div style={{ borderRadius: "0.375rem", overflow: "hidden", border: "1px solid var(--color-border)" }}>
+              <MDEditor
+                value={formData.content || ""}
+                onChange={(val) => setFormData({ ...formData, content: val || "" })}
+                preview="live"
+                height={300}
+                visibleDragbar={false}
+              />
+            </div>
           </div>
 
           <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem", marginTop: "0.5rem" }}>

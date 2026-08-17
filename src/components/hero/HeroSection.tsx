@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import SplitHero from "./SplitHero";
-import TonyRobbinsHero from "./TonyRobbinsHero";
+import FeaturedOverlayHero from "./FeaturedOverlayHero";
 import MinimalCenteredHero from "./MinimalCenteredHero";
+import FullCenteredHero from "./FullCenteredHero";
 import { getLocalSettings, SiteSettings, DEFAULT_SETTINGS } from "@/lib/supabase";
 
 export default function HeroSection() {
@@ -27,11 +28,12 @@ export default function HeroSection() {
   }, []);
 
   if (settings.bannerLayout === "featured_overlay") {
-    return <TonyRobbinsHero settings={settings} />;
+    return <FeaturedOverlayHero settings={settings} />;
   }
 
-  if (settings.bannerLayout === "minimal_centered") {
-    return <MinimalCenteredHero settings={settings} />;
+
+  if (settings.bannerLayout === "full_centered_floating") {
+    return <FullCenteredHero settings={settings} />;
   }
 
   return <SplitHero settings={settings} />;

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { siteConfig, blogPosts } from "@/data/site-data";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import ShareButton from "@/components/ui/ShareButton";
+import BlogContentClient from "@/components/blog/BlogContentClient";
 import {
   RiArrowLeftLine,
   RiCalendarLine,
@@ -146,24 +147,7 @@ export default async function BlogPostPage({ params }: Props) {
       <section className="section py-8" aria-label="Article content">
         <div className="container max-w-3xl">
           <AnimatedSection>
-            <article className="prose max-w-none">
-              <p>
-                This is a placeholder for the full article content. In the next version,
-                blog posts will be powered by MDX files, allowing rich markdown content with
-                embedded React components, code syntax highlighting, and more.
-              </p>
-              <p>
-                The content management system (CMS) integration is planned for Version 2
-                of this site, as outlined in the roadmap. For now, each article is
-                represented by its metadata and excerpt.
-              </p>
-              <h2>Coming Soon</h2>
-              <p>
-                Full articles with MDX content will be available soon. Check back or{" "}
-                <Link href="/contact">reach out</Link> if you&apos;d like to be
-                notified when this feature launches.
-              </p>
-            </article>
+            <BlogContentClient initialPost={post} />
           </AnimatedSection>
         </div>
       </section>

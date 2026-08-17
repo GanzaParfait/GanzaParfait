@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import {
   RiArrowRightLine,
@@ -17,11 +16,11 @@ import { siteConfig } from "@/data/site-data";
 import { SiteSettings } from "@/lib/supabase";
 
 const primarySocials = [
-  { href: siteConfig.social.whatsapp,  label: "WhatsApp",    icon: RiWhatsappLine },
-  { href: siteConfig.social.linkedin,  label: "LinkedIn",    icon: RiLinkedinFill },
-  { href: siteConfig.social.github,    label: "GitHub",      icon: RiGithubFill },
-  { href: siteConfig.social.twitter,   label: "X / Twitter", icon: RiTwitterXFill },
-  { href: siteConfig.social.instagram, label: "Instagram",   icon: RiInstagramLine },
+  { href: siteConfig.social.whatsapp, label: "WhatsApp", icon: RiWhatsappLine },
+  { href: siteConfig.social.linkedin, label: "LinkedIn", icon: RiLinkedinFill },
+  { href: siteConfig.social.github, label: "GitHub", icon: RiGithubFill },
+  { href: siteConfig.social.twitter, label: "X / Twitter", icon: RiTwitterXFill },
+  { href: siteConfig.social.instagram, label: "Instagram", icon: RiInstagramLine },
 ];
 
 export default function MinimalCenteredHero({ settings }: { settings: SiteSettings }) {
@@ -98,13 +97,10 @@ export default function MinimalCenteredHero({ settings }: { settings: SiteSettin
             border: "3px solid var(--color-primary)",
             boxShadow: "0 0 30px rgba(14,82,168,0.2), 0 0 60px rgba(14,82,168,0.1)",
           }}>
-            <Image
-              src="/images/profile/hero-photo-v3.png"
+            <img
+              src={settings?.heroImageUrl || "/images/profile/hero-photo.png"}
               alt={settings.siteTitle}
-              fill
-              className="object-cover object-top"
-              priority
-              sizes="104px"
+              className="w-full h-full object-cover object-top"
             />
           </div>
         </div>
@@ -168,7 +164,7 @@ export default function MinimalCenteredHero({ settings }: { settings: SiteSettin
                   color: "var(--color-primary)",
                   transform: idx === currentRoleIndex
                     ? "translateY(0)" : idx < currentRoleIndex
-                    ? "translateY(-120%)" : "translateY(120%)",
+                      ? "translateY(-120%)" : "translateY(120%)",
                   opacity: idx === currentRoleIndex ? 1 : 0,
                   transition: "all 0.55s cubic-bezier(0.4, 0, 0.2, 1)",
                 }}

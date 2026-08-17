@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import {
   RiArrowRightLine,
@@ -16,7 +15,7 @@ import AnimatedSection from "@/components/ui/AnimatedSection";
 import { siteConfig } from "@/data/site-data";
 import { SiteSettings } from "@/lib/supabase";
 
-export default function TonyRobbinsHero({ settings }: { settings: SiteSettings }) {
+export default function FeaturedOverlayHero({ settings }: { settings: SiteSettings }) {
   return (
     <section className="relative overflow-hidden pt-28 pb-20 lg:pt-36 lg:pb-32" aria-label="Hero Section Full Width">
       {/* Full-width Gradient Backdrop & Ambient Orbs */}
@@ -146,12 +145,10 @@ export default function TonyRobbinsHero({ settings }: { settings: SiteSettings }
           >
             {/* Banner Media Container */}
             <div style={{ position: "relative", width: "100%", height: "24rem", background: "linear-gradient(135deg, #0e52a8 0%, #1e1b4b 100%)" }}>
-              <Image
-                src="/images/profile/hero-photo.png"
+              <img
+                src={settings?.heroImageUrl || "/images/profile/hero-photo.png"}
                 alt={settings.siteTitle}
-                fill
-                className="object-cover object-top opacity-90"
-                priority
+                className="w-full h-full object-cover object-top opacity-90"
               />
               <div
                 style={{

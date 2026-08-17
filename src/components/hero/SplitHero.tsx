@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import {
   RiArrowRightLine,
@@ -20,11 +19,11 @@ import { siteConfig } from "@/data/site-data";
 import { SiteSettings } from "@/lib/supabase";
 
 const primarySocials = [
-  { href: siteConfig.social.whatsapp,  label: "WhatsApp",    icon: RiWhatsappLine },
-  { href: siteConfig.social.linkedin,  label: "LinkedIn",    icon: RiLinkedinFill },
-  { href: siteConfig.social.github,    label: "GitHub",      icon: RiGithubFill },
-  { href: siteConfig.social.twitter,   label: "X / Twitter", icon: RiTwitterXFill },
-  { href: siteConfig.social.instagram, label: "Instagram",   icon: RiInstagramLine },
+  { href: siteConfig.social.whatsapp, label: "WhatsApp", icon: RiWhatsappLine },
+  { href: siteConfig.social.linkedin, label: "LinkedIn", icon: RiLinkedinFill },
+  { href: siteConfig.social.github, label: "GitHub", icon: RiGithubFill },
+  { href: siteConfig.social.twitter, label: "X / Twitter", icon: RiTwitterXFill },
+  { href: siteConfig.social.instagram, label: "Instagram", icon: RiInstagramLine },
 ];
 
 export default function SplitHero({ settings }: { settings: SiteSettings }) {
@@ -115,7 +114,7 @@ export default function SplitHero({ settings }: { settings: SiteSettings }) {
     };
   }, []);
 
-  const delay = (ms: number) => ({ 
+  const delay = (ms: number) => ({
     opacity: visible ? 1 : 0,
     transform: visible ? "translateY(0)" : "translateY(28px)",
     transition: `opacity 0.7s ease ${ms}ms, transform 0.7s ease ${ms}ms`,
@@ -259,7 +258,7 @@ export default function SplitHero({ settings }: { settings: SiteSettings }) {
                         color: "var(--color-text)",
                         transform: idx === currentRoleIndex
                           ? "translateY(0)" : idx < currentRoleIndex
-                          ? "translateY(-110%)" : "translateY(110%)",
+                            ? "translateY(-110%)" : "translateY(110%)",
                         opacity: idx === currentRoleIndex ? 1 : 0,
                         transition: "all 0.55s cubic-bezier(0.4, 0, 0.2, 1)",
                       }}
@@ -409,13 +408,10 @@ export default function SplitHero({ settings }: { settings: SiteSettings }) {
 
               {/* Photo */}
               <div style={{ position: "relative", zIndex: 2, width: "88%", height: "98%", bottom: 0 }}>
-                <Image
-                  src="/images/profile/hero-photo-v3.png"
+                <img
+                  src={settings?.heroImageUrl || "/images/profile/hero-photo.png"}
                   alt={`${settings.siteTitle} — ${settings.siteSubtitle}`}
-                  fill
-                  className="object-contain object-bottom"
-                  priority
-                  sizes="(max-width: 1024px) 75vw, 450px"
+                  className="w-full h-full object-contain object-bottom"
                 />
               </div>
 

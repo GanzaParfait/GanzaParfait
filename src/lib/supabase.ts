@@ -5,10 +5,11 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOi
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-export type HeroLayoutType = "split_portrait" | "featured_overlay" | "minimal_centered";
+export type HeroLayoutType = "split_portrait" | "featured_overlay" | "full_centered_floating";
 
 export interface SiteSettings {
   bannerLayout: HeroLayoutType;
+  heroImageUrl?: string;
   siteTitle: string;
   siteSubtitle: string;
   bio: string;
@@ -20,6 +21,7 @@ export interface SiteSettings {
 
 export const DEFAULT_SETTINGS: SiteSettings = {
   bannerLayout: "split_portrait",
+  heroImageUrl: "/images/profile/hero-photo.png",
   siteTitle: "Prince Parfait GANZA",
   siteSubtitle: "Founder • Software Engineer • AI Builder • Speaker • Entrepreneur",
   bio: "I build full-stack products and integrate AI to solve real-world problems across Africa and beyond.",

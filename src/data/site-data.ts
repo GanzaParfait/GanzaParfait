@@ -52,9 +52,11 @@ export type Project = {
   description: string;
   longDescription?: string;
   problem?: string;
-  solution?: string;
-  impact?: string;
+  whatIBuilt?: string;
   technologies: string[];
+  myRole?: string;
+  result?: string;
+  screenshots?: string[];
   category: "web" | "mobile" | "ai" | "saas" | "open-source";
   status: "live" | "in-progress" | "archived";
   featured: boolean;
@@ -77,10 +79,11 @@ export const projects: Project[] = [
       "Lerony is my software company focused on building impactful technology solutions for African markets. From SaaS tools to custom software development, Lerony bridges the gap between world-class engineering and local impact.",
     problem:
       "African businesses and individuals lack access to high-quality, locally-relevant software solutions.",
-    solution:
+    whatIBuilt:
       "Building a portfolio of software products and services tailored to African contexts with global standards.",
-    impact:
+    result:
       "Empowering businesses and individuals across Rwanda and Africa with reliable software tools.",
+    myRole: "Founder & Lead Engineer",
     technologies: ["Next.js", "TypeScript", "Node.js", "PostgreSQL", "AWS"],
     category: "saas",
     status: "live",
@@ -99,10 +102,11 @@ export const projects: Project[] = [
       "AgriVoice provides Rwandan farmers with AI-powered assistance through voice interfaces, offering crop disease diagnosis, weather alerts, market prices, and best practices in Kinyarwanda.",
     problem:
       "Rwandan smallholder farmers lack accessible, real-time agricultural knowledge and market data.",
-    solution:
+    whatIBuilt:
       "Voice-first AI assistant that speaks to farmers in their language with locally-relevant agricultural intelligence.",
-    impact:
+    result:
       "Improving crop yields and farmer income through AI-powered agricultural guidance.",
+    myRole: "Full-Stack AI Developer",
     technologies: ["React", "Express", "OpenAI API", "PostgreSQL", "PWA"],
     category: "ai",
     status: "in-progress",
@@ -121,10 +125,11 @@ export const projects: Project[] = [
       "TUT Labs develops advanced security technologies including body armor innovations, signal intelligence systems, and corporate security solutions.",
     problem:
       "Organizations need reliable, sophisticated security solutions that balance protection with practicality.",
-    solution:
+    whatIBuilt:
       "Building a comprehensive security technology portfolio with a focus on R&D and innovation.",
-    impact:
+    result:
       "Enhancing security capabilities for governments, corporations, and institutions.",
+    myRole: "Technical Co-founder",
     technologies: [
       "Next.js",
       "TypeScript",

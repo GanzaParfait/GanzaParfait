@@ -97,28 +97,46 @@ export const viewport: Viewport = {
   ],
 };
 
-// Structured Data — Person + Website
+// Structured Data — Person + Website (Industrial-Grade Knowledge Graph Schema)
 const structuredData = {
   "@context": "https://schema.org",
   "@graph": [
     {
-      "@type": "Person",
+      "@type": ["Person", "Brand"],
       "@id": `${siteConfig.url}/#person`,
       name: "Prince Parfait GANZA",
-      alternateName: ["Prince Parfait", "PPG", "GANZA Prince"],
+      alternateName: ["Prince Parfait", "PPG", "GANZA Prince", "Prince Parfait Ishimwe", "Prince Parfait Ganza"],
       description: siteConfig.description,
       url: siteConfig.url,
       image: {
         "@type": "ImageObject",
-        url: `${siteConfig.url}/brand/logos/logo-horizontal-blue.png`,
+        "@id": `${siteConfig.url}/#primaryimage`,
+        url: `${siteConfig.url}/images/profile/hero-photo.png`,
         width: 1200,
-        height: 400,
+        height: 1200,
+        caption: "Prince Parfait GANZA"
       },
-      jobTitle: "Founder • Software Engineer • AI Builder • Speaker • Entrepreneur",
+      jobTitle: [
+        "Software Engineer",
+        "Founder",
+        "CEO",
+        "AI Builder"
+      ],
       worksFor: {
         "@type": "Organization",
         name: "Lerony",
-        url: "https://lerony.com",
+        url: "https://lerony.com"
+      },
+      founder: [
+        {
+          "@type": "Organization",
+          name: "Lerony",
+          url: "https://lerony.com"
+        }
+      ],
+      alumniOf: {
+        "@type": "CollegeOrUniversity",
+        name: "Kigali Independent University ULK"
       },
       address: {
         "@type": "PostalAddress",
@@ -135,6 +153,8 @@ const structuredData = {
         siteConfig.social.threads,
         siteConfig.social.luma,
         siteConfig.social.buymeacoffee,
+        "https://trenely.com",
+        "https://princeparfait.com"
       ],
       knowsAbout: [
         "Software Engineering",
@@ -146,8 +166,14 @@ const structuredData = {
         "Entrepreneurship",
         "Public Speaking",
         "Technology",
+        "Business Automation"
       ],
       nationality: { "@type": "Country", name: "Rwanda" },
+      gender: "Male",
+      mainEntityOfPage: {
+        "@type": "ProfilePage",
+        "@id": siteConfig.url
+      }
     },
     {
       "@type": "WebSite",
@@ -156,6 +182,7 @@ const structuredData = {
       name: siteConfig.name,
       description: siteConfig.description,
       publisher: { "@id": `${siteConfig.url}/#person` },
+      inLanguage: "en-US",
       potentialAction: {
         "@type": "SearchAction",
         target: {
@@ -172,7 +199,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" dir="ltr" id="top" data-theme="light">
+    <html lang="en" dir="ltr" id="top" data-theme="light" suppressHydrationWarning>
       <head>
         {/* Anti-FOUC: apply saved theme before first paint */}
         <script
@@ -189,7 +216,7 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#0E52A8" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
       </head>
-      <body className={`${outfit.variable} antialiased`}>
+      <body className={`${outfit.variable} antialiased`} suppressHydrationWarning>
         <LayoutShell>{children}</LayoutShell>
       </body>
     </html>

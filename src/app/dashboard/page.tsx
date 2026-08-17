@@ -1,1169 +1,170 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
-import Link from "next/link";
-import {
-  RiDashboardLine,
-  RiLayoutGridLine,
-  RiSettings4Line,
-  RiShareLine,
-  RiFolderLine,
-  RiBookOpenLine,
-  RiLogoutBoxRLine,
-  RiCheckLine,
-  RiSaveLine,
-  RiExternalLinkLine,
-  RiUser3Line,
-  RiGroupLine,
-  RiEyeLine,
-  RiTimeLine,
-  RiGlobalLine,
-  RiEditLine,
-  RiAddLine,
-  RiSearchLine,
-  RiDeleteBinLine,
-  RiMenuLine,
-  RiCloseLine,
-  RiMenuFoldLine,
-  RiMenuUnfoldLine,
-  RiImageLine,
-} from "react-icons/ri";
+import { useState } from "react";
+import { RiGroupLine, RiUser3Line, RiEyeLine, RiTimeLine, RiGlobalLine } from "react-icons/ri";
 import { Smartphone, Monitor, Tablet } from "lucide-react";
+import { MOCK_ANALYTICS, AnalyticsMetrics } from "@/lib/supabase";
 
-import {
-  siteConfig,
-  projects as initialProjects,
-  blogPosts as initialBlogPosts,
-  Project,
-  BlogPost,
-} from "@/data/site-data";
-
-import {
-  getLocalSettings,
-  saveLocalSettings,
-  SiteSettings,
-  DEFAULT_SETTINGS,
-  HeroLayoutType,
-  MOCK_ANALYTICS,
-  AnalyticsMetrics,
-  SIDEBAR_STORAGE_KEY,
-} from "@/lib/supabase";
-
-import MediaManagerModal from "@/components/dashboard/MediaManagerModal";
-import MediaManagerPage from "@/app/dashboard/media/page";
-import AdminProfileModal, { AdminProfile } from "@/components/dashboard/AdminProfileModal";
-import BlogEditorModal from "@/components/dashboard/BlogEditorModal";
-import ProjectEditorModal from "@/components/dashboard/ProjectEditorModal";
-import BannerEditorModal, { BannerItem } from "@/components/dashboard/BannerEditorModal";
-
-const DEFAULT_BANNERS: BannerItem[] = [
-  {
-    id: "b1",
-    title: "Prince Parfait GANZA",
-    subtitle: "Founder • Software Engineer • AI Builder • Speaker • Entrepreneur",
-    imageUrl: "/images/profile/hero-photo.png",
-    buttonText: "View My Work",
-    buttonLink: "/projects",
-    pageLocation: "main_hero",
-    sortOrder: 1,
-    isActive: true,
-    layoutStyle: "split_portrait",
-  },
-  {
-    id: "b2",
-    title: "Featured Executive Banner",
-    subtitle: "Building Software that Creates Impact Across Africa and Beyond",
-    imageUrl: "/images/profile/hero-photo.png",
-    buttonText: "Let's Collaborate",
-    buttonLink: "https://wa.me/250792054846",
-    pageLocation: "main_hero",
-    sortOrder: 2,
-    isActive: true,
-    layoutStyle: "featured_overlay",
-  },
-];
-
-export default function DashboardPage() {
-  const router = useRouter();
-
-  // Navigation & UI States
-  const [activeTab, setActiveTab] = useState<"overview" | "banners" | "blogs" | "projects" | "socials" | "media" | "settings">("overview");
-  
-  // Single sidebar toggle — persisted to localStorage so it survives refresh
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [savedMessage, setSavedMessage] = useState("");
-
-  // Search & Global State
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
-
-  // Settings & Profile Data — initialized via useEffect to avoid SSR hydration mismatch
-  const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
-  const [profile, setProfile] = useState<AdminProfile>({
-    name: "Prince Parfait GANZA",
-    email: "ganzaparfait7@gmail.com",
-    avatarUrl: "/images/profile/hero-photo.png",
-    role: "Super Admin",
-  });
-
-  // Load settings + sidebar state client-side only to avoid SSR mismatch
-  useEffect(() => {
-    setSettings(getLocalSettings());
-    // Restore persisted sidebar state
-    try {
-      const savedSidebar = localStorage.getItem(SIDEBAR_STORAGE_KEY);
-      if (savedSidebar !== null) {
-        setSidebarOpen(savedSidebar === "true");
-      }
-    } catch {}
-  }, []);
-
-  // Content Items (Real-time CRUD)
-  const [bannersList, setBannersList] = useState<BannerItem[]>(DEFAULT_BANNERS);
-  const [projectsList, setProjectsList] = useState<Project[]>(initialProjects);
-  const [blogsList, setBlogsList] = useState<BlogPost[]>(initialBlogPosts);
-  const [analytics, setAnalytics] = useState<AnalyticsMetrics>(MOCK_ANALYTICS);
-
-  // Modals Control
-  const [isMediaOpen, setIsMediaOpen] = useState(false);
-  const [mediaTargetCallback, setMediaTargetCallback] = useState<((url: string) => void) | null>(null);
-
-  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-
-  const [editingBanner, setEditingBanner] = useState<BannerItem | null>(null);
-  const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
-
-  const [editingProject, setEditingProject] = useState<Project | null>(null);
-  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
-
-  const [editingBlog, setEditingBlog] = useState<BlogPost | null>(null);
-  const [isBlogModalOpen, setIsBlogModalOpen] = useState(false);
-
-  // Auth Guard
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const auth = localStorage.getItem("ppg_admin_auth");
-      if (!auth) {
-        router.push("/dashboard/login");
-      }
-    }
-  }, [router]);
-
-  const handleLogout = () => {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("ppg_admin_auth");
-      document.cookie = "ppg_admin_auth=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
-    }
-    router.push("/dashboard/login");
-  };
-
-  const showNotification = (msg: string) => {
-    setSavedMessage(msg);
-    setTimeout(() => setSavedMessage(""), 3500);
-  };
-
-  // Hero Layout Switcher
-  const layoutLabels: Record<HeroLayoutType, string> = {
-    split_portrait: "Split Portrait Layout",
-    featured_overlay: "Gradient Overlay Banner",
-    minimal_centered: "Minimal Centered Layout",
-  };
-  const handleLayoutChange = (layout: HeroLayoutType) => {
-    const updated = saveLocalSettings({ bannerLayout: layout });
-    setSettings(updated);
-    showNotification(`Hero layout updated to ${layoutLabels[layout]}`);
-  };
-
-  // Sidebar toggle with persistence
-  const toggleSidebar = () => {
-    const next = !sidebarOpen;
-    setSidebarOpen(next);
-    try { localStorage.setItem(SIDEBAR_STORAGE_KEY, String(next)); } catch {}
-  };
-
-  // Header Social Limit
-  const handleSocialLimitChange = (limit: number) => {
-    const updated = saveLocalSettings({ headerSocialLimit: limit });
-    setSettings(updated);
-    showNotification(`Primary header social icons limit set to ${limit}`);
-  };
-
-  // Settings Submit
-  const handleSettingsSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    saveLocalSettings(settings);
-    showNotification("Site information saved successfully!");
-  };
-
-  // Profile Save
-  const handleProfileSave = (updated: AdminProfile) => {
-    setProfile(updated);
-    showNotification("Admin profile updated!");
-  };
-
-  // CRUD Handlers — Banners
-  const handleSaveBanner = (banner: BannerItem) => {
-    const exists = bannersList.find((b) => b.id === banner.id);
-    if (exists) {
-      setBannersList(bannersList.map((b) => (b.id === banner.id ? banner : b)));
-    } else {
-      setBannersList([banner, ...bannersList]);
-    }
-    showNotification("Banner saved!");
-  };
-
-  const handleDeleteBanner = (id: string) => {
-    setBannersList(bannersList.filter((b) => b.id !== id));
-    showNotification("Banner removed.");
-  };
-
-  const handleToggleBannerActive = (id: string) => {
-    setBannersList(bannersList.map((b) => (b.id === id ? { ...b, isActive: !b.isActive } : b)));
-    showNotification("Banner status updated.");
-  };
-
-  // CRUD Handlers — Projects
-  const handleSaveProject = (proj: Project) => {
-    const exists = projectsList.find((p) => p.id === proj.id);
-    if (exists) {
-      setProjectsList(projectsList.map((p) => (p.id === proj.id ? proj : p)));
-    } else {
-      setProjectsList([proj, ...projectsList]);
-    }
-    showNotification("Project saved!");
-  };
-
-  const handleDeleteProject = (id: string) => {
-    setProjectsList(projectsList.filter((p) => p.id !== id));
-    showNotification("Project deleted.");
-  };
-
-  // CRUD Handlers — Blogs
-  const handleSaveBlog = (blog: BlogPost) => {
-    const exists = blogsList.find((b) => b.id === blog.id);
-    if (exists) {
-      setBlogsList(blogsList.map((b) => (b.id === blog.id ? blog : b)));
-    } else {
-      setBlogsList([blog, ...blogsList]);
-    }
-    showNotification("Blog post saved!");
-  };
-
-  const handleDeleteBlog = (id: string) => {
-    setBlogsList(blogsList.filter((b) => b.id !== id));
-    showNotification("Blog post removed.");
-  };
-
-  // Helper for Media Modal callback
-  const triggerMediaPicker = (callback: (url: string) => void) => {
-    setMediaTargetCallback(() => callback);
-    setIsMediaOpen(true);
-  };
-
-  const handleMediaSelect = (url: string) => {
-    if (mediaTargetCallback) {
-      mediaTargetCallback(url);
-      setMediaTargetCallback(null);
-    }
-  };
-
-  // Global Dynamic Search Filter
-  const filteredProjects = projectsList.filter(
-    (p) => p.title.toLowerCase().includes(searchQuery.toLowerCase()) || p.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-  const filteredBlogs = blogsList.filter(
-    (b) => b.title.toLowerCase().includes(searchQuery.toLowerCase()) || b.excerpt.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+export default function DashboardOverviewPage() {
+  const [analytics] = useState<AnalyticsMetrics>(MOCK_ANALYTICS);
 
   return (
-    <div style={{ height: "100vh", display: "flex", flexDirection: "column", background: "#f8fafc", color: "#0f172a", overflow: "hidden" }}>
-
-      {/* Standalone Admin Topbar — no website nav/footer */}
-      <header
-        style={{
-          height: "4rem",
-          background: "#ffffff",
-          borderBottom: "1px solid #e2e8f0",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "0 1.25rem",
-          zIndex: 50,
-          boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
-          flexShrink: 0,
-        }}
-      >
-        {/* Left: Single Toggler + Blue Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          {/* ONE toggler — works for both desktop & mobile */}
-          <button
-            onClick={toggleSidebar}
-            style={{ padding: "0.375rem", borderRadius: "0.375rem", border: "none", background: "none", cursor: "pointer", color: "#475569", display: "flex", alignItems: "center" }}
-            title={sidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
-            aria-label="Toggle Sidebar"
-          >
-            {sidebarOpen ? <RiMenuFoldLine size={20} /> : <RiMenuUnfoldLine size={20} />}
-          </button>
-
-          <Link href="/dashboard" style={{ display: "flex", alignItems: "center" }}>
-            <div style={{ position: "relative", width: "8.5rem", height: "2.25rem" }}>
-              <Image
-                src="/brand/logos/logo-horizontal-blue.png"
-                alt="Prince Parfait GANZA"
-                fill
-                className="object-contain object-left"
-              />
-            </div>
-          </Link>
-          <span style={{ height: "1rem", width: "1px", background: "#cbd5e1" }} />
-          <span style={{ fontSize: "0.6875rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.05em", background: "#eff6ff", color: "#1d4ed8", padding: "0.15rem 0.5rem", borderRadius: "0.25rem" }}>
-            Control Center
-          </span>
+    <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.75rem" }}>
+        <div>
+          <h1 style={{ fontSize: "1.375rem", fontWeight: 800, color: "#0f172a", letterSpacing: "-0.01em" }}>
+            Analytics & Performance Index
+          </h1>
+          <p style={{ fontSize: "0.8125rem", color: "#64748b", marginTop: "0.15rem" }}>
+            Real-time visitor telemetry, geographic country capture, and traffic streams.
+          </p>
         </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", background: "#ffffff", border: "1px solid #e2e8f0", padding: "0.375rem 0.875rem", borderRadius: "0.375rem", fontSize: "0.75rem", fontWeight: 700, color: "#16a34a" }}>
+          <span style={{ width: "0.45rem", height: "0.45rem", borderRadius: "50%", background: "#22c55e", display: "inline-block" }} />
+          Database Telemetry Active
+        </div>
+      </div>
 
-        {/* Center: Dynamic Search with Fallbacks */}
-        <div style={{ position: "relative", flex: "0 1 20rem" }}>
-          <div style={{ position: "relative" }}>
-            <RiSearchLine size={15} style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }} />
-            <input
-              type="text"
-              placeholder="Search projects, blogs, site..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => setIsSearchFocused(true)}
-              onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
-              style={{
-                width: "100%",
-                padding: "0.375rem 0.75rem 0.375rem 2.125rem",
-                borderRadius: "0.375rem", // Small radius
-                background: "#f1f5f9",
-                border: "1px solid #cbd5e1",
-                fontSize: "0.8125rem",
-                color: "#0f172a",
-                outline: "none",
-              }}
-            />
-          </div>
-
-          {/* Search Results Dropdown */}
-          {isSearchFocused && searchQuery.trim().length > 0 && (
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(12rem, 1fr))", gap: "1rem" }}>
+        {[
+          { label: "Total Site Visitors", value: analytics.totalVisitors.toLocaleString(), icon: RiGroupLine, change: "+14.2% this month", color: "#1d4ed8" },
+          { label: "Unique Visitors", value: analytics.uniqueVisitors.toLocaleString(), icon: RiUser3Line, change: "+8.5% new audience", color: "#6366f1" },
+          { label: "Total Pageviews", value: analytics.totalPageviews.toLocaleString(), icon: RiEyeLine, change: "+22.4% engagement", color: "#0891b2" },
+          { label: "Avg. Session Duration", value: analytics.avgDuration, icon: RiTimeLine, change: "Low bounce rate (34%)", color: "#16a34a" },
+        ].map((s) => {
+          const Icon = s.icon;
+          return (
             <div
+              key={s.label}
               style={{
-                position: "absolute",
-                top: "2.5rem",
-                left: 0,
-                right: 0,
                 background: "#ffffff",
                 border: "1px solid #e2e8f0",
-                borderRadius: "0.375rem", // Small radius
-                boxShadow: "0 10px 25px rgba(0,0,0,0.12)",
-                padding: "0.875rem",
-                zIndex: 100,
-                maxHeight: "18rem",
-                overflowY: "auto",
+                borderRadius: "0.375rem",
+                padding: "1.125rem",
+                boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
               }}
             >
-              {filteredProjects.length === 0 && filteredBlogs.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "1rem", color: "#64748b", fontSize: "0.8125rem" }}>
-                  No matches found for &ldquo;{searchQuery}&rdquo;.
-                </div>
-              ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
-                  {filteredProjects.length > 0 && (
-                    <div>
-                      <p style={{ fontSize: "0.6875rem", fontWeight: 800, textTransform: "uppercase", color: "#94a3b8", marginBottom: "0.25rem" }}>Projects</p>
-                      {filteredProjects.map((p) => (
-                        <div
-                          key={p.id}
-                          onClick={() => {
-                            setEditingProject(p);
-                            setIsProjectModalOpen(true);
-                          }}
-                          style={{ padding: "0.375rem 0.625rem", borderRadius: "0.25rem", cursor: "pointer", background: "#f8fafc", marginBottom: "0.25rem" }}
-                        >
-                          <p style={{ fontSize: "0.8125rem", fontWeight: 700, color: "#0f172a" }}>{p.title}</p>
-                          <p style={{ fontSize: "0.7rem", color: "#64748b" }}>{p.description}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {filteredBlogs.length > 0 && (
-                    <div>
-                      <p style={{ fontSize: "0.6875rem", fontWeight: 800, textTransform: "uppercase", color: "#94a3b8", marginBottom: "0.25rem" }}>Blogs</p>
-                      {filteredBlogs.map((b) => (
-                        <div
-                          key={b.id}
-                          onClick={() => {
-                            setEditingBlog(b);
-                            setIsBlogModalOpen(true);
-                          }}
-                          style={{ padding: "0.375rem 0.625rem", borderRadius: "0.25rem", cursor: "pointer", background: "#f8fafc", marginBottom: "0.25rem" }}
-                        >
-                          <p style={{ fontSize: "0.8125rem", fontWeight: 700, color: "#0f172a" }}>{b.title}</p>
-                          <p style={{ fontSize: "0.7rem", color: "#64748b" }}>{b.excerpt}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Right Actions */}
-        <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
-          <Link href="/" target="_blank" className="btn btn-outline btn-sm" style={{ borderRadius: "0.375rem", gap: "0.375rem" }}>
-            Live Site <RiExternalLinkLine size={13} />
-          </Link>
-          <button onClick={handleLogout} className="btn btn-ghost btn-sm" style={{ color: "#ef4444", gap: "0.375rem", borderRadius: "0.375rem" }}>
-            <RiLogoutBoxRLine size={15} /> Logout
-          </button>
-        </div>
-      </header>
-
-      {/* ─── BODY: SIDEBAR + MAIN (fills remaining height) ─── */}
-      <div style={{ flex: 1, display: "flex", overflow: "hidden", minHeight: 0 }}>
-
-        {/* SIDEBAR — dark navy, always 100% of its parent height */}
-        <aside
-          style={{
-            width: sidebarOpen ? "16rem" : "0",
-            minWidth: 0,
-            height: "100%",
-            background: "#0b1329",
-            color: "#ffffff",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-            padding: sidebarOpen ? "1.25rem 0.875rem" : "0",
-            flexShrink: 0,
-            zIndex: 40,
-            transition: "width 0.25s ease, padding 0.25s ease",
-            overflow: "hidden",
-          }}
-        >
-          {/* Navigation Links */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", opacity: sidebarOpen ? 1 : 0, transition: "opacity 0.2s ease" }}>
-            {[
-              { id: "overview", label: "Analytics Overview", icon: RiDashboardLine },
-              { id: "banners", label: "Banners & Hero Layouts", icon: RiLayoutGridLine },
-              { id: "blogs", label: "Blog Articles", icon: RiBookOpenLine },
-              { id: "projects", label: "Projects", icon: RiFolderLine },
-              { id: "media", label: "Media Library", icon: RiImageLine },
-              { id: "socials", label: "Social Links", icon: RiShareLine },
-              { id: "settings", label: "Site Settings", icon: RiSettings4Line },
-            ].map((tab) => {
-              const Icon = tab.icon;
-              const active = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => {
-                    setActiveTab(tab.id as any);
-                  }}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.75rem",
-                    padding: "0.75rem 0.875rem",
-                    justifyContent: "flex-start",
-                    borderRadius: "0.375rem",
-                    fontSize: "0.8125rem",
-                    fontWeight: active ? 700 : 500,
-                    border: "none",
-                    background: active ? "#1d4ed8" : "transparent",
-                    color: active ? "#ffffff" : "#94a3b8",
-                    cursor: "pointer",
-                    textAlign: "left",
-                    width: "100%",
-                    transition: "all 0.15s ease",
-                    whiteSpace: "nowrap",
-                  }}
-                >
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.625rem" }}>
+                <span style={{ fontSize: "0.75rem", fontWeight: 600, color: "#64748b" }}>{s.label}</span>
+                <div style={{ width: "2rem", height: "2rem", borderRadius: "0.375rem", background: "#f1f5f9", color: s.color, display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <Icon size={18} />
-                  <span>{tab.label}</span>
-                </button>
+                </div>
+              </div>
+              <p style={{ fontSize: "1.5rem", fontWeight: 800, color: "#0f172a", lineHeight: 1 }}>{s.value}</p>
+              <p style={{ fontSize: "0.7rem", color: "#16a34a", marginTop: "0.35rem", fontWeight: 700 }}>{s.change}</p>
+            </div>
+          );
+        })}
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: "1.25rem" }} className="grid-cols-1 lg:grid-cols-[1.6fr_1fr]">
+        <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "0.375rem", padding: "1.25rem", boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
+          <div style={{ marginBottom: "1rem" }}>
+            <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "#0f172a", display: "flex", alignItems: "center", gap: "0.375rem" }}>
+              <RiGlobalLine style={{ color: "#1d4ed8" }} /> Geographic Visitor Capture by Country
+            </h3>
+            <p style={{ fontSize: "0.75rem", color: "#64748b", marginTop: "0.1rem" }}>
+              Real-time country telemetry originating web traffic to princeparfait.com
+            </p>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+            {analytics.countryBreakdown.map((c) => (
+              <div key={c.country}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.8125rem", marginBottom: "0.25rem" }}>
+                  <span style={{ fontWeight: 700, color: "#0f172a", display: "flex", alignItems: "center", gap: "0.375rem" }}>
+                    <span style={{ fontSize: "1rem" }}>{c.flag}</span> {c.country}
+                  </span>
+                  <span style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: 700 }}>
+                    {c.count.toLocaleString()} visits ({c.percentage}%)
+                  </span>
+                </div>
+                <div style={{ width: "100%", height: "0.375rem", borderRadius: "0.25rem", background: "#f1f5f9", overflow: "hidden" }}>
+                  <div
+                    style={{
+                      width: `${c.percentage}%`,
+                      height: "100%",
+                      borderRadius: "0.25rem",
+                      background: c.country === "Rwanda" ? "#1d4ed8" : "linear-gradient(90deg, #6366f1, #0891b2)",
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "0.375rem", padding: "1.25rem", boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
+          <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "#0f172a", marginBottom: "0.1rem" }}>
+            Device Distribution
+          </h3>
+          <p style={{ fontSize: "0.75rem", color: "#64748b", marginBottom: "1rem" }}>
+            Traffic split across hardware platforms
+          </p>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+            {analytics.deviceBreakdown.map((d) => {
+              const DeviceIcon = d.icon === "mobile" ? Smartphone
+                : d.icon === "desktop" ? Monitor
+                : Tablet;
+              const color = d.icon === "mobile" ? "#0e52a8"
+                : d.icon === "desktop" ? "#6366f1"
+                : "#0ea5e9";
+              return (
+                <div key={d.device} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.75rem 0.875rem", borderRadius: "0.375rem", background: "#f8fafc", border: "1px solid #e2e8f0" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+                    <div style={{ width: "2rem", height: "2rem", borderRadius: "0.375rem", background: `${color}12`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <DeviceIcon size={16} color={color} strokeWidth={2} />
+                    </div>
+                    <div>
+                      <p style={{ fontSize: "0.8125rem", fontWeight: 700, color: "#0f172a" }}>{d.device}</p>
+                      <p style={{ fontSize: "0.65rem", color: "#64748b" }}>Responsive view</p>
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.125rem" }}>
+                    <span style={{ fontSize: "1.125rem", fontWeight: 800, color }}>{d.percentage}%</span>
+                    <div style={{ width: "4rem", height: "4px", borderRadius: "9999px", background: "#e2e8f0", overflow: "hidden" }}>
+                      <div style={{ width: `${d.percentage}%`, height: "100%", background: color, borderRadius: "9999px" }} />
+                    </div>
+                  </div>
+                </div>
               );
             })}
           </div>
-
-          {/* Dynamic Admin Profile Footer Button */}
-          <div
-            onClick={() => setIsProfileModalOpen(true)}
-            style={{
-              padding: "0.75rem",
-              borderRadius: "0.375rem",
-              background: "rgba(255, 255, 255, 0.06)",
-              border: "1px solid rgba(255, 255, 255, 0.1)",
-              display: "flex",
-              alignItems: "center",
-              gap: "0.625rem",
-              cursor: "pointer",
-              transition: "all 0.15s ease",
-              flexShrink: 0,
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-            }}
-            title="Update Profile & Avatar"
-          >
-            <div style={{ position: "relative", width: "2.25rem", height: "2.25rem", borderRadius: "50%", overflow: "hidden", background: "#1e293b", flexShrink: 0 }}>
-              <Image src={profile.avatarUrl} alt={profile.name} fill className="object-cover" />
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ fontSize: "0.75rem", fontWeight: 700, color: "#ffffff", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
-                {profile.name}
-              </p>
-              <p style={{ fontSize: "0.65rem", color: "#94a3b8", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
-                {profile.email}
-              </p>
-            </div>
-          </div>
-        </aside>
-
-      {/* MAIN DASHBOARD CONTENT */}
-        <main style={{ flex: 1, height: "100%", overflowY: "auto", padding: "1.5rem 1.75rem" }}>
-          
-          {/* TAB 1: REAL-TIME ANALYTICS OVERVIEW */}
-          {activeTab === "overview" && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-              
-              {/* Header */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.75rem" }}>
-                <div>
-                  <h1 style={{ fontSize: "1.375rem", fontWeight: 800, color: "#0f172a", letterSpacing: "-0.01em" }}>
-                    Analytics & Performance Index
-                  </h1>
-                  <p style={{ fontSize: "0.8125rem", color: "#64748b", marginTop: "0.15rem" }}>
-                    Real-time visitor telemetry, geographic country capture, and traffic streams.
-                  </p>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", background: "#ffffff", border: "1px solid #e2e8f0", padding: "0.375rem 0.875rem", borderRadius: "0.375rem", fontSize: "0.75rem", fontWeight: 700, color: "#16a34a" }}>
-                  <span style={{ width: "0.45rem", height: "0.45rem", borderRadius: "50%", background: "#22c55e", display: "inline-block" }} />
-                  Database Telemetry Active
-                </div>
-              </div>
-
-              {/* Stat Cards Row (Flush layout, small radius 0.375rem) */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(12rem, 1fr))", gap: "1rem" }}>
-                {[
-                  { label: "Total Site Visitors", value: analytics.totalVisitors.toLocaleString(), icon: RiGroupLine, change: "+14.2% this month", color: "#1d4ed8" },
-                  { label: "Unique Visitors", value: analytics.uniqueVisitors.toLocaleString(), icon: RiUser3Line, change: "+8.5% new audience", color: "#6366f1" },
-                  { label: "Total Pageviews", value: analytics.totalPageviews.toLocaleString(), icon: RiEyeLine, change: "+22.4% engagement", color: "#0891b2" },
-                  { label: "Avg. Session Duration", value: analytics.avgDuration, icon: RiTimeLine, change: "Low bounce rate (34%)", color: "#16a34a" },
-                ].map((s) => {
-                  const Icon = s.icon;
-                  return (
-                    <div
-                      key={s.label}
-                      style={{
-                        background: "#ffffff",
-                        border: "1px solid #e2e8f0",
-                        borderRadius: "0.375rem", // Small radius
-                        padding: "1.125rem",
-                        boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
-                      }}
-                    >
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.625rem" }}>
-                        <span style={{ fontSize: "0.75rem", fontWeight: 600, color: "#64748b" }}>{s.label}</span>
-                        <div style={{ width: "2rem", height: "2rem", borderRadius: "0.375rem", background: "#f1f5f9", color: s.color, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <Icon size={18} />
-                        </div>
-                      </div>
-                      <p style={{ fontSize: "1.5rem", fontWeight: 800, color: "#0f172a", lineHeight: 1 }}>{s.value}</p>
-                      <p style={{ fontSize: "0.7rem", color: "#16a34a", marginTop: "0.35rem", fontWeight: 700 }}>{s.change}</p>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Geographic Country Capture & Device Distribution Grid */}
-              <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: "1.25rem" }} className="grid-cols-1 lg:grid-cols-[1.6fr_1fr]">
-                
-                {/* Geographic Country Capture */}
-                <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "0.375rem", padding: "1.25rem", boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
-                  <div style={{ marginBottom: "1rem" }}>
-                    <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "#0f172a", display: "flex", alignItems: "center", gap: "0.375rem" }}>
-                      <RiGlobalLine style={{ color: "#1d4ed8" }} /> Geographic Visitor Capture by Country
-                    </h3>
-                    <p style={{ fontSize: "0.75rem", color: "#64748b", marginTop: "0.1rem" }}>
-                      Real-time country telemetry originating web traffic to princeparfait.com
-                    </p>
-                  </div>
-
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                    {analytics.countryBreakdown.map((c) => (
-                      <div key={c.country}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.8125rem", marginBottom: "0.25rem" }}>
-                          <span style={{ fontWeight: 700, color: "#0f172a", display: "flex", alignItems: "center", gap: "0.375rem" }}>
-                            <span style={{ fontSize: "1rem" }}>{c.flag}</span> {c.country}
-                          </span>
-                          <span style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: 700 }}>
-                            {c.count.toLocaleString()} visits ({c.percentage}%)
-                          </span>
-                        </div>
-                        <div style={{ width: "100%", height: "0.375rem", borderRadius: "0.25rem", background: "#f1f5f9", overflow: "hidden" }}>
-                          <div
-                            style={{
-                              width: `${c.percentage}%`,
-                              height: "100%",
-                              borderRadius: "0.25rem",
-                              background: c.country === "Rwanda" ? "#1d4ed8" : "linear-gradient(90deg, #6366f1, #0891b2)",
-                            }}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Device Distribution */}
-                <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "0.375rem", padding: "1.25rem", boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
-                  <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "#0f172a", marginBottom: "0.1rem" }}>
-                    Device Distribution
-                  </h3>
-                  <p style={{ fontSize: "0.75rem", color: "#64748b", marginBottom: "1rem" }}>
-                    Traffic split across hardware platforms
-                  </p>
-
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                    {analytics.deviceBreakdown.map((d) => {
-                      const DeviceIcon = d.icon === "mobile" ? Smartphone
-                        : d.icon === "desktop" ? Monitor
-                        : Tablet;
-                      const color = d.icon === "mobile" ? "#0e52a8"
-                        : d.icon === "desktop" ? "#6366f1"
-                        : "#0ea5e9";
-                      return (
-                        <div key={d.device} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.75rem 0.875rem", borderRadius: "0.375rem", background: "#f8fafc", border: "1px solid #e2e8f0" }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
-                            <div style={{ width: "2rem", height: "2rem", borderRadius: "0.375rem", background: `${color}12`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                              <DeviceIcon size={16} color={color} strokeWidth={2} />
-                            </div>
-                            <div>
-                              <p style={{ fontSize: "0.8125rem", fontWeight: 700, color: "#0f172a" }}>{d.device}</p>
-                              <p style={{ fontSize: "0.65rem", color: "#64748b" }}>Responsive view</p>
-                            </div>
-                          </div>
-                          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.125rem" }}>
-                            <span style={{ fontSize: "1.125rem", fontWeight: 800, color }}>{d.percentage}%</span>
-                            <div style={{ width: "4rem", height: "4px", borderRadius: "9999px", background: "#e2e8f0", overflow: "hidden" }}>
-                              <div style={{ width: `${d.percentage}%`, height: "100%", background: color, borderRadius: "9999px" }} />
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-              </div>
-
-              {/* Real-time Visitor Stream Log Table */}
-              <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "0.375rem", padding: "1.25rem", boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
-                <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "#0f172a", marginBottom: "0.875rem" }}>
-                  Real-Time Visitor Activity Stream
-                </h3>
-
-                <div style={{ overflowX: "auto" }}>
-                  <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.8125rem" }}>
-                    <thead>
-                      <tr style={{ borderBottom: "1px solid #e2e8f0", color: "#64748b", fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                        <th style={{ padding: "0.625rem 0.875rem" }}>Time</th>
-                        <th style={{ padding: "0.625rem 0.875rem" }}>Location</th>
-                        <th style={{ padding: "0.625rem 0.875rem" }}>Page Visited</th>
-                        <th style={{ padding: "0.625rem 0.875rem" }}>Device / User Agent</th>
-                        <th style={{ padding: "0.625rem 0.875rem" }}>IP Address</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {analytics.recentLogs.map((log) => (
-                        <tr key={log.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                          <td style={{ padding: "0.75rem 0.875rem", color: "#64748b", fontSize: "0.75rem" }}>{log.time}</td>
-                          <td style={{ padding: "0.75rem 0.875rem", fontWeight: 700, color: "#0f172a" }}>
-                            {log.flag} {log.country}
-                          </td>
-                          <td style={{ padding: "0.75rem 0.875rem", color: "#1d4ed8", fontWeight: 600 }}>{log.page}</td>
-                          <td style={{ padding: "0.75rem 0.875rem", color: "#334155" }}>{log.device}</td>
-                          <td style={{ padding: "0.75rem 0.875rem", color: "#64748b", fontFamily: "monospace", fontSize: "0.75rem" }}>{log.ip}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-            </div>
-          )}
-
-          {/* TAB 2: BANNERS & HERO LAYOUTS MANAGER */}
-          {activeTab === "banners" && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div>
-                  <h2 style={{ fontSize: "1.375rem", fontWeight: 800, color: "#0f172a" }}>
-                    Banners & Hero Layouts Manager
-                  </h2>
-                  <p style={{ fontSize: "0.8125rem", color: "#64748b", marginTop: "0.15rem" }}>
-                    Manage home page carousel, executive banners, and presentation layouts.
-                  </p>
-                </div>
-                <button
-                  onClick={() => {
-                    setEditingBanner(null);
-                    setIsBannerModalOpen(true);
-                  }}
-                  className="btn btn-primary btn-sm"
-                  style={{ gap: "0.375rem", borderRadius: "0.375rem" }}
-                >
-                  <RiAddLine size={16} /> New Banner
-                </button>
-              </div>
-
-              {/* Banners List Table */}
-              <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "0.375rem", overflow: "hidden", boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
-                <div style={{ overflowX: "auto" }}>
-                  <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.8125rem" }}>
-                    <thead>
-                      <tr style={{ background: "#f8fafc", borderBottom: "1px solid #e2e8f0", color: "#64748b", fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                        <th style={{ padding: "0.75rem 1rem" }}>Preview</th>
-                        <th style={{ padding: "0.75rem 1rem" }}>Title / Details</th>
-                        <th style={{ padding: "0.75rem 1rem" }}>Layout Style</th>
-                        <th style={{ padding: "0.75rem 1rem" }}>Status</th>
-                        <th style={{ padding: "0.75rem 1rem", textAlign: "right" }}>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {bannersList.map((banner) => (
-                        <tr key={banner.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                          <td style={{ padding: "0.75rem 1rem" }}>
-                            <div style={{ position: "relative", width: "2.75rem", height: "2.75rem", borderRadius: "0.25rem", overflow: "hidden", background: "#e2e8f0" }}>
-                              <Image src={banner.imageUrl} alt={banner.title} fill className="object-cover" />
-                            </div>
-                          </td>
-                          <td style={{ padding: "0.75rem 1rem" }}>
-                            <p style={{ fontWeight: 700, color: "#0f172a" }}>{banner.title}</p>
-                            <p style={{ fontSize: "0.7rem", color: "#64748b" }}>{banner.subtitle}</p>
-                          </td>
-                          <td style={{ padding: "0.75rem 1rem" }}>
-                            <span style={{ fontSize: "0.7rem", fontWeight: 700, textTransform: "uppercase", padding: "0.15rem 0.45rem", borderRadius: "0.25rem", background: "#f1f5f9", color: "#334155" }}>
-                              {banner.layoutStyle === "split_portrait" ? "Split Portrait" : "Gradient Overlay"}
-                            </span>
-                          </td>
-                          <td style={{ padding: "0.75rem 1rem" }}>
-                            <button onClick={() => handleToggleBannerActive(banner.id)} style={{ border: "none", background: "none", cursor: "pointer" }}>
-                              <span style={{ fontSize: "0.7rem", fontWeight: 700, padding: "0.2rem 0.5rem", borderRadius: "0.25rem", background: banner.isActive ? "rgba(34, 197, 94, 0.1)" : "rgba(100, 116, 139, 0.1)", color: banner.isActive ? "#16a34a" : "#64748b" }}>
-                                {banner.isActive ? "ACTIVE" : "HIDDEN"}
-                              </span>
-                            </button>
-                          </td>
-                          <td style={{ padding: "0.75rem 1rem", textAlign: "right" }}>
-                            <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.375rem" }}>
-                              <button
-                                onClick={() => {
-                                  setEditingBanner(banner);
-                                  setIsBannerModalOpen(true);
-                                }}
-                                className="btn btn-ghost btn-sm"
-                                style={{ padding: "0.375rem", borderRadius: "0.25rem" }}
-                                title="Edit Banner"
-                              >
-                                <RiEditLine size={16} />
-                              </button>
-                              <button
-                                onClick={() => handleDeleteBanner(banner.id)}
-                                className="btn btn-ghost btn-sm"
-                                style={{ padding: "0.375rem", color: "#ef4444", borderRadius: "0.25rem" }}
-                                title="Delete Banner"
-                              >
-                                <RiDeleteBinLine size={16} />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 3: BLOG ARTICLES MANAGER */}
-          {activeTab === "blogs" && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div>
-                  <h2 style={{ fontSize: "1.375rem", fontWeight: 800, color: "#0f172a" }}>
-                    Blog Articles Manager ({blogsList.length})
-                  </h2>
-                  <p style={{ fontSize: "0.8125rem", color: "#64748b", marginTop: "0.15rem" }}>
-                    Write, edit, publish, and delete blog posts across the site.
-                  </p>
-                </div>
-                <button
-                  onClick={() => {
-                    setEditingBlog(null);
-                    setIsBlogModalOpen(true);
-                  }}
-                  className="btn btn-primary btn-sm"
-                  style={{ gap: "0.375rem", borderRadius: "0.375rem" }}
-                >
-                  <RiAddLine size={16} /> New Blog Article
-                </button>
-              </div>
-
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                {blogsList.map((post) => (
-                  <div key={post.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "1rem", borderRadius: "0.375rem", background: "#ffffff", border: "1px solid #e2e8f0", boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.875rem" }}>
-                      <div style={{ position: "relative", width: "3.5rem", height: "2.5rem", borderRadius: "0.25rem", overflow: "hidden", background: "#e2e8f0" }}>
-                        <Image src={post.coverImage || "/images/blog/blog-placeholder.png"} alt={post.title} fill className="object-cover" />
-                      </div>
-                      <div>
-                        <h4 style={{ fontSize: "0.9375rem", fontWeight: 700, color: "#0f172a" }}>{post.title}</h4>
-                        <p style={{ fontSize: "0.7rem", color: "#64748b", marginTop: "0.1rem" }}>{post.date} • {post.category}</p>
-                      </div>
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                      <button
-                        onClick={() => {
-                          setEditingBlog(post);
-                          setIsBlogModalOpen(true);
-                        }}
-                        className="btn btn-outline btn-sm"
-                        style={{ gap: "0.25rem", borderRadius: "0.25rem" }}
-                      >
-                        <RiEditLine size={13} /> Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteBlog(post.id)}
-                        className="btn btn-ghost btn-sm"
-                        style={{ color: "#ef4444", padding: "0.375rem", borderRadius: "0.25rem" }}
-                        title="Delete Article"
-                      >
-                        <RiDeleteBinLine size={16} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* TAB 4: PORTFOLIO PROJECTS MANAGER */}
-          {activeTab === "projects" && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div>
-                  <h2 style={{ fontSize: "1.375rem", fontWeight: 800, color: "#0f172a" }}>
-                    Portfolio Projects ({projectsList.length})
-                  </h2>
-                  <p style={{ fontSize: "0.8125rem", color: "#64748b", marginTop: "0.15rem" }}>
-                    Manage engineering showcase items, live links, and categories.
-                  </p>
-                </div>
-                <button
-                  onClick={() => {
-                    setEditingProject(null);
-                    setIsProjectModalOpen(true);
-                  }}
-                  className="btn btn-primary btn-sm"
-                  style={{ gap: "0.375rem", borderRadius: "0.375rem" }}
-                >
-                  <RiAddLine size={16} /> New Project
-                </button>
-              </div>
-
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                {projectsList.map((p) => (
-                  <div key={p.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "1rem", borderRadius: "0.375rem", background: "#ffffff", border: "1px solid #e2e8f0", boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
-                    <div>
-                      <h4 style={{ fontSize: "0.9375rem", fontWeight: 700, color: "#0f172a" }}>{p.title}</h4>
-                      <p style={{ fontSize: "0.7rem", color: "#64748b", marginTop: "0.1rem" }}>
-                        {p.category.toUpperCase()} • {p.technologies.slice(0, 4).join(", ")}
-                      </p>
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                      <button
-                        onClick={() => {
-                          setEditingProject(p);
-                          setIsProjectModalOpen(true);
-                        }}
-                        className="btn btn-outline btn-sm"
-                        style={{ gap: "0.25rem", borderRadius: "0.25rem" }}
-                      >
-                        <RiEditLine size={13} /> Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteProject(p.id)}
-                        className="btn btn-ghost btn-sm"
-                        style={{ color: "#ef4444", padding: "0.375rem", borderRadius: "0.25rem" }}
-                        title="Delete Project"
-                      >
-                        <RiDeleteBinLine size={16} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* TAB 5: SOCIAL LINKS CONTROLS */}
-          {activeTab === "socials" && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-              <div>
-                <h2 style={{ fontSize: "1.375rem", fontWeight: 800, color: "#0f172a" }}>
-                  Social Links & Header Controls
-                </h2>
-                <p style={{ fontSize: "0.8125rem", color: "#64748b", marginTop: "0.15rem" }}>
-                  Limit how many social icons appear in top header before overflow into menu.
-                </p>
-              </div>
-
-              <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "0.375rem", padding: "1.25rem", boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
-                <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "#0f172a", marginBottom: "0.25rem" }}>
-                  Primary Header Social Icons Limit
-                </h3>
-                <p style={{ fontSize: "0.75rem", color: "#64748b", marginBottom: "1rem" }}>
-                  Select how many primary icons to show directly in top header:
-                </p>
-                <div style={{ display: "flex", gap: "0.5rem" }}>
-                  {[1, 2, 3, 4, 5].map((num) => (
-                    <button
-                      key={num}
-                      onClick={() => handleSocialLimitChange(num)}
-                      style={{
-                        padding: "0.5rem 1.125rem",
-                        borderRadius: "0.375rem", // Small radius
-                        fontWeight: 700,
-                        fontSize: "0.8125rem",
-                        border: "1px solid #cbd5e1",
-                        background: (settings.headerSocialLimit || 3) === num ? "#1d4ed8" : "#ffffff",
-                        color: (settings.headerSocialLimit || 3) === num ? "#ffffff" : "#0f172a",
-                        cursor: "pointer",
-                      }}
-                    >
-                      {num} {num === 1 ? "Icon" : "Icons"}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 6: SITE SETTINGS */}
-          {activeTab === "settings" && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-
-              {/* Hero Layout Card */}
-              <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "0.375rem", padding: "1.5rem", boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
-                <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "#0f172a", marginBottom: "0.25rem" }}>
-                  Hero Layout
-                </h3>
-                <p style={{ fontSize: "0.75rem", color: "#64748b", marginBottom: "1rem" }}>
-                  Choose which homepage hero layout visitors see.
-                </p>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.75rem" }}>
-                  {([
-                    { id: "split_portrait" as const, label: "Split Portrait", desc: "Image right, content left — cinematic two-column layout." },
-                    { id: "featured_overlay" as const, label: "Full Banner Overlay", desc: "Full-width image with gradient overlay and text." },
-                    { id: "minimal_centered" as const, label: "Minimal Centered", desc: "Text-focused centered layout with avatar circle — clean & modern." },
-                  ]).map((opt) => {
-                    const isActive = (settings.bannerLayout || "split_portrait") === opt.id;
-                    return (
-                      <button
-                        key={opt.id}
-                        type="button"
-                        onClick={() => handleLayoutChange(opt.id)}
-                        style={{
-                          padding: "1rem", borderRadius: "0.375rem",
-                          border: `2px solid ${isActive ? "#1d4ed8" : "#e2e8f0"}`,
-                          background: isActive ? "#eff6ff" : "#f8fafc",
-                          cursor: "pointer", textAlign: "left",
-                          transition: "all 0.15s ease",
-                        }}
-                      >
-                        <p style={{ fontSize: "0.875rem", fontWeight: 700, color: isActive ? "#1d4ed8" : "#0f172a", marginBottom: "0.25rem", display: "flex", alignItems: "center", gap: "0.375rem" }}>
-                          {isActive && <RiCheckLine size={14} />}
-                          {opt.label}
-                        </p>
-                        <p style={{ fontSize: "0.75rem", color: "#64748b" }}>{opt.desc}</p>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Site Information Form */}
-              <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "0.375rem", padding: "1.5rem", boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
-                <form onSubmit={handleSettingsSave}>
-                  <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "#0f172a", marginBottom: "0.25rem" }}>
-                    Site &amp; Brand Information
-                  </h3>
-                  <p style={{ fontSize: "0.75rem", color: "#64748b", marginBottom: "1.25rem" }}>
-                    Update global site identity fields shown across the portfolio.
-                  </p>
-
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-                    <div>
-                      <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.25rem" }}>
-                        Display Name
-                      </label>
-                      <input type="text" value={settings.siteTitle}
-                        onChange={(e) => setSettings({ ...settings, siteTitle: e.target.value })}
-                        style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "#f8fafc", border: "1px solid #cbd5e1", fontSize: "0.8125rem", color: "#0f172a", outline: "none" }}
-                      />
-                    </div>
-
-                    <div>
-                      <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.25rem" }}>
-                        Location
-                      </label>
-                      <input type="text" value={settings.location}
-                        onChange={(e) => setSettings({ ...settings, location: e.target.value })}
-                        placeholder="e.g. Kigali, Rwanda"
-                        style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "#f8fafc", border: "1px solid #cbd5e1", fontSize: "0.8125rem", color: "#0f172a", outline: "none" }}
-                      />
-                    </div>
-
-                    <div style={{ gridColumn: "1 / -1" }}>
-                      <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.25rem" }}>
-                        Roles &amp; Tagline <span style={{ color: "#94a3b8", fontWeight: 400 }}>(separated by " • ")</span>
-                      </label>
-                      <input type="text" value={settings.siteSubtitle}
-                        onChange={(e) => setSettings({ ...settings, siteSubtitle: e.target.value })}
-                        placeholder="Founder • Software Engineer • AI Builder"
-                        style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "#f8fafc", border: "1px solid #cbd5e1", fontSize: "0.8125rem", color: "#0f172a", outline: "none" }}
-                      />
-                    </div>
-
-                    <div style={{ gridColumn: "1 / -1" }}>
-                      <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.25rem" }}>
-                        Bio Summary
-                      </label>
-                      <textarea rows={3} value={settings.bio}
-                        onChange={(e) => setSettings({ ...settings, bio: e.target.value })}
-                        style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "#f8fafc", border: "1px solid #cbd5e1", fontSize: "0.8125rem", color: "#0f172a", outline: "none", resize: "vertical" }}
-                      />
-                    </div>
-
-                    <div>
-                      <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.25rem" }}>
-                        Contact Email
-                      </label>
-                      <input type="email" value={settings.contactEmail}
-                        onChange={(e) => setSettings({ ...settings, contactEmail: e.target.value })}
-                        placeholder="hello@princeparfait.com"
-                        style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "#f8fafc", border: "1px solid #cbd5e1", fontSize: "0.8125rem", color: "#0f172a", outline: "none" }}
-                      />
-                    </div>
-
-                    <div>
-                      <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.25rem" }}>
-                        WhatsApp Number <span style={{ color: "#94a3b8", fontWeight: 400 }}>(digits only)</span>
-                      </label>
-                      <input type="text" value={settings.whatsappNumber}
-                        onChange={(e) => setSettings({ ...settings, whatsappNumber: e.target.value })}
-                        placeholder="250792054846"
-                        style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "#f8fafc", border: "1px solid #cbd5e1", fontSize: "0.8125rem", color: "#0f172a", outline: "none" }}
-                      />
-                    </div>
-                  </div>
-
-                  <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1.25rem" }}>
-                    <button type="submit" className="btn btn-primary btn-sm" style={{ gap: "0.375rem", borderRadius: "0.375rem" }}>
-                      <RiSaveLine size={16} /> Save Settings
-                    </button>
-                  </div>
-                </form>
-              </div>
-
-              {/* Social Icons Limit */}
-              <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "0.375rem", padding: "1.5rem", boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
-                <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "#0f172a", marginBottom: "0.25rem" }}>
-                  Header Social Icons Limit
-                </h3>
-                <p style={{ fontSize: "0.75rem", color: "#64748b", marginBottom: "1rem" }}>
-                  How many icons appear directly in the top nav before overflow menu.
-                </p>
-                <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-                  {[1, 2, 3, 4, 5].map((num) => (
-                    <button
-                      key={num}
-                      type="button"
-                      onClick={() => handleSocialLimitChange(num)}
-                      style={{
-                        padding: "0.5rem 1.125rem", borderRadius: "0.375rem",
-                        fontWeight: 700, fontSize: "0.8125rem",
-                        border: "1px solid #cbd5e1",
-                        background: (settings.headerSocialLimit || 3) === num ? "#1d4ed8" : "#ffffff",
-                        color: (settings.headerSocialLimit || 3) === num ? "#ffffff" : "#0f172a",
-                        cursor: "pointer", transition: "all 0.15s ease",
-                      }}
-                    >
-                      {num} {num === 1 ? "Icon" : "Icons"}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-            </div>
-          )}
-
-          {/* TAB: MEDIA LIBRARY */}
-          {activeTab === "media" && (
-            <div style={{ height: "calc(100vh - 4rem - 1.5rem * 2)", borderRadius: "0.375rem", overflow: "hidden", border: "1px solid #e2e8f0" }}>
-              <MediaManagerPage />
-            </div>
-          )}
-
-        </main>
+        </div>
       </div>
 
-      {/* ALL REUSABLE MODALS */}
-      <MediaManagerModal
-        isOpen={isMediaOpen}
-        onClose={() => setIsMediaOpen(false)}
-        onSelect={handleMediaSelect}
-      />
-
-      <AdminProfileModal
-        isOpen={isProfileModalOpen}
-        onClose={() => setIsProfileModalOpen(false)}
-        profile={profile}
-        onSave={handleProfileSave}
-        onOpenMedia={() => triggerMediaPicker((url) => setProfile((prev) => ({ ...prev, avatarUrl: url })))}
-      />
-
-      <BannerEditorModal
-        isOpen={isBannerModalOpen}
-        onClose={() => setIsBannerModalOpen(false)}
-        banner={editingBanner}
-        onSave={handleSaveBanner}
-        onOpenMedia={() => triggerMediaPicker((url) => setEditingBanner((prev) => (prev ? { ...prev, imageUrl: url } : null)))}
-      />
-
-      <ProjectEditorModal
-        isOpen={isProjectModalOpen}
-        onClose={() => setIsProjectModalOpen(false)}
-        project={editingProject}
-        onSave={handleSaveProject}
-        onOpenMedia={() => triggerMediaPicker((url) => setEditingProject((prev) => (prev ? { ...prev, image: url } : null)))}
-      />
-
-      <BlogEditorModal
-        isOpen={isBlogModalOpen}
-        onClose={() => setIsBlogModalOpen(false)}
-        post={editingBlog}
-        onSave={handleSaveBlog}
-        onOpenMedia={() => triggerMediaPicker((url) => setEditingBlog((prev) => (prev ? { ...prev, coverImage: url } : null)))}
-      />
-
+      <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "0.375rem", padding: "1.25rem", boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
+        <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "#0f172a", marginBottom: "0.875rem" }}>
+          Real-Time Visitor Activity Stream
+        </h3>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.8125rem" }}>
+            <thead>
+              <tr style={{ borderBottom: "1px solid #e2e8f0", color: "#64748b", fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                <th style={{ padding: "0.625rem 0.875rem" }}>Time</th>
+                <th style={{ padding: "0.625rem 0.875rem" }}>Location</th>
+                <th style={{ padding: "0.625rem 0.875rem" }}>Page Visited</th>
+                <th style={{ padding: "0.625rem 0.875rem" }}>Device / User Agent</th>
+                <th style={{ padding: "0.625rem 0.875rem" }}>IP Address</th>
+              </tr>
+            </thead>
+            <tbody>
+              {analytics.recentLogs.map((log) => (
+                <tr key={log.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                  <td style={{ padding: "0.75rem 0.875rem", color: "#64748b", fontSize: "0.75rem" }}>{log.time}</td>
+                  <td style={{ padding: "0.75rem 0.875rem", fontWeight: 700, color: "#0f172a" }}>
+                    {log.flag} {log.country}
+                  </td>
+                  <td style={{ padding: "0.75rem 0.875rem", color: "#1d4ed8", fontWeight: 600 }}>{log.page}</td>
+                  <td style={{ padding: "0.75rem 0.875rem", color: "#334155" }}>{log.device}</td>
+                  <td style={{ padding: "0.75rem 0.875rem", color: "#64748b", fontFamily: "monospace", fontSize: "0.75rem" }}>{log.ip}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }
