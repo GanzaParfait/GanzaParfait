@@ -54,10 +54,10 @@ export default function FullCenteredHero({ settings }: { settings: SiteSettings 
           <img
             src={settings?.heroImageUrl || "/images/profile/hero-photo.png"}
             alt={settings.siteTitle}
-            className="w-full h-full object-cover object-bottom"
+            className="w-full h-full object-contain object-bottom"
             style={{ 
-              maskImage: "linear-gradient(to top, black 80%, transparent 100%)",
-              WebkitMaskImage: "linear-gradient(to top, black 80%, transparent 100%)" 
+              maskImage: "linear-gradient(to top, black 90%, transparent 100%)",
+              WebkitMaskImage: "linear-gradient(to top, black 90%, transparent 100%)" 
             }}
           />
         </div>
@@ -133,7 +133,7 @@ export default function FullCenteredHero({ settings }: { settings: SiteSettings 
 
         {/* BOTTOM CENTER CONTENT */}
         <div 
-          className="w-full text-center relative z-20 pb-16 md:pb-24 pt-60 md:pt-0"
+          className="w-full text-center relative z-20 pb-12 md:pb-20 pt-60 md:pt-0"
           style={{
             opacity: visible ? 1 : 0,
             transform: visible ? "translateY(0)" : "translateY(30px)",
@@ -142,25 +142,19 @@ export default function FullCenteredHero({ settings }: { settings: SiteSettings 
         >
           {/* Text shadow to ensure readability over image */}
           <h1 
-            className="text-[3rem] sm:text-[4rem] md:text-[5rem] lg:text-[7rem] font-black tracking-tight leading-none mb-6"
+            className="text-[2.5rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[6rem] font-black tracking-tight leading-none mb-4"
             style={{ 
               fontFamily: "var(--font-heading)",
               background: "linear-gradient(to right, #ffffff, #c7d2fe)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
-              textShadow: "0 10px 40px rgba(0,0,0,0.5)"
+              textShadow: "0 10px 40px rgba(0,0,0,0.8)"
             }}
           >
             {settings.siteTitle}
           </h1>
-          <p className="text-lg md:text-xl text-slate-300 font-medium">
-            Do you have a project?{" "}
-            <Link 
-              href="/contact" 
-              className="text-red-400 font-bold border-b-2 border-red-400 pb-1 hover:text-red-300 hover:border-red-300 transition-colors"
-            >
-              Let's Talk
-            </Link>
+          <p className="text-sm md:text-lg text-slate-300 font-medium max-w-2xl mx-auto" style={{ textShadow: "0 2px 10px rgba(0,0,0,0.8)" }}>
+            "I'm building a reputation so strong that opportunities naturally find me."
           </p>
         </div>
         

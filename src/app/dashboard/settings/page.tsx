@@ -120,7 +120,48 @@ export default function SettingsPage() {
               />
             </div>
           </div>
+          
+          <div style={{ marginTop: "2rem", paddingTop: "1.5rem", borderTop: "1px solid #e2e8f0" }}>
+            <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "#0f172a", marginBottom: "0.25rem" }}>
+              Target Announcement
+            </h3>
+            <p style={{ fontSize: "0.75rem", color: "#64748b", marginBottom: "1rem" }}>
+              Manage the dynamic announcement banner displayed at the top of the site.
+            </p>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "1rem" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <input type="checkbox" id="announcementIsActive" checked={settings.announcementIsActive || false}
+                  onChange={(e) => setSettings({ ...settings, announcementIsActive: e.target.checked })}
+                  style={{ width: "1rem", height: "1rem" }}
+                />
+                <label htmlFor="announcementIsActive" style={{ fontSize: "0.875rem", fontWeight: 600, color: "#334155" }}>
+                  Show announcement banner
+                </label>
+              </div>
+              
+              <div>
+                <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.25rem" }}>
+                  Announcement Text
+                </label>
+                <input type="text" value={settings.announcementText || ""}
+                  onChange={(e) => setSettings({ ...settings, announcementText: e.target.value })}
+                  placeholder="Exciting news! We just launched a new feature."
+                  style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "#f8fafc", border: "1px solid #cbd5e1", fontSize: "0.8125rem", color: "#0f172a", outline: "none" }}
+                />
+              </div>
 
+              <div>
+                <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.25rem" }}>
+                  Action Link <span style={{ color: "#94a3b8", fontWeight: 400 }}>(e.g. /projects or https://link.com)</span>
+                </label>
+                <input type="text" value={settings.announcementLink || ""}
+                  onChange={(e) => setSettings({ ...settings, announcementLink: e.target.value })}
+                  placeholder="/projects"
+                  style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "#f8fafc", border: "1px solid #cbd5e1", fontSize: "0.8125rem", color: "#0f172a", outline: "none" }}
+                />
+              </div>
+            </div>
+          </div>
 
         </form>
       </div>

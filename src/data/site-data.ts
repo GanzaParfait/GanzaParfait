@@ -29,7 +29,7 @@ export const siteConfig = {
   ],
   social: {
     github: "https://github.com/GanzaParfait",
-    linkedin: "https://linkedin.com/in/ganza-prince-235816269",
+    linkedin: "https://www.linkedin.com/in/prince-parfait-ganza",
     twitter: "https://x.com/_prince_parfait_1",
     youtube: "https://youtube.com/@_prince_parfait_",
     instagram: "https://www.instagram.com/_prince_parfait_",

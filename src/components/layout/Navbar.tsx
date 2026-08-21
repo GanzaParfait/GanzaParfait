@@ -114,11 +114,34 @@ export default function Navbar() {
           top: 0, left: 0, right: 0,
           zIndex: 50,
           transition: "all 0.3s ease",
-          padding: "0.5rem 0.75rem",
+          padding: 0,
         }}
       >
-        <div
-          className="container"
+        {settings.announcementIsActive && settings.announcementText && (
+          <div style={{
+            background: "var(--color-primary)",
+            color: "#ffffff",
+            padding: "0.5rem 1rem",
+            textAlign: "center",
+            fontSize: "0.85rem",
+            fontWeight: 500,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: "0.5rem",
+            width: "100%",
+          }}>
+            <span>{settings.announcementText}</span>
+            {settings.announcementLink && (
+              <Link href={settings.announcementLink} style={{ color: "#ffffff", textDecoration: "underline", fontWeight: 700, flexShrink: 0 }}>
+                Explore Now &rarr;
+              </Link>
+            )}
+          </div>
+        )}
+        <div style={{ padding: "0.5rem 0.75rem" }}>
+          <div
+            className="container"
           style={{
             background: pillBg,
             backdropFilter: "blur(20px)",
@@ -312,6 +335,7 @@ export default function Navbar() {
               {isOpen ? <RiMenuFoldLine size={18} /> : <RiMenuUnfoldLine size={18} />}
             </button>
           </div>
+        </div>
         </div>
       </header>
 

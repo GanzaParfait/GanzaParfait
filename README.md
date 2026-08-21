@@ -15,7 +15,7 @@
 [![Vercel](https://img.shields.io/badge/Deploy-Vercel-black?style=flat-square&logo=vercel)](https://vercel.com)
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
-[🌐 Live Site](https://princeparfait.com) · [📬 Contact](https://princeparfait.com/contact) · [💼 LinkedIn](https://linkedin.com/in/ganza-prince-235816269) · [🐙 GitHub](https://github.com/GanzaParfait)
+[🌐 Live Site](https://princeparfait.com) · [📬 Contact](https://princeparfait.com/contact) · [💼 LinkedIn](https://www.linkedin.com/in/prince-parfait-ganza) · [🐙 GitHub](https://github.com/GanzaParfait)
 
 </div>
 
@@ -349,7 +349,7 @@ He builds full-stack web applications and AI-powered tools that solve real-world
 |---------------|----------------------------------------------------------------------------|
 | Website       | [princeparfait.com](https://princeparfait.com)                             |
 | GitHub        | [@GanzaParfait](https://github.com/GanzaParfait)                          |
-| LinkedIn      | [ganza-prince-235816269](https://linkedin.com/in/ganza-prince-235816269)  |
+| LinkedIn      | [ganza-prince-235816269](https://www.linkedin.com/in/prince-parfait-ganza)  |
 | X / Twitter   | [@_prince_parfait_1](https://x.com/_prince_parfait_1)                         |
 | YouTube       | [@_prince_parfait_](https://youtube.com/@_prince_parfait_)                     |
 | Instagram     | [@_prince_parfait_](https://www.instagram.com/_prince_parfait_)                |

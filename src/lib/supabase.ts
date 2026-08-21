@@ -17,6 +17,9 @@ export interface SiteSettings {
   contactEmail: string;
   whatsappNumber: string;
   headerSocialLimit: number;
+  announcementText?: string;
+  announcementLink?: string;
+  announcementIsActive?: boolean;
 }
 
 export const DEFAULT_SETTINGS: SiteSettings = {
@@ -29,6 +32,9 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   contactEmail: "ganzaparfait7@gmail.com",
   whatsappNumber: "250792054846",
   headerSocialLimit: 3,
+  announcementText: "🚀 Exciting news! The TUT Labs Platform is now live.",
+  announcementLink: "/projects",
+  announcementIsActive: false,
 };
 
 export interface AnalyticsMetrics {
