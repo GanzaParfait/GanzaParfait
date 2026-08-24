@@ -10,16 +10,27 @@ import {
 } from "@/lib/analytics";
 import { getClientIp, normalizeIp, resolveGeo } from "@/lib/geo";
 import { createServerSupabase } from "@/lib/supabase-server";
+import { cleanPagePath } from "@/lib/utm";
 
 interface TrackPayload {
   page_path?: string;
   referrer?: string | null;
+  utm_source?: string | null;
+  utm_medium?: string | null;
+  utm_campaign?: string | null;
+  utm_term?: string | null;
+  utm_content?: string | null;
+}
+
+function sanitizeUtm(value: string | null | undefined): string | null {
+  if (!value) return null;
+  return value.trim().slice(0, 120) || null;
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as TrackPayload;
-    const pagePath = body.page_path?.trim();
+    const pagePath = cleanPagePath(body.page_path?.trim() || "");
 
     if (!pagePath || pagePath.startsWith("/dashboard") || pagePath.startsWith("/api/")) {
       return NextResponse.json({ ok: false, reason: "ignored" }, { status: 200 });
@@ -47,6 +58,14 @@ export async function POST(request: NextRequest) {
 
     const supabase = createServerSupabase(true);
 
+    const utmFields = {
+      utm_source: sanitizeUtm(body.utm_source),
+      utm_medium: sanitizeUtm(body.utm_medium),
+      utm_campaign: sanitizeUtm(body.utm_campaign),
+      utm_term: sanitizeUtm(body.utm_term),
+      utm_content: sanitizeUtm(body.utm_content),
+    };
+
     const baseRecord = {
       page_path: pagePath.slice(0, 255),
       referrer: body.referrer?.slice(0, 500) || null,
@@ -59,6 +78,7 @@ export async function POST(request: NextRequest) {
 
     const extendedRecord = {
       ...baseRecord,
+      ...utmFields,
       visitor_id: visitorId,
       session_id: sessionId,
       user_agent: userAgent.slice(0, 500),
@@ -66,6 +86,16 @@ export async function POST(request: NextRequest) {
     };
 
     let { error } = await supabase.from("page_views").insert(extendedRecord);
+    if (error && /column|schema cache/i.test(error.message)) {
+      const withoutUtm = {
+        ...baseRecord,
+        visitor_id: visitorId,
+        session_id: sessionId,
+        user_agent: userAgent.slice(0, 500),
+        device_type: deviceType,
+      };
+      ({ error } = await supabase.from("page_views").insert(withoutUtm));
+    }
     if (error && /column|schema cache/i.test(error.message)) {
       ({ error } = await supabase.from("page_views").insert(baseRecord));
     }

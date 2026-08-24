@@ -1,29 +1,38 @@
 import type { Metadata } from "next";
-import { siteConfig, blogPosts } from "@/data/site-data";
+import { blogPosts } from "@/data/site-data";
 import BlogCard from "@/components/ui/BlogCard";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import NewsletterForm from "@/components/ui/NewsletterForm";
 import BlogFilter from "@/components/ui/BlogFilter";
+import { buildBreadcrumbJsonLd, buildPageMetadata, buildWebPageJsonLd } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Blog",
+export const metadata: Metadata = buildPageMetadata({
+  title: "Blog by PPG — AI, Software & Entrepreneurship",
   description:
-    "Articles on AI, software engineering, entrepreneurship, and building technology products in Africa, by Prince Parfait GANZA.",
-  alternates: { canonical: `${siteConfig.url}/blog` },
-  openGraph: {
-    title: "Blog — Prince Parfait GANZA",
-    description:
-      "Articles on AI, software engineering, entrepreneurship, and building in Africa.",
-    url: `${siteConfig.url}/blog`,
-  },
-};
+    "Articles on AI, software engineering, and entrepreneurship by Prince Parfait GANZA (PPG) — building technology products in Africa.",
+  path: "/blog",
+  keywords: ["PPG blog", "Prince Parfait GANZA articles", "AI Africa blog", "software engineering Rwanda"],
+});
 
 export default function BlogPage() {
   const featuredPosts = blogPosts.filter((p) => p.featured);
   const otherPosts = blogPosts.filter((p) => !p.featured);
 
+  const schema = [
+    buildWebPageJsonLd({
+      name: "Blog by Prince Parfait GANZA (PPG)",
+      description: "Articles on AI, software engineering, and entrepreneurship.",
+      path: "/blog",
+    }),
+    buildBreadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Blog", path: "/blog" },
+    ]),
+  ];
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
       {/* Header */}
       <section className="section pt-32 pb-10 relative dot-grid overflow-hidden" aria-label="Blog header">
         <div aria-hidden="true" className="absolute inset-0 bg-gradient-radial pointer-events-none" />

@@ -24,6 +24,7 @@ const EMPTY_ANALYTICS: AnalyticsMetrics = {
   pageBreakdown: [],
   deviceBreakdown: [],
   recentSessions: [],
+  utmBreakdown: [],
   telemetryActive: false,
   changes: {
     totalVisitors: "Loading...",
@@ -227,6 +228,35 @@ export default function DashboardOverviewPage() {
         </section>
       )}
 
+      {analytics.utmBreakdown.length > 0 && (
+        <section className="analytics-panel">
+          <div className="analytics-panel-title">Campaign Attribution (UTM)</div>
+          <p className="analytics-panel-subtitle">
+            Traffic sources from shared links — utm_source, utm_medium, and utm_campaign
+          </p>
+          <div style={{ marginTop: "1rem" }}>
+            {analytics.utmBreakdown.map((entry) => (
+              <div key={`${entry.source}-${entry.medium}-${entry.campaign}`} className="analytics-bar-row">
+                <div className="analytics-bar-meta">
+                  <strong>
+                    {entry.source} / {entry.medium}
+                  </strong>
+                  <span style={{ color: "#64748b", fontWeight: 700 }}>
+                    {entry.visits} visits ({entry.percentage}%)
+                  </span>
+                </div>
+                <p style={{ fontSize: "0.72rem", color: "#64748b", marginBottom: "0.35rem" }}>
+                  campaign: {entry.campaign}
+                </p>
+                <div className="analytics-bar-track">
+                  <div className="analytics-bar-fill" style={{ width: `${Math.max(entry.percentage, 4)}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       <section className="analytics-panel">
         <div className="analytics-panel-title">Visitor Sessions</div>
         <p className="analytics-panel-subtitle">
@@ -256,6 +286,7 @@ export default function DashboardOverviewPage() {
                       </span>
                       <span className="analytics-session-sub">
                         {session.time} · {session.ip} · {session.duration} on site
+                        {session.utmSource ? ` · via ${session.utmSource}` : ""}
                       </span>
                     </div>
                     <div className="analytics-session-badges">

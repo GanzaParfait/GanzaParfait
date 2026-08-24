@@ -55,7 +55,16 @@ export interface AnalyticsMetrics {
     ip: string;
     pageCount: number;
     duration: string;
+    utmSource?: string;
+    utmCampaign?: string;
     pages: { path: string; name: string; time: string }[];
+  }[];
+  utmBreakdown: {
+    source: string;
+    medium: string;
+    campaign: string;
+    visits: number;
+    percentage: number;
   }[];
   telemetryActive: boolean;
   changes: {

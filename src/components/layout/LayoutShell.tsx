@@ -6,6 +6,7 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import SubscribeWidget from "@/components/ui/SubscribeWidget";
 import PageViewTracker from "@/components/analytics/PageViewTracker";
+import UtmCapture from "@/components/analytics/UtmCapture";
 
 export default function LayoutShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -27,6 +28,7 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
       <Footer />
       <SubscribeWidget />
       <Suspense fallback={null}>
+        <UtmCapture />
         <PageViewTracker />
       </Suspense>
     </>

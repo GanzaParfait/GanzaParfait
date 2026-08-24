@@ -42,6 +42,16 @@ FOR INSERT
 TO anon, authenticated
 WITH CHECK (true);
 
+ALTER TABLE public.page_views
+ADD COLUMN IF NOT EXISTS utm_source VARCHAR(120),
+ADD COLUMN IF NOT EXISTS utm_medium VARCHAR(120),
+ADD COLUMN IF NOT EXISTS utm_campaign VARCHAR(120),
+ADD COLUMN IF NOT EXISTS utm_term VARCHAR(120),
+ADD COLUMN IF NOT EXISTS utm_content VARCHAR(120);
+
+CREATE INDEX IF NOT EXISTS idx_page_views_utm_source ON public.page_views (utm_source);
+CREATE INDEX IF NOT EXISTS idx_page_views_utm_campaign ON public.page_views (utm_campaign);
+
 DROP POLICY IF EXISTS "Allow service role read on page_views" ON public.page_views;
 CREATE POLICY "Allow service role read on page_views"
 ON public.page_views

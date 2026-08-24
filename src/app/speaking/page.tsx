@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { siteConfig, speakingEngagements } from "@/data/site-data";
+import { speakingEngagements } from "@/data/site-data";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import Link from "next/link";
 import {
@@ -9,19 +9,15 @@ import {
   RiGlobeLine,
   RiVideoLine,
 } from "react-icons/ri";
+import { buildBreadcrumbJsonLd, buildPageMetadata, buildWebPageJsonLd } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Speaking",
+export const metadata: Metadata = buildPageMetadata({
+  title: "Speaking — PPG on AI, Tech & Entrepreneurship",
   description:
-    "Prince Parfait GANZA speaks on AI, software engineering, entrepreneurship, and technology building in Africa at conferences, workshops, and universities.",
-  alternates: { canonical: `${siteConfig.url}/speaking` },
-  openGraph: {
-    title: "Speaking — Prince Parfait GANZA",
-    description:
-      "Speaking on AI, software engineering, and entrepreneurship by Prince Parfait GANZA.",
-    url: `${siteConfig.url}/speaking`,
-  },
-};
+    "Prince Parfait GANZA (PPG) speaks on AI, software engineering, and entrepreneurship at conferences, workshops, and universities across Africa.",
+  path: "/speaking",
+  keywords: ["PPG speaker", "Prince Parfait GANZA speaking", "tech speaker Rwanda", "AI speaker Africa"],
+});
 
 const topics = [
   {
@@ -58,8 +54,22 @@ const typeConfig: Record<string, string> = {
 };
 
 export default function SpeakingPage() {
+  const schema = [
+    buildWebPageJsonLd({
+      name: "Speaking by Prince Parfait GANZA (PPG)",
+      description: "Conference talks and workshops on AI, software engineering, and entrepreneurship.",
+      path: "/speaking",
+    }),
+    buildBreadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Speaking", path: "/speaking" },
+    ]),
+  ];
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+
       {/* Header */}
       <section className="section pt-32 pb-10 relative dot-grid overflow-hidden" aria-label="Speaking header">
         <div aria-hidden="true" className="absolute inset-0 bg-gradient-radial pointer-events-none" />

@@ -2,19 +2,15 @@ import type { Metadata } from "next";
 import { siteConfig } from "@/data/site-data";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import ContactForm from "./ContactForm";
+import { buildBreadcrumbJsonLd, buildPageMetadata, buildWebPageJsonLd } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Contact",
+export const metadata: Metadata = buildPageMetadata({
+  title: "Contact PPG — Hire Prince Parfait GANZA",
   description:
-    "Get in touch with Prince Parfait GANZA for freelance projects, technical consulting, speaking engagements, and collaborations.",
-  alternates: { canonical: `${siteConfig.url}/contact` },
-  openGraph: {
-    title: "Contact — Prince Parfait GANZA",
-    description:
-      "Reach out to Prince Parfait GANZA for projects, consulting, speaking, and collaborations.",
-    url: `${siteConfig.url}/contact`,
-  },
-};
+    "Contact Prince Parfait GANZA (PPG) for freelance projects, AI consulting, speaking engagements, and collaborations in Rwanda and globally.",
+  path: "/contact",
+  keywords: ["Contact PPG", "Hire Prince Parfait GANZA", "PPG consulting", "software engineer Rwanda contact"],
+});
 
 const contactPageSchema = {
   "@context": "https://schema.org",
@@ -25,6 +21,7 @@ const contactPageSchema = {
   mainEntity: {
     "@type": "Person",
     name: "Prince Parfait GANZA",
+    alternateName: ["PPG", "Prince Parfait GANZA PPG"],
     contactPoint: {
       "@type": "ContactPoint",
       contactType: "Professional",
@@ -35,11 +32,24 @@ const contactPageSchema = {
 };
 
 export default function ContactPage() {
+  const schema = [
+    contactPageSchema,
+    buildWebPageJsonLd({
+      name: "Contact Prince Parfait GANZA (PPG)",
+      description: "Get in touch with PPG for projects, consulting, and speaking.",
+      path: "/contact",
+    }),
+    buildBreadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Contact", path: "/contact" },
+    ]),
+  ];
+
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(contactPageSchema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       />
 
       <section

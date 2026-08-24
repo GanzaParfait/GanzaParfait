@@ -1,36 +1,48 @@
 import type { Metadata } from "next";
-import { siteConfig, projects } from "@/data/site-data";
+import { projects, siteConfig } from "@/data/site-data";
 import ProjectCard from "@/components/ui/ProjectCard";
 import AnimatedSection from "@/components/ui/AnimatedSection";
+import { buildBreadcrumbJsonLd, buildPageMetadata, buildWebPageJsonLd } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Projects",
+export const metadata: Metadata = buildPageMetadata({
+  title: "Projects by PPG — Software & AI Portfolio",
   description:
-    "Explore software projects built by Prince Parfait GANZA — web applications, AI tools, SaaS products, and open-source contributions.",
-  alternates: { canonical: `${siteConfig.url}/projects` },
-  openGraph: {
-    title: "Projects — Prince Parfait GANZA",
-    description:
-      "Web apps, AI tools, SaaS products, and open-source contributions by Prince Parfait GANZA.",
-    url: `${siteConfig.url}/projects`,
-  },
-};
-
-const categories = [
-  { key: "all", label: "All Projects" },
-  { key: "web", label: "Web Apps" },
-  { key: "ai", label: "AI" },
-  { key: "saas", label: "SaaS" },
-  { key: "open-source", label: "Open Source" },
-];
+    "Explore software projects built by Prince Parfait GANZA (PPG) — web applications, AI tools, SaaS products, and open-source work from Rwanda.",
+  path: "/projects",
+  keywords: ["PPG projects", "Prince Parfait GANZA portfolio", "Lerony projects", "Rwanda software projects"],
+});
 
 export default function ProjectsPage() {
   const featuredProjects = projects.filter((p) => p.featured);
   const otherProjects = projects.filter((p) => !p.featured);
 
+  const schema = [
+    buildWebPageJsonLd({
+      name: "Projects by Prince Parfait GANZA (PPG)",
+      description: "Software and AI projects portfolio by PPG from Rwanda.",
+      path: "/projects",
+    }),
+    buildBreadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Projects", path: "/projects" },
+    ]),
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      name: "Prince Parfait GANZA (PPG) Projects",
+      itemListElement: projects.map((project, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        url: `${siteConfig.url}/projects/${project.id}`,
+        name: project.title,
+      })),
+    },
+  ];
+
   return (
     <>
-      {/* Header */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+
       <section className="section pt-32 pb-10 relative dot-grid overflow-hidden" aria-label="Projects header">
         <div aria-hidden="true" className="absolute inset-0 bg-gradient-radial pointer-events-none" />
         <div className="container relative z-10 max-w-4xl">
@@ -40,15 +52,13 @@ export default function ProjectsPage() {
               Things I&apos;ve built.
             </h1>
             <p className="text-slate-400 text-lg leading-relaxed max-w-2xl">
-              A curated selection of projects spanning web development, AI
-              integration, SaaS products, and open-source contributions. Each
-              built with purpose and shipped with care.
+              A curated selection of projects by Prince Parfait GANZA (PPG) spanning web development, AI
+              integration, SaaS products, and open-source contributions.
             </p>
           </AnimatedSection>
         </div>
       </section>
 
-      {/* Featured */}
       {featuredProjects.length > 0 && (
         <section className="section bg-mesh" aria-label="Featured projects">
           <div className="container">
@@ -69,7 +79,6 @@ export default function ProjectsPage() {
         </section>
       )}
 
-      {/* Other projects */}
       {otherProjects.length > 0 && (
         <section className="section" aria-label="Other projects">
           <div className="container">
@@ -90,7 +99,6 @@ export default function ProjectsPage() {
         </section>
       )}
 
-      {/* GitHub CTA */}
       <section className="section" aria-label="GitHub call to action">
         <div className="container">
           <AnimatedSection className="text-center">

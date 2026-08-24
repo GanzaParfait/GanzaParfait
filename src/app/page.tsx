@@ -3,6 +3,7 @@ import Link from "next/link";
 import { RiArrowRightLine, RiWhatsappLine } from "react-icons/ri";
 import { Wrench, BrainCircuit, Rocket } from "lucide-react";
 import { siteConfig, projects, blogPosts, skills } from "@/data/site-data";
+import { buildPageMetadata, buildWebPageJsonLd } from "@/lib/seo";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import HeroSection from "@/components/hero/HeroSection";
 import TechMarquee from "@/components/ui/TechMarquee";
@@ -10,11 +11,14 @@ import ImpactSection from "@/components/ui/ImpactSection";
 import ProjectShowcase from "@/components/ui/ProjectShowcase";
 import FeaturedBlogCards from "@/components/ui/FeaturedBlogCards";
 
-export const metadata: Metadata = {
-  title: "Prince Parfait GANZA — Founder • Software Engineer • AI Builder • Speaker • Entrepreneur",
-  description: siteConfig.description,
-  alternates: { canonical: siteConfig.url },
-};
+export const metadata: Metadata = buildPageMetadata({
+  title: "Prince Parfait GANZA (PPG) — Software Engineer & AI Builder Rwanda",
+  description:
+    "Official home of Prince Parfait GANZA (PPG) — founder, full-stack software engineer, AI builder, speaker and entrepreneur based in Kigali, Rwanda. Search PPG developer or visit princeparfait.com.",
+  path: "/",
+  absoluteTitle: true,
+  keywords: ["PPG homepage", "Prince Parfait GANZA official site", "PPG portfolio Rwanda"],
+});
 
 const featuredProjects = projects.filter((p) => p.featured);
 const featuredPosts    = blogPosts.filter((p) => p.featured);
@@ -47,8 +51,15 @@ const pillars = [
 ];
 
 export default function HomePage() {
+  const homeSchema = buildWebPageJsonLd({
+    name: "Prince Parfait GANZA (PPG) — Official Portfolio",
+    description: siteConfig.description,
+    path: "/",
+  });
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homeSchema) }} />
       {/* ─── HERO ─── */}
       <HeroSection />
 

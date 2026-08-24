@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
-import Footer from "@/components/layout/Footer";
 import LayoutShell from "@/components/layout/LayoutShell";
 import { siteConfig } from "@/data/site-data";
+import { DEFAULT_OG_IMAGE, PPG_SEO_KEYWORDS } from "@/lib/seo";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -14,11 +14,12 @@ const outfit = Outfit({
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: siteConfig.title,
-    template: `%s | Prince Parfait GANZA`,
+    default: "Prince Parfait GANZA (PPG) — Founder • Software Engineer • AI Builder",
+    template: `%s | Prince Parfait GANZA (PPG)`,
   },
-  description: siteConfig.description,
-  keywords: siteConfig.keywords,
+  description: `${siteConfig.description} Official portfolio of Prince Parfait GANZA (PPG) — search PPG Rwanda, PPG developer, or princeparfait.com.`,
+  keywords: [...siteConfig.keywords, ...PPG_SEO_KEYWORDS],
+  applicationName: "Prince Parfait GANZA (PPG)",
   authors: [{ name: "Prince Parfait GANZA", url: siteConfig.url }],
   creator: "Prince Parfait GANZA",
   publisher: "Prince Parfait GANZA",
@@ -42,30 +43,30 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: siteConfig.url,
-    title: "Prince Parfait GANZA — Founder • Software Engineer • AI Builder",
+    title: "Prince Parfait GANZA (PPG) — Founder • Software Engineer • AI Builder",
     description: siteConfig.description,
-    siteName: "Prince Parfait GANZA",
+    siteName: "Prince Parfait GANZA (PPG)",
     images: [
       {
-        url: "/og-image.png",
+        url: DEFAULT_OG_IMAGE,
         width: 1200,
         height: 630,
-        alt: "Prince Parfait GANZA — Founder, Software Engineer, AI Builder, Speaker & Entrepreneur from Rwanda",
+        alt: "Prince Parfait GANZA (PPG) — Founder, Software Engineer, AI Builder from Rwanda",
         type: "image/png",
-        secureUrl: `${siteConfig.url}/og-image.png`,
+        secureUrl: `${siteConfig.url}${DEFAULT_OG_IMAGE}`,
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
     site: "@_prince_parfait_1",
-    title: "Prince Parfait GANZA — Founder • Software Engineer • AI Builder",
+    title: "Prince Parfait GANZA (PPG) — Founder • Software Engineer • AI Builder",
     description: siteConfig.description,
     creator: "@_prince_parfait_1",
     images: [
       {
-        url: "/og-image.png",
-        alt: "Prince Parfait GANZA — Founder, Software Engineer, AI Builder",
+        url: DEFAULT_OG_IMAGE,
+        alt: "Prince Parfait GANZA (PPG) — Founder, Software Engineer, AI Builder",
         width: 1200,
         height: 630,
       },
@@ -78,7 +79,6 @@ export const metadata: Metadata = {
   manifest: "/site.webmanifest",
   alternates: { canonical: siteConfig.url },
   other: {
-    // WhatsApp-specific — WhatsApp uses og:image but needs absolute URL
     "og:image:width": "1200",
     "og:image:height": "630",
     "og:image:type": "image/png",
@@ -105,7 +105,17 @@ const structuredData = {
       "@type": ["Person", "Brand"],
       "@id": `${siteConfig.url}/#person`,
       name: "Prince Parfait GANZA",
-      alternateName: ["Prince Parfait", "PPG", "GANZA Prince", "Prince Parfait Ishimwe", "Prince Parfait Ganza"],
+      alternateName: [
+        "PPG",
+        "Prince Parfait GANZA PPG",
+        "PPG Rwanda",
+        "PPG developer",
+        "PPG software engineer",
+        "Prince Parfait",
+        "GANZA Prince",
+        "Prince Parfait Ishimwe",
+        "Prince Parfait Ganza",
+      ],
       description: siteConfig.description,
       url: siteConfig.url,
       image: {
@@ -166,7 +176,9 @@ const structuredData = {
         "Entrepreneurship",
         "Public Speaking",
         "Technology",
-        "Business Automation"
+        "Business Automation",
+        "PPG",
+        "Rwanda technology",
       ],
       nationality: { "@type": "Country", name: "Rwanda" },
       gender: "Male",
@@ -176,21 +188,22 @@ const structuredData = {
       }
     },
     {
+      "@type": "Organization",
+      "@id": "https://lerony.com/#organization",
+      name: "Lerony",
+      url: "https://lerony.com",
+      founder: { "@id": `${siteConfig.url}/#person` },
+      sameAs: ["https://lerony.com"],
+    },
+    {
       "@type": "WebSite",
       "@id": `${siteConfig.url}/#website`,
       url: siteConfig.url,
-      name: siteConfig.name,
+      name: "Prince Parfait GANZA (PPG)",
+      alternateName: ["PPG", "princeparfait.com", "Prince Parfait GANZA Portfolio"],
       description: siteConfig.description,
       publisher: { "@id": `${siteConfig.url}/#person` },
       inLanguage: "en-US",
-      potentialAction: {
-        "@type": "SearchAction",
-        target: {
-          "@type": "EntryPoint",
-          urlTemplate: `${siteConfig.url}/search?q={search_term_string}`,
-        },
-        "query-input": "required name=search_term_string",
-      },
     },
   ],
 };
@@ -212,6 +225,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
         {/* Force site favicon — prevents platform-injected icons */}
+        <link rel="alternate" type="application/rss+xml" title="PPG Blog RSS" href="/feed.xml" />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <meta name="msapplication-TileColor" content="#0E52A8" />
         <meta name="msapplication-config" content="/browserconfig.xml" />

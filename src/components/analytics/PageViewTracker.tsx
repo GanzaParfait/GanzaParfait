@@ -2,6 +2,12 @@
 
 import { useEffect, useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
+import {
+  cleanPagePath,
+  getStoredUtmAttribution,
+  parseUtmFromSearchParams,
+  resolveUtmAttribution,
+} from "@/lib/utm";
 
 export default function PageViewTracker() {
   const pathname = usePathname();
@@ -11,14 +17,23 @@ export default function PageViewTracker() {
   useEffect(() => {
     if (!pathname || pathname.startsWith("/dashboard")) return;
 
-    const query = searchParams?.toString();
-    const pagePath = query ? `${pathname}?${query}` : pathname;
-    if (lastTracked.current === pagePath) return;
-    lastTracked.current = pagePath;
+    const utm = resolveUtmAttribution(
+      parseUtmFromSearchParams(searchParams),
+      getStoredUtmAttribution()
+    );
+    const pagePath = cleanPagePath(pathname);
+    const trackKey = `${pagePath}:${JSON.stringify(utm)}`;
+    if (lastTracked.current === trackKey) return;
+    lastTracked.current = trackKey;
 
     const payload = JSON.stringify({
       page_path: pagePath,
       referrer: typeof document !== "undefined" ? document.referrer || null : null,
+      utm_source: utm.utm_source || null,
+      utm_medium: utm.utm_medium || null,
+      utm_campaign: utm.utm_campaign || null,
+      utm_term: utm.utm_term || null,
+      utm_content: utm.utm_content || null,
     });
 
     if (typeof navigator !== "undefined" && navigator.sendBeacon) {

@@ -21,6 +21,11 @@ interface PageViewRow {
   visitor_id?: string | null;
   session_id?: string | null;
   user_agent?: string | null;
+  utm_source?: string | null;
+  utm_medium?: string | null;
+  utm_campaign?: string | null;
+  utm_term?: string | null;
+  utm_content?: string | null;
   created_at: string;
 }
 
@@ -62,6 +67,7 @@ function emptyMetrics(): AnalyticsMetrics {
     pageBreakdown: [],
     deviceBreakdown: [],
     recentSessions: [],
+    utmBreakdown: [],
     telemetryActive: false,
     changes: {
       totalVisitors: "No data yet",
@@ -86,7 +92,9 @@ export async function GET(request: NextRequest) {
 
   const extendedQuery = await supabase
     .from("page_views")
-    .select("id, page_path, country_name, country_flag, device, device_type, ip_address, visitor_id, session_id, user_agent, created_at")
+    .select(
+      "id, page_path, country_name, country_flag, device, device_type, ip_address, visitor_id, session_id, user_agent, utm_source, utm_medium, utm_campaign, utm_term, utm_content, created_at"
+    )
     .order("created_at", { ascending: false })
     .limit(5000);
 
@@ -258,6 +266,8 @@ export async function GET(request: NextRequest) {
         ip: displayIp(first.ip_address),
         pageCount: sorted.length,
         duration: formatDuration(durationSeconds),
+        utmSource: first.utm_source || undefined,
+        utmCampaign: first.utm_campaign || undefined,
         pages: sorted.map((row) => ({
           path: row.page_path,
           name: pagePathToName(row.page_path),
@@ -269,6 +279,28 @@ export async function GET(request: NextRequest) {
     .slice(0, 12)
     .map(({ lastSeen: _lastSeen, ...session }) => session);
 
+  const utmCounts = new Map<string, { source: string; medium: string; campaign: string; visits: number }>();
+  for (const row of allRows) {
+    if (!row.utm_source) continue;
+    const key = `${row.utm_source}|${row.utm_medium || "—"}|${row.utm_campaign || "—"}`;
+    const existing = utmCounts.get(key) || {
+      source: row.utm_source,
+      medium: row.utm_medium || "—",
+      campaign: row.utm_campaign || "—",
+      visits: 0,
+    };
+    existing.visits += 1;
+    utmCounts.set(key, existing);
+  }
+
+  const utmBreakdown = Array.from(utmCounts.values())
+    .sort((a, b) => b.visits - a.visits)
+    .slice(0, 10)
+    .map((entry) => ({
+      ...entry,
+      percentage: Math.round((entry.visits / totalPageviews) * 100),
+    }));
+
   const metrics: AnalyticsMetrics = {
     totalVisitors: uniqueSessions,
     uniqueVisitors,
@@ -279,6 +311,7 @@ export async function GET(request: NextRequest) {
     pageBreakdown,
     deviceBreakdown,
     recentSessions,
+    utmBreakdown,
     telemetryActive: true,
     changes: {
       totalVisitors: formatPercentChange(thisMonthSessions, lastMonthSessions),

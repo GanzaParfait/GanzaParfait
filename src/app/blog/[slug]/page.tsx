@@ -3,8 +3,9 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { siteConfig, blogPosts } from "@/data/site-data";
 import AnimatedSection from "@/components/ui/AnimatedSection";
-import ShareButton from "@/components/ui/ShareButton";
+import ShareActions from "@/components/ui/ShareActions";
 import BlogContentClient from "@/components/blog/BlogContentClient";
+import { buildBreadcrumbJsonLd, buildPageMetadata } from "@/lib/seo";
 import {
   RiArrowLeftLine,
   RiCalendarLine,
@@ -27,24 +28,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: "Post Not Found" };
   }
 
-  return {
+  return buildPageMetadata({
     title: post.title,
-    description: post.excerpt,
-    alternates: { canonical: `${siteConfig.url}/blog/${slug}` },
-    openGraph: {
-      title: `${post.title} — Prince Parfait GANZA`,
-      description: post.excerpt,
-      type: "article",
-      publishedTime: post.date,
-      authors: ["Prince Parfait GANZA"],
-      url: `${siteConfig.url}/blog/${slug}`,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: post.title,
-      description: post.excerpt,
-    },
-  };
+    description: `${post.excerpt} By Prince Parfait GANZA (PPG).`,
+    path: `/blog/${slug}`,
+    keywords: [...post.tags, "PPG blog", "Prince Parfait GANZA"],
+    ogType: "article",
+    publishedTime: post.date,
+  });
 }
 
 export default async function BlogPostPage({ params }: Props) {
@@ -68,6 +59,7 @@ export default async function BlogPostPage({ params }: Props) {
     author: {
       "@type": "Person",
       name: "Prince Parfait GANZA",
+      alternateName: ["PPG", "Prince Parfait GANZA PPG"],
       url: siteConfig.url,
     },
     publisher: {
@@ -76,14 +68,20 @@ export default async function BlogPostPage({ params }: Props) {
       url: siteConfig.url,
     },
     url: `${siteConfig.url}/blog/${slug}`,
-    keywords: post.tags.join(", "),
+    keywords: [...post.tags, "PPG", "Prince Parfait GANZA"].join(", "),
   };
+
+  const breadcrumbSchema = buildBreadcrumbJsonLd([
+    { name: "Home", path: "/" },
+    { name: "Blog", path: "/blog" },
+    { name: post.title, path: `/blog/${slug}` },
+  ]);
 
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify([articleSchema, breadcrumbSchema]) }}
       />
 
       {/* Header */}
@@ -163,7 +161,12 @@ export default async function BlogPostPage({ params }: Props) {
             Back to Blog
           </Link>
 
-          <ShareButton title={post.title} excerpt={post.excerpt} />
+          <ShareActions
+            title={post.title}
+            excerpt={post.excerpt}
+            campaign={`blog-${slug}`}
+            content={slug}
+          />
         </div>
       </section>
     </>

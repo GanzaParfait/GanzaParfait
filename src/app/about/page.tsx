@@ -8,20 +8,17 @@ import {
   RiLinkedinFill,
 } from "react-icons/ri";
 import { siteConfig, timeline, skills } from "@/data/site-data";
+import { buildFaqJsonLd, buildPageMetadata } from "@/lib/seo";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 
-export const metadata: Metadata = {
-  title: "About",
+export const metadata: Metadata = buildPageMetadata({
+  title: "About Prince Parfait GANZA (PPG)",
   description:
-    "Learn about Prince Parfait GANZA — software engineer, AI builder, founder of Lerony, and technology entrepreneur based in Kigali, Rwanda.",
-  alternates: { canonical: `${siteConfig.url}/about` },
-  openGraph: {
-    title: "About — Prince Parfait GANZA",
-    description:
-      "Learn about Prince Parfait GANZA — software engineer, AI builder, and founder of Lerony.",
-    url: `${siteConfig.url}/about`,
-  },
-};
+    "Who is PPG? Prince Parfait GANZA (PPG) is a software engineer, AI builder, founder of Lerony, and technology entrepreneur based in Kigali, Rwanda.",
+  path: "/about",
+  keywords: ["About PPG", "Who is Prince Parfait GANZA", "PPG Rwanda biography"],
+  ogType: "profile",
+});
 
 const structuredData = {
   "@context": "https://schema.org",
@@ -29,11 +26,29 @@ const structuredData = {
   mainEntity: {
     "@type": "Person",
     name: "Prince Parfait GANZA",
+    alternateName: ["PPG", "Prince Parfait GANZA PPG", "PPG Rwanda"],
     description:
       "Software Engineer, AI Builder, and Founder of Lerony based in Kigali, Rwanda.",
     url: siteConfig.url,
   },
 };
+
+const faqSchema = buildFaqJsonLd([
+  {
+    question: "Who is PPG?",
+    answer:
+      "PPG stands for Prince Parfait GANZA — a Rwandan software engineer, AI builder, founder of Lerony, speaker, and entrepreneur based in Kigali.",
+  },
+  {
+    question: "What does Prince Parfait GANZA (PPG) do?",
+    answer:
+      "PPG builds full-stack software products, integrates AI into real-world workflows, leads Lerony, and speaks on technology entrepreneurship across Africa.",
+  },
+  {
+    question: "Where is PPG based?",
+    answer: "Prince Parfait GANZA (PPG) is based in Kigali, Rwanda and works with clients across Africa and globally.",
+  },
+]);
 
 const values = [
   {
@@ -65,7 +80,7 @@ export default function AboutPage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify([structuredData, faqSchema]) }}
       />
 
       {/* Header */}

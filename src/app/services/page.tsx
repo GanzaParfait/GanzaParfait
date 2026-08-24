@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { siteConfig, services } from "@/data/site-data";
+import { services } from "@/data/site-data";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import Link from "next/link";
 import { RiArrowRightLine, RiCheckLine } from "react-icons/ri";
 import { Globe, BrainCircuit, Puzzle, Mic } from "lucide-react";
 import type { ElementType } from "react";
+import { buildBreadcrumbJsonLd, buildPageMetadata, buildWebPageJsonLd } from "@/lib/seo";
 
 const SERVICE_ICONS: Record<string, ElementType> = {
   globe: Globe,
@@ -20,22 +21,31 @@ const SERVICE_COLORS: Record<string, string> = {
   mic: "#10b981",
 };
 
-export const metadata: Metadata = {
-  title: "Services",
+export const metadata: Metadata = buildPageMetadata({
+  title: "Services by PPG — Software, AI & Consulting",
   description:
-    "Software development, AI integration, technical consulting, and speaking services by Prince Parfait GANZA.",
-  alternates: { canonical: `${siteConfig.url}/services` },
-  openGraph: {
-    title: "Services — Prince Parfait GANZA",
-    description:
-      "Web development, AI integration, consulting, and speaking by Prince Parfait GANZA.",
-    url: `${siteConfig.url}/services`,
-  },
-};
+    "Software development, AI integration, technical consulting, and speaking services by Prince Parfait GANZA (PPG) from Kigali, Rwanda.",
+  path: "/services",
+  keywords: ["PPG services", "hire PPG developer", "AI consulting Rwanda", "Prince Parfait GANZA consulting"],
+});
 
 export default function ServicesPage() {
+  const schema = [
+    buildWebPageJsonLd({
+      name: "Services by Prince Parfait GANZA (PPG)",
+      description: "Software development, AI integration, and consulting services.",
+      path: "/services",
+    }),
+    buildBreadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Services", path: "/services" },
+    ]),
+  ];
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+
       {/* Header */}
       <section className="section pt-32 pb-10 relative dot-grid overflow-hidden" aria-label="Services header">
         <div aria-hidden="true" className="absolute inset-0 bg-gradient-radial pointer-events-none" />
