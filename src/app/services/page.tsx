@@ -52,10 +52,10 @@ export default function ServicesPage() {
         <div className="container relative z-10 max-w-4xl">
           <AnimatedSection>
             <p className="section-label">Services</p>
-            <h1 className="text-white mb-4" style={{ fontFamily: "var(--font-heading)" }}>
+            <h1 className="theme-heading mb-4" style={{ fontFamily: "var(--font-heading)" }}>
               How I can help.
             </h1>
-            <p className="text-slate-400 text-lg leading-relaxed max-w-2xl">
+            <p className="theme-copy text-lg leading-relaxed max-w-2xl">
               From building full-stack web applications to integrating AI, I
               work with founders, startups, and organizations to ship
               software that creates lasting value.
@@ -90,19 +90,19 @@ export default function ServicesPage() {
                     );
                   })()}
                   <h2
-                    className="text-white text-xl font-semibold mb-3"
+                    className="theme-heading text-xl font-semibold mb-3"
                     style={{ fontFamily: "var(--font-heading)" }}
                   >
                     {service.title}
                   </h2>
-                  <p className="text-slate-400 mb-6 leading-relaxed">
+                  <p className="theme-copy mb-6 leading-relaxed">
                     {service.description}
                   </p>
                   <ul className="space-y-2" role="list">
                     {service.features.map((feature) => (
                       <li
                         key={feature}
-                        className="flex items-center gap-2.5 text-sm text-slate-400"
+                        className="flex items-center gap-2.5 text-sm theme-copy"
                       >
                         <RiCheckLine
                           size={16}
@@ -125,7 +125,7 @@ export default function ServicesPage() {
         <div className="container max-w-3xl">
           <AnimatedSection className="text-center mb-12">
             <p className="section-label justify-center">How I Work</p>
-            <h2 className="text-white" style={{ fontFamily: "var(--font-heading)" }}>
+            <h2 className="theme-heading" style={{ fontFamily: "var(--font-heading)" }}>
               My process.
             </h2>
           </AnimatedSection>
@@ -155,7 +155,7 @@ export default function ServicesPage() {
             ].map((step, i) => (
               <AnimatedSection as="li" key={step.n} delay={i * 80} className="relative">
                 <div
-                  className="absolute -left-[2.3rem] top-1 w-4 h-4 rounded-full border-2 border-[#0E52A8] bg-[#050816] flex items-center justify-center"
+                  className="theme-timeline-dot absolute -left-[2.3rem] top-1 w-4 h-4 rounded-full border-2 border-[#0E52A8] flex items-center justify-center"
                   aria-hidden="true"
                 >
                   <div className="w-1.5 h-1.5 rounded-full bg-[#0E52A8]" />
@@ -163,11 +163,11 @@ export default function ServicesPage() {
                 <div className="card p-5">
                   <div className="flex items-center gap-3 mb-2">
                     <span className="text-xs font-mono text-[#0E52A8] font-semibold">{step.n}</span>
-                    <h3 className="text-white font-semibold" style={{ fontFamily: "var(--font-heading)" }}>
+                    <h3 className="theme-heading font-semibold" style={{ fontFamily: "var(--font-heading)" }}>
                       {step.title}
                     </h3>
                   </div>
-                  <p className="text-sm text-slate-400">{step.desc}</p>
+                  <p className="text-sm theme-copy">{step.desc}</p>
                 </div>
               </AnimatedSection>
             ))}
@@ -180,10 +180,10 @@ export default function ServicesPage() {
         <div className="container">
           <AnimatedSection className="text-center">
             <p className="section-label justify-center">Start Today</p>
-            <h2 className="text-white mb-4" style={{ fontFamily: "var(--font-heading)" }}>
+            <h2 className="theme-heading mb-4" style={{ fontFamily: "var(--font-heading)" }}>
               Ready to work together?
             </h2>
-            <p className="text-slate-400 mb-8 max-w-md mx-auto">
+            <p className="theme-copy mb-8 max-w-md mx-auto">
               Share your project, and we&apos;ll figure out the best way to
               move forward together.
             </p>

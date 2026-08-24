@@ -48,10 +48,10 @@ export default function ProjectsPage() {
         <div className="container relative z-10 max-w-4xl">
           <AnimatedSection>
             <p className="section-label">Portfolio</p>
-            <h1 className="text-white mb-4" style={{ fontFamily: "var(--font-heading)" }}>
+            <h1 className="theme-heading mb-4" style={{ fontFamily: "var(--font-heading)" }}>
               Things I&apos;ve built.
             </h1>
-            <p className="text-slate-400 text-lg leading-relaxed max-w-2xl">
+            <p className="theme-copy text-lg leading-relaxed max-w-2xl">
               A curated selection of projects by Prince Parfait GANZA (PPG) spanning web development, AI
               integration, SaaS products, and open-source contributions.
             </p>
@@ -64,7 +64,7 @@ export default function ProjectsPage() {
           <div className="container">
             <AnimatedSection className="mb-10">
               <p className="section-label">Featured</p>
-              <h2 className="text-white" style={{ fontFamily: "var(--font-heading)" }}>
+              <h2 className="theme-heading" style={{ fontFamily: "var(--font-heading)" }}>
                 Highlights.
               </h2>
             </AnimatedSection>
@@ -84,7 +84,7 @@ export default function ProjectsPage() {
           <div className="container">
             <AnimatedSection className="mb-10">
               <p className="section-label">More Work</p>
-              <h2 className="text-white" style={{ fontFamily: "var(--font-heading)" }}>
+              <h2 className="theme-heading" style={{ fontFamily: "var(--font-heading)" }}>
                 Other projects.
               </h2>
             </AnimatedSection>
@@ -103,10 +103,10 @@ export default function ProjectsPage() {
         <div className="container">
           <AnimatedSection className="text-center">
             <p className="section-label justify-center">Open Source</p>
-            <h2 className="text-white mb-4" style={{ fontFamily: "var(--font-heading)" }}>
+            <h2 className="theme-heading mb-4" style={{ fontFamily: "var(--font-heading)" }}>
               More on GitHub.
             </h2>
-            <p className="text-slate-400 mb-8 max-w-md mx-auto">
+            <p className="theme-copy mb-8 max-w-md mx-auto">
               These are my highlighted projects. Find more experiments,
               open-source contributions, and work-in-progress on GitHub.
             </p>

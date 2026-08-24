@@ -32,14 +32,14 @@ export default function ProjectCard({ project, featured = false }: ProjectCardPr
       {/* Status + Category */}
       <div className="flex items-center justify-between mb-4">
         <span className={`badge ${status.className}`}>{status.label}</span>
-        <span className="text-xs text-slate-600 font-medium">
+        <span className="text-xs theme-muted font-medium">
           {categoryLabels[project.category]} · {project.year}
         </span>
       </div>
 
       {/* Title */}
       <h3
-        className={`font-semibold text-white mb-2 group-hover:text-[#60a5fa] transition-colors duration-200 ${
+        className={`font-semibold theme-heading mb-2 group-hover:text-[#60a5fa] transition-colors duration-200 ${
           featured ? "text-xl" : "text-lg"
         }`}
         style={{ fontFamily: "var(--font-heading)" }}
@@ -48,7 +48,7 @@ export default function ProjectCard({ project, featured = false }: ProjectCardPr
       </h3>
 
       {/* Description */}
-      <p className="text-sm text-slate-400 leading-relaxed flex-1 mb-5">
+      <p className="text-sm theme-copy leading-relaxed flex-1 mb-5">
         {project.description}
       </p>
 
@@ -61,7 +61,7 @@ export default function ProjectCard({ project, featured = false }: ProjectCardPr
             </span>
           ))}
           {project.technologies.length > (featured ? 6 : 4) && (
-            <span className="tech-tag text-slate-600">
+            <span className="tech-tag theme-muted">
               +{project.technologies.length - (featured ? 6 : 4)}
             </span>
           )}
@@ -73,26 +73,26 @@ export default function ProjectCard({ project, featured = false }: ProjectCardPr
         <div className="flex-1 flex flex-col gap-3 mt-2 mb-6 border-l-2 border-[var(--color-border)] pl-4">
           {project.problem && (
             <div>
-              <span className="block text-[0.65rem] font-bold uppercase tracking-wider text-slate-500 mb-1">Problem</span>
-              <p className="text-sm text-slate-300">{project.problem}</p>
+              <span className="block text-[0.65rem] font-bold uppercase tracking-wider theme-muted mb-1">Problem</span>
+              <p className="text-sm theme-copy">{project.problem}</p>
             </div>
           )}
           {project.whatIBuilt && (
             <div>
-              <span className="block text-[0.65rem] font-bold uppercase tracking-wider text-slate-500 mb-1">What I Built</span>
-              <p className="text-sm text-slate-300">{project.whatIBuilt}</p>
+              <span className="block text-[0.65rem] font-bold uppercase tracking-wider theme-muted mb-1">What I Built</span>
+              <p className="text-sm theme-copy">{project.whatIBuilt}</p>
             </div>
           )}
           {project.myRole && (
             <div>
-              <span className="block text-[0.65rem] font-bold uppercase tracking-wider text-slate-500 mb-1">My Role</span>
-              <p className="text-sm text-slate-300">{project.myRole}</p>
+              <span className="block text-[0.65rem] font-bold uppercase tracking-wider theme-muted mb-1">My Role</span>
+              <p className="text-sm theme-copy">{project.myRole}</p>
             </div>
           )}
           {project.result && (
             <div>
-              <span className="block text-[0.65rem] font-bold uppercase tracking-wider text-slate-500 mb-1">Result</span>
-              <p className="text-sm text-slate-300">{project.result}</p>
+              <span className="block text-[0.65rem] font-bold uppercase tracking-wider theme-muted mb-1">Result</span>
+              <p className="text-sm theme-copy">{project.result}</p>
             </div>
           )}
         </div>
@@ -126,7 +126,7 @@ export default function ProjectCard({ project, featured = false }: ProjectCardPr
             href={project.links.github}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn btn-ghost btn-sm text-slate-400 hover:text-white ml-auto"
+            className="btn btn-ghost btn-sm theme-copy ml-auto"
             aria-label={`View ${project.title} on GitHub (opens in new tab)`}
           >
             <RiGithubFill size={14} />

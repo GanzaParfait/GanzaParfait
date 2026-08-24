@@ -5,8 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
-  RiMenuLine,
-  RiCloseLine,
   RiMenuFoldLine,
   RiMenuUnfoldLine,
   RiGithubFill,
@@ -14,6 +12,11 @@ import {
   RiTwitterXFill,
   RiWhatsappLine,
   RiInstagramLine,
+  RiFacebookFill,
+  RiShareLine,
+  RiFileCopyLine,
+  RiCheckLine,
+  RiCloseLine,
   RiMore2Line,
 } from "react-icons/ri";
 import { siteConfig } from "@/data/site-data";
@@ -30,11 +33,11 @@ const navLinks = [
 ];
 
 const allSocials = [
-  { href: siteConfig.social.whatsapp,     label: "WhatsApp",        icon: RiWhatsappLine },
-  { href: siteConfig.social.linkedin,     label: "LinkedIn",        icon: RiLinkedinFill },
-  { href: siteConfig.social.instagram,    label: "Instagram",       icon: RiInstagramLine },
-  { href: siteConfig.social.github,       label: "GitHub",          icon: RiGithubFill },
-  { href: siteConfig.social.twitter,      label: "X / Twitter",     icon: RiTwitterXFill },
+  { href: siteConfig.social.whatsapp, label: "WhatsApp", icon: RiWhatsappLine },
+  { href: siteConfig.social.linkedin, label: "LinkedIn", icon: RiLinkedinFill },
+  { href: siteConfig.social.instagram, label: "Instagram", icon: RiInstagramLine },
+  { href: siteConfig.social.github, label: "GitHub", icon: RiGithubFill },
+  { href: siteConfig.social.twitter, label: "X / Twitter", icon: RiTwitterXFill },
 ];
 
 export default function Navbar() {
@@ -42,21 +45,20 @@ export default function Navbar() {
   const [isOpen,    setIsOpen]    = useState(false);
   const [isScrolled,setIsScrolled]= useState(false);
   const [isDark,    setIsDark]    = useState(false);
-  const [moreOpen,  setMoreOpen]  = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [settings,  setSettings]  = useState<SiteSettings>(DEFAULT_SETTINGS);
 
   useEffect(() => {
-    setSettings(getLocalSettings());
-    const onUpdate = (e: CustomEvent<SiteSettings>) => {
-      if (e.detail) setSettings(e.detail);
+    queueMicrotask(() => setSettings(getLocalSettings()));
+    const onUpdate: EventListener = (event) => {
+      const detail = (event as CustomEvent<SiteSettings>).detail;
+      if (detail) setSettings(detail);
     };
-    window.addEventListener("site-settings-changed" as any, onUpdate);
-    return () => window.removeEventListener("site-settings-changed" as any, onUpdate);
+    window.addEventListener("site-settings-changed", onUpdate);
+    return () => window.removeEventListener("site-settings-changed", onUpdate);
   }, []);
-
-  const limit = settings.headerSocialLimit || 3;
-  const primarySocials = allSocials.slice(0, limit);
-  const overflowSocials = allSocials.slice(limit);
 
   const handleScroll = useCallback(() => {
     setIsScrolled(window.scrollY > 20);
@@ -78,7 +80,22 @@ export default function Navbar() {
     return () => observer.disconnect();
   }, []);
 
-  useEffect(() => { setIsOpen(false); setMoreOpen(false); }, [pathname]);
+  useEffect(() => {
+    queueMicrotask(() => {
+      setIsOpen(false);
+      setShareOpen(false);
+      setMoreOpen(false);
+    });
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!shareOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setShareOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [shareOpen]);
 
   // Removed scroll lock effect because it breaks scrolling when resizing to desktop
 
@@ -101,8 +118,44 @@ export default function Navbar() {
     active ? "var(--color-primary)" : "var(--color-text-2)";
   const navLinkBg = (active: boolean) =>
     active ? (isDark ? "rgba(14,82,168,0.15)" : "rgba(14,82,168,0.08)") : "transparent";
-  const iconColor = "var(--color-text-3)";
-  const dividerColor = isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)";
+  const primarySocials = allSocials.slice(0, settings.headerSocialLimit || 3);
+  const overflowSocials = allSocials.slice(settings.headerSocialLimit || 3);
+  const getShareDetails = () => {
+    const url = window.location.href.split("?")[0];
+    const title = document.title || "Prince Parfait GANZA";
+    return { url, title, encodedUrl: encodeURIComponent(url), encodedTitle: encodeURIComponent(title) };
+  };
+
+  const copyPageLink = async () => {
+    const { url } = getShareDetails();
+    await navigator.clipboard.writeText(url);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 2000);
+  };
+
+  const openNativeShare = async () => {
+    const { url, title } = getShareDetails();
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, url });
+        setShareOpen(false);
+        return;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+      }
+    }
+    await copyPageLink();
+  };
+
+  const shareOptions = !shareOpen || typeof window === "undefined" ? [] : (() => {
+    const { encodedUrl, encodedTitle } = getShareDetails();
+    return [
+      { label: "WhatsApp", icon: RiWhatsappLine, href: `https://wa.me/?text=${encodedTitle}%20${encodedUrl}` },
+      { label: "LinkedIn", icon: RiLinkedinFill, href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}` },
+      { label: "X", icon: RiTwitterXFill, href: `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}` },
+      { label: "Facebook", icon: RiFacebookFill, href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}` },
+    ];
+  })();
 
   return (
     <>
@@ -199,110 +252,29 @@ export default function Navbar() {
           {/* Right actions */}
           <div style={{ display: "flex", alignItems: "center", gap: "0.25rem", flexShrink: 0 }}>
 
-            {/* Primary social links + "more" — desktop only */}
             <div className="hidden lg:flex" style={{ alignItems: "center", gap: "0.125rem", position: "relative" }}>
               {primarySocials.map(({ href, label, icon: Icon }) => (
-                <a
-                  key={label}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={label}
-                  title={label}
-                  style={{
-                    width: "1.875rem",
-                    height: "1.875rem",
-                    borderRadius: "0.5rem",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: iconColor,
-                    textDecoration: "none",
-                    transition: "all 0.2s ease",
-                  }}
-                  className="nav-social-icon"
-                >
+                <a key={label} href={href} target="_blank" rel="noopener noreferrer" aria-label={label} title={label} className="nav-social-icon navbar-social-link">
                   <Icon size={16} />
                 </a>
               ))}
-
-              {/* More dropdown */}
-              <div style={{ position: "relative" }}>
-                <button
-                  onClick={() => setMoreOpen(!moreOpen)}
-                  aria-label="More social links"
-                  aria-expanded={moreOpen}
-                  style={{
-                    width: "1.875rem",
-                    height: "1.875rem",
-                    borderRadius: "0.5rem",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: iconColor,
-                    background: "transparent",
-                    border: "none",
-                    cursor: "pointer",
-                    transition: "all 0.2s ease",
-                  }}
-                  className="nav-social-icon"
-                >
-                  <RiMore2Line size={16} />
-                </button>
-
-                {moreOpen && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "calc(100% + 0.5rem)",
-                      right: 0,
-                      background: "var(--color-bg)",
-                      border: "1px solid var(--color-border)",
-                      borderRadius: "0.75rem",
-                      padding: "0.5rem",
-                      boxShadow: "var(--shadow-lg)",
-                      minWidth: "10rem",
-                      zIndex: 100,
-                    }}
-                    role="menu"
-                  >
-                    {[
-                      { href: siteConfig.social.github,       label: "GitHub" },
-                      { href: siteConfig.social.twitter,      label: "X / Twitter" },
-                      { href: siteConfig.social.youtube,      label: "YouTube" },
-                      { href: siteConfig.social.tiktok,       label: "TikTok" },
-                      { href: siteConfig.social.threads,      label: "Threads" },
-                      { href: siteConfig.social.luma,         label: "Luma Events" },
-                      { href: siteConfig.social.buymeacoffee, label: "Buy Me a Coffee" },
-                    ].map(({ href, label }) => (
-                      <a
-                        key={label}
-                        href={href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        role="menuitem"
-                        style={{
-                          display: "block",
-                          padding: "0.5rem 0.75rem",
-                          fontSize: "0.8125rem",
-                          color: "var(--color-text-2)",
-                          textDecoration: "none",
-                          borderRadius: "0.5rem",
-                          transition: "all 0.15s ease",
-                          whiteSpace: "nowrap",
-                        }}
-                        className="nav-more-item"
-                      >
-                        {label}
-                      </a>
-                    ))}
-                  </div>
-                )}
-              </div>
+              {overflowSocials.length > 0 && (
+                <div style={{ position: "relative" }}>
+                  <button type="button" onClick={() => setMoreOpen((open) => !open)} aria-label="More social links" aria-expanded={moreOpen} className="nav-social-icon navbar-social-link">
+                    <RiMore2Line size={16} />
+                  </button>
+                  {moreOpen && (
+                    <div className="navbar-more-menu" role="menu">
+                      {overflowSocials.map(({ href, label, icon: Icon }) => (
+                        <a key={label} href={href} target="_blank" rel="noopener noreferrer" role="menuitem" className="nav-more-item navbar-more-item">
+                          <Icon size={16} /> {label}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-
-            {/* Divider */}
-            <div className="hidden lg:block" style={{ width: "1px", height: "1.25rem", background: dividerColor }} />
 
             {/* Theme toggle */}
             <ThemeToggle />
@@ -312,15 +284,27 @@ export default function Navbar() {
               Let&apos;s Talk
             </Link>
 
+            {/* Desktop share occupies the old desktop hamburger position */}
+            <button
+              type="button"
+              onClick={() => setShareOpen(true)}
+              className="navbar-icon-button hidden md:inline-flex"
+              aria-label="Share this page"
+              aria-haspopup="dialog"
+              aria-expanded={shareOpen}
+              title="Share this page"
+            >
+              <RiShareLine size={17} />
+            </button>
+
             {/* Mobile hamburger */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="md:hidden"
+              className="inline-flex md:hidden"
               style={{
                 width: "2.125rem",
                 height: "2.125rem",
                 borderRadius: "0.5rem",
-                display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
                 color: "var(--color-text)",
@@ -338,6 +322,49 @@ export default function Navbar() {
         </div>
         </div>
       </header>
+
+      {shareOpen && (
+        <div className="share-overlay" role="presentation" onMouseDown={() => setShareOpen(false)}>
+          <section
+            className="share-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="share-dialog-title"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div className="share-panel-handle" aria-hidden="true" />
+            <div className="share-panel-header">
+              <div>
+                <p className="section-label">Spread the word</p>
+                <h2 id="share-dialog-title">Share this page</h2>
+              </div>
+              <button type="button" className="navbar-icon-button" onClick={() => setShareOpen(false)} aria-label="Close share options">
+                <RiCloseLine size={19} />
+              </button>
+            </div>
+
+            <div className="share-social-grid">
+              {shareOptions.map(({ label, icon: Icon, href }) => (
+                <a key={label} href={href} target="_blank" rel="noopener noreferrer" className="share-social-option">
+                  <span><Icon size={22} /></span>
+                  {label}
+                </a>
+              ))}
+            </div>
+
+            <div className="share-native-actions">
+              <button type="button" className="btn btn-primary" onClick={openNativeShare}>
+                <RiShareLine size={17} />
+                More sharing options
+              </button>
+              <button type="button" className="btn btn-outline" onClick={copyPageLink}>
+                {copied ? <RiCheckLine size={17} /> : <RiFileCopyLine size={17} />}
+                {copied ? "Link copied" : "Copy link"}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
 
       {/* ── MOBILE BOTTOM SHEET ── */}
       {/* Backdrop */}
@@ -415,6 +442,14 @@ export default function Navbar() {
 
         {/* Bottom actions */}
         <div style={{ marginTop: "0.5rem", paddingTop: "0.5rem", borderTop: "1px solid var(--color-border)" }}>
+          <button
+            type="button"
+            className="btn btn-outline btn-sm"
+            onClick={() => { setIsOpen(false); setShareOpen(true); }}
+            style={{ width: "100%", justifyContent: "center", marginBottom: "0.5rem" }}
+          >
+            <RiShareLine size={16} /> Share this page
+          </button>
           <Link href="/contact" className="btn btn-primary btn-sm" style={{ width: "100%", justifyContent: "center", marginBottom: "0.5rem" }}>
             Let&apos;s Talk
           </Link>
@@ -440,15 +475,6 @@ export default function Navbar() {
           </div>
         </div>
       </div>
-
-      {/* Close "more" dropdown when clicking outside */}
-      {moreOpen && (
-        <div
-          style={{ position: "fixed", inset: 0, zIndex: 45 }}
-          onClick={() => setMoreOpen(false)}
-          aria-hidden="true"
-        />
-      )}
     </>
   );
 }

@@ -76,10 +76,10 @@ export default function SpeakingPage() {
         <div className="container relative z-10 max-w-4xl">
           <AnimatedSection>
             <p className="section-label">Speaking</p>
-            <h1 className="text-white mb-4" style={{ fontFamily: "var(--font-heading)" }}>
+            <h1 className="theme-heading mb-4" style={{ fontFamily: "var(--font-heading)" }}>
               Sharing what I know.
             </h1>
-            <p className="text-slate-400 text-lg leading-relaxed max-w-2xl">
+            <p className="theme-copy text-lg leading-relaxed max-w-2xl">
               I speak at conferences, universities, and events on AI, software
               engineering, and building technology in Africa. If you&apos;d like me
               to speak at your event, reach out.
@@ -93,7 +93,7 @@ export default function SpeakingPage() {
         <div className="container">
           <AnimatedSection className="mb-12">
             <p className="section-label">Topics</p>
-            <h2 className="text-white" style={{ fontFamily: "var(--font-heading)" }}>
+            <h2 className="theme-heading" style={{ fontFamily: "var(--font-heading)" }}>
               What I speak about.
             </h2>
           </AnimatedSection>
@@ -110,12 +110,12 @@ export default function SpeakingPage() {
                   </div>
                   <div>
                     <h3
-                      className="text-white font-semibold mb-2"
+                      className="theme-heading font-semibold mb-2"
                       style={{ fontFamily: "var(--font-heading)" }}
                     >
                       {topic.title}
                     </h3>
-                    <p className="text-sm text-slate-400 leading-relaxed">
+                    <p className="text-sm theme-copy leading-relaxed">
                       {topic.description}
                     </p>
                   </div>
@@ -131,7 +131,7 @@ export default function SpeakingPage() {
         <div className="container max-w-3xl">
           <AnimatedSection className="mb-10">
             <p className="section-label">Past Engagements</p>
-            <h2 className="text-white" style={{ fontFamily: "var(--font-heading)" }}>
+            <h2 className="theme-heading" style={{ fontFamily: "var(--font-heading)" }}>
               Where I&apos;ve spoken.
             </h2>
           </AnimatedSection>
@@ -148,16 +148,16 @@ export default function SpeakingPage() {
                       <span className={`badge ${typeConfig[engagement.type]}`}>
                         {engagement.type}
                       </span>
-                      <time className="text-xs text-slate-600">{engagement.date}</time>
+                      <time className="text-xs theme-muted">{engagement.date}</time>
                     </div>
                     <h3
-                      className="text-white font-semibold mb-1"
+                      className="theme-heading font-semibold mb-1"
                       style={{ fontFamily: "var(--font-heading)" }}
                     >
                       {engagement.title}
                     </h3>
                     <p className="text-sm text-[#60a5fa]">{engagement.event}</p>
-                    <p className="text-xs text-slate-600 mt-0.5">{engagement.location}</p>
+                    <p className="text-xs theme-muted mt-0.5">{engagement.location}</p>
                   </div>
                 </article>
               </AnimatedSection>

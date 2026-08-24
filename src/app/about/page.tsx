@@ -99,20 +99,20 @@ export default function AboutPage() {
               <AnimatedSection>
                 <p className="section-label">About Me</p>
                 <h1
-                  className="text-white mb-5"
+                  className="theme-heading mb-5"
                   style={{ fontFamily: "var(--font-heading)" }}
                 >
                   Building from Kigali,
                   <br />
                   <span className="text-[#0E52A8]">for the world.</span>
                 </h1>
-                <p className="text-slate-400 leading-relaxed mb-6 text-lg">
-                  I&apos;m <strong className="text-white">Prince Parfait GANZA</strong> — a software
+                <p className="theme-copy leading-relaxed mb-6 text-lg">
+                  I&apos;m <strong className="theme-heading">Prince Parfait GANZA</strong> — a software
                   engineer, AI builder, and founder based in Kigali, Rwanda. I
                   build full-stack web applications and AI-powered tools that
                   solve real problems across Africa and beyond.
                 </p>
-                <p className="text-slate-400 leading-relaxed mb-8">
+                <p className="theme-copy leading-relaxed mb-8">
                   As the founder of{" "}
                   <a
                     href="https://lerony.com"
@@ -194,7 +194,7 @@ export default function AboutPage() {
         <div className="container">
           <AnimatedSection className="text-center mb-12">
             <p className="section-label justify-center">Principles</p>
-            <h2 className="text-white" style={{ fontFamily: "var(--font-heading)" }}>
+            <h2 className="theme-heading" style={{ fontFamily: "var(--font-heading)" }}>
               What I stand for.
             </h2>
           </AnimatedSection>
@@ -204,12 +204,12 @@ export default function AboutPage() {
                 <div className="card glass-hover p-6 h-full">
                   <div className="w-2 h-2 rounded-full bg-[#0E52A8] mb-4" />
                   <h3
-                    className="text-white font-semibold mb-2 text-base"
+                    className="theme-heading font-semibold mb-2 text-base"
                     style={{ fontFamily: "var(--font-heading)" }}
                   >
                     {val.title}
                   </h3>
-                  <p className="text-sm text-slate-500 leading-relaxed">
+                  <p className="text-sm theme-copy leading-relaxed">
                     {val.description}
                   </p>
                 </div>
@@ -224,7 +224,7 @@ export default function AboutPage() {
         <div className="container max-w-4xl">
           <AnimatedSection className="mb-12">
             <p className="section-label">Skills</p>
-            <h2 className="text-white mb-2" style={{ fontFamily: "var(--font-heading)" }}>
+            <h2 className="theme-heading mb-2" style={{ fontFamily: "var(--font-heading)" }}>
               My technical toolkit.
             </h2>
           </AnimatedSection>
@@ -260,7 +260,7 @@ export default function AboutPage() {
         <div className="container max-w-3xl">
           <AnimatedSection className="mb-12">
             <p className="section-label">Journey</p>
-            <h2 className="text-white" style={{ fontFamily: "var(--font-heading)" }}>
+            <h2 className="theme-heading" style={{ fontFamily: "var(--font-heading)" }}>
               How I got here.
             </h2>
           </AnimatedSection>
@@ -275,7 +275,7 @@ export default function AboutPage() {
               >
                 {/* Dot */}
                 <div
-                  className="absolute -left-[2.3rem] top-1 w-4 h-4 rounded-full border-2 border-[#0E52A8] bg-[#050816] flex items-center justify-center"
+                  className="theme-timeline-dot absolute -left-[2.3rem] top-1 w-4 h-4 rounded-full border-2 border-[#0E52A8] flex items-center justify-center"
                   aria-hidden="true"
                 >
                   <div className="w-1.5 h-1.5 rounded-full bg-[#0E52A8]" />
@@ -284,7 +284,7 @@ export default function AboutPage() {
                 <div className="card p-5">
                   <div className="flex items-start justify-between gap-4 mb-2">
                     <h3
-                      className="text-white font-semibold"
+                      className="theme-heading font-semibold"
                       style={{ fontFamily: "var(--font-heading)" }}
                     >
                       {item.title}
@@ -299,7 +299,7 @@ export default function AboutPage() {
                   <p className="text-sm text-[#60a5fa] mb-2 font-medium">
                     {item.organization}
                   </p>
-                  <p className="text-sm text-slate-400">{item.description}</p>
+                  <p className="text-sm theme-copy">{item.description}</p>
                 </div>
               </AnimatedSection>
             ))}
@@ -313,12 +313,12 @@ export default function AboutPage() {
           <AnimatedSection className="text-center">
             <p className="section-label justify-center">Ready to build?</p>
             <h2
-              className="text-white mb-4"
+              className="theme-heading mb-4"
               style={{ fontFamily: "var(--font-heading)" }}
             >
               Let&apos;s work together.
             </h2>
-            <p className="text-slate-400 mb-8 max-w-md mx-auto">
+            <p className="theme-copy mb-8 max-w-md mx-auto">
               Whether you have a project, a question, or just want to connect —
               my inbox is always open.
             </p>

@@ -42,7 +42,7 @@ export default function BlogCard({ post, featured = false }: BlogCardProps) {
       {/* Title */}
       <Link href={`/blog/${post.slug}`} className="group-hover:text-[#60a5fa] transition-colors">
         <h3
-          className={`font-semibold text-white mb-3 leading-snug ${
+          className={`font-semibold theme-heading mb-3 leading-snug ${
             featured ? "text-xl" : "text-lg"
           }`}
           style={{ fontFamily: "var(--font-heading)" }}
@@ -52,7 +52,7 @@ export default function BlogCard({ post, featured = false }: BlogCardProps) {
       </Link>
 
       {/* Excerpt */}
-      <p className="text-sm text-slate-400 leading-relaxed flex-1 mb-5">
+      <p className="text-sm theme-copy leading-relaxed flex-1 mb-5">
         {post.excerpt}
       </p>
 
@@ -67,7 +67,7 @@ export default function BlogCard({ post, featured = false }: BlogCardProps) {
 
       {/* Footer */}
       <div className="flex items-center justify-between pt-4 border-t border-[rgba(14,82,168,0.1)]">
-        <div className="flex items-center gap-3 text-xs text-slate-600">
+        <div className="flex items-center gap-3 text-xs theme-muted">
           <span className="flex items-center gap-1">
             <RiCalendarLine size={12} />
             <time dateTime={post.date}>{formattedDate}</time>

@@ -58,19 +58,19 @@ export default function ContactPageClient() {
         <div>
           <p className="section-label">Contact</p>
           <h1
-            className="text-white mb-3"
+            className="theme-heading mb-3"
             style={{ fontFamily: "var(--font-heading)" }}
           >
             Let&apos;s talk.
           </h1>
-          <p className="text-slate-400 leading-relaxed">
+          <p className="theme-copy leading-relaxed">
             Whether you have a project, an idea, or just want to connect — I&apos;m
             always open to interesting conversations.
           </p>
         </div>
 
         <div className="space-y-4">
-          <div className="flex items-center gap-3 text-slate-400">
+          <div className="flex items-center gap-3 theme-copy">
             <div
               className="w-10 h-10 rounded-lg glass flex items-center justify-center text-[#0E52A8]"
               aria-hidden="true"
@@ -78,17 +78,17 @@ export default function ContactPageClient() {
               <RiMailLine size={18} />
             </div>
             <div>
-              <p className="text-xs text-slate-600 mb-0.5">Email</p>
+              <p className="text-xs theme-muted mb-0.5">Email</p>
               <a
                 href={`mailto:${siteConfig.contact.email}`}
-                className="text-sm text-white hover:text-[#60a5fa] transition-colors"
+                className="text-sm theme-heading hover:text-[#60a5fa] transition-colors"
               >
                 {siteConfig.contact.email}
               </a>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 text-slate-400">
+          <div className="flex items-center gap-3 theme-copy">
             <div
               className="w-10 h-10 rounded-lg glass flex items-center justify-center text-[#0E52A8]"
               aria-hidden="true"
@@ -96,15 +96,15 @@ export default function ContactPageClient() {
               <RiMapPinLine size={18} />
             </div>
             <div>
-              <p className="text-xs text-slate-600 mb-0.5">Location</p>
-              <p className="text-sm text-white">{siteConfig.contact.location} 🇷🇼</p>
+              <p className="text-xs theme-muted mb-0.5">Location</p>
+              <p className="text-sm theme-heading">{siteConfig.contact.location} 🇷🇼</p>
             </div>
           </div>
         </div>
 
         {/* Social links */}
         <div>
-          <p className="text-xs text-slate-600 uppercase tracking-widest mb-3">
+          <p className="text-xs theme-muted uppercase tracking-widest mb-3">
             Social
           </p>
           <div className="flex gap-3">
@@ -119,7 +119,7 @@ export default function ContactPageClient() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={label}
-                className="w-10 h-10 rounded-lg glass flex items-center justify-center text-slate-400 hover:text-white hover:border-[rgba(14,82,168,0.5)] transition-all"
+                className="w-10 h-10 rounded-lg glass flex items-center justify-center theme-copy hover:border-[rgba(14,82,168,0.5)] transition-all"
               >
                 <Icon size={17} />
               </a>
@@ -136,7 +136,7 @@ export default function ContactPageClient() {
             />
             <p className="text-xs font-semibold text-emerald-400">Usually responds within 24h</p>
           </div>
-          <p className="text-xs text-slate-600">
+          <p className="text-xs theme-muted">
             Based in Kigali, Rwanda (UTC+2). I try to respond to every serious inquiry.
           </p>
         </div>
@@ -151,12 +151,12 @@ export default function ContactPageClient() {
                 <RiCheckLine size={28} className="text-emerald-400" />
               </div>
               <h3
-                className="text-white font-semibold text-xl mb-2"
+                className="theme-heading font-semibold text-xl mb-2"
                 style={{ fontFamily: "var(--font-heading)" }}
               >
                 Message sent!
               </h3>
-              <p className="text-slate-400 text-sm max-w-xs">
+              <p className="theme-copy text-sm max-w-xs">
                 Thanks for reaching out. I&apos;ll get back to you within 24 hours.
               </p>
               <button
@@ -172,7 +172,7 @@ export default function ContactPageClient() {
           ) : (
             <form onSubmit={handleSubmit} aria-label="Contact form" noValidate>
               <h2
-                className="text-white font-semibold text-lg mb-6"
+                className="theme-heading font-semibold text-lg mb-6"
                 style={{ fontFamily: "var(--font-heading)" }}
               >
                 Send a message
@@ -194,7 +194,7 @@ export default function ContactPageClient() {
                 <div>
                   <label
                     htmlFor="contact-name"
-                    className="block text-xs font-medium text-slate-400 mb-1.5"
+                    className="block text-xs font-medium theme-copy mb-1.5"
                   >
                     Full Name <span aria-label="required" className="text-[#0E52A8]">*</span>
                   </label>
@@ -206,7 +206,7 @@ export default function ContactPageClient() {
                     onChange={handleChange}
                     required
                     placeholder="Your name"
-                    className="w-full bg-[rgba(14,82,168,0.06)] border border-[rgba(14,82,168,0.2)] rounded-lg px-4 py-3 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-[#0E52A8] transition-colors"
+                    className="theme-input w-full border border-[rgba(14,82,168,0.2)] rounded-lg px-4 py-3 text-sm placeholder:text-slate-600 focus:outline-none focus:border-[#0E52A8] transition-colors"
                     autoComplete="name"
                   />
                 </div>
@@ -215,7 +215,7 @@ export default function ContactPageClient() {
                 <div>
                   <label
                     htmlFor="contact-email"
-                    className="block text-xs font-medium text-slate-400 mb-1.5"
+                    className="block text-xs font-medium theme-copy mb-1.5"
                   >
                     Email <span aria-label="required" className="text-[#0E52A8]">*</span>
                   </label>
@@ -227,7 +227,7 @@ export default function ContactPageClient() {
                     onChange={handleChange}
                     required
                     placeholder="you@example.com"
-                    className="w-full bg-[rgba(14,82,168,0.06)] border border-[rgba(14,82,168,0.2)] rounded-lg px-4 py-3 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-[#0E52A8] transition-colors"
+                    className="theme-input w-full border border-[rgba(14,82,168,0.2)] rounded-lg px-4 py-3 text-sm placeholder:text-slate-600 focus:outline-none focus:border-[#0E52A8] transition-colors"
                     autoComplete="email"
                   />
                 </div>
@@ -237,7 +237,7 @@ export default function ContactPageClient() {
               <div className="mb-4">
                 <label
                   htmlFor="contact-reason"
-                  className="block text-xs font-medium text-slate-400 mb-1.5"
+                  className="block text-xs font-medium theme-copy mb-1.5"
                 >
                   Reason for contact
                 </label>
@@ -246,14 +246,13 @@ export default function ContactPageClient() {
                   name="reason"
                   value={formData.reason}
                   onChange={handleChange}
-                  className="w-full bg-[rgba(14,82,168,0.06)] border border-[rgba(14,82,168,0.2)] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#0E52A8] transition-colors"
-                  style={{ color: formData.reason ? "white" : "#475569" }}
+                  className="theme-input w-full border border-[rgba(14,82,168,0.2)] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#0E52A8] transition-colors"
                 >
                   <option value="" disabled>
                     Select a reason
                   </option>
                   {contactReasons.map((reason) => (
-                    <option key={reason} value={reason} style={{ background: "#050816" }}>
+                    <option key={reason} value={reason} style={{ background: "var(--color-bg)" }}>
                       {reason}
                     </option>
                   ))}
@@ -264,7 +263,7 @@ export default function ContactPageClient() {
               <div className="mb-6">
                 <label
                   htmlFor="contact-message"
-                  className="block text-xs font-medium text-slate-400 mb-1.5"
+                  className="block text-xs font-medium theme-copy mb-1.5"
                 >
                   Message <span aria-label="required" className="text-[#0E52A8]">*</span>
                 </label>
@@ -276,7 +275,7 @@ export default function ContactPageClient() {
                   onChange={handleChange}
                   required
                   placeholder="Tell me about your project, question, or idea..."
-                  className="w-full bg-[rgba(14,82,168,0.06)] border border-[rgba(14,82,168,0.2)] rounded-lg px-4 py-3 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-[#0E52A8] transition-colors resize-none"
+                  className="theme-input w-full border border-[rgba(14,82,168,0.2)] rounded-lg px-4 py-3 text-sm placeholder:text-slate-600 focus:outline-none focus:border-[#0E52A8] transition-colors resize-none"
                 />
               </div>
 
