@@ -359,7 +359,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </Link>
         </aside>
 
-        <main style={{ flex: 1, height: "100%", overflowY: "auto", padding: "1.5rem 1.75rem" }}>
+        <main style={{ flex: 1, height: "100%", overflowY: "auto", padding: "1.5rem 1.75rem", background: "linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%)" }}>
           {children}
         </main>
       </div>

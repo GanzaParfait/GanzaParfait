@@ -46,43 +46,26 @@ export interface AnalyticsMetrics {
   countryBreakdown: { country: string; flag: string; count: number; percentage: number }[];
   pageBreakdown: { path: string; name: string; views: number }[];
   deviceBreakdown: { device: string; icon: string; percentage: number }[];
-  recentLogs: { id: string; time: string; country: string; flag: string; page: string; device: string; ip: string }[];
+  recentSessions: {
+    id: string;
+    time: string;
+    country: string;
+    flag: string;
+    device: string;
+    ip: string;
+    pageCount: number;
+    duration: string;
+    pages: { path: string; name: string; time: string }[];
+  }[];
+  telemetryActive: boolean;
+  changes: {
+    totalVisitors: string;
+    uniqueVisitors: string;
+    totalPageviews: string;
+    engagement: string;
+  };
+  error?: string;
 }
-
-export const MOCK_ANALYTICS: AnalyticsMetrics = {
-  totalVisitors: 14850,
-  uniqueVisitors: 9420,
-  totalPageviews: 38200,
-  avgDuration: "3m 42s",
-  bounceRate: "34.2%",
-  countryBreakdown: [
-    { country: "Rwanda", flag: "🇷🇼", count: 6682, percentage: 45 },
-    { country: "United States", flag: "🇺🇸", count: 3267, percentage: 22 },
-    { country: "Kenya", flag: "🇰🇪", count: 1782, percentage: 12 },
-    { country: "United Kingdom", flag: "🇬🇧", count: 1336, percentage: 9 },
-    { country: "Germany", flag: "🇩🇪", count: 891, percentage: 6 },
-    { country: "Others", flag: "🌍", count: 892, percentage: 6 },
-  ],
-  pageBreakdown: [
-    { path: "/", name: "Homepage", views: 18450 },
-    { path: "/projects", name: "Projects", views: 9200 },
-    { path: "/about", name: "About", views: 5300 },
-    { path: "/blog", name: "Blog Posts", views: 3400 },
-    { path: "/contact", name: "Contact Page", views: 1850 },
-  ],
-  deviceBreakdown: [
-    { device: "Mobile", icon: "mobile", percentage: 58 },
-    { device: "Desktop", icon: "desktop", percentage: 38 },
-    { device: "Tablet", icon: "tablet", percentage: 4 },
-  ],
-  recentLogs: [
-    { id: "1", time: "2 mins ago", country: "Rwanda", flag: "🇷🇼", page: "/", device: "Mobile (Safari)", ip: "197.243.0.12" },
-    { id: "2", time: "7 mins ago", country: "United States", flag: "🇺🇸", page: "/projects", device: "Desktop (Chrome)", ip: "104.28.192.4" },
-    { id: "3", time: "14 mins ago", country: "Kenya", flag: "🇰🇪", page: "/", device: "Mobile (Chrome)", ip: "105.163.2.89" },
-    { id: "4", time: "22 mins ago", country: "Rwanda", flag: "🇷🇼", page: "/blog/building-ai-africa", device: "Desktop (Firefox)", ip: "197.243.14.5" },
-    { id: "5", time: "35 mins ago", country: "United Kingdom", flag: "🇬🇧", page: "/contact", device: "Desktop (Edge)", ip: "86.15.22.101" },
-  ],
-};
 
 const SETTINGS_STORAGE_KEY = "ppg_site_settings";
 export const SIDEBAR_STORAGE_KEY = "ppg_sidebar_open";

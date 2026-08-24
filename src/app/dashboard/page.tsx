@@ -1,170 +1,290 @@
 "use client";
 
-import { useState } from "react";
-import { RiGroupLine, RiUser3Line, RiEyeLine, RiTimeLine, RiGlobalLine } from "react-icons/ri";
+import { useCallback, useEffect, useState } from "react";
+import {
+  RiGroupLine,
+  RiUser3Line,
+  RiEyeLine,
+  RiTimeLine,
+  RiGlobalLine,
+  RiRefreshLine,
+  RiArrowDownSLine,
+} from "react-icons/ri";
 import { Smartphone, Monitor, Tablet } from "lucide-react";
-import { MOCK_ANALYTICS, AnalyticsMetrics } from "@/lib/supabase";
+import type { AnalyticsMetrics } from "@/lib/supabase";
+import "./analytics.css";
+
+const EMPTY_ANALYTICS: AnalyticsMetrics = {
+  totalVisitors: 0,
+  uniqueVisitors: 0,
+  totalPageviews: 0,
+  avgDuration: "0s",
+  bounceRate: "0%",
+  countryBreakdown: [],
+  pageBreakdown: [],
+  deviceBreakdown: [],
+  recentSessions: [],
+  telemetryActive: false,
+  changes: {
+    totalVisitors: "Loading...",
+    uniqueVisitors: "Loading...",
+    totalPageviews: "Loading...",
+    engagement: "Loading...",
+  },
+};
+
+const STAT_CARDS = [
+  { key: "totalVisitors", label: "Total Sessions", icon: RiGroupLine, color: "#0e52a8" },
+  { key: "uniqueVisitors", label: "Unique Visitors", icon: RiUser3Line, color: "#6366f1" },
+  { key: "totalPageviews", label: "Total Pageviews", icon: RiEyeLine, color: "#0891b2" },
+  { key: "avgDuration", label: "Avg. Session Duration", icon: RiTimeLine, color: "#16a34a", isDuration: true },
+] as const;
 
 export default function DashboardOverviewPage() {
-  const [analytics] = useState<AnalyticsMetrics>(MOCK_ANALYTICS);
+  const [analytics, setAnalytics] = useState<AnalyticsMetrics>(EMPTY_ANALYTICS);
+  const [loading, setLoading] = useState(true);
+  const [expandedSession, setExpandedSession] = useState<string | null>(null);
+
+  const loadAnalytics = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/analytics/metrics", { cache: "no-store" });
+      if (!res.ok) throw new Error("Failed to load analytics");
+      const data = (await res.json()) as AnalyticsMetrics;
+      setAnalytics(data);
+    } catch {
+      setAnalytics({
+        ...EMPTY_ANALYTICS,
+        telemetryActive: false,
+        error: "Could not load analytics data.",
+        changes: {
+          totalVisitors: "Unavailable",
+          uniqueVisitors: "Unavailable",
+          totalPageviews: "Unavailable",
+          engagement: "Unavailable",
+        },
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadAnalytics();
+    const interval = setInterval(loadAnalytics, 30000);
+    return () => clearInterval(interval);
+  }, [loadAnalytics]);
+
+  const getStatValue = (key: (typeof STAT_CARDS)[number]["key"]) => {
+    if (loading) return "...";
+    const value = analytics[key];
+    return typeof value === "number" ? value.toLocaleString() : value;
+  };
+
+  const getStatChange = (key: (typeof STAT_CARDS)[number]["key"]) => {
+    if (key === "avgDuration") return analytics.changes.engagement;
+    if (key === "totalVisitors") return analytics.changes.totalVisitors;
+    if (key === "uniqueVisitors") return analytics.changes.uniqueVisitors;
+    return analytics.changes.totalPageviews;
+  };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.75rem" }}>
+    <div className="analytics-page">
+      <div className="analytics-header">
         <div>
-          <h1 style={{ fontSize: "1.375rem", fontWeight: 800, color: "#0f172a", letterSpacing: "-0.01em" }}>
-            Analytics & Performance Index
-          </h1>
-          <p style={{ fontSize: "0.8125rem", color: "#64748b", marginTop: "0.15rem" }}>
-            Real-time visitor telemetry, geographic country capture, and traffic streams.
+          <h1>Analytics & Performance</h1>
+          <p>
+            Live visitor intelligence — geo capture, session journeys, device mix, and page performance in one view.
           </p>
+          {analytics.error && <p className="analytics-error">{analytics.error}</p>}
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", background: "#ffffff", border: "1px solid #e2e8f0", padding: "0.375rem 0.875rem", borderRadius: "0.375rem", fontSize: "0.75rem", fontWeight: 700, color: "#16a34a" }}>
-          <span style={{ width: "0.45rem", height: "0.45rem", borderRadius: "50%", background: "#22c55e", display: "inline-block" }} />
-          Database Telemetry Active
+
+        <div className="analytics-header-actions">
+          <button type="button" className="analytics-btn" onClick={loadAnalytics} disabled={loading}>
+            <RiRefreshLine size={15} />
+            Refresh
+          </button>
+          <div className={`analytics-status ${analytics.telemetryActive ? "analytics-status--live" : "analytics-status--offline"}`}>
+            <span className="analytics-status-dot" />
+            {analytics.telemetryActive ? "Live Telemetry" : "Telemetry Offline"}
+          </div>
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(12rem, 1fr))", gap: "1rem" }}>
-        {[
-          { label: "Total Site Visitors", value: analytics.totalVisitors.toLocaleString(), icon: RiGroupLine, change: "+14.2% this month", color: "#1d4ed8" },
-          { label: "Unique Visitors", value: analytics.uniqueVisitors.toLocaleString(), icon: RiUser3Line, change: "+8.5% new audience", color: "#6366f1" },
-          { label: "Total Pageviews", value: analytics.totalPageviews.toLocaleString(), icon: RiEyeLine, change: "+22.4% engagement", color: "#0891b2" },
-          { label: "Avg. Session Duration", value: analytics.avgDuration, icon: RiTimeLine, change: "Low bounce rate (34%)", color: "#16a34a" },
-        ].map((s) => {
-          const Icon = s.icon;
+      <div className="analytics-stats">
+        {STAT_CARDS.map((stat) => {
+          const Icon = stat.icon;
           return (
-            <div
-              key={s.label}
-              style={{
-                background: "#ffffff",
-                border: "1px solid #e2e8f0",
-                borderRadius: "0.375rem",
-                padding: "1.125rem",
-                boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.625rem" }}>
-                <span style={{ fontSize: "0.75rem", fontWeight: 600, color: "#64748b" }}>{s.label}</span>
-                <div style={{ width: "2rem", height: "2rem", borderRadius: "0.375rem", background: "#f1f5f9", color: s.color, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div key={stat.key} className="analytics-stat" style={{ ["--stat-accent" as string]: stat.color }}>
+              <div className="analytics-stat-top">
+                <span className="analytics-stat-label">{stat.label}</span>
+                <div className="analytics-stat-icon">
                   <Icon size={18} />
                 </div>
               </div>
-              <p style={{ fontSize: "1.5rem", fontWeight: 800, color: "#0f172a", lineHeight: 1 }}>{s.value}</p>
-              <p style={{ fontSize: "0.7rem", color: "#16a34a", marginTop: "0.35rem", fontWeight: 700 }}>{s.change}</p>
+              <p className="analytics-stat-value">{getStatValue(stat.key)}</p>
+              <p className="analytics-stat-change">{getStatChange(stat.key)}</p>
             </div>
           );
         })}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: "1.25rem" }} className="grid-cols-1 lg:grid-cols-[1.6fr_1fr]">
-        <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "0.375rem", padding: "1.25rem", boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
-          <div style={{ marginBottom: "1rem" }}>
-            <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "#0f172a", display: "flex", alignItems: "center", gap: "0.375rem" }}>
-              <RiGlobalLine style={{ color: "#1d4ed8" }} /> Geographic Visitor Capture by Country
-            </h3>
-            <p style={{ fontSize: "0.75rem", color: "#64748b", marginTop: "0.1rem" }}>
-              Real-time country telemetry originating web traffic to princeparfait.com
-            </p>
+      <div className="analytics-grid">
+        <section className="analytics-panel">
+          <div className="analytics-panel-title">
+            <RiGlobalLine style={{ color: "#0e52a8" }} />
+            Geographic Distribution
           </div>
+          <p className="analytics-panel-subtitle">Resolved from CDN edge headers and IP geolocation APIs</p>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-            {analytics.countryBreakdown.map((c) => (
-              <div key={c.country}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.8125rem", marginBottom: "0.25rem" }}>
-                  <span style={{ fontWeight: 700, color: "#0f172a", display: "flex", alignItems: "center", gap: "0.375rem" }}>
-                    <span style={{ fontSize: "1rem" }}>{c.flag}</span> {c.country}
-                  </span>
-                  <span style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: 700 }}>
-                    {c.count.toLocaleString()} visits ({c.percentage}%)
-                  </span>
+          {analytics.countryBreakdown.length === 0 ? (
+            <div className="analytics-empty" style={{ marginTop: "1rem" }}>
+              No geography recorded yet. Visit the public site to start capturing country-level traffic.
+            </div>
+          ) : (
+            <div style={{ marginTop: "1rem" }}>
+              {analytics.countryBreakdown.map((country) => (
+                <div key={country.country} className="analytics-bar-row">
+                  <div className="analytics-bar-meta">
+                    <strong>
+                      <span>{country.flag}</span> {country.country}
+                    </strong>
+                    <span style={{ color: "#64748b", fontWeight: 700 }}>
+                      {country.count.toLocaleString()} ({country.percentage}%)
+                    </span>
+                  </div>
+                  <div className="analytics-bar-track">
+                    <div
+                      className="analytics-bar-fill"
+                      style={{
+                        width: `${country.percentage}%`,
+                        background:
+                          country.country === "Rwanda"
+                            ? "linear-gradient(90deg, #0e52a8, #1a6dd4)"
+                            : undefined,
+                      }}
+                    />
+                  </div>
                 </div>
-                <div style={{ width: "100%", height: "0.375rem", borderRadius: "0.25rem", background: "#f1f5f9", overflow: "hidden" }}>
-                  <div
-                    style={{
-                      width: `${c.percentage}%`,
-                      height: "100%",
-                      borderRadius: "0.25rem",
-                      background: c.country === "Rwanda" ? "#1d4ed8" : "linear-gradient(90deg, #6366f1, #0891b2)",
-                    }}
-                  />
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section className="analytics-panel">
+          <div className="analytics-panel-title">Device Mix</div>
+          <p className="analytics-panel-subtitle">Hardware categories parsed from user-agent data</p>
+
+          {analytics.deviceBreakdown.length === 0 ? (
+            <div className="analytics-empty" style={{ marginTop: "1rem" }}>No device data yet.</div>
+          ) : (
+            <div style={{ marginTop: "1rem" }}>
+              {analytics.deviceBreakdown.map((device) => {
+                const DeviceIcon =
+                  device.icon === "mobile" ? Smartphone : device.icon === "desktop" ? Monitor : Tablet;
+                const color =
+                  device.icon === "mobile" ? "#0e52a8" : device.icon === "desktop" ? "#6366f1" : "#0ea5e9";
+
+                return (
+                  <div key={device.device} className="analytics-device-row">
+                    <div className="analytics-device-left">
+                      <div
+                        className="analytics-device-icon"
+                        style={{ background: `${color}14`, color }}
+                      >
+                        <DeviceIcon size={17} strokeWidth={2.2} />
+                      </div>
+                      <div>
+                        <p style={{ fontSize: "0.875rem", fontWeight: 800, color: "#0b192c" }}>{device.device}</p>
+                        <p style={{ fontSize: "0.68rem", color: "#64748b" }}>{device.percentage}% of traffic</p>
+                      </div>
+                    </div>
+                    <span style={{ fontSize: "1.125rem", fontWeight: 800, color }}>{device.percentage}%</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      </div>
+
+      {analytics.pageBreakdown.length > 0 && (
+        <section className="analytics-panel">
+          <div className="analytics-panel-title">Top Pages</div>
+          <p className="analytics-panel-subtitle">Most visited routes ranked by total pageviews</p>
+          <div className="analytics-pages-list" style={{ marginTop: "1rem" }}>
+            {analytics.pageBreakdown.map((page, index) => (
+              <div key={page.path} className="analytics-page-row">
+                <div className="analytics-page-rank">{index + 1}</div>
+                <div>
+                  <div className="analytics-page-name">{page.name}</div>
+                  <div className="analytics-page-path">{page.path}</div>
                 </div>
+                <div className="analytics-page-views">{page.views.toLocaleString()}</div>
               </div>
             ))}
           </div>
-        </div>
+        </section>
+      )}
 
-        <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "0.375rem", padding: "1.25rem", boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
-          <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "#0f172a", marginBottom: "0.1rem" }}>
-            Device Distribution
-          </h3>
-          <p style={{ fontSize: "0.75rem", color: "#64748b", marginBottom: "1rem" }}>
-            Traffic split across hardware platforms
-          </p>
+      <section className="analytics-panel">
+        <div className="analytics-panel-title">Visitor Sessions</div>
+        <p className="analytics-panel-subtitle">
+          Grouped by session — expand to see the full page journey instead of duplicate rows
+        </p>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-            {analytics.deviceBreakdown.map((d) => {
-              const DeviceIcon = d.icon === "mobile" ? Smartphone
-                : d.icon === "desktop" ? Monitor
-                : Tablet;
-              const color = d.icon === "mobile" ? "#0e52a8"
-                : d.icon === "desktop" ? "#6366f1"
-                : "#0ea5e9";
+        {analytics.recentSessions.length === 0 ? (
+          <div className="analytics-empty" style={{ marginTop: "1rem" }}>
+            No sessions recorded yet. Browse the public site to generate your first tracked journey.
+          </div>
+        ) : (
+          <div className="analytics-sessions" style={{ marginTop: "1rem" }}>
+            {analytics.recentSessions.map((session) => {
+              const isOpen = expandedSession === session.id;
               return (
-                <div key={d.device} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.75rem 0.875rem", borderRadius: "0.375rem", background: "#f8fafc", border: "1px solid #e2e8f0" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
-                    <div style={{ width: "2rem", height: "2rem", borderRadius: "0.375rem", background: `${color}12`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <DeviceIcon size={16} color={color} strokeWidth={2} />
+                <div key={session.id} className={`analytics-session ${isOpen ? "is-open" : ""}`}>
+                  <button
+                    type="button"
+                    className="analytics-session-trigger"
+                    onClick={() => setExpandedSession(isOpen ? null : session.id)}
+                    aria-expanded={isOpen}
+                  >
+                    <span style={{ fontSize: "1.25rem" }}>{session.flag}</span>
+                    <div className="analytics-session-meta">
+                      <span className="analytics-session-title">
+                        {session.country} · {session.device}
+                      </span>
+                      <span className="analytics-session-sub">
+                        {session.time} · {session.ip} · {session.duration} on site
+                      </span>
                     </div>
-                    <div>
-                      <p style={{ fontSize: "0.8125rem", fontWeight: 700, color: "#0f172a" }}>{d.device}</p>
-                      <p style={{ fontSize: "0.65rem", color: "#64748b" }}>Responsive view</p>
+                    <div className="analytics-session-badges">
+                      <span className="analytics-badge">{session.pageCount} pages</span>
                     </div>
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.125rem" }}>
-                    <span style={{ fontSize: "1.125rem", fontWeight: 800, color }}>{d.percentage}%</span>
-                    <div style={{ width: "4rem", height: "4px", borderRadius: "9999px", background: "#e2e8f0", overflow: "hidden" }}>
-                      <div style={{ width: `${d.percentage}%`, height: "100%", background: color, borderRadius: "9999px" }} />
+                    <RiArrowDownSLine size={18} className="analytics-session-chevron" />
+                  </button>
+
+                  {isOpen && (
+                    <div className="analytics-session-details">
+                      <div className="analytics-session-pages">
+                        {session.pages.map((page, index) => (
+                          <div key={`${session.id}-${page.path}-${index}`} className="analytics-session-page">
+                            <div>
+                              <div className="analytics-session-page-path">{page.path}</div>
+                              <div className="analytics-session-page-name">{page.name}</div>
+                            </div>
+                            <div className="analytics-session-page-time">{page.time}</div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               );
             })}
           </div>
-        </div>
-      </div>
-
-      <div style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "0.375rem", padding: "1.25rem", boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }}>
-        <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "#0f172a", marginBottom: "0.875rem" }}>
-          Real-Time Visitor Activity Stream
-        </h3>
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.8125rem" }}>
-            <thead>
-              <tr style={{ borderBottom: "1px solid #e2e8f0", color: "#64748b", fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                <th style={{ padding: "0.625rem 0.875rem" }}>Time</th>
-                <th style={{ padding: "0.625rem 0.875rem" }}>Location</th>
-                <th style={{ padding: "0.625rem 0.875rem" }}>Page Visited</th>
-                <th style={{ padding: "0.625rem 0.875rem" }}>Device / User Agent</th>
-                <th style={{ padding: "0.625rem 0.875rem" }}>IP Address</th>
-              </tr>
-            </thead>
-            <tbody>
-              {analytics.recentLogs.map((log) => (
-                <tr key={log.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                  <td style={{ padding: "0.75rem 0.875rem", color: "#64748b", fontSize: "0.75rem" }}>{log.time}</td>
-                  <td style={{ padding: "0.75rem 0.875rem", fontWeight: 700, color: "#0f172a" }}>
-                    {log.flag} {log.country}
-                  </td>
-                  <td style={{ padding: "0.75rem 0.875rem", color: "#1d4ed8", fontWeight: 600 }}>{log.page}</td>
-                  <td style={{ padding: "0.75rem 0.875rem", color: "#334155" }}>{log.device}</td>
-                  <td style={{ padding: "0.75rem 0.875rem", color: "#64748b", fontFamily: "monospace", fontSize: "0.75rem" }}>{log.ip}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+        )}
+      </section>
     </div>
   );
 }

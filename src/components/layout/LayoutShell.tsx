@@ -1,9 +1,11 @@
 "use client";
 
+import { Suspense } from "react";
 import { usePathname } from "next/navigation";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import SubscribeWidget from "@/components/ui/SubscribeWidget";
+import PageViewTracker from "@/components/analytics/PageViewTracker";
 
 export default function LayoutShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -24,6 +26,9 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
       </main>
       <Footer />
       <SubscribeWidget />
+      <Suspense fallback={null}>
+        <PageViewTracker />
+      </Suspense>
     </>
   );
 }
