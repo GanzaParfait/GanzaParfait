@@ -350,13 +350,13 @@ He builds full-stack web applications and AI-powered tools that solve real-world
 | Website       | [princeparfait.com](https://princeparfait.com)                             |
 | GitHub        | [@GanzaParfait](https://github.com/GanzaParfait)                          |
 | LinkedIn      | [ganza-prince-235816269](https://www.linkedin.com/in/prince-parfait-ganza)  |
-| X / Twitter   | [@_prince_parfait_1](https://x.com/_prince_parfait_1)                         |
-| YouTube       | [@_prince_parfait_](https://youtube.com/@_prince_parfait_)                     |
+| X / Twitter   | [@prince_parfait1](https://x.com/prince_parfait1)                         |
+| YouTube       | [@prince_parfait](https://youtube.com/@prince_parfait)                     |
 | Instagram     | [@_prince_parfait_](https://www.instagram.com/_prince_parfait_)                |
 | TikTok        | [@_prince_parfait_](https://tiktok.com/@_prince_parfait_)                      |
 | Threads       | [@_prince_parfait_](https://www.threads.com/@_prince_parfait_)                 |
 | Luma           | [princeparfait](https://lu.ma/user/princeparfait)                         |
-| Buy Me a Coffee | [princeparfait](https://buymeacoffee.com/princeparfait)                  |
+| Buy Me a Coffee | [_prince_parfait_](https://buymeacoffee.com/_prince_parfait_)                  |
 | WhatsApp      | [+250 792 054 846](https://wa.me/250792054846)                             |
 | Lerony        | [lerony.com](https://lerony.com)                                           |
 

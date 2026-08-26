@@ -37,13 +37,13 @@ export const siteConfig = {
   social: {
     github: "https://github.com/GanzaParfait",
     linkedin: "https://www.linkedin.com/in/prince-parfait-ganza",
-    twitter: "https://x.com/_prince_parfait_1",
-    youtube: "https://youtube.com/@_prince_parfait_",
+    twitter: "https://x.com/prince_parfait1",
+    youtube: "https://youtube.com/@prince_parfait",
     instagram: "https://www.instagram.com/_prince_parfait_",
     tiktok: "https://tiktok.com/@_prince_parfait_",
     threads: "https://www.threads.com/@_prince_parfait_",
     luma: "https://luma.com/user/princeparfait",
-    buymeacoffee: "https://buymeacoffee.com/princeparfait",
+    buymeacoffee: "https://buymeacoffee.com/_prince_parfait_",
     whatsapp: "https://wa.me/250792054846",
   },
   contact: {

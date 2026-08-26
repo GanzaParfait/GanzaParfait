@@ -68,8 +68,8 @@ export function buildPageMetadata(input: PageSeoInput): Metadata {
     },
     twitter: {
       card: "summary_large_image",
-      site: "@_prince_parfait_1",
-      creator: "@_prince_parfait_1",
+      site: "@prince_parfait1",
+      creator: "@prince_parfait1",
       title: input.title,
       description: input.description,
       images: [ogImage],

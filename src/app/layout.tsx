@@ -59,10 +59,10 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    site: "@_prince_parfait_1",
+    site: "@prince_parfait1",
     title: "Prince Parfait GANZA (PPG) — Founder • Software Engineer • AI Builder",
     description: siteConfig.description,
-    creator: "@_prince_parfait_1",
+    creator: "@prince_parfait1",
     images: [
       {
         url: DEFAULT_OG_IMAGE,
