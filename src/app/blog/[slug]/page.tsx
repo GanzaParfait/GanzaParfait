@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { siteConfig, blogPosts } from "@/data/site-data";
+import { blogPosts } from "@/data/site-data";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import ShareActions from "@/components/ui/ShareActions";
 import BlogContentClient from "@/components/blog/BlogContentClient";
-import { buildBreadcrumbJsonLd, buildPageMetadata } from "@/lib/seo";
+import { buildPageMetadata } from "@/lib/seo";
+import { PERSON_ID, buildBreadcrumbListJsonLd, buildGraph, canonicalUrl } from "@/lib/schema";
+import { JsonLd } from "@/components/seo/JsonLd";
+import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import {
   RiArrowLeftLine,
   RiCalendarLine,
@@ -25,14 +28,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = blogPosts.find((p) => p.slug === slug);
 
   if (!post) {
-    return { title: "Post Not Found" };
+    return { title: "Post Not Found", robots: { index: false, follow: true } };
   }
 
   return buildPageMetadata({
     title: post.title,
-    description: `${post.excerpt} By Prince Parfait GANZA (PPG).`,
+    description: `${post.excerpt} By Prince Parfait GANZA.`,
     path: `/blog/${slug}`,
-    keywords: [...post.tags, "PPG blog", "Prince Parfait GANZA"],
+    keywords: [...post.tags, "Prince Parfait GANZA"],
     ogType: "article",
     publishedTime: post.date,
   });
@@ -50,42 +53,35 @@ export default async function BlogPostPage({ params }: Props) {
     day: "numeric",
   });
 
-  const articleSchema = {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: post.title,
-    description: post.excerpt,
-    datePublished: post.date,
-    author: {
-      "@type": "Person",
-      name: "Prince Parfait GANZA",
-      alternateName: ["PPG", "Prince Parfait GANZA PPG"],
-      url: siteConfig.url,
-    },
-    publisher: {
-      "@type": "Person",
-      name: "Prince Parfait GANZA",
-      url: siteConfig.url,
-    },
-    url: `${siteConfig.url}/blog/${slug}`,
-    keywords: [...post.tags, "PPG", "Prince Parfait GANZA"].join(", "),
-  };
-
-  const breadcrumbSchema = buildBreadcrumbJsonLd([
+  const crumbs = [
     { name: "Home", path: "/" },
-    { name: "Blog", path: "/blog" },
+    { name: "Insights", path: "/blog" },
     { name: post.title, path: `/blog/${slug}` },
+  ];
+
+  const articleSchema = buildGraph([
+    {
+      "@type": "BlogPosting",
+      "@id": `${canonicalUrl(`/blog/${slug}`)}#article`,
+      headline: post.title,
+      description: post.excerpt,
+      datePublished: post.date,
+      mainEntityOfPage: canonicalUrl(`/blog/${slug}`),
+      author: { "@id": PERSON_ID },
+      publisher: { "@id": PERSON_ID },
+      url: canonicalUrl(`/blog/${slug}`),
+      image: post.coverImage,
+    },
+    buildBreadcrumbListJsonLd(crumbs, `/blog/${slug}`),
   ]);
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify([articleSchema, breadcrumbSchema]) }}
-      />
+      <JsonLd data={articleSchema} />
+      <Breadcrumbs items={crumbs} />
 
       {/* Header */}
-      <section className="section pt-32 pb-8 relative dot-grid overflow-hidden" aria-label="Blog post header">
+      <section className="section pt-8 pb-8" aria-label="Blog post header">
         <div aria-hidden="true" className="absolute inset-0 bg-gradient-radial pointer-events-none" />
         <div className="container max-w-3xl relative z-10">
           <AnimatedSection>

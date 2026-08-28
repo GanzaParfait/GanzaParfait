@@ -2,163 +2,69 @@ import type { Metadata } from "next";
 import { speakingEngagements } from "@/data/site-data";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import Link from "next/link";
-import {
-  RiArrowRightLine,
-  RiMicLine,
-  RiTeamLine,
-  RiGlobeLine,
-  RiVideoLine,
-} from "react-icons/ri";
-import { buildBreadcrumbJsonLd, buildPageMetadata, buildWebPageJsonLd } from "@/lib/seo";
+import { RiArrowRightLine } from "react-icons/ri";
+import { buildPageMetadata } from "@/lib/seo";
+import { buildBreadcrumbListJsonLd, buildGraph, buildWebPageJsonLd } from "@/lib/schema";
+import { JsonLd } from "@/components/seo/JsonLd";
+import Breadcrumbs from "@/components/seo/Breadcrumbs";
+
+const PAGE_DESCRIPTION =
+  "Verified training record, including data-systems training with Eshuri Learning, and invitations for technical sessions.";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Speaking — PPG on AI, Tech & Entrepreneurship",
-  description:
-    "Prince Parfait GANZA (PPG) speaks on AI, software engineering, and entrepreneurship at conferences, workshops, and universities across Africa.",
+  title: "Speaking and training | Prince Parfait GANZA",
+  description: PAGE_DESCRIPTION,
   path: "/speaking",
-  keywords: ["PPG speaker", "Prince Parfait GANZA speaking", "tech speaker Rwanda", "AI speaker Africa"],
+  absoluteTitle: true,
 });
 
-const topics = [
-  {
-    icon: RiGlobeLine,
-    title: "AI in African Contexts",
-    description:
-      "How to build AI products that work in low-connectivity, low-resource environments with underrepresented languages.",
-  },
-  {
-    icon: RiTeamLine,
-    title: "From Student to Founder",
-    description:
-      "The journey of building a technology company as a young entrepreneur in Africa — honest lessons from the trenches.",
-  },
-  {
-    icon: RiMicLine,
-    title: "The Future of Software Engineering",
-    description:
-      "How AI is reshaping software development and what engineers need to know to stay relevant.",
-  },
-  {
-    icon: RiVideoLine,
-    title: "Building for Impact",
-    description:
-      "Why purposeful software — built with real users in mind — always outperforms feature-bloated products.",
-  },
+const breadcrumbItems = [
+  { name: "Home", path: "/" },
+  { name: "Speaking", path: "/speaking" },
 ];
 
-const typeConfig: Record<string, string> = {
-  conference: "badge-primary",
-  workshop: "badge-success",
-  panel: "badge-outline",
-  podcast: "badge-outline",
-};
-
 export default function SpeakingPage() {
-  const schema = [
-    buildWebPageJsonLd({
-      name: "Speaking by Prince Parfait GANZA (PPG)",
-      description: "Conference talks and workshops on AI, software engineering, and entrepreneurship.",
-      path: "/speaking",
-    }),
-    buildBreadcrumbJsonLd([
-      { name: "Home", path: "/" },
-      { name: "Speaking", path: "/speaking" },
-    ]),
-  ];
-
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      <JsonLd
+        data={buildGraph([
+          buildWebPageJsonLd({
+            path: "/speaking",
+            name: "Speaking and training | Prince Parfait GANZA",
+            description: PAGE_DESCRIPTION,
+          }),
+          buildBreadcrumbListJsonLd(breadcrumbItems, "/speaking"),
+        ])}
+      />
+      <Breadcrumbs items={breadcrumbItems} />
 
-      {/* Header */}
-      <section className="section pt-32 pb-10 relative dot-grid overflow-hidden" aria-label="Speaking header">
-        <div aria-hidden="true" className="absolute inset-0 bg-gradient-radial pointer-events-none" />
-        <div className="container relative z-10 max-w-4xl">
+      <section className="section pt-8 pb-10" aria-label="Speaking header">
+        <div className="container max-w-4xl">
           <AnimatedSection>
-            <p className="section-label">Speaking</p>
-            <h1 className="theme-heading mb-4" style={{ fontFamily: "var(--font-heading)" }}>
-              Sharing what I know.
-            </h1>
+            <p className="section-label">Speaking & training</p>
+            <h1 className="theme-heading mb-4">Knowledge sharing with a paper trail.</h1>
             <p className="theme-copy text-lg leading-relaxed max-w-2xl">
-              I speak at conferences, universities, and events on AI, software
-              engineering, and building technology in Africa. If you&apos;d like me
-              to speak at your event, reach out.
+              The public record here is training that actually happened. Conference keynotes and university talks are not listed because they have not been verified for this site.
             </p>
           </AnimatedSection>
         </div>
       </section>
 
-      {/* Topics */}
-      <section className="section bg-mesh" aria-label="Speaking topics">
-        <div className="container">
-          <AnimatedSection className="mb-12">
-            <p className="section-label">Topics</p>
-            <h2 className="theme-heading" style={{ fontFamily: "var(--font-heading)" }}>
-              What I speak about.
-            </h2>
-          </AnimatedSection>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {topics.map((topic, i) => (
-              <AnimatedSection key={topic.title} delay={i * 80}>
-                <article className="card glass-hover p-7 h-full flex gap-5" aria-label={topic.title}>
-                  <div
-                    className="w-12 h-12 rounded-xl bg-[rgba(14,82,168,0.15)] border border-[rgba(14,82,168,0.2)] flex items-center justify-center text-[#60a5fa] flex-shrink-0"
-                    aria-hidden="true"
-                  >
-                    <topic.icon size={22} />
-                  </div>
-                  <div>
-                    <h3
-                      className="theme-heading font-semibold mb-2"
-                      style={{ fontFamily: "var(--font-heading)" }}
-                    >
-                      {topic.title}
-                    </h3>
-                    <p className="text-sm theme-copy leading-relaxed">
-                      {topic.description}
-                    </p>
-                  </div>
-                </article>
-              </AnimatedSection>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Past engagements */}
-      <section className="section" aria-label="Past speaking engagements">
+      <section className="section pt-0" aria-label="Training record">
         <div className="container max-w-3xl">
           <AnimatedSection className="mb-10">
-            <p className="section-label">Past Engagements</p>
-            <h2 className="theme-heading" style={{ fontFamily: "var(--font-heading)" }}>
-              Where I&apos;ve spoken.
-            </h2>
+            <p className="section-label">Record</p>
+            <h2 className="theme-heading">Documented engagements.</h2>
           </AnimatedSection>
-
           <div className="space-y-4">
             {speakingEngagements.map((engagement, i) => (
               <AnimatedSection key={`${engagement.event}-${i}`} delay={i * 80}>
-                <article
-                  className="card p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-                  aria-label={`${engagement.title} at ${engagement.event}`}
-                >
-                  <div>
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <span className={`badge ${typeConfig[engagement.type]}`}>
-                        {engagement.type}
-                      </span>
-                      <time className="text-xs theme-muted">{engagement.date}</time>
-                    </div>
-                    <h3
-                      className="theme-heading font-semibold mb-1"
-                      style={{ fontFamily: "var(--font-heading)" }}
-                    >
-                      {engagement.title}
-                    </h3>
-                    <p className="text-sm text-[#60a5fa]">{engagement.event}</p>
-                    <p className="text-xs theme-muted mt-0.5">{engagement.location}</p>
-                  </div>
+                <article className="card p-6">
+                  <span className="badge badge-primary">{engagement.type}</span>
+                  <h3 className="theme-heading font-semibold mt-3 mb-1">{engagement.title}</h3>
+                  <p className="text-sm font-medium" style={{ color: "var(--color-primary)" }}>{engagement.event}</p>
+                  <p className="text-sm theme-copy mt-3">{engagement.topic}</p>
+                  <p className="text-xs theme-muted mt-3">{engagement.location} · {engagement.date}</p>
                 </article>
               </AnimatedSection>
             ))}
@@ -166,36 +72,17 @@ export default function SpeakingPage() {
         </div>
       </section>
 
-      {/* Invite CTA */}
-      <section className="section" aria-label="Speaking invitation">
-        <div className="container">
+      <section className="section" aria-label="Invitation" style={{ background: "var(--color-bg-2)" }}>
+        <div className="container text-center">
           <AnimatedSection>
-            <div className="relative rounded-2xl overflow-hidden text-center">
-              <div className="absolute inset-0 bg-[#0B192C]" aria-hidden="true" />
-              <div
-                className="absolute inset-0"
-                style={{
-                  background:
-                    "radial-gradient(ellipse 60% 80% at 50% 50%, rgba(14,82,168,0.2) 0%, transparent 70%)",
-                }}
-                aria-hidden="true"
-              />
-              <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#0E52A8] to-transparent opacity-50" aria-hidden="true" />
-              <div className="relative z-10 p-12 md:p-16">
-                <p className="section-label justify-center">Book Me</p>
-                <h2 className="text-white mb-4" style={{ fontFamily: "var(--font-heading)" }}>
-                  Invite me to speak.
-                </h2>
-                <p className="text-slate-400 max-w-md mx-auto mb-8">
-                  I&apos;m available for conferences, workshops, university events, and
-                  podcasts. Share details and let&apos;s make it happen.
-                </p>
-                <Link href="/contact" className="btn btn-primary btn-lg">
-                  Send an Invitation
-                  <RiArrowRightLine size={18} />
-                </Link>
-              </div>
-            </div>
+            <h2 className="theme-heading mb-4">Invite a session.</h2>
+            <p className="theme-copy mb-8 max-w-md mx-auto">
+              Available for technical training, workshops, and speaking where the brief is real. Send the audience, format, and date.
+            </p>
+            <Link href="/contact" className="btn btn-primary btn-lg">
+              Send an invitation
+              <RiArrowRightLine size={18} />
+            </Link>
           </AnimatedSection>
         </div>
       </section>

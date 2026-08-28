@@ -1,87 +1,130 @@
 # Content Strategy
 
+Writing, information architecture, and page jobs for princeparfait.com.
+
+Read `docs/PORTFOLIO_CONTEXT.md` before publishing or rewriting copy.
+
+---
+
+## Purpose
+
+The site should help a first-time visitor understand Prince Parfait GANZA in one sitting: who he is, what he builds, what evidence exists, and how to work with him.
+
+It is a professional identity system, not a résumé dump and not a company brochure.
+
+---
+
 ## Voice
 
-Professional
+- Confident, concise, professional, human.
+- Technically credible without jargon theatre.
+- Internationally understandable.
+- Evidence before adjectives.
 
-Friendly
+Avoid: tech genius, visionary, world-class, revolutionary, leading African entrepreneur, unsupported expert claims, and generic AI marketing language.
 
-Confident
+Prefer:
 
-Practical
-
-Never arrogant
-
----
-
-## Hero Message
-
-Who am I?
-
-What do I build?
-
-Call to action
+> Prince builds software systems for organizations and businesses, with work spanning data platforms, business operations and digital services.
 
 ---
 
-## About Page
+## Information Architecture
 
-My Story
+### Primary navigation
 
-Journey
+| Label | Route | Job |
+|-------|-------|-----|
+| Home | `/` | Identity in ~10 seconds |
+| About | `/about` | Person, education, positioning |
+| Work | `/projects` | Evidence of shipped systems |
+| Experience | `/experience` | Roles, timeline, training |
+| Services | `/services` | How organizations can work with him |
+| Contact | `/contact` | Clear next step |
 
-Mission
+### Secondary
 
-Values
+| Label | Route | Rule |
+|-------|-------|------|
+| Insights | `/blog` | Keep the route. Do not put it in primary nav until verified articles exist. |
+| Speaking / Training | `/speaking` | Honest training record only. No invented keynotes. |
+| Case studies | `/projects/[id]` | One project, one evidence-led story. |
 
----
-
-## Projects
-
-Problem
-
-Solution
-
-Impact
-
-Technologies
-
-Lessons Learned
-
----
-
-## Blog
-
-AI
-
-Software Engineering
-
-Entrepreneurship
-
-Learning
-
-Leadership
-
-Career
+Do not add Education, Certifications, Media, or Uses as top-level items until each has enough verified content to stand alone.
 
 ---
 
-## Speaking
+## Page Jobs
 
-Topics
+### Home
 
-Events
+Answer, in order:
 
-Media Kit
+1. Who — Prince Parfait GANZA
+2. What — Founder and software engineer building practical digital products
+3. Where — Kigali, Rwanda
+4. Proof — named organizations and real systems
+5. Action — View work / Contact
+
+Do not lead with animation, badge walls, or invented metrics.
+
+### About
+
+Story, education, LERONY relationship, and how he works. Link to Experience and Work rather than duplicating every project.
+
+### Work
+
+Selected systems and products. Each card should show problem, contribution, and relevant technology. Distinguish client systems from independent experiments.
+
+### Experience
+
+Structured roles: LERONY Ltd, AskField / Ethical Research Solutions, PSTA, Eshuri training. Education belongs here and on About, not as a fake career milestone.
+
+### Services
+
+Capabilities that match verified experience. For larger commercial work, point to LERONY Ltd. Do not sell research ML, fine-tuning, or keynotes as products.
+
+### Insights
+
+Publish only real writing. An empty, honest state is better than invented posts.
+
+### Speaking / Training
+
+Show the Eshuri data-systems training as training, not as a conference circuit. Invite genuine speaking requests without fabricating past stages.
+
+### Contact
+
+Public business email, location, LinkedIn, GitHub, and WhatsApp as the existing public business channel. No private identifiers.
 
 ---
 
-## Contact
+## Project Writing Pattern
 
-Consulting
+1. Context — who it was for
+2. Challenge — the real problem
+3. Solution — what was built
+4. My role — specific contribution
+5. Technology — only what was used
+6. Outcome — what changed, if known
+7. Evidence — only what may be published
 
-Speaking
+If an outcome is not verified, omit it. Do not fill the gap with "improved efficiency by X%".
 
-Collaborations
+---
 
-Freelancing
+## Naming
+
+- Primary name: **Prince Parfait GANZA**
+- Company: **LERONY Ltd**
+- Location: **Kigali, Rwanda**
+- Domain: **princeparfait.com**
+
+Do not use PPG in titles, headings, or public copy.
+
+---
+
+## What Must Not Be Invented
+
+Clients, results, statistics, job titles, awards, partnerships, testimonials, qualifications, media coverage, dates, conference talks, and blog posts.
+
+If content is missing, leave the section out or use a short honest empty state.

@@ -1,190 +1,91 @@
 "use client";
 
 import Link from "next/link";
-import {
-  RiFacebookFill,
-  RiTwitterXFill,
-  RiInstagramLine,
-  RiGlobalLine,
-  RiLinkedinFill,
-  RiGithubFill
-} from "react-icons/ri";
 import { SiteSettings } from "@/lib/supabase";
-import { siteConfig } from "@/data/site-data";
-import { useEffect, useState } from "react";
+import { heroImageFor, setting } from "@/lib/hero";
+import { socialIcon, heroSocialsFor } from "@/lib/socials";
 
-export default function FullCenteredHero({ settings }: { settings: SiteSettings }) {
-  const [visible, setVisible] = useState(false);
-  
-  useEffect(() => {
-    setVisible(true);
-  }, []);
-
-  const roles = settings.siteSubtitle ? settings.siteSubtitle.split(" • ") : ["Software Engineer"];
-  const primaryRole = roles[0];
-
-  const primarySocials = [
-    { href: siteConfig.social.linkedin, icon: RiLinkedinFill, label: "LinkedIn" },
-    { href: siteConfig.social.twitter, icon: RiTwitterXFill, label: "Twitter" },
-    { href: siteConfig.social.github, icon: RiGithubFill, label: "GitHub" },
-    { href: siteConfig.url, icon: RiGlobalLine, label: "Website" },
+export default function FullCenteredHero({
+  settings,
+  isPreview = false,
+}: {
+  settings: SiteSettings;
+  isPreview?: boolean;
+}) {
+  const roles = setting(settings, "siteSubtitle").split(" • ").filter(Boolean);
+  const primaryRole = roles[0] || "Founder";
+  const image = heroImageFor(settings, "full_centered_floating");
+  const name = setting(settings, "siteTitle");
+  const email = setting(settings, "contactEmail");
+  const location = setting(settings, "location");
+  const socials = heroSocialsFor(settings);
+  const highlights = [
+    { value: setting(settings, "heroStat1Value"), label: setting(settings, "heroStat1Label") },
+    { value: setting(settings, "heroStat2Value"), label: setting(settings, "heroStat2Label") },
+    { value: setting(settings, "heroStat3Value"), label: setting(settings, "heroStat3Label") },
   ];
 
   return (
-    <section 
-      className="relative w-full overflow-hidden flex flex-col items-center justify-end"
+    <section
+      className={isPreview ? "hero-centered hero-layout-preview" : "hero-centered"}
       style={{
-        minHeight: "100dvh",
-        background: "radial-gradient(circle at 50% 50%, #2e266f 0%, #050816 80%)",
-        paddingTop: "6rem"
+        minHeight: isPreview ? "100%" : "100dvh",
+        height: isPreview ? "100%" : undefined,
+        paddingTop: isPreview ? "2rem" : undefined,
       }}
     >
-      {/* Container for the absolute positioning of the elements */}
-      <div className="container relative z-10 w-full h-full flex-1 flex flex-col items-center justify-end max-w-7xl mx-auto px-6">
-        
-        {/* The Person Image - absolute centered */}
-        <div 
-          className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-[85%] md:w-[60%] max-w-[600px] h-[70vh] md:h-[80vh] z-0"
-          style={{
-            opacity: visible ? 1 : 0,
-            transform: visible ? "translate(-50%, 0)" : "translate(-50%, 40px)",
-            transition: "opacity 1s ease 0.3s, transform 1s ease 0.3s"
-          }}
-        >
-          <img
-            src={settings?.heroImageUrl || "/images/profile/hero-photo.png"}
-            alt={settings.siteTitle}
-            className="w-full h-full object-contain object-bottom"
-            style={{ 
-              maskImage: "linear-gradient(to top, black 90%, transparent 100%)",
-              WebkitMaskImage: "linear-gradient(to top, black 90%, transparent 100%)" 
-            }}
-          />
+      <div className="hero-centered-box">
+        <div className="hero-centered-caption">
+          <h1 className="hero-centered-name">{name}</h1>
         </div>
+        <img src={image} alt={name} className="hero-centered-photo" />
+        <p className="hero-centered-invite">
+          {setting(settings, "heroInviteLine")}{" "}
+          <Link href={setting(settings, "heroInviteCtaHref")} className="hero-centered-invite-link">
+            {setting(settings, "heroInviteCtaLabel")}
+          </Link>
+        </p>
+      </div>
 
-        {/* LEFT FLOATING CONTENT */}
-        <div 
-          className="absolute left-6 md:left-12 lg:left-24 top-[30%] flex flex-col gap-12 z-10 hidden md:flex"
-          style={{
-            opacity: visible ? 1 : 0,
-            transform: visible ? "translateX(0)" : "translateX(-40px)",
-            transition: "all 1s ease 0.5s"
-          }}
-        >
-          {/* Role & Location */}
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <span className="w-2 h-2 rounded-full bg-red-500"></span>
-              <h3 className="text-xl md:text-2xl font-bold text-white tracking-wide">{primaryRole}</h3>
-            </div>
-            <p className="text-slate-400 text-sm ml-5">Based in {settings.location.split(",")[0]}</p>
+      <div className="hero-centered-info">
+        <div className="hero-centered-left">
+          <div className="hero-centered-pill">
+            <p className="hero-centered-pill-title">{primaryRole}</p>
+            <p className="hero-centered-pill-sub">Based in {location}</p>
           </div>
-          
-          {/* Email */}
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <span className="w-2 h-2 rounded-full bg-slate-400"></span>
-              <p className="text-slate-300">Say hello to</p>
-            </div>
-            <a href={`mailto:${settings.contactEmail}`} className="text-white font-bold text-lg md:text-xl ml-5 hover:text-red-400 transition-colors">
-              {settings.contactEmail}
+          <div className="hero-centered-pill">
+            <p className="hero-centered-pill-sub">Say hello to</p>
+            <a href={`mailto:${email}`} className="hero-centered-pill-title hero-centered-email">
+              {email}
             </a>
           </div>
-
-          {/* Socials */}
-          <div className="flex gap-4 ml-5 mt-4">
-            {primarySocials.slice(0, 4).map((social, i) => (
-              <a 
-                key={i} 
-                href={social.href}
-                target="_blank" rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full flex items-center justify-center text-blue-500 hover:bg-blue-500 hover:text-white transition-all bg-transparent border border-blue-900/30"
-              >
-                <social.icon size={18} />
-              </a>
-            ))}
+          <div className="hero-centered-socials">
+            {socials.map((social) => {
+              const Icon = socialIcon(social.platform);
+              return (
+                <a
+                  key={social.id}
+                  href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={social.label}
+                  className="hero-centered-social"
+                >
+                  <Icon size={18} />
+                </a>
+              );
+            })}
           </div>
         </div>
 
-        {/* RIGHT FLOATING CONTENT */}
-        <div 
-          className="absolute right-6 md:right-12 lg:right-24 top-[30%] flex flex-col gap-10 text-right z-10 hidden md:flex"
-          style={{
-            opacity: visible ? 1 : 0,
-            transform: visible ? "translateX(0)" : "translateX(40px)",
-            transition: "all 1s ease 0.7s"
-          }}
-        >
-          <div>
-            <h2 className="text-3xl lg:text-4xl font-extrabold text-white mb-1">100%</h2>
-            <p className="text-slate-400 text-sm uppercase tracking-wider">Client Satisfaction</p>
-          </div>
-          <div className="w-full h-px bg-white/10"></div>
-          <div>
-            <h2 className="text-3xl lg:text-4xl font-extrabold text-white mb-1">15+</h2>
-            <p className="text-slate-400 text-sm uppercase tracking-wider">Projects Done</p>
-          </div>
-          <div className="w-full h-px bg-white/10"></div>
-          <div>
-            <h2 className="text-3xl lg:text-4xl font-extrabold text-white mb-1">3+</h2>
-            <p className="text-slate-400 text-sm uppercase tracking-wider">Years Experience</p>
-          </div>
-        </div>
-
-        {/* BOTTOM CENTER CONTENT */}
-        <div 
-          className="w-full text-center relative z-20 pb-12 md:pb-20 pt-60 md:pt-0"
-          style={{
-            opacity: visible ? 1 : 0,
-            transform: visible ? "translateY(0)" : "translateY(30px)",
-            transition: "all 1s ease 0.9s"
-          }}
-        >
-          {/* Text shadow to ensure readability over image */}
-          <h1 
-            className="text-[2.5rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[6rem] font-black tracking-tight leading-none mb-4"
-            style={{ 
-              fontFamily: "var(--font-heading)",
-              background: "linear-gradient(to right, #ffffff, #c7d2fe)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              textShadow: "0 10px 40px rgba(0,0,0,0.8)"
-            }}
-          >
-            {settings.siteTitle}
-          </h1>
-          <p className="text-sm md:text-lg text-slate-300 font-medium max-w-2xl mx-auto" style={{ textShadow: "0 2px 10px rgba(0,0,0,0.8)" }}>
-            "I'm building a reputation so strong that opportunities naturally find me."
-          </p>
-        </div>
-        
-        {/* Mobile-only stats & info (since side panels are hidden on mobile) */}
-        <div className="md:hidden flex flex-col gap-6 items-center text-center w-full relative z-20 pb-12 opacity-90">
-          <div className="flex items-center justify-center gap-6 w-full">
-            <div>
-              <h2 className="text-xl font-bold text-white">15+</h2>
-              <p className="text-xs text-slate-400">Projects</p>
+        <div className="hero-centered-stats">
+          {highlights.map((item) => (
+            <div key={`${item.value}-${item.label}`} className="hero-centered-stat">
+              <p className="hero-centered-stat-value">{item.value}</p>
+              <p className="hero-centered-stat-label">{item.label}</p>
             </div>
-            <div className="w-px h-8 bg-white/20"></div>
-            <div>
-              <h2 className="text-xl font-bold text-white">3+</h2>
-              <p className="text-xs text-slate-400">Years Exp.</p>
-            </div>
-            <div className="w-px h-8 bg-white/20"></div>
-            <div>
-              <h2 className="text-xl font-bold text-white">100%</h2>
-              <p className="text-xs text-slate-400">Satisfaction</p>
-            </div>
-          </div>
-          <div className="flex gap-4 mt-2">
-            {primarySocials.map((social, i) => (
-              <a key={i} href={social.href} className="text-slate-400 hover:text-white">
-                <social.icon size={20} />
-              </a>
-            ))}
-          </div>
+          ))}
         </div>
-
       </div>
     </section>
   );

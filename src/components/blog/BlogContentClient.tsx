@@ -1,28 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import "@uiw/react-markdown-preview/markdown.css";
-import { BlogPost, blogPosts } from "@/data/site-data";
+import { BlogPost } from "@/data/site-data";
 import Link from "next/link";
 
 const MarkdownPreview = dynamic(() => import("@uiw/react-markdown-preview"), { ssr: false });
 
 export default function BlogContentClient({ initialPost }: { initialPost: BlogPost }) {
-  const [post, setPost] = useState<BlogPost>(initialPost);
-
-  useEffect(() => {
-    try {
-      const cached = localStorage.getItem("ppg_blog_posts");
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        const found = parsed.find((p: BlogPost) => p.slug === initialPost.slug);
-        if (found) {
-          setPost(found);
-        }
-      }
-    } catch {}
-  }, [initialPost.slug]);
+  const post = initialPost;
 
   if (post.content) {
     return (

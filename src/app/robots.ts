@@ -1,5 +1,5 @@
-import { MetadataRoute } from "next";
-import { siteConfig } from "@/data/site-data";
+import type { MetadataRoute } from "next";
+import { CANONICAL_ORIGIN } from "@/lib/schema";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -7,10 +7,10 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/_next/", "/dashboard/", "/admin/"],
+        disallow: ["/api/", "/dashboard/", "/admin/"],
       },
     ],
-    sitemap: `${siteConfig.url}/sitemap.xml`,
-    host: siteConfig.url,
+    sitemap: `${CANONICAL_ORIGIN}/sitemap.xml`,
+    host: CANONICAL_ORIGIN,
   };
 }

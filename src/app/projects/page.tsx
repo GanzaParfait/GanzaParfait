@@ -1,74 +1,73 @@
 import type { Metadata } from "next";
-import { projects, siteConfig } from "@/data/site-data";
+import { projects } from "@/data/site-data";
 import ProjectCard from "@/components/ui/ProjectCard";
 import AnimatedSection from "@/components/ui/AnimatedSection";
-import { buildBreadcrumbJsonLd, buildPageMetadata, buildWebPageJsonLd } from "@/lib/seo";
+import { buildPageMetadata } from "@/lib/seo";
+import {
+  buildBreadcrumbListJsonLd,
+  buildGraph,
+  buildItemListJsonLd,
+  buildWebPageJsonLd,
+} from "@/lib/schema";
+import { JsonLd } from "@/components/seo/JsonLd";
+import Breadcrumbs from "@/components/seo/Breadcrumbs";
+import { PublicSocialAnchor } from "@/components/public/PublicContact";
+
+const PAGE_DESCRIPTION =
+  "Case studies of software systems built by Prince Parfait GANZA, including organizational reporting, inventory operations, ticket accounting, and product work.";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Projects by PPG — Software & AI Portfolio",
-  description:
-    "Explore software projects built by Prince Parfait GANZA (PPG) — web applications, AI tools, SaaS products, and open-source work from Rwanda.",
+  title: "Projects & Case Studies | Prince Parfait GANZA",
+  description: PAGE_DESCRIPTION,
   path: "/projects",
-  keywords: ["PPG projects", "Prince Parfait GANZA portfolio", "Lerony projects", "Rwanda software projects"],
+  absoluteTitle: true,
 });
+
+const breadcrumbItems = [
+  { name: "Home", path: "/" },
+  { name: "Work", path: "/projects" },
+];
 
 export default function ProjectsPage() {
   const featuredProjects = projects.filter((p) => p.featured);
   const otherProjects = projects.filter((p) => !p.featured);
 
-  const schema = [
-    buildWebPageJsonLd({
-      name: "Projects by Prince Parfait GANZA (PPG)",
-      description: "Software and AI projects portfolio by PPG from Rwanda.",
-      path: "/projects",
-    }),
-    buildBreadcrumbJsonLd([
-      { name: "Home", path: "/" },
-      { name: "Projects", path: "/projects" },
-    ]),
-    {
-      "@context": "https://schema.org",
-      "@type": "ItemList",
-      name: "Prince Parfait GANZA (PPG) Projects",
-      itemListElement: projects.map((project, index) => ({
-        "@type": "ListItem",
-        position: index + 1,
-        url: `${siteConfig.url}/projects/${project.id}`,
-        name: project.title,
-      })),
-    },
-  ];
-
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      <JsonLd
+        data={buildGraph([
+          buildWebPageJsonLd({
+            path: "/projects",
+            name: "Projects & Case Studies | Prince Parfait GANZA",
+            description: PAGE_DESCRIPTION,
+            type: "CollectionPage",
+          }),
+          buildBreadcrumbListJsonLd(breadcrumbItems, "/projects"),
+          buildItemListJsonLd(projects, "/projects"),
+        ])}
+      />
+      <Breadcrumbs items={breadcrumbItems} />
 
-      <section className="section pt-32 pb-10 relative dot-grid overflow-hidden" aria-label="Projects header">
-        <div aria-hidden="true" className="absolute inset-0 bg-gradient-radial pointer-events-none" />
-        <div className="container relative z-10 max-w-4xl">
+      <section className="section pt-8 pb-10" aria-label="Work header">
+        <div className="container max-w-4xl">
           <AnimatedSection>
-            <p className="section-label">Portfolio</p>
-            <h1 className="theme-heading mb-4" style={{ fontFamily: "var(--font-heading)" }}>
-              Things I&apos;ve built.
-            </h1>
+            <p className="section-label">Work</p>
+            <h1 className="theme-heading mb-4">Selected systems and products.</h1>
             <p className="theme-copy text-lg leading-relaxed max-w-2xl">
-              A curated selection of projects by Prince Parfait GANZA (PPG) spanning web development, AI
-              integration, SaaS products, and open-source contributions.
+              Each piece of work is framed as a problem, a contribution, and the technologies involved. Client names appear only where the relationship is already public. Outcomes without evidence are omitted.
             </p>
           </AnimatedSection>
         </div>
       </section>
 
       {featuredProjects.length > 0 && (
-        <section className="section bg-mesh" aria-label="Featured projects">
+        <section className="section pt-0" aria-label="Featured work">
           <div className="container">
             <AnimatedSection className="mb-10">
               <p className="section-label">Featured</p>
-              <h2 className="theme-heading" style={{ fontFamily: "var(--font-heading)" }}>
-                Highlights.
-              </h2>
+              <h2 className="theme-heading">Primary evidence.</h2>
             </AnimatedSection>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {featuredProjects.map((project, i) => (
                 <AnimatedSection key={project.id} delay={i * 80}>
                   <ProjectCard project={project} featured />
@@ -80,13 +79,11 @@ export default function ProjectsPage() {
       )}
 
       {otherProjects.length > 0 && (
-        <section className="section" aria-label="Other projects">
+        <section className="section" aria-label="Additional work" style={{ background: "var(--color-bg-2)" }}>
           <div className="container">
             <AnimatedSection className="mb-10">
-              <p className="section-label">More Work</p>
-              <h2 className="theme-heading" style={{ fontFamily: "var(--font-heading)" }}>
-                Other projects.
-              </h2>
+              <p className="section-label">Also</p>
+              <h2 className="theme-heading">Further work.</h2>
             </AnimatedSection>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {otherProjects.map((project, i) => (
@@ -99,26 +96,17 @@ export default function ProjectsPage() {
         </section>
       )}
 
-      <section className="section" aria-label="GitHub call to action">
-        <div className="container">
-          <AnimatedSection className="text-center">
-            <p className="section-label justify-center">Open Source</p>
-            <h2 className="theme-heading mb-4" style={{ fontFamily: "var(--font-heading)" }}>
-              More on GitHub.
-            </h2>
+      <section className="section" aria-label="GitHub">
+        <div className="container text-center">
+          <AnimatedSection>
+            <p className="section-label justify-center">Source</p>
+            <h2 className="theme-heading mb-4">Public code on GitHub.</h2>
             <p className="theme-copy mb-8 max-w-md mx-auto">
-              These are my highlighted projects. Find more experiments,
-              open-source contributions, and work-in-progress on GitHub.
+              Experiments and public repositories live on GitHub. Client systems stay off this page when they cannot be shown.
             </p>
-            <a
-              href={siteConfig.social.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-primary btn-lg"
-              aria-label="View GitHub profile (opens in new tab)"
-            >
-              View GitHub Profile
-            </a>
+            <PublicSocialAnchor platform="github" className="btn btn-primary btn-lg">
+              GitHub profile
+            </PublicSocialAnchor>
           </AnimatedSection>
         </div>
       </section>

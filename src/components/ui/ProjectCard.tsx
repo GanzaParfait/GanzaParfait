@@ -14,11 +14,13 @@ const statusConfig = {
 };
 
 const categoryLabels: Record<Project["category"], string> = {
-  web: "Web App",
+  web: "Web",
   mobile: "Mobile",
-  ai: "AI",
-  saas: "SaaS",
+  ai: "AI-enabled",
+  saas: "Company",
   "open-source": "Open Source",
+  systems: "Systems",
+  product: "Product",
 };
 
 export default function ProjectCard({ project, featured = false }: ProjectCardProps) {
@@ -33,7 +35,8 @@ export default function ProjectCard({ project, featured = false }: ProjectCardPr
       <div className="flex items-center justify-between mb-4">
         <span className={`badge ${status.className}`}>{status.label}</span>
         <span className="text-xs theme-muted font-medium">
-          {categoryLabels[project.category]} · {project.year}
+          {categoryLabels[project.category]}
+          {project.period ? ` · ${project.period}` : project.year ? ` · ${project.year}` : ""}
         </span>
       </div>
 
@@ -69,7 +72,7 @@ export default function ProjectCard({ project, featured = false }: ProjectCardPr
       )}
 
       {/* Evidence Section */}
-      {(project.problem || project.whatIBuilt || project.myRole || project.result) && (
+      {(project.problem || project.whatIBuilt || project.myRole || project.outcome || project.result) && (
         <div className="flex-1 flex flex-col gap-3 mt-2 mb-6 border-l-2 border-[var(--color-border)] pl-4">
           {project.problem && (
             <div>
@@ -89,10 +92,10 @@ export default function ProjectCard({ project, featured = false }: ProjectCardPr
               <p className="text-sm theme-copy">{project.myRole}</p>
             </div>
           )}
-          {project.result && (
+          {project.outcome && (
             <div>
-              <span className="block text-[0.65rem] font-bold uppercase tracking-wider theme-muted mb-1">Result</span>
-              <p className="text-sm theme-copy">{project.result}</p>
+              <span className="block text-[0.65rem] font-bold uppercase tracking-wider theme-muted mb-1">Outcome</span>
+              <p className="text-sm theme-copy">{project.outcome}</p>
             </div>
           )}
         </div>

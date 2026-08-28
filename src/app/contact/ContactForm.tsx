@@ -4,13 +4,13 @@ import { useState } from "react";
 import {
   RiMailLine,
   RiMapPinLine,
-  RiGithubFill,
-  RiLinkedinFill,
-  RiTwitterXFill,
+  RiPhoneLine,
   RiCheckLine,
   RiErrorWarningLine,
 } from "react-icons/ri";
-import { siteConfig } from "@/data/site-data";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { setting } from "@/lib/hero";
+import { socialIcon, socialsFor } from "@/lib/socials";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 
 type FormState = "idle" | "loading" | "success" | "error";
@@ -24,6 +24,12 @@ const contactReasons = [
 ];
 
 export default function ContactPageClient() {
+  const settings = useSiteSettings();
+  const email = setting(settings, "contactEmail");
+  const location = setting(settings, "location");
+  const phone = settings.phoneNumber || "";
+  const whatsapp = socialsFor(settings, "contact").find((link) => link.platform === "whatsapp")?.url;
+  const contactSocials = socialsFor(settings, "contact");
   const [formState, setFormState] = useState<FormState>("idle");
   const [formData, setFormData] = useState({
     name: "",
@@ -44,10 +50,14 @@ export default function ContactPageClient() {
     e.preventDefault();
     setFormState("loading");
 
-    // Simulate submission — replace with your API/Resend/Formspree integration
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    const subject = encodeURIComponent(
+      formData.reason ? `${formData.reason} — ${formData.name}` : `Message from ${formData.name}`
+    );
+    const body = encodeURIComponent(
+      `${formData.message}\n\n— ${formData.name}\n${formData.email}`
+    );
 
-    // For demo, always succeed
+    window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
     setFormState("success");
   };
 
@@ -64,8 +74,7 @@ export default function ContactPageClient() {
             Let&apos;s talk.
           </h1>
           <p className="theme-copy leading-relaxed">
-            Whether you have a project, an idea, or just want to connect — I&apos;m
-            always open to interesting conversations.
+            Whether you have a project, a systems problem, or a training brief — write with a real context. I will reply from this address.
           </p>
         </div>
 
@@ -80,13 +89,30 @@ export default function ContactPageClient() {
             <div>
               <p className="text-xs theme-muted mb-0.5">Email</p>
               <a
-                href={`mailto:${siteConfig.contact.email}`}
+                href={`mailto:${email}`}
                 className="text-sm theme-heading hover:text-[#60a5fa] transition-colors"
               >
-                {siteConfig.contact.email}
+                {email}
               </a>
             </div>
           </div>
+
+          {phone ? (
+          <div className="flex items-center gap-3 theme-copy">
+            <div
+              className="w-10 h-10 rounded-lg glass flex items-center justify-center text-[#0E52A8]"
+              aria-hidden="true"
+            >
+              <RiPhoneLine size={18} />
+            </div>
+            <div>
+              <p className="text-xs theme-muted mb-0.5">Phone</p>
+              <a href={whatsapp || `tel:${phone.replace(/\s/g, "")}`} className="text-sm theme-heading hover:text-[#60a5fa] transition-colors">
+                {phone}
+              </a>
+            </div>
+          </div>
+          ) : null}
 
           <div className="flex items-center gap-3 theme-copy">
             <div
@@ -97,7 +123,7 @@ export default function ContactPageClient() {
             </div>
             <div>
               <p className="text-xs theme-muted mb-0.5">Location</p>
-              <p className="text-sm theme-heading">{siteConfig.contact.location} 🇷🇼</p>
+              <p className="text-sm theme-heading">{location} 🇷🇼</p>
             </div>
           </div>
         </div>
@@ -108,22 +134,21 @@ export default function ContactPageClient() {
             Social
           </p>
           <div className="flex gap-3">
-            {[
-              { href: siteConfig.social.github, icon: RiGithubFill, label: "GitHub" },
-              { href: siteConfig.social.linkedin, icon: RiLinkedinFill, label: "LinkedIn" },
-              { href: siteConfig.social.twitter, icon: RiTwitterXFill, label: "X (Twitter)" },
-            ].map(({ href, icon: Icon, label }) => (
+            {contactSocials.map((link) => {
+              const Icon = socialIcon(link.platform);
+              return (
               <a
-                key={label}
-                href={href}
+                key={link.id}
+                href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label={label}
+                aria-label={link.label}
                 className="w-10 h-10 rounded-lg glass flex items-center justify-center theme-copy hover:border-[rgba(14,82,168,0.5)] transition-all"
               >
                 <Icon size={17} />
               </a>
-            ))}
+              );
+            })}
           </div>
         </div>
 

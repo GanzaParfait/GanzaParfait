@@ -1,0 +1,16 @@
+{
+  "redirects": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "princeparfait.com" }],
+      "destination": "https://www.princeparfait.com/",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "princeparfait.com" }],
+      "destination": "https://www.princeparfait.com/:path*",
+      "permanent": true
+    }
+  ]
+}

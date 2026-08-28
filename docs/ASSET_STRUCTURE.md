@@ -81,7 +81,7 @@ Use descriptive, kebab-case filenames optimized for image SEO:
 ```
 ✅ prince-parfait-ganza-speaking-kigali-2025.webp
 ✅ lerony-saas-dashboard-screenshot.webp
-✅ agrivoice-mobile-app-interface.webp
+✅ caritas-rwanda-indicator-system.webp
 
 ❌ IMG_1234.jpg
 ❌ screenshot1.png

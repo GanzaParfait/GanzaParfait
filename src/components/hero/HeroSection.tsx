@@ -1,40 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import SplitHero from "./SplitHero";
 import FeaturedOverlayHero from "./FeaturedOverlayHero";
-import MinimalCenteredHero from "./MinimalCenteredHero";
 import FullCenteredHero from "./FullCenteredHero";
-import { getLocalSettings, SiteSettings, DEFAULT_SETTINGS } from "@/lib/supabase";
+import type { SiteSettings } from "@/lib/supabase";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+
+export function HeroRenderer({
+  settings,
+  isPreview = false,
+}: {
+  settings: SiteSettings;
+  isPreview?: boolean;
+}) {
+  if (settings.bannerLayout === "featured_overlay") {
+    return <FeaturedOverlayHero settings={settings} isPreview={isPreview} />;
+  }
+  if (settings.bannerLayout === "full_centered_floating") {
+    return <FullCenteredHero settings={settings} isPreview={isPreview} />;
+  }
+  return <SplitHero settings={settings} isPreview={isPreview} />;
+}
 
 export default function HeroSection() {
-  const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
-
-  useEffect(() => {
-    // Sync initial settings
-    setSettings(getLocalSettings());
-
-    // Listen for live updates from admin dashboard
-    const handleUpdate = (e: CustomEvent<SiteSettings>) => {
-      if (e.detail) {
-        setSettings(e.detail);
-      }
-    };
-
-    window.addEventListener("site-settings-changed" as any, handleUpdate);
-    return () => {
-      window.removeEventListener("site-settings-changed" as any, handleUpdate);
-    };
-  }, []);
-
-  if (settings.bannerLayout === "featured_overlay") {
-    return <FeaturedOverlayHero settings={settings} />;
-  }
-
-
-  if (settings.bannerLayout === "full_centered_floating") {
-    return <FullCenteredHero settings={settings} />;
-  }
-
-  return <SplitHero settings={settings} />;
+  const settings = useSiteSettings();
+  return <HeroRenderer settings={settings} />;
 }

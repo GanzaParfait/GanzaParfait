@@ -25,7 +25,7 @@ export default function ProfilePage() {
   const [formData, setFormData] = useState<AdminProfile>({
     name: "Prince Parfait GANZA",
     email: "ganzaparfait7@gmail.com",
-    avatarUrl: "/images/profile/hero-photo.png",
+    avatarUrl: "/images/profile/prince-parfait-ganza-kigali-rwanda.webp",
     role: "Super Admin",
   });
   
@@ -135,7 +135,7 @@ export default function ProfilePage() {
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}>
               <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>Current</span>
               <div style={{ position: "relative", width: "5.5rem", height: "5.5rem", borderRadius: "50%", overflow: "hidden", background: "#f1f5f9", border: "2px solid #e2e8f0" }}>
-                <img src={formData.avatarUrl || "/images/profile/hero-photo.png"} alt={formData.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <img src={formData.avatarUrl || "/images/profile/prince-parfait-ganza-kigali-rwanda.webp"} alt={formData.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               </div>
             </div>
             

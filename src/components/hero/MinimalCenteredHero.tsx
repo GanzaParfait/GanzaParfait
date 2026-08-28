@@ -3,7 +3,6 @@
 import Link from "next/link";
 import {
   RiArrowRightLine,
-  RiDownloadLine,
   RiMapPinLine,
   RiWhatsappLine,
   RiLinkedinFill,
@@ -98,7 +97,7 @@ export default function MinimalCenteredHero({ settings }: { settings: SiteSettin
             boxShadow: "0 0 30px rgba(14,82,168,0.2), 0 0 60px rgba(14,82,168,0.1)",
           }}>
             <img
-              src={settings?.heroImageUrl || "/images/profile/hero-photo.png"}
+              src={settings?.heroImageUrl || "/images/profile/prince-parfait-ganza-kigali-rwanda.webp"}
               alt={settings.siteTitle}
               className="w-full h-full object-cover object-top"
             />
@@ -230,15 +229,9 @@ export default function MinimalCenteredHero({ settings }: { settings: SiteSettin
             <Link href="/contact" className="btn btn-outline btn-lg" style={{ fontWeight: 600 }}>
               Let&apos;s Collaborate
             </Link>
-            <a
-              href="/resume.pdf"
-              download
-              className="btn btn-ghost"
-              style={{ color: "var(--color-text-3)", fontWeight: 500 }}
-            >
-              <RiDownloadLine size={16} />
-              CV
-            </a>
+            <Link href="/experience" className="btn btn-ghost" style={{ color: "var(--color-text-3)", fontWeight: 500 }}>
+              Experience
+            </Link>
           </div>
         </div>
       </div>

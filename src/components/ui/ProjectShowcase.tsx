@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { RiArrowRightLine, RiExternalLinkLine, RiGithubFill } from "react-icons/ri";
-import { Building2, Sprout, Shield, Package } from "lucide-react";
+import { Building2, Shield, Package } from "lucide-react";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import type { Project } from "@/data/site-data";
 
@@ -16,21 +16,28 @@ const projectMeta: Record<string, {
   lerony: {
     accent: "#0e52a8",
     bg: "linear-gradient(135deg, #dbeafe 0%, #e0f2fe 100%)",
-    tag: "SaaS Platform",
+    tag: "Company",
     Icon: Building2,
     iconColor: "#0e52a8",
   },
-  agrivoice: {
-    accent: "#10b981",
-    bg: "linear-gradient(135deg, #d1fae5 0%, #e0f2fe 100%)",
-    tag: "AI Product",
-    Icon: Sprout,
-    iconColor: "#10b981",
+  "caritas-systems": {
+    accent: "#0e52a8",
+    bg: "linear-gradient(135deg, #dbeafe 0%, #eef2ff 100%)",
+    tag: "Information systems",
+    Icon: Building2,
+    iconColor: "#0e52a8",
   },
-  "tut-labs": {
+  stockpro: {
+    accent: "#0ea5e9",
+    bg: "linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%)",
+    tag: "Operations",
+    Icon: Package,
+    iconColor: "#0ea5e9",
+  },
+  "psta-accounting": {
     accent: "#6366f1",
-    bg: "linear-gradient(135deg, #ede9fe 0%, #e0e7ff 100%)",
-    tag: "Security Tech",
+    bg: "linear-gradient(135deg, #e0e7ff 0%, #eef2ff 100%)",
+    tag: "Accounting system",
     Icon: Shield,
     iconColor: "#6366f1",
   },
@@ -54,11 +61,11 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
           <div>
             <p className="section-label">Featured Projects</p>
             <h2 style={{ color: "var(--color-text)" }}>
-              Things I&apos;ve <span className="hero-name-gradient">built.</span>
+              Selected <span className="hero-name-gradient">work.</span>
             </h2>
           </div>
           <Link href="/projects" className="btn btn-ghost" style={{ color: "var(--color-text-2)", fontWeight: 600 }}>
-            All Projects <RiArrowRightLine size={16} />
+            All work <RiArrowRightLine size={16} />
           </Link>
         </AnimatedSection>
 
@@ -167,7 +174,7 @@ export default function ProjectShowcase({ projects }: { projects: Project[] }) {
                       }} />
                       <span style={{ color: status.color }}>{status.label}</span>
                       <span style={{ color: "var(--color-border)" }}>|</span>
-                      <span style={{ color: "var(--color-text-3)" }}>{project.year}</span>
+                      <span style={{ color: "var(--color-text-3)" }}>{project.period || project.year || project.organization}</span>
                     </div>
 
                     <h3 style={{

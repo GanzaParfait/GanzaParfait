@@ -1,171 +1,125 @@
 import type { Metadata } from "next";
-import { services } from "@/data/site-data";
+import { services, siteConfig } from "@/data/site-data";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import Link from "next/link";
 import { RiArrowRightLine, RiCheckLine } from "react-icons/ri";
-import { Globe, BrainCircuit, Puzzle, Mic } from "lucide-react";
+import { Globe, BrainCircuit, Puzzle, Layers, Compass } from "lucide-react";
 import type { ElementType } from "react";
-import { buildBreadcrumbJsonLd, buildPageMetadata, buildWebPageJsonLd } from "@/lib/seo";
+import { buildPageMetadata } from "@/lib/seo";
+import { buildBreadcrumbListJsonLd, buildGraph, buildWebPageJsonLd } from "@/lib/schema";
+import { JsonLd } from "@/components/seo/JsonLd";
+import Breadcrumbs from "@/components/seo/Breadcrumbs";
 
 const SERVICE_ICONS: Record<string, ElementType> = {
   globe: Globe,
+  layers: Layers,
   "brain-circuit": BrainCircuit,
   puzzle: Puzzle,
-  mic: Mic,
+  compass: Compass,
 };
 
-const SERVICE_COLORS: Record<string, string> = {
-  globe: "#0e52a8",
-  "brain-circuit": "#6366f1",
-  puzzle: "#0ea5e9",
-  mic: "#10b981",
-};
+const PAGE_DESCRIPTION =
+  "Software engineering, full-stack development, business systems, and practical AI integration. Larger commercial work may run through LERONY Ltd.";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Services by PPG — Software, AI & Consulting",
-  description:
-    "Software development, AI integration, technical consulting, and speaking services by Prince Parfait GANZA (PPG) from Kigali, Rwanda.",
+  title: "Software Development Services | Prince Parfait GANZA",
+  description: PAGE_DESCRIPTION,
   path: "/services",
-  keywords: ["PPG services", "hire PPG developer", "AI consulting Rwanda", "Prince Parfait GANZA consulting"],
+  absoluteTitle: true,
 });
 
-export default function ServicesPage() {
-  const schema = [
-    buildWebPageJsonLd({
-      name: "Services by Prince Parfait GANZA (PPG)",
-      description: "Software development, AI integration, and consulting services.",
-      path: "/services",
-    }),
-    buildBreadcrumbJsonLd([
-      { name: "Home", path: "/" },
-      { name: "Services", path: "/services" },
-    ]),
-  ];
+const breadcrumbItems = [
+  { name: "Home", path: "/" },
+  { name: "Services", path: "/services" },
+];
 
+export default function ServicesPage() {
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      <JsonLd
+        data={buildGraph([
+          buildWebPageJsonLd({
+            path: "/services",
+            name: "Software Development Services | Prince Parfait GANZA",
+            description: PAGE_DESCRIPTION,
+          }),
+          buildBreadcrumbListJsonLd(breadcrumbItems, "/services"),
+        ])}
+      />
+      <Breadcrumbs items={breadcrumbItems} />
 
-      {/* Header */}
-      <section className="section pt-32 pb-10 relative dot-grid overflow-hidden" aria-label="Services header">
-        <div aria-hidden="true" className="absolute inset-0 bg-gradient-radial pointer-events-none" />
-        <div className="container relative z-10 max-w-4xl">
+      <section className="section pt-8 pb-10" aria-label="Services header">
+        <div className="container max-w-4xl">
           <AnimatedSection>
             <p className="section-label">Services</p>
-            <h1 className="theme-heading mb-4" style={{ fontFamily: "var(--font-heading)" }}>
-              How I can help.
-            </h1>
+            <h1 className="theme-heading mb-4">How we can work.</h1>
             <p className="theme-copy text-lg leading-relaxed max-w-2xl">
-              From building full-stack web applications to integrating AI, I
-              work with founders, startups, and organizations to ship
-              software that creates lasting value.
+              Capabilities that match shipped work: production software, operational systems, and practical AI inside real workflows. For larger commercial engagements, {siteConfig.company.name} is the appropriate entity.
             </p>
           </AnimatedSection>
         </div>
       </section>
 
-      {/* Services grid */}
-      <section className="section" aria-label="Service offerings">
+      <section className="section pt-0" aria-label="Service offerings">
         <div className="container">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {services.map((service, i) => (
-              <AnimatedSection key={service.id} delay={i * 80}>
-                <article
-                  className="card glass-hover p-8 h-full"
-                  aria-label={service.title}
-                >
-                  {(() => {
-                    const Icon = SERVICE_ICONS[service.icon] || Globe;
-                    const color = SERVICE_COLORS[service.icon] || "#0e52a8";
-                    return (
-                      <div style={{
-                        width: "3.5rem", height: "3.5rem", borderRadius: "1rem",
-                        background: `${color}12`,
-                        border: `1px solid ${color}25`,
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        marginBottom: "1rem",
-                      }}>
-                        <Icon size={22} color={color} strokeWidth={1.75} />
-                      </div>
-                    );
-                  })()}
-                  <h2
-                    className="theme-heading text-xl font-semibold mb-3"
-                    style={{ fontFamily: "var(--font-heading)" }}
-                  >
-                    {service.title}
-                  </h2>
-                  <p className="theme-copy mb-6 leading-relaxed">
-                    {service.description}
-                  </p>
-                  <ul className="space-y-2" role="list">
-                    {service.features.map((feature) => (
-                      <li
-                        key={feature}
-                        className="flex items-center gap-2.5 text-sm theme-copy"
-                      >
-                        <RiCheckLine
-                          size={16}
-                          className="text-[#0E52A8] flex-shrink-0"
-                          aria-hidden="true"
-                        />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </article>
-              </AnimatedSection>
-            ))}
+            {services.map((service, i) => {
+              const Icon = SERVICE_ICONS[service.icon] || Globe;
+              return (
+                <AnimatedSection key={service.id} delay={i * 80}>
+                  <article className="card p-8 h-full" aria-label={service.title}>
+                    <div style={{
+                      width: "3.25rem",
+                      height: "3.25rem",
+                      borderRadius: "1rem",
+                      background: "rgba(14,82,168,0.08)",
+                      border: "1px solid rgba(14,82,168,0.18)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginBottom: "1rem",
+                    }}>
+                      <Icon size={22} color="var(--color-primary)" strokeWidth={1.75} />
+                    </div>
+                    <h2 className="theme-heading text-xl font-semibold mb-3">{service.title}</h2>
+                    <p className="theme-copy mb-6 leading-relaxed">{service.description}</p>
+                    <ul className="space-y-2" role="list">
+                      {service.features.map((feature) => (
+                        <li key={feature} className="flex items-center gap-2.5 text-sm theme-copy">
+                          <RiCheckLine size={16} className="text-[#0E52A8] flex-shrink-0" aria-hidden="true" />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                  </article>
+                </AnimatedSection>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* Process */}
-      <section className="section bg-mesh" aria-label="Work process">
+      <section className="section" aria-label="Work process" style={{ background: "var(--color-bg-2)" }}>
         <div className="container max-w-3xl">
           <AnimatedSection className="text-center mb-12">
-            <p className="section-label justify-center">How I Work</p>
-            <h2 className="theme-heading" style={{ fontFamily: "var(--font-heading)" }}>
-              My process.
-            </h2>
+            <p className="section-label justify-center">Process</p>
+            <h2 className="theme-heading">How delivery usually runs.</h2>
           </AnimatedSection>
-
           <ol className="relative border-l border-[rgba(14,82,168,0.2)] pl-8 space-y-8">
             {[
-              {
-                n: "01",
-                title: "Understand",
-                desc: "I begin by deeply understanding your problem, users, and goals before writing a single line of code.",
-              },
-              {
-                n: "02",
-                title: "Plan",
-                desc: "Define scope, architecture, and timeline. Clear plans prevent costly rework.",
-              },
-              {
-                n: "03",
-                title: "Build",
-                desc: "Ship iteratively with regular updates. No black boxes — you see progress throughout.",
-              },
-              {
-                n: "04",
-                title: "Launch & Support",
-                desc: "Deployment, documentation, and ongoing support to ensure everything runs smoothly.",
-              },
+              { n: "01", title: "Understand", desc: "The problem, users, constraints, and what already exists — before a stack is chosen." },
+              { n: "02", title: "Plan", desc: "Scope, architecture, and sequence. Clear plans prevent expensive rework." },
+              { n: "03", title: "Build", desc: "Iterative delivery with visible progress. No black box." },
+              { n: "04", title: "Launch & support", desc: "Deployment, handover, and support so the system can actually be operated." },
             ].map((step, i) => (
               <AnimatedSection as="li" key={step.n} delay={i * 80} className="relative">
-                <div
-                  className="theme-timeline-dot absolute -left-[2.3rem] top-1 w-4 h-4 rounded-full border-2 border-[#0E52A8] flex items-center justify-center"
-                  aria-hidden="true"
-                >
+                <div className="theme-timeline-dot absolute -left-[2.3rem] top-1 w-4 h-4 rounded-full border-2 border-[#0E52A8] flex items-center justify-center" aria-hidden="true">
                   <div className="w-1.5 h-1.5 rounded-full bg-[#0E52A8]" />
                 </div>
                 <div className="card p-5">
                   <div className="flex items-center gap-3 mb-2">
-                    <span className="text-xs font-mono text-[#0E52A8] font-semibold">{step.n}</span>
-                    <h3 className="theme-heading font-semibold" style={{ fontFamily: "var(--font-heading)" }}>
-                      {step.title}
-                    </h3>
+                    <span className="text-xs font-mono font-semibold" style={{ color: "var(--color-primary)" }}>{step.n}</span>
+                    <h3 className="theme-heading font-semibold">{step.title}</h3>
                   </div>
                   <p className="text-sm theme-copy">{step.desc}</p>
                 </div>
@@ -175,22 +129,22 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* CTA */}
       <section className="section" aria-label="Get in touch">
-        <div className="container">
-          <AnimatedSection className="text-center">
-            <p className="section-label justify-center">Start Today</p>
-            <h2 className="theme-heading mb-4" style={{ fontFamily: "var(--font-heading)" }}>
-              Ready to work together?
-            </h2>
+        <div className="container text-center">
+          <AnimatedSection>
+            <h2 className="theme-heading mb-4">Ready to scope a system?</h2>
             <p className="theme-copy mb-8 max-w-md mx-auto">
-              Share your project, and we&apos;ll figure out the best way to
-              move forward together.
+              Share the problem. We will decide whether it is a personal engagement or a {siteConfig.company.name} delivery.
             </p>
-            <Link href="/contact" className="btn btn-primary btn-lg">
-              Get A Quote
-              <RiArrowRightLine size={18} />
-            </Link>
+            <div className="flex flex-wrap justify-center gap-3">
+              <Link href="/contact" className="btn btn-primary btn-lg">
+                Contact
+                <RiArrowRightLine size={18} />
+              </Link>
+              <Link href="/projects" className="btn btn-outline btn-lg">
+                See selected work
+              </Link>
+            </div>
           </AnimatedSection>
         </div>
       </section>

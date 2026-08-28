@@ -1,68 +1,34 @@
-import { MetadataRoute } from "next";
-import { siteConfig, projects, blogPosts } from "@/data/site-data";
+import type { MetadataRoute } from "next";
+import { projects, blogPosts } from "@/data/site-data";
+import { canonicalUrl } from "@/lib/schema";
+import { sitemapLastModified } from "@/lib/seo";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = siteConfig.url;
-  const now = new Date();
+  const revised = sitemapLastModified();
 
   const staticRoutes: MetadataRoute.Sitemap = [
-    {
-      url: baseUrl,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 1,
-    },
-    {
-      url: `${baseUrl}/about`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.95,
-    },
-    {
-      url: `${baseUrl}/projects`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/blog`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/services`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/speaking`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/contact`,
-      lastModified: now,
-      changeFrequency: "yearly",
-      priority: 0.7,
-    },
+    { url: canonicalUrl("/"), lastModified: revised, changeFrequency: "monthly", priority: 1 },
+    { url: canonicalUrl("/about"), lastModified: revised, changeFrequency: "monthly", priority: 0.9 },
+    { url: canonicalUrl("/projects"), lastModified: revised, changeFrequency: "monthly", priority: 0.9 },
+    { url: canonicalUrl("/experience"), lastModified: revised, changeFrequency: "monthly", priority: 0.85 },
+    { url: canonicalUrl("/services"), lastModified: revised, changeFrequency: "monthly", priority: 0.8 },
+    { url: canonicalUrl("/contact"), lastModified: revised, changeFrequency: "yearly", priority: 0.7 },
+    { url: canonicalUrl("/speaking"), lastModified: revised, changeFrequency: "monthly", priority: 0.5 },
   ];
 
   const projectRoutes: MetadataRoute.Sitemap = projects.map((project) => ({
-    url: `${baseUrl}/projects/${project.id}`,
-    lastModified: now,
+    url: canonicalUrl(`/projects/${project.id}`),
+    lastModified: revised,
     changeFrequency: "monthly" as const,
     priority: 0.7,
   }));
 
-  const blogRoutes: MetadataRoute.Sitemap = blogPosts.map((post) => ({
-    url: `${baseUrl}/blog/${post.slug}`,
+  const articleRoutes: MetadataRoute.Sitemap = blogPosts.map((post) => ({
+    url: canonicalUrl(`/blog/${post.slug}`),
     lastModified: new Date(post.date),
     changeFrequency: "yearly" as const,
     priority: 0.6,
   }));
 
-  return [...staticRoutes, ...projectRoutes, ...blogRoutes];
+  return [...staticRoutes, ...projectRoutes, ...articleRoutes];
 }

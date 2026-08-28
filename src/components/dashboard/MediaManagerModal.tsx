@@ -21,6 +21,7 @@ export default function MediaManagerModal({ isOpen, onClose, onSelect }: MediaMa
   if (!isOpen || !mounted) return null;
 
   const handleSelect = (url: string) => {
+    if (url.startsWith("blob:")) return;
     onSelect(url);
     onClose();
   };
@@ -47,13 +48,13 @@ export default function MediaManagerModal({ isOpen, onClose, onSelect }: MediaMa
           width: "100%",
           maxWidth: "62rem",
           height: "min(88vh, 700px)",
-          background: "#ffffff",
+          background: "#eef2f7",
           borderRadius: "0.5rem",
           boxShadow: "0 25px 60px rgba(0,0,0,0.35)",
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
-          border: "1px solid #e2e8f0",
+          border: "1px solid #dbe4f0",
         }}
       >
         {/* Modal top-bar close */}
@@ -68,7 +69,7 @@ export default function MediaManagerModal({ isOpen, onClose, onSelect }: MediaMa
           }}
         >
           <span style={{ fontSize: "0.8125rem", fontWeight: 700, color: "#ffffff" }}>
-            Media Library — Select an Asset
+            Media Library — Select an Image
           </span>
           <button
             onClick={onClose}
@@ -79,8 +80,8 @@ export default function MediaManagerModal({ isOpen, onClose, onSelect }: MediaMa
         </div>
 
         {/* Embed full media manager */}
-        <div style={{ flex: 1, overflow: "hidden" }}>
-          <MediaManagerPage onSelect={handleSelect} asModal />
+        <div style={{ flex: 1, overflow: "hidden", minHeight: 0 }}>
+          <MediaManagerPage onSelect={handleSelect} asModal pickerMode="image" />
         </div>
       </div>
     </div>

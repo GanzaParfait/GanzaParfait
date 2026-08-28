@@ -3,7 +3,7 @@
 -- ============================================================
 
 ALTER TABLE public.site_settings
-ADD COLUMN IF NOT EXISTS announcement_text VARCHAR(255) DEFAULT 'Exciting news! The TUT Labs Platform is now live.',
+ADD COLUMN IF NOT EXISTS announcement_text VARCHAR(255) DEFAULT '',
 ADD COLUMN IF NOT EXISTS announcement_link VARCHAR(500) DEFAULT '/projects',
 ADD COLUMN IF NOT EXISTS announcement_is_active BOOLEAN DEFAULT false;
 

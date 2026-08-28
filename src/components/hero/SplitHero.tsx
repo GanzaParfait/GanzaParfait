@@ -1,39 +1,41 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import {
   RiArrowRightLine,
-  RiDownloadLine,
   RiMapPinLine,
-  RiWhatsappLine,
-  RiLinkedinFill,
-  RiInstagramLine,
-  RiGithubFill,
-  RiTwitterXFill,
   RiCloseLine,
   RiArrowDownLine,
 } from "react-icons/ri";
-import { useState, useEffect, useRef } from "react";
-import { BrainCircuit } from "lucide-react";
-import { siteConfig } from "@/data/site-data";
+import { useState, useEffect } from "react";
 import { SiteSettings } from "@/lib/supabase";
+import { heroImageFor, setting, splitDisplayName } from "@/lib/hero";
+import { socialIcon, heroSocialsFor } from "@/lib/socials";
 
-const primarySocials = [
-  { href: siteConfig.social.whatsapp, label: "WhatsApp", icon: RiWhatsappLine },
-  { href: siteConfig.social.linkedin, label: "LinkedIn", icon: RiLinkedinFill },
-  { href: siteConfig.social.github, label: "GitHub", icon: RiGithubFill },
-  { href: siteConfig.social.twitter, label: "X / Twitter", icon: RiTwitterXFill },
-  { href: siteConfig.social.instagram, label: "Instagram", icon: RiInstagramLine },
-];
-
-export default function SplitHero({ settings }: { settings: SiteSettings }) {
+export default function SplitHero({
+  settings,
+  isPreview = false,
+}: {
+  settings: SiteSettings;
+  isPreview?: boolean;
+}) {
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const roles = settings.siteSubtitle
     ? settings.siteSubtitle.split(" • ")
     : ["Founder", "Software Engineer", "AI Builder", "Speaker", "Entrepreneur"];
   const [currentRoleIndex, setCurrentRoleIndex] = useState(0);
   const [visible, setVisible] = useState(false);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const displayName = splitDisplayName(setting(settings, "siteTitle"));
+  const greeting = setting(settings, "heroGreeting");
+  const availableText = setting(settings, "heroAvailableText");
+  const primaryCtaLabel = setting(settings, "heroPrimaryCtaLabel");
+  const primaryCtaHref = setting(settings, "heroPrimaryCtaHref");
+  const secondaryCtaLabel = setting(settings, "heroSecondaryCtaLabel");
+  const secondaryCtaHref = setting(settings, "heroSecondaryCtaHref");
+  const splitImage = heroImageFor(settings, "split_portrait");
+  const splitIsStatic = splitImage.startsWith("/") && !splitImage.startsWith("//");
+  const primarySocials = heroSocialsFor(settings);
 
   useEffect(() => {
     setVisible(true);
@@ -47,73 +49,6 @@ export default function SplitHero({ settings }: { settings: SiteSettings }) {
     return () => clearInterval(interval);
   }, [roles.length]);
 
-  // Particle canvas
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    let animId: number;
-    const resize = () => {
-      canvas.width = canvas.offsetWidth * window.devicePixelRatio;
-      canvas.height = canvas.offsetHeight * window.devicePixelRatio;
-      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-    };
-    resize();
-    window.addEventListener("resize", resize);
-
-    const count = 55;
-    const particles = Array.from({ length: count }, () => ({
-      x: Math.random() * canvas.offsetWidth,
-      y: Math.random() * canvas.offsetHeight,
-      r: Math.random() * 1.5 + 0.3,
-      dx: (Math.random() - 0.5) * 0.25,
-      dy: (Math.random() - 0.5) * 0.25,
-      alpha: Math.random() * 0.5 + 0.15,
-    }));
-
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
-      particles.forEach((p) => {
-        p.x += p.dx;
-        p.y += p.dy;
-        if (p.x < 0) p.x = canvas.offsetWidth;
-        if (p.x > canvas.offsetWidth) p.x = 0;
-        if (p.y < 0) p.y = canvas.offsetHeight;
-        if (p.y > canvas.offsetHeight) p.y = 0;
-
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(14, 82, 168, ${p.alpha})`;
-        ctx.fill();
-      });
-
-      // Lines
-      particles.forEach((a, i) => {
-        particles.slice(i + 1).forEach((b) => {
-          const dist = Math.hypot(a.x - b.x, a.y - b.y);
-          if (dist < 100) {
-            ctx.beginPath();
-            ctx.moveTo(a.x, a.y);
-            ctx.lineTo(b.x, b.y);
-            ctx.strokeStyle = `rgba(14, 82, 168, ${0.06 * (1 - dist / 100)})`;
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
-          }
-        });
-      });
-
-      animId = requestAnimationFrame(draw);
-    };
-    draw();
-
-    return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener("resize", resize);
-    };
-  }, []);
-
   const delay = (ms: number) => ({
     opacity: visible ? 1 : 0,
     transform: visible ? "translateY(0)" : "translateY(28px)",
@@ -122,32 +57,18 @@ export default function SplitHero({ settings }: { settings: SiteSettings }) {
 
   return (
     <section
-      className="relative overflow-hidden"
+      className={isPreview ? "relative overflow-hidden hero-layout-preview" : "relative overflow-hidden"}
       aria-label="Hero Section"
       style={{
-        minHeight: "100dvh",
+        minHeight: isPreview ? "100%" : "100dvh",
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
         background: "var(--color-bg)",
-        paddingTop: "6rem",
+        paddingTop: isPreview ? "3rem" : "var(--public-nav-offset, 3.6rem)",
         paddingBottom: "4rem",
       }}
     >
-      {/* Particle canvas */}
-      <canvas
-        ref={canvasRef}
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          inset: 0,
-          width: "100%",
-          height: "100%",
-          zIndex: 0,
-          pointerEvents: "none",
-        }}
-      />
-
       {/* Ambient orbs */}
       <div aria-hidden="true" style={{
         position: "absolute", top: "-15%", right: "-8%",
@@ -168,10 +89,18 @@ export default function SplitHero({ settings }: { settings: SiteSettings }) {
       }} />
 
       <div className="container" style={{ position: "relative", zIndex: 10 }}>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+        <div
+          className={isPreview ? undefined : "grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center"}
+          style={isPreview ? {
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "5rem",
+            alignItems: "center",
+          } : undefined}
+        >
 
           {/* ── LEFT — Text Content ── */}
-          <div className="order-2 lg:order-1">
+          <div className={isPreview ? undefined : "order-2 lg:order-1"} style={isPreview ? { order: 1 } : undefined}>
 
             {/* Status pill */}
             <div style={{ marginBottom: "1.75rem", ...delay(0) }}>
@@ -189,7 +118,7 @@ export default function SplitHero({ settings }: { settings: SiteSettings }) {
                   boxShadow: "0 0 6px #22c55e",
                   animation: "pulse 2s infinite",
                 }} aria-hidden="true" />
-                <span style={{ color: "#16a34a" }}>Available for new projects</span>
+                <span style={{ color: "#16a34a" }}>{availableText}</span>
                 <span style={{ width: "1px", height: "0.85rem", background: "rgba(0,0,0,0.12)" }} />
                 <RiMapPinLine size={12} style={{ color: "var(--color-text-3)" }} />
                 <span style={{ color: "var(--color-text-3)" }}>{settings.location}</span>
@@ -207,7 +136,7 @@ export default function SplitHero({ settings }: { settings: SiteSettings }) {
                 letterSpacing: "0.06em",
                 textTransform: "uppercase",
               }}>
-                Hi there, I&apos;m
+                {greeting}
               </p>
             </div>
 
@@ -221,11 +150,13 @@ export default function SplitHero({ settings }: { settings: SiteSettings }) {
                 marginBottom: "1.5rem",
               }}>
                 <span className="hero-name-gradient" style={{ display: "block" }}>
-                  Prince Parfait
+                  {displayName.first}
                 </span>
-                <span style={{ color: "var(--color-text)", display: "block" }}>
-                  GANZA
-                </span>
+                {displayName.last ? (
+                  <span style={{ color: "var(--color-text)", display: "block" }}>
+                    {displayName.last}
+                  </span>
+                ) : null}
               </h1>
             </div>
 
@@ -278,73 +209,61 @@ export default function SplitHero({ settings }: { settings: SiteSettings }) {
                 lineHeight: 1.8,
                 maxWidth: "40rem",
               }}>
-                {settings.bio}{" "}
-                Founder of{" "}
-                <a
-                  href="https://lerony.com"
-                  target="_blank" rel="noopener noreferrer"
-                  style={{
-                    color: "var(--color-primary)", fontWeight: 700,
-                    textDecoration: "none",
-                    borderBottom: "2px solid rgba(14,82,168,0.3)",
-                    paddingBottom: "1px",
-                    transition: "border-color 0.2s ease",
-                  }}
-                >
-                  Lerony
-                </a>
-                , building software that creates lasting impact.
+                {settings.bio}
               </p>
             </div>
 
             {/* Social icons */}
             <div style={{ marginBottom: "2.25rem", ...delay(360) }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
-                {primarySocials.map(({ href, label, icon: Icon }) => (
+              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
+                {primarySocials.map((link) => {
+                  const Icon = socialIcon(link.platform);
+                  return (
                   <a
-                    key={label}
-                    href={href}
+                    key={link.id}
+                    href={link.url}
                     target="_blank" rel="noopener noreferrer"
-                    aria-label={label}
-                    title={label}
+                    aria-label={link.label}
+                    title={link.label}
                     className="social-icon-btn"
                   >
                     <Icon size={17} />
                   </a>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
             {/* CTAs */}
             <div style={delay(440)}>
-              {/* Desktop */}
-              <div className="hidden lg:flex" style={{ alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
-                <Link href="/projects" className="btn btn-primary btn-lg" style={{ fontWeight: 700 }}>
-                  View My Work
+              <div
+                className={isPreview ? undefined : "hidden lg:flex"}
+                style={{ alignItems: "center", gap: "1rem", flexWrap: "wrap", display: isPreview ? "flex" : undefined }}
+              >
+                <Link href={primaryCtaHref} className="btn btn-primary btn-lg" style={{ fontWeight: 700 }}>
+                  {primaryCtaLabel}
                   <RiArrowRightLine size={18} />
                 </Link>
-                <Link href="/contact" className="btn btn-outline btn-lg" style={{ fontWeight: 600 }}>
-                  Let&apos;s Collaborate
+                <Link href={secondaryCtaHref} className="btn btn-outline btn-lg" style={{ fontWeight: 600 }}>
+                  {secondaryCtaLabel}
                 </Link>
-                <a
-                  href="/resume.pdf"
-                  download
+                <Link
+                  href="/experience"
                   className="btn btn-ghost"
                   style={{ color: "var(--color-text-3)", fontWeight: 500 }}
                 >
-                  <RiDownloadLine size={16} />
-                  CV
-                </a>
+                  Experience
+                </Link>
               </div>
 
-              {/* Mobile */}
+              {!isPreview && (
               <div className="flex lg:hidden" style={{ alignItems: "center", gap: "0.75rem", width: "100%" }}>
                 <Link
-                  href="/projects"
+                  href={primaryCtaHref}
                   className="btn btn-primary"
                   style={{ flex: 1, justifyContent: "center", height: "3.25rem", fontWeight: 700 }}
                 >
-                  View My Work
+                  {primaryCtaLabel}
                   <RiArrowRightLine size={18} />
                 </Link>
                 <button
@@ -356,22 +275,26 @@ export default function SplitHero({ settings }: { settings: SiteSettings }) {
                   More
                 </button>
               </div>
+              )}
             </div>
           </div>
 
           {/* ── RIGHT — Photo + floating badges ── */}
           <div
-            className="flex justify-center order-1 lg:order-2"
+            className={isPreview ? undefined : "flex justify-center order-1 lg:order-2"}
             style={{
+              display: "flex",
+              justifyContent: "center",
+              order: isPreview ? 2 : undefined,
               opacity: visible ? 1 : 0,
               transform: visible ? "translateY(0)" : "translateY(32px)",
               transition: "opacity 0.9s ease 200ms, transform 0.9s ease 200ms",
             }}
           >
-            <div style={{
+            <div className="hero-split-photo" style={{
               position: "relative",
-              width: "min(72vw, 28rem)",
-              height: "min(90vw, 36rem)",
+              width: isPreview ? "32rem" : "min(100%, 32rem)",
+              height: isPreview ? "38rem" : "min(92vw, 38rem)",
               display: "flex",
               alignItems: "flex-end",
               justifyContent: "center",
@@ -408,74 +331,64 @@ export default function SplitHero({ settings }: { settings: SiteSettings }) {
 
               {/* Photo */}
               <div style={{ position: "relative", zIndex: 2, width: "88%", height: "98%", bottom: 0 }}>
-                <img
-                  src={settings?.heroImageUrl || "/images/profile/hero-photo.png"}
-                  alt={`${settings.siteTitle} — ${settings.siteSubtitle}`}
-                  className="w-full h-full object-contain object-bottom"
-                />
+                {splitIsStatic ? (
+                  <Image
+                    src={splitImage}
+                    alt={setting(settings, "siteTitle")}
+                    fill
+                    priority
+                    sizes="(max-width: 1024px) 72vw, 28rem"
+                    className="object-contain object-bottom"
+                  />
+                ) : (
+                  <img
+                    src={splitImage}
+                    alt={setting(settings, "siteTitle")}
+                    style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "bottom" }}
+                  />
+                )}
               </div>
 
-              {/* Floating stat — Projects */}
+              {/* Floating identity cards */}
               <div
                 className="hero-stat-card animate-float"
                 style={{
                   position: "absolute", top: "2rem", right: "-0.5rem",
-                  animationDelay: "0.3s", zIndex: 3, minWidth: "7rem",
+                  animationDelay: "0.3s", zIndex: 3, minWidth: "8.5rem",
                   textAlign: "center",
                 }}
               >
                 <p style={{
-                  fontFamily: "var(--font-heading)", fontSize: "1.875rem",
-                  fontWeight: 800, color: "var(--color-primary)", lineHeight: 1,
-                }}>15+</p>
+                  fontFamily: "var(--font-heading)", fontSize: "1rem",
+                  fontWeight: 800, color: "var(--color-primary)", lineHeight: 1.2,
+                }}> {setting(settings, "heroStat1Value")}</p>
                 <p style={{ fontSize: "0.7rem", color: "var(--color-text-3)", marginTop: "0.25rem", fontWeight: 500 }}>
-                  Projects Shipped
+                  {setting(settings, "heroStat1Label")}
                 </p>
               </div>
 
-              {/* Floating stat — Years */}
               <div
                 className="hero-stat-card animate-float"
                 style={{
                   position: "absolute", top: "8rem", left: "-0.5rem",
-                  animationDelay: "1s", zIndex: 3, minWidth: "7rem",
+                  animationDelay: "1s", zIndex: 3, minWidth: "8rem",
                   textAlign: "center",
                 }}
               >
                 <p style={{
-                  fontFamily: "var(--font-heading)", fontSize: "1.875rem",
-                  fontWeight: 800, color: "#6366f1", lineHeight: 1,
-                }}>3+</p>
+                  fontFamily: "var(--font-heading)", fontSize: "1rem",
+                  fontWeight: 800, color: "var(--color-primary)", lineHeight: 1.2,
+                }}> {setting(settings, "heroStat2Value")}</p>
                 <p style={{ fontSize: "0.7rem", color: "var(--color-text-3)", marginTop: "0.25rem", fontWeight: 500 }}>
-                  Years Building
+                  {setting(settings, "heroStat2Label")}
                 </p>
-              </div>
-
-              {/* Floating tech pill */}
-              <div
-                className="animate-float"
-                style={{
-                  position: "absolute", bottom: "3.5rem", left: "-1rem",
-                  animationDelay: "1.8s", zIndex: 3,
-                  background: "var(--glass-bg)",
-                  backdropFilter: "blur(12px)",
-                  border: "1px solid var(--glass-border)",
-                  borderRadius: "9999px",
-                  padding: "0.4rem 1rem",
-                  display: "flex", alignItems: "center", gap: "0.5rem",
-                  boxShadow: "var(--shadow-md)",
-                }}
-              >
-                <BrainCircuit size={15} style={{ color: "#6366f1" }} strokeWidth={2} />
-                <span style={{ fontSize: "0.75rem", fontWeight: 600, color: "var(--color-text)", whiteSpace: "nowrap" }}>
-                  AI Builder
-                </span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Scroll indicator */}
+        {!isPreview && (
         <div
           style={{
             position: "absolute", bottom: "-3rem", left: "50%",
@@ -493,8 +406,11 @@ export default function SplitHero({ settings }: { settings: SiteSettings }) {
             style={{ color: "var(--color-text-3)", animation: "float 2s ease-in-out infinite" }}
           />
         </div>
+        )}
       </div>
 
+      {!isPreview && (
+      <>
       {/* Mobile More Sheet */}
       <div
         aria-hidden={!isMoreOpen}
@@ -541,22 +457,22 @@ export default function SplitHero({ settings }: { settings: SiteSettings }) {
             className="btn btn-outline"
             style={{ justifyContent: "center", width: "100%", height: "3.25rem", fontWeight: 600 }}
           >
-            Let&apos;s Collaborate
+            Contact
           </Link>
-          <a
-            href="/resume.pdf"
-            download
+          <Link
+            href="/experience"
             className="btn btn-ghost"
             style={{
               justifyContent: "center", width: "100%", height: "3.25rem",
               color: "var(--color-text)", border: "1px solid var(--color-border)", fontWeight: 500,
             }}
           >
-            <RiDownloadLine size={18} style={{ marginRight: "0.5rem" }} />
-            Download CV
-          </a>
+            Experience
+          </Link>
         </div>
       </div>
+      </>
+      )}
     </section>
   );
 }

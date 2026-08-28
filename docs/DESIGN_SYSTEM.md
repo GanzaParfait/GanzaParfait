@@ -1,69 +1,143 @@
 # Design System
 
-## Grid
+Visual and interaction rules for princeparfait.com.
 
-12-column
-
----
-
-## Breakpoints
-
-Mobile
-
-Tablet
-
-Desktop
-
-Large Desktop
+The site should feel clean, premium, modern, professional, and human. Primary visual family: blue.
 
 ---
 
-## Border Radius
+## Brand
 
-Buttons
+| Token | Value | Use |
+|-------|-------|-----|
+| Name | Prince Parfait GANZA | All public surfaces |
+| Domain | princeparfait.com | Canonical identity |
+| Direction | Blue | Accents, CTAs, focus |
+| Location | Kigali, Rwanda | Hero, footer, schema |
 
-Cards
-
-Inputs
+Logos live in `public/brand/logos/`. Use horizontal blue on light surfaces and horizontal light on dark surfaces.
 
 ---
 
-## Shadows
+## Color
 
-Light
+Use CSS custom properties from `src/app/globals.css`. Do not introduce a second palette.
 
-Medium
+| Token | Light | Dark | Role |
+|-------|-------|------|------|
+| `--color-primary` | `#0e52a8` | `#0e52a8` | Brand, CTAs, links |
+| `--color-primary-light` | `#1a6dd4` | `#1a6dd4` | Hover |
+| `--color-primary-dark` | `#093d80` | `#093d80` | Pressed |
+| `--color-bg` | `#ffffff` | `#050816` | Page |
+| `--color-bg-2` | `#f8fafc` | `#0b192c` | Alternating sections |
+| `--color-surface` | `#ffffff` | `#0a1628` | Cards |
+| `--color-text` | `#0b192c` | `#ffffff` | Headings |
+| `--color-text-2` | `#3d5173` | `#94a3b8` | Body |
+| `--color-text-3` | `#8496b0` | `#64748b` | Meta |
+| `--color-border` | blue at 15% | blue at 20% | Dividers |
 
-Large
+Contrast for body text must meet WCAG AA (4.5:1). Do not place primary-blue text on white without checking contrast.
+
+Avoid: excessive gradients, holographic UI, robot imagery, code rain, heavy glass, glow stacks.
+
+---
+
+## Typography
+
+The live site uses **Outfit** for headings and body, loaded in `src/app/layout.tsx`.
+
+| Role | Family | Notes |
+|------|--------|-------|
+| Headings | Outfit | 700–800, tight tracking |
+| Body | Outfit | 400–500, 1.75 line height |
+| Code / tags | JetBrains Mono fallback | Tech chips only |
+
+Scale:
+
+- H1: `clamp(2.75rem, 6vw, 5rem)`
+- H2: `clamp(1.875rem, 3.5vw, 3rem)`
+- Body: 1rem
+- Labels: 0.75rem, uppercase, wide tracking, primary color
+
+Do not mix a third display font without a documented reason.
+
+---
+
+## Layout
+
+- Max width: `--container-max` (1280px)
+- Horizontal padding: `--container-padding` (1rem, increase on large screens via existing utilities)
+- Section padding: `--section-padding` (5rem 0)
+- 12-column mental model; practical implementation is CSS grid (`grid-cols-1 md:grid-cols-2 lg:grid-cols-3`)
+- Mobile first. Primary CTAs must remain usable at 320px.
+
+Breakpoints follow Tailwind defaults: sm 640, md 768, lg 1024, xl 1280.
+
+---
+
+## Radius, Shadow, Focus
+
+| Token | Value |
+|-------|-------|
+| `--radius-sm` | 0.375rem |
+| `--radius-md` | 0.75rem |
+| `--radius-lg` | 1rem |
+| `--radius-xl` | 1.5rem |
+| `--shadow-sm` / `--shadow-md` | Soft, navy-tinted |
+| `--shadow-glow` | Use rarely, on primary CTA only |
+
+Focus: visible `:focus-visible` rings using brand blue. Never remove outlines without a replacement.
 
 ---
 
 ## Components
 
-Navbar
+Reuse before creating:
 
-Hero
+- `Navbar` — sticky pill, theme-aware logo, compact mobile sheet
+- `Footer` — identity, primary links, public socials
+- `AnimatedSection` — scroll entrance only
+- `ProjectCard` / `ProjectShowcase` — work evidence
+- `HeroSection` — homepage identity
+- Buttons via `.btn`, `.btn-primary`, `.btn-outline`, `.btn-ghost`
+- Cards via `.card`
+- Section labels via `.section-label`
 
-Buttons
+Do not add Framer Motion to a page that already has Intersection Observer motion unless a specific interaction cannot be done in CSS.
 
-Cards
+---
 
-Timeline
+## Motion
 
-Testimonials
+Homepage priority: **clarity over animation**.
 
-Footer
+Allowed:
 
-Forms
+- Short fade/translate on scroll (`AnimatedSection`)
+- Hover lift of ~2px on cards
+- Role ticker on the hero if it does not delay comprehension
+- CSS marquees that pause on hover and respect reduced motion
 
-Badges
+Not allowed:
 
-Project Cards
+- Particle networks or code-background canvases
+- Animation that blocks reading
+- Auto-playing decorative 3D
+- Fake statistics counters
 
-Blog Cards
+Always honor `prefers-reduced-motion`. `AnimatedSection` must skip transform when that preference is set.
 
-Animations
+---
 
-Loading States
+## Imagery
 
-Empty States
+- Hero photograph: `public/images/profile/prince-parfait-ganza-kigali-rwanda.webp`
+- Alt text must name Prince Parfait GANZA
+- Project screenshots only when they do not expose confidential data
+- No stock "AI robot" or generic laptop-with-code hero art
+
+---
+
+## Theme
+
+Light is default. Dark is a first-class alternative via `data-theme`. Keep both readable. Do not design a third theme.

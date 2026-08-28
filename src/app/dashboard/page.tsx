@@ -10,8 +10,11 @@ import {
   RiRefreshLine,
   RiArrowDownSLine,
 } from "react-icons/ri";
-import { Smartphone, Monitor, Tablet } from "lucide-react";
 import type { AnalyticsMetrics } from "@/lib/supabase";
+import { projects, services, experience, speakingEngagements, blogPosts, education } from "@/data/site-data";
+import { BarChart, ColumnChart, DonutChart } from "@/components/dashboard/Charts";
+import { HERO_LAYOUTS } from "@/lib/hero";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 import "./analytics.css";
 
 const EMPTY_ANALYTICS: AnalyticsMetrics = {
@@ -45,6 +48,7 @@ export default function DashboardOverviewPage() {
   const [analytics, setAnalytics] = useState<AnalyticsMetrics>(EMPTY_ANALYTICS);
   const [loading, setLoading] = useState(true);
   const [expandedSession, setExpandedSession] = useState<string | null>(null);
+  const settings = useSiteSettings();
 
   const loadAnalytics = useCallback(async () => {
     setLoading(true);
@@ -93,9 +97,9 @@ export default function DashboardOverviewPage() {
     <div className="analytics-page">
       <div className="analytics-header">
         <div>
-          <h1>Analytics & Performance</h1>
+          <h1>Dashboard</h1>
           <p>
-            Live visitor intelligence — geo capture, session journeys, device mix, and page performance in one view.
+            Traffic, content inventory, and the live homepage layout in one place.
           </p>
           {analytics.error && <p className="analytics-error">{analytics.error}</p>}
         </div>
@@ -110,6 +114,47 @@ export default function DashboardOverviewPage() {
             {analytics.telemetryActive ? "Live Telemetry" : "Telemetry Offline"}
           </div>
         </div>
+      </div>
+
+      <div className="analytics-stats">
+        {[
+          { label: "Projects", value: projects.length, detail: `${projects.filter((item) => item.featured).length} featured` },
+          { label: "Services", value: services.length, detail: "Public offerings" },
+          { label: "Experience", value: experience.length, detail: `${education.length} education records` },
+          { label: "Writing", value: blogPosts.length, detail: speakingEngagements.length ? `${speakingEngagements.length} speaking record` : "No public articles yet" },
+        ].map((item) => (
+          <div key={item.label} className="analytics-stat" style={{ ["--stat-accent" as string]: "#0e52a8" }}>
+            <div className="analytics-stat-top">
+              <span className="analytics-stat-label">{item.label}</span>
+            </div>
+            <p className="analytics-stat-value">{item.value}</p>
+            <p className="analytics-stat-change">{item.detail}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="analytics-grid">
+        <section className="analytics-panel">
+          <div className="analytics-panel-title">Traffic volume</div>
+          <p className="analytics-panel-subtitle">Sessions, unique visitors, and pageviews compared on one scale</p>
+          <ColumnChart
+            items={[
+              { label: "Sessions", value: analytics.totalVisitors },
+              { label: "Unique", value: analytics.uniqueVisitors },
+              { label: "Views", value: analytics.totalPageviews },
+            ]}
+          />
+        </section>
+        <section className="analytics-panel">
+          <div className="analytics-panel-title">Live homepage layout</div>
+          <p className="analytics-panel-subtitle">
+            {HERO_LAYOUTS.find((layout) => layout.id === settings.bannerLayout)?.name || "Split Portrait"} is currently active.
+          </p>
+          <p style={{ fontSize: "0.9rem", color: "#334155", lineHeight: 1.6, marginTop: "0.75rem" }}>
+            {settings.siteTitle} · {settings.location}
+          </p>
+          <p style={{ fontSize: "0.82rem", color: "#64748b", marginTop: "0.4rem" }}>{settings.bio}</p>
+        </section>
       </div>
 
       <div className="analytics-stats">
@@ -144,30 +189,12 @@ export default function DashboardOverviewPage() {
             </div>
           ) : (
             <div style={{ marginTop: "1rem" }}>
-              {analytics.countryBreakdown.map((country) => (
-                <div key={country.country} className="analytics-bar-row">
-                  <div className="analytics-bar-meta">
-                    <strong>
-                      <span>{country.flag}</span> {country.country}
-                    </strong>
-                    <span style={{ color: "#64748b", fontWeight: 700 }}>
-                      {country.count.toLocaleString()} ({country.percentage}%)
-                    </span>
-                  </div>
-                  <div className="analytics-bar-track">
-                    <div
-                      className="analytics-bar-fill"
-                      style={{
-                        width: `${country.percentage}%`,
-                        background:
-                          country.country === "Rwanda"
-                            ? "linear-gradient(90deg, #0e52a8, #1a6dd4)"
-                            : undefined,
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
+              <BarChart
+                items={analytics.countryBreakdown.map((country) => ({
+                  label: `${country.flag} ${country.country}`,
+                  value: country.count,
+                }))}
+              />
             </div>
           )}
         </section>
@@ -180,30 +207,13 @@ export default function DashboardOverviewPage() {
             <div className="analytics-empty" style={{ marginTop: "1rem" }}>No device data yet.</div>
           ) : (
             <div style={{ marginTop: "1rem" }}>
-              {analytics.deviceBreakdown.map((device) => {
-                const DeviceIcon =
-                  device.icon === "mobile" ? Smartphone : device.icon === "desktop" ? Monitor : Tablet;
-                const color =
-                  device.icon === "mobile" ? "#0e52a8" : device.icon === "desktop" ? "#6366f1" : "#0ea5e9";
-
-                return (
-                  <div key={device.device} className="analytics-device-row">
-                    <div className="analytics-device-left">
-                      <div
-                        className="analytics-device-icon"
-                        style={{ background: `${color}14`, color }}
-                      >
-                        <DeviceIcon size={17} strokeWidth={2.2} />
-                      </div>
-                      <div>
-                        <p style={{ fontSize: "0.875rem", fontWeight: 800, color: "#0b192c" }}>{device.device}</p>
-                        <p style={{ fontSize: "0.68rem", color: "#64748b" }}>{device.percentage}% of traffic</p>
-                      </div>
-                    </div>
-                    <span style={{ fontSize: "1.125rem", fontWeight: 800, color }}>{device.percentage}%</span>
-                  </div>
-                );
-              })}
+              <DonutChart
+                items={analytics.deviceBreakdown.map((device, index) => ({
+                  label: device.device,
+                  value: device.percentage,
+                  color: ["#0e52a8", "#6366f1", "#0ea5e9"][index] || "#94a3b8",
+                }))}
+              />
             </div>
           )}
         </section>

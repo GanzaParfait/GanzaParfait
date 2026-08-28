@@ -3,184 +3,115 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   RiArrowRightLine,
-  RiDownloadLine,
   RiGithubFill,
   RiLinkedinFill,
 } from "react-icons/ri";
-import { siteConfig, timeline, skills } from "@/data/site-data";
-import { buildFaqJsonLd, buildPageMetadata } from "@/lib/seo";
+import { siteConfig, timeline, skills, education } from "@/data/site-data";
+import { PublicSocialAnchor } from "@/components/public/PublicContact";
+import { buildPageMetadata } from "@/lib/seo";
+import { buildBreadcrumbListJsonLd, buildGraph, buildProfilePageJsonLd } from "@/lib/schema";
+import { JsonLd } from "@/components/seo/JsonLd";
+import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "About Prince Parfait GANZA (PPG)",
+  title: "About Prince Parfait GANZA | Software Engineer in Rwanda",
   description:
-    "Who is PPG? Prince Parfait GANZA (PPG) is a software engineer, AI builder, founder of Lerony, and technology entrepreneur based in Kigali, Rwanda.",
+    "Background, education, and working principles of Prince Parfait GANZA, a founder and software engineer based in Kigali and founder of LERONY Ltd.",
   path: "/about",
-  keywords: ["About PPG", "Who is Prince Parfait GANZA", "PPG Rwanda biography"],
   ogType: "profile",
+  absoluteTitle: true,
 });
 
-const structuredData = {
-  "@context": "https://schema.org",
-  "@type": "ProfilePage",
-  mainEntity: {
-    "@type": "Person",
-    name: "Prince Parfait GANZA",
-    alternateName: ["PPG", "Prince Parfait GANZA PPG", "PPG Rwanda"],
-    description:
-      "Software Engineer, AI Builder, and Founder of Lerony based in Kigali, Rwanda.",
-    url: siteConfig.url,
-  },
-};
-
-const faqSchema = buildFaqJsonLd([
-  {
-    question: "Who is PPG?",
-    answer:
-      "PPG stands for Prince Parfait GANZA — a Rwandan software engineer, AI builder, founder of Lerony, speaker, and entrepreneur based in Kigali.",
-  },
-  {
-    question: "What does Prince Parfait GANZA (PPG) do?",
-    answer:
-      "PPG builds full-stack software products, integrates AI into real-world workflows, leads Lerony, and speaks on technology entrepreneurship across Africa.",
-  },
-  {
-    question: "Where is PPG based?",
-    answer: "Prince Parfait GANZA (PPG) is based in Kigali, Rwanda and works with clients across Africa and globally.",
-  },
-]);
+const breadcrumbItems = [
+  { name: "Home", path: "/" },
+  { name: "About", path: "/about" },
+];
 
 const values = [
   {
-    title: "Impact First",
-    description:
-      "Every line of code I write should create measurable value for real people.",
+    title: "Evidence over claims",
+    description: "Work should stand on real systems, named organizations, and clear contribution — not adjectives.",
   },
   {
-    title: "Craft Matters",
-    description:
-      "Clean, performant, accessible code is not optional — it&apos;s the standard.",
+    title: "Ship what operations need",
+    description: "The useful product is the one staff can log into, report from, and run a process on.",
   },
   {
-    title: "Think Long Term",
-    description:
-      "Building things that last and scale requires patience and architectural discipline.",
+    title: "Separate person and company",
+    description: "This site is the person. LERONY Ltd is the commercial brand for larger delivery.",
   },
   {
-    title: "Keep Learning",
-    description:
-      "Technology evolves rapidly. Staying curious and humble is a non-negotiable.",
+    title: "Keep learning visible",
+    description: "University Computer Science is ongoing. That is stated plainly, not dressed up as a finished credential.",
   },
 ];
 
-const skillCategories = ["Frontend", "Backend", "AI/ML", "DevOps"];
+const skillCategories = ["Frontend", "Backend", "Data", "Infrastructure"];
 
 export default function AboutPage() {
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify([structuredData, faqSchema]) }}
+      <JsonLd
+        data={buildGraph([
+          buildProfilePageJsonLd({
+            path: "/about",
+            name: "About Prince Parfait GANZA | Software Engineer in Rwanda",
+            description: metadata.description as string,
+          }),
+          buildBreadcrumbListJsonLd(breadcrumbItems, "/about"),
+        ])}
       />
+      <Breadcrumbs items={breadcrumbItems} />
 
-      {/* Header */}
-      <section
-        className="section pt-32 pb-16 relative overflow-hidden dot-grid"
-        aria-label="About header"
-      >
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 bg-gradient-radial pointer-events-none"
-        />
+      <section className="section pt-8 pb-16 relative overflow-hidden" aria-label="About header">
         <div className="container relative z-10">
-          <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            {/* Text */}
+          <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <AnimatedSection>
-                <p className="section-label">About Me</p>
-                <h1
-                  className="theme-heading mb-5"
-                  style={{ fontFamily: "var(--font-heading)" }}
-                >
+                <p className="section-label">About</p>
+                <h1 className="theme-heading mb-5">
                   Building from Kigali,
                   <br />
-                  <span className="text-[#0E52A8]">for the world.</span>
+                  <span style={{ color: "var(--color-primary)" }}>for organizations that need systems.</span>
                 </h1>
                 <p className="theme-copy leading-relaxed mb-6 text-lg">
-                  I&apos;m <strong className="theme-heading">Prince Parfait GANZA</strong> — a software
-                  engineer, AI builder, and founder based in Kigali, Rwanda. I
-                  build full-stack web applications and AI-powered tools that
-                  solve real problems across Africa and beyond.
+                  I&apos;m <strong className="theme-heading">{siteConfig.name}</strong>, a Rwandan founder and software engineer. I build full-stack products and integrate AI to solve real-world problems across Africa and beyond.
                 </p>
                 <p className="theme-copy leading-relaxed mb-8">
-                  As the founder of{" "}
-                  <a
-                    href="https://lerony.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[#60a5fa] hover:underline"
-                  >
-                    Lerony
+                  In 2025 I founded{" "}
+                  <a href={siteConfig.company.url} target="_blank" rel="noopener noreferrer" style={{ color: "var(--color-primary)", fontWeight: 700 }}>
+                    {siteConfig.company.name}
                   </a>
-                  , I&apos;m building a technology company focused on creating impactful
-                  software products for local and global markets. My journey is
-                  driven by the belief that code is one of the most powerful tools
-                  for social and economic change.
+                  , a technology and innovation company in Kigali. This site is about the person, the work, and the evidence. The company brand lives at lerony.com.
                 </p>
                 <div className="flex flex-wrap gap-3">
                   <Link href="/contact" className="btn btn-primary">
-                    Work With Me
+                    Work with me
                     <RiArrowRightLine size={16} />
                   </Link>
-                  <a
-                    href="/resume.pdf"
-                    download
-                    className="btn btn-outline"
-                    aria-label="Download résumé (PDF)"
-                  >
-                    <RiDownloadLine size={16} />
-                    Résumé
-                  </a>
-                  <a
-                    href={siteConfig.social.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn btn-ghost text-slate-400"
-                    aria-label="GitHub profile"
-                  >
+                  <Link href="/experience" className="btn btn-outline">
+                    Experience
+                  </Link>
+                  <PublicSocialAnchor platform="github" className="btn btn-ghost">
                     <RiGithubFill size={18} />
-                  </a>
-                  <a
-                    href={siteConfig.social.linkedin}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn btn-ghost text-slate-400"
-                    aria-label="LinkedIn profile"
-                  >
+                  </PublicSocialAnchor>
+                  <PublicSocialAnchor platform="linkedin" className="btn btn-ghost">
                     <RiLinkedinFill size={18} />
-                  </a>
+                  </PublicSocialAnchor>
                 </div>
               </AnimatedSection>
             </div>
 
-            {/* Logo/Visual */}
-            <AnimatedSection delay={200} direction="right">
+            <AnimatedSection delay={160} direction="right">
               <div className="flex justify-center lg:justify-end">
-                <div className="relative w-72 h-72 rounded-3xl overflow-hidden glass border border-[rgba(14,82,168,0.3)] flex items-center justify-center p-8">
-                  <div
-                    aria-hidden="true"
-                    className="absolute inset-0"
-                    style={{
-                      background:
-                        "radial-gradient(circle at 30% 30%, rgba(14,82,168,0.2) 0%, transparent 60%)",
-                    }}
-                  />
+                <div className="relative w-72 h-72 rounded-3xl overflow-hidden glass border border-[rgba(14,82,168,0.3)]">
                   <Image
-                    src="/brand/logos/logo-vertical-blue.png"
-                    alt="Prince Parfait GANZA logo"
-                    width={220}
-                    height={220}
-                    className="object-contain relative z-10"
+                    src="/images/profile/prince-parfait-ganza-kigali-rwanda.webp"
+                    alt="Prince Parfait GANZA"
+                    fill
+                    sizes="288px"
+                    className="object-cover object-top"
                   />
                 </div>
               </div>
@@ -189,29 +120,42 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Values */}
-      <section className="section bg-mesh" aria-label="Personal values">
+      <section className="section" aria-label="Education" style={{ background: "var(--color-bg-2)" }}>
+        <div className="container max-w-4xl">
+          <AnimatedSection className="mb-10">
+            <p className="section-label">Education</p>
+            <h2 className="theme-heading">Where the craft was trained.</h2>
+          </AnimatedSection>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {education.map((item, i) => (
+              <AnimatedSection key={item.id} delay={i * 80}>
+                <article className="card p-6 h-full">
+                  <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "var(--color-primary)" }}>
+                    {item.period}
+                  </p>
+                  <h3 className="theme-heading text-lg mt-2 mb-1">{item.program}</h3>
+                  <p className="theme-copy mb-2">{item.institution}</p>
+                  <p className="text-sm theme-muted">{item.status}{item.note ? ` · ${item.note}` : ""}</p>
+                </article>
+              </AnimatedSection>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section" aria-label="How I work">
         <div className="container">
           <AnimatedSection className="text-center mb-12">
             <p className="section-label justify-center">Principles</p>
-            <h2 className="theme-heading" style={{ fontFamily: "var(--font-heading)" }}>
-              What I stand for.
-            </h2>
+            <h2 className="theme-heading">How the work is judged.</h2>
           </AnimatedSection>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {values.map((val, i) => (
               <AnimatedSection key={val.title} delay={i * 80}>
-                <div className="card glass-hover p-6 h-full">
+                <div className="card p-6 h-full">
                   <div className="w-2 h-2 rounded-full bg-[#0E52A8] mb-4" />
-                  <h3
-                    className="theme-heading font-semibold mb-2 text-base"
-                    style={{ fontFamily: "var(--font-heading)" }}
-                  >
-                    {val.title}
-                  </h3>
-                  <p className="text-sm theme-copy leading-relaxed">
-                    {val.description}
-                  </p>
+                  <h3 className="theme-heading font-semibold mb-2 text-base">{val.title}</h3>
+                  <p className="text-sm theme-copy leading-relaxed">{val.description}</p>
                 </div>
               </AnimatedSection>
             ))}
@@ -219,34 +163,27 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Skills */}
-      <section className="section" aria-label="Technical skills">
+      <section className="section" aria-label="Technical skills" style={{ background: "var(--color-bg-2)" }}>
         <div className="container max-w-4xl">
           <AnimatedSection className="mb-12">
-            <p className="section-label">Skills</p>
-            <h2 className="theme-heading mb-2" style={{ fontFamily: "var(--font-heading)" }}>
-              My technical toolkit.
-            </h2>
+            <p className="section-label">Capabilities</p>
+            <h2 className="theme-heading mb-2">Tools used in shipped work.</h2>
+            <p className="theme-copy max-w-2xl">
+              This is a working toolkit, not an expert-level claim for every item. Depth shows up in the systems, not the list.
+            </p>
           </AnimatedSection>
-
           <div className="space-y-8">
             {skillCategories.map((category, ci) => {
               const categorySkills = skills.filter((s) => s.category === category);
               return (
-                <AnimatedSection key={category} delay={ci * 100}>
-                  <div>
-                    <h3
-                      className="text-xs uppercase tracking-widest font-semibold text-[#0E52A8] mb-3"
-                    >
-                      {category}
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {categorySkills.map((skill) => (
-                        <span key={skill.name} className="tech-tag">
-                          {skill.name}
-                        </span>
-                      ))}
-                    </div>
+                <AnimatedSection key={category} delay={ci * 80}>
+                  <h3 className="text-xs uppercase tracking-widest font-semibold mb-3" style={{ color: "var(--color-primary)" }}>
+                    {category}
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {categorySkills.map((skill) => (
+                      <span key={skill.name} className="tech-tag">{skill.name}</span>
+                    ))}
                   </div>
                 </AnimatedSection>
               );
@@ -255,50 +192,26 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Timeline */}
-      <section className="section bg-mesh" aria-label="Career timeline">
+      <section className="section" aria-label="Journey">
         <div className="container max-w-3xl">
           <AnimatedSection className="mb-12">
             <p className="section-label">Journey</p>
-            <h2 className="theme-heading" style={{ fontFamily: "var(--font-heading)" }}>
-              How I got here.
-            </h2>
+            <h2 className="theme-heading">Selected chronology.</h2>
           </AnimatedSection>
-
           <ol className="relative border-l border-[rgba(14,82,168,0.2)] pl-8 space-y-8">
             {timeline.map((item, i) => (
-              <AnimatedSection
-                as="li"
-                key={`${item.year}-${item.title}`}
-                delay={i * 80}
-                className="relative"
-              >
-                {/* Dot */}
-                <div
-                  className="theme-timeline-dot absolute -left-[2.3rem] top-1 w-4 h-4 rounded-full border-2 border-[#0E52A8] flex items-center justify-center"
-                  aria-hidden="true"
-                >
+              <AnimatedSection as="li" key={`${item.year}-${item.title}`} delay={i * 80} className="relative">
+                <div className="theme-timeline-dot absolute -left-[2.3rem] top-1 w-4 h-4 rounded-full border-2 border-[#0E52A8] flex items-center justify-center" aria-hidden="true">
                   <div className="w-1.5 h-1.5 rounded-full bg-[#0E52A8]" />
                 </div>
-
                 <div className="card p-5">
                   <div className="flex items-start justify-between gap-4 mb-2">
-                    <h3
-                      className="theme-heading font-semibold"
-                      style={{ fontFamily: "var(--font-heading)" }}
-                    >
-                      {item.title}
-                    </h3>
-                    <time
-                      className="text-xs text-[#0E52A8] font-semibold flex-shrink-0 mt-0.5"
-                      dateTime={item.year}
-                    >
+                    <h3 className="theme-heading font-semibold">{item.title}</h3>
+                    <span className="text-xs font-semibold flex-shrink-0 mt-0.5" style={{ color: "var(--color-primary)" }}>
                       {item.year}
-                    </time>
+                    </span>
                   </div>
-                  <p className="text-sm text-[#60a5fa] mb-2 font-medium">
-                    {item.organization}
-                  </p>
+                  <p className="text-sm mb-2 font-medium" style={{ color: "var(--color-primary)" }}>{item.organization}</p>
                   <p className="text-sm theme-copy">{item.description}</p>
                 </div>
               </AnimatedSection>
@@ -307,25 +220,19 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* CTA */}
       <section className="section" aria-label="Connect">
         <div className="container">
           <AnimatedSection className="text-center">
-            <p className="section-label justify-center">Ready to build?</p>
-            <h2
-              className="theme-heading mb-4"
-              style={{ fontFamily: "var(--font-heading)" }}
-            >
-              Let&apos;s work together.
-            </h2>
-            <p className="theme-copy mb-8 max-w-md mx-auto">
-              Whether you have a project, a question, or just want to connect —
-              my inbox is always open.
-            </p>
-            <Link href="/contact" className="btn btn-primary btn-lg">
-              Get In Touch
-              <RiArrowRightLine size={18} />
-            </Link>
+            <p className="section-label justify-center">Next</p>
+            <h2 className="theme-heading mb-4">See the work, or start a conversation.</h2>
+            <div className="flex flex-wrap justify-center gap-3">
+              <Link href="/projects" className="btn btn-primary">
+                Selected work
+                <RiArrowRightLine size={16} />
+              </Link>
+              <Link href="/experience" className="btn btn-outline">Experience</Link>
+              <Link href="/contact" className="btn btn-outline">Contact</Link>
+            </div>
           </AnimatedSection>
         </div>
       </section>

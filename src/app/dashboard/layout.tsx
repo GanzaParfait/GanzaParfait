@@ -8,7 +8,6 @@ import {
   RiDashboardLine,
   RiLayoutGridLine,
   RiSettings4Line,
-  RiShareLine,
   RiFolderLine,
   RiBookOpenLine,
   RiLogoutBoxRLine,
@@ -28,6 +27,7 @@ import {
 import { SIDEBAR_STORAGE_KEY } from "@/lib/supabase";
 
 import MediaManagerModal from "@/components/dashboard/MediaManagerModal";
+import { DashboardFeedbackProvider } from "@/components/dashboard/DashboardFeedback";
 export interface AdminProfile {
   name: string;
   email: string;
@@ -52,7 +52,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [profile, setProfile] = useState<AdminProfile>({
     name: "Prince Parfait GANZA",
     email: "ganzaparfait7@gmail.com",
-    avatarUrl: "/images/profile/hero-photo.png",
+    avatarUrl: "/images/profile/prince-parfait-ganza-kigali-rwanda.webp",
     role: "Super Admin",
   });
 
@@ -118,6 +118,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   const handleMediaSelect = (url: string) => {
+    if (url.startsWith("blob:")) return;
     if (mediaTargetCallback) {
       mediaTargetCallback(url);
       setMediaTargetCallback(null);
@@ -137,18 +138,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   return (
+    <DashboardFeedbackProvider>
     <div style={{ height: "100vh", display: "flex", flexDirection: "column", background: "#f8fafc", color: "#0f172a", overflow: "hidden" }}>
       <header
         style={{
-          height: "4rem",
+          height: "5rem",
           background: "#ffffff",
           borderBottom: "1px solid #e2e8f0",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "0 1.25rem",
+          padding: "0 1.5rem",
           zIndex: 50,
-          boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
+          boxShadow: "0 1px 8px rgba(11,25,44,0.06)",
           flexShrink: 0,
         }}
       >
@@ -162,7 +164,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </button>
 
           <Link href="/dashboard" style={{ display: "flex", alignItems: "center" }}>
-            <div style={{ position: "relative", width: "8.5rem", height: "2.25rem" }}>
+            <div style={{ position: "relative", width: "11rem", height: "2.6rem" }}>
               <img
                 src="/brand/logos/logo-horizontal-blue.png"
                 alt="Prince Parfait GANZA"
@@ -171,7 +173,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
           </Link>
           <span style={{ height: "1rem", width: "1px", background: "#cbd5e1" }} />
-          <span style={{ fontSize: "0.6875rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.05em", background: "#eff6ff", color: "#1d4ed8", padding: "0.15rem 0.5rem", borderRadius: "0.25rem" }}>
+          <span style={{ fontSize: "0.72rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", background: "#eff6ff", color: "#0e52a8", padding: "0.3rem 0.65rem", borderRadius: "0.4rem" }}>
             Control Center
           </span>
         </div>
@@ -271,56 +273,56 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div style={{ flex: 1, display: "flex", overflow: "hidden", minHeight: 0 }}>
         <aside
           style={{
-            width: sidebarOpen ? "16rem" : "0",
-            minWidth: 0,
+            width: sidebarOpen ? "17.5rem" : "4.75rem",
+            minWidth: sidebarOpen ? "17.5rem" : "4.75rem",
             height: "100%",
-            background: "#0b1329",
+            background: "#07111f",
             color: "#ffffff",
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
-            padding: sidebarOpen ? "1.25rem 0.875rem" : "0",
+            padding: "1.35rem 0.8rem",
             flexShrink: 0,
             zIndex: 40,
-            transition: "width 0.25s ease, padding 0.25s ease",
+            transition: "width 0.25s ease, min-width 0.25s ease",
             overflow: "hidden",
           }}
         >
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", opacity: sidebarOpen ? 1 : 0, transition: "opacity 0.2s ease" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
             {[
               { id: "overview", path: "/dashboard", label: "Analytics Overview", icon: RiDashboardLine },
               { id: "banners", path: "/dashboard/banners", label: "Banners & Hero Layouts", icon: RiLayoutGridLine },
               { id: "blogs", path: "/dashboard/blogs", label: "Blog Articles", icon: RiBookOpenLine },
               { id: "projects", path: "/dashboard/projects", label: "Projects", icon: RiFolderLine },
               { id: "media", path: "/dashboard/media", label: "Media Library", icon: RiImageLine },
-              { id: "socials", path: "/dashboard/socials", label: "Social Links", icon: RiShareLine },
               { id: "settings", path: "/dashboard/settings", label: "Site Settings", icon: RiSettings4Line },
             ].map((tab) => {
               const Icon = tab.icon;
-              const active = pathname === tab.path;
+              const active = tab.path === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(tab.path);
               return (
                 <Link
                   key={tab.id}
                   href={tab.path}
+                  title={tab.label}
                   style={{
                     display: "flex",
                     alignItems: "center",
                     gap: "0.75rem",
-                    padding: "0.75rem 0.875rem",
-                    justifyContent: "flex-start",
-                    borderRadius: "0.375rem",
-                    fontSize: "0.8125rem",
-                    fontWeight: active ? 700 : 500,
+                    padding: "0.85rem 0.9rem",
+                    justifyContent: sidebarOpen ? "flex-start" : "center",
+                    borderRadius: "0.65rem",
+                    fontSize: "0.9rem",
+                    fontWeight: active ? 700 : 600,
                     textDecoration: "none",
-                    background: active ? "#1d4ed8" : "transparent",
+                    background: active ? "#0e52a8" : "transparent",
                     color: active ? "#ffffff" : "#94a3b8",
                     width: "100%",
                     transition: "all 0.15s ease",
                     whiteSpace: "nowrap",
                   }}
                 >
-                  <Icon size={18} />
-                  <span>{tab.label}</span>
+                  <Icon size={20} />
+                  {sidebarOpen && <span>{tab.label}</span>}
                 </Link>
               );
             })}
@@ -359,7 +361,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </Link>
         </aside>
 
-        <main style={{ flex: 1, height: "100%", overflowY: "auto", padding: "1.5rem 1.75rem", background: "linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%)" }}>
+        <main style={{
+          flex: 1,
+          height: "100%",
+          minHeight: 0,
+          overflowY: pathname.startsWith("/dashboard/settings") || pathname.startsWith("/dashboard/media") ? "hidden" : "auto",
+          padding: pathname.startsWith("/dashboard/settings") || pathname.startsWith("/dashboard/media") ? "1.1rem 1.25rem" : "1.75rem 2rem",
+          background: "#eef2f7",
+          display: pathname.startsWith("/dashboard/settings") || pathname.startsWith("/dashboard/media") ? "flex" : undefined,
+          flexDirection: pathname.startsWith("/dashboard/settings") || pathname.startsWith("/dashboard/media") ? "column" : undefined,
+        }}>
           {children}
         </main>
       </div>
@@ -386,5 +397,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         onOpenMedia={() => triggerMediaPicker((url) => setEditingBlog((prev) => (prev ? { ...prev, coverImage: url } : null)))}
       />
     </div>
+    </DashboardFeedbackProvider>
   );
 }

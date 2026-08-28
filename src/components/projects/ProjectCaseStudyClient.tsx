@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   RiArrowLeftLine,
@@ -17,50 +15,15 @@ import { Project, projects as defaultProjects } from "@/data/site-data";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import ShareActions from "@/components/ui/ShareActions";
 
-export default function ProjectCaseStudyClient() {
-  const { id } = useParams();
-  const router = useRouter();
-  const [project, setProject] = useState<Project | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    try {
-      const cached = localStorage.getItem("ppg_projects_list");
-      let found: Project | undefined;
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        found = parsed.find((p: Project) => p.id === id);
-      }
-      if (!found) {
-        found = defaultProjects.find((p) => p.id === id);
-      }
-      if (found) {
-        setProject(found);
-      } else {
-        router.push("/projects");
-      }
-    } catch {
-      const found = defaultProjects.find((p) => p.id === id);
-      if (found) setProject(found);
-      else router.push("/projects");
-    } finally {
-      setLoading(false);
-    }
-  }, [id, router]);
-
-  if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading case study...</div>;
-  }
-  if (!project) return null;
-
+export default function ProjectCaseStudyClient({ project }: { project: Project }) {
   return (
-    <main className="min-h-screen bg-[var(--color-bg)] pt-24 pb-20">
+    <article className="min-h-screen bg-[var(--color-bg)] pt-8 pb-20">
       <div className="container max-w-4xl">
         <Link
           href="/projects"
           className="inline-flex items-center gap-2 text-sm font-bold text-[var(--color-text-3)] hover:text-[var(--color-primary)] transition-colors mb-8"
         >
-          <RiArrowLeftLine /> Back to Projects
+          <RiArrowLeftLine /> Back to work
         </Link>
 
         <AnimatedSection>
@@ -98,7 +61,7 @@ export default function ProjectCaseStudyClient() {
           </div>
 
           <ShareActions
-            title={`${project.title} by Prince Parfait GANZA (PPG)`}
+            title={`${project.title} by Prince Parfait GANZA`}
             excerpt={project.description}
             campaign={`project-${project.id}`}
             content={project.id}
@@ -115,47 +78,60 @@ export default function ProjectCaseStudyClient() {
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 mt-12">
           <div className="md:col-span-8 flex flex-col gap-12">
-            {project.problem && (
+            {project.context && (
+              <AnimatedSection delay={160}>
+                <h2 className="text-2xl font-bold text-[var(--color-text)] mb-4">Context</h2>
+                <p className="text-[var(--color-text-2)] leading-loose text-lg">{project.context}</p>
+              </AnimatedSection>
+            )}
+
+            {(project.challenge || project.problem) && (
               <AnimatedSection delay={200}>
                 <h2 className="flex items-center gap-3 text-2xl font-bold text-[var(--color-text)] mb-4">
                   <div className="p-2 bg-red-500/10 text-red-500 rounded-lg">
                     <RiFocus2Line size={20} />
                   </div>
-                  The Problem
+                  Challenge
                 </h2>
-                <p className="text-[var(--color-text-2)] leading-loose text-lg">{project.problem}</p>
+                <p className="text-[var(--color-text-2)] leading-loose text-lg">{project.challenge || project.problem}</p>
               </AnimatedSection>
             )}
 
-            {project.whatIBuilt && (
-              <AnimatedSection delay={300}>
+            {(project.solution || project.whatIBuilt) && (
+              <AnimatedSection delay={280}>
                 <h2 className="flex items-center gap-3 text-2xl font-bold text-[var(--color-text)] mb-4">
                   <div className="p-2 bg-blue-500/10 text-blue-500 rounded-lg">
                     <RiBuilding2Line size={20} />
                   </div>
-                  What I Built
+                  Solution
                 </h2>
-                <p className="text-[var(--color-text-2)] leading-loose text-lg">{project.whatIBuilt}</p>
+                <p className="text-[var(--color-text-2)] leading-loose text-lg">{project.solution || project.whatIBuilt}</p>
               </AnimatedSection>
             )}
 
-            {project.result && (
-              <AnimatedSection delay={400}>
+            {(project.outcome || project.result) && (
+              <AnimatedSection delay={360}>
                 <h2 className="flex items-center gap-3 text-2xl font-bold text-[var(--color-text)] mb-4">
                   <div className="p-2 bg-green-500/10 text-green-500 rounded-lg">
                     <RiCheckDoubleLine size={20} />
                   </div>
-                  Result & Impact
+                  Outcome
                 </h2>
-                <div className="p-6 bg-green-500/5 border border-green-500/10 rounded-2xl">
-                  <p className="text-[var(--color-text-2)] leading-loose text-lg">{project.result}</p>
+                <div className="p-6 border border-[var(--color-border)] rounded-2xl bg-[var(--color-surface)]">
+                  <p className="text-[var(--color-text-2)] leading-loose text-lg">{project.outcome || project.result}</p>
                 </div>
               </AnimatedSection>
             )}
 
+            {project.independent && (
+              <p className="text-sm text-[var(--color-text-3)]">
+                Independent product-development work, distinct from commercially deployed client systems.
+              </p>
+            )}
+
             {project.screenshots && project.screenshots.length > 0 && (
-              <AnimatedSection delay={500}>
-                <h2 className="text-2xl font-bold text-[var(--color-text)] mb-6">Visuals</h2>
+              <AnimatedSection delay={440}>
+                <h2 className="text-2xl font-bold text-[var(--color-text)] mb-6">Evidence</h2>
                 <div className="grid grid-cols-1 gap-6">
                   {project.screenshots.map((src, idx) => (
                     <div key={idx} className="w-full rounded-2xl overflow-hidden border border-[var(--color-border)]">
@@ -200,9 +176,17 @@ export default function ProjectCaseStudyClient() {
                 </h3>
                 <div className="flex flex-col gap-4">
                   <div>
-                    <p className="text-xs text-[var(--color-text-3)] font-bold mb-1">YEAR</p>
-                    <p className="text-sm font-semibold text-[var(--color-text)]">{project.year}</p>
+                    <p className="text-xs text-[var(--color-text-3)] font-bold mb-1">PERIOD</p>
+                    <p className="text-sm font-semibold text-[var(--color-text)]">
+                      {project.period || (project.year ? String(project.year) : "Not published")}
+                    </p>
                   </div>
+                  {project.organization && (
+                    <div>
+                      <p className="text-xs text-[var(--color-text-3)] font-bold mb-1">ORGANIZATION</p>
+                      <p className="text-sm font-semibold text-[var(--color-text)]">{project.organization}</p>
+                    </div>
+                  )}
                   <div>
                     <p className="text-xs text-[var(--color-text-3)] font-bold mb-1">STATUS</p>
                     <p className="text-sm font-semibold text-[var(--color-text)] capitalize">
@@ -214,7 +198,30 @@ export default function ProjectCaseStudyClient() {
             </AnimatedSection>
           </div>
         </div>
+
+        <AnimatedSection className="mt-16">
+          <h2 className="text-2xl font-bold text-[var(--color-text)] mb-6">Related work</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {defaultProjects
+              .filter((item) => item.id !== project.id)
+              .slice(0, 4)
+              .map((item) => (
+                <Link
+                  key={item.id}
+                  href={`/projects/${item.id}`}
+                  className="card p-5"
+                  style={{ textDecoration: "none" }}
+                >
+                  <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: "var(--color-primary)" }}>
+                    {item.organization || "Work"}
+                  </p>
+                  <h3 className="theme-heading text-lg mb-2">{item.title}</h3>
+                  <p className="text-sm theme-copy">{item.description}</p>
+                </Link>
+              ))}
+          </div>
+        </AnimatedSection>
       </div>
-    </main>
+    </article>
   );
 }

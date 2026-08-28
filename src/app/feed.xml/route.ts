@@ -1,4 +1,5 @@
 import { siteConfig, blogPosts } from "@/data/site-data";
+import { SITE_CONTENT_REVISED } from "@/lib/schema";
 
 function escapeXml(value: string): string {
   return value
@@ -27,11 +28,11 @@ export async function GET() {
   const rss = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Prince Parfait GANZA (PPG) — Blog</title>
+    <title>Prince Parfait GANZA — Insights</title>
     <link>${siteConfig.url}/blog</link>
-    <description>Articles on AI, software engineering, and entrepreneurship by PPG.</description>
+    <description>Writing by Prince Parfait GANZA. Published only when articles exist.</description>
     <language>en-us</language>
-    <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
+    <lastBuildDate>${new Date(`${SITE_CONTENT_REVISED}T00:00:00.000Z`).toUTCString()}</lastBuildDate>
     <atom:link href="${siteConfig.url}/feed.xml" rel="self" type="application/rss+xml"/>
     ${items}
   </channel>

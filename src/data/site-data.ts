@@ -1,38 +1,30 @@
 // ============================================================
 // Site Data — Prince Parfait GANZA
+// Source of truth for public copy: docs/PORTFOLIO_CONTEXT.md
+// Do not invent clients, results, titles, dates, or testimonials.
 // ============================================================
 
 export const siteConfig = {
   name: "Prince Parfait GANZA",
-  shortName: "PPG",
-  title: "Prince Parfait GANZA — Founder • Software Engineer • AI Builder • Speaker • Entrepreneur",
+  title:
+    "Prince Parfait GANZA — Founder • Software Engineer • AI Builder • Speaker • Entrepreneur",
   description:
-    "Founder, Software Engineer, AI Builder, Speaker & Entrepreneur. Building software that creates impact across Africa and beyond.",
-  tagline: "Building software that creates impact.",
-  url: "https://princeparfait.com",
-  ogImage: "/images/profile/hero-photo.png",
+    "Prince Parfait GANZA is a Rwandan founder and software engineer based in Kigali, building practical digital products and software systems for organizations and businesses.",
+  tagline: "Building software that creates impact across Africa and beyond.",
+  positioning: "Founder • Software Engineer • AI Builder • Speaker • Entrepreneur",
+  shortIntro:
+    "Prince Parfait GANZA is a Rwandan founder and software engineer based in Kigali, building practical digital products and software systems for organizations and businesses.",
+  url: "https://www.princeparfait.com",
+  ogImage: "/images/og/prince-parfait-ganza.jpg",
   locale: "en_US",
   keywords: [
-    "PPG",
-    "PPG Rwanda",
-    "PPG developer",
-    "PPG software engineer",
-    "Prince Parfait GANZA PPG",
     "Prince Parfait GANZA",
-    "Prince Parfait",
-    "GANZA Prince",
-    "princeparfait.com",
+    "Prince Parfait Ganza",
     "Software Engineer Rwanda",
-    "AI Builder Africa",
-    "Founder Lerony",
-    "Full Stack Developer Rwanda",
-    "React Developer Rwanda",
-    "Next.js Developer Rwanda",
-    "Technology Entrepreneur Rwanda",
-    "Software Engineer Africa",
-    "Speaker Africa",
-    "Entrepreneur Rwanda",
-    "Kigali software developer",
+    "Founder LERONY Ltd",
+    "Full Stack Developer Kigali",
+    "Technology entrepreneur Rwanda",
+    "princeparfait.com",
   ],
   social: {
     github: "https://github.com/GanzaParfait",
@@ -51,139 +43,252 @@ export const siteConfig = {
     location: "Kigali, Rwanda",
     whatsapp: "https://wa.me/250792054846",
   },
+  company: {
+    name: "LERONY Ltd",
+    url: "https://lerony.com",
+    role: "Founder",
+    established: "2025",
+    location: "Kigali, Rwanda",
+    summary:
+      "A Rwanda-based technology and innovation company building digital solutions for organizations and businesses.",
+  },
 };
+
+export const primaryNav = [
+  { href: "/about", label: "About" },
+  { href: "/projects", label: "Work" },
+  { href: "/experience", label: "Experience" },
+  { href: "/services", label: "Services" },
+  { href: "/contact", label: "Contact" },
+] as const;
+
+export const footerNav = [
+  {
+    label: "Explore",
+    links: [
+      { label: "Home", href: "/" },
+      { label: "About", href: "/about" },
+      { label: "Work", href: "/projects" },
+      { label: "Experience", href: "/experience" },
+    ],
+  },
+  {
+    label: "Work with me",
+    links: [
+      { label: "Services", href: "/services" },
+      { label: "Speaking", href: "/speaking" },
+      { label: "Insights", href: "/blog" },
+      { label: "Contact", href: "/contact" },
+    ],
+  },
+] as const;
 
 export type Project = {
   id: string;
   title: string;
+  organization?: string;
   description: string;
   longDescription?: string;
+  context?: string;
+  challenge?: string;
+  solution?: string;
   problem?: string;
   whatIBuilt?: string;
   technologies: string[];
   myRole?: string;
+  outcome?: string;
   result?: string;
   screenshots?: string[];
-  category: "web" | "mobile" | "ai" | "saas" | "open-source";
+  category: "web" | "mobile" | "ai" | "saas" | "open-source" | "systems" | "product";
   status: "live" | "in-progress" | "archived";
   featured: boolean;
+  independent?: boolean;
   links: {
     live?: string;
     github?: string;
     case_study?: string;
   };
   image?: string;
-  year: number;
+  year?: number;
+  period?: string;
+  contribution?: "creator" | "contributor";
 };
 
 export const projects: Project[] = [
   {
     id: "lerony",
-    title: "Lerony",
+    title: "LERONY Ltd",
+    organization: "LERONY Ltd",
     description:
-      "A technology company building software products that solve real-world problems across Africa.",
+      "Technology and innovation company founded in Kigali to build digital solutions for organizations and businesses.",
     longDescription:
-      "Lerony is my software company focused on building impactful technology solutions for African markets. From SaaS tools to custom software development, Lerony bridges the gap between world-class engineering and local impact.",
+      "LERONY Ltd is the company Prince Parfait GANZA founded in 2025. It is the commercial home for custom software, digital transformation, enterprise systems, AI-enabled solutions, and technology consulting. This personal site tells the founder story; lerony.com is the company brand.",
+    context:
+      "Organizations and businesses in Rwanda and beyond need practical digital systems, not generic software catalogues.",
+    challenge:
+      "Many teams still run critical operations on disconnected tools, manual reporting, and websites that do not support how the organization actually works.",
+    solution:
+      "A technology company focused on custom software, web platforms, business systems, and practical AI integration.",
     problem:
-      "African businesses and individuals lack access to high-quality, locally-relevant software solutions.",
+      "Organizations need production digital systems that match real operational workflows.",
     whatIBuilt:
-      "Building a portfolio of software products and services tailored to African contexts with global standards.",
-    result:
-      "Empowering businesses and individuals across Rwanda and Africa with reliable software tools.",
-    myRole: "Founder & Lead Engineer",
-    technologies: ["Next.js", "TypeScript", "Node.js", "PostgreSQL", "AWS"],
+      "Founded LERONY Ltd as a Rwanda-based technology and innovation company.",
+    myRole: "Founder",
+    outcome:
+      "LERONY Ltd operates as the commercial vehicle for software, systems, and consulting work.",
+    technologies: ["Next.js", "TypeScript", "React", "Node.js", "Supabase"],
     category: "saas",
     status: "live",
     featured: true,
+    period: "2025–Present",
+    year: 2025,
     links: {
       live: "https://lerony.com",
     },
-    year: 2024,
   },
   {
-    id: "agrivoice",
-    title: "AgriVoice Rwanda",
+    id: "caritas-systems",
+    title: "Caritas Rwanda Information Systems",
+    organization: "Caritas Rwanda",
     description:
-      "An AI-powered agricultural assistant helping Rwandan farmers with voice-based crop guidance and market insights.",
+      "Organizational digital systems for indicator tracking, reporting, and information management.",
     longDescription:
-      "AgriVoice provides Rwandan farmers with AI-powered assistance through voice interfaces, offering crop disease diagnosis, weather alerts, market prices, and best practices in Kinyarwanda.",
+      "Work for Caritas Rwanda on internal digital systems used for organizational reporting and information management. The systems support role-based access, dashboards, data management, exports, and administrative workflows.",
+    context: "Caritas Rwanda needed digital systems for organizational indicator and information management.",
+    challenge:
+      "Humanitarian and organizational reporting depends on reliable data, controlled access, and repeatable administrative workflows.",
+    solution:
+      "Information-management functionality including dashboards, role-based access, reporting, exports, and administration.",
     problem:
-      "Rwandan smallholder farmers lack accessible, real-time agricultural knowledge and market data.",
+      "Organizational indicator and information-management work required structured digital systems.",
     whatIBuilt:
-      "Voice-first AI assistant that speaks to farmers in their language with locally-relevant agricultural intelligence.",
-    result:
-      "Improving crop yields and farmer income through AI-powered agricultural guidance.",
-    myRole: "Full-Stack AI Developer",
-    technologies: ["React", "Express", "OpenAI API", "PostgreSQL", "PWA"],
-    category: "ai",
-    status: "in-progress",
-    featured: true,
-    links: {
-      github: "https://github.com/GanzaParfait/agrivoice",
-    },
-    year: 2025,
-  },
-  {
-    id: "tut-labs",
-    title: "TUT Labs",
-    description:
-      "A technology security and defense company providing cutting-edge solutions for critical infrastructure protection.",
-    longDescription:
-      "TUT Labs develops advanced security technologies including body armor innovations, signal intelligence systems, and corporate security solutions.",
-    problem:
-      "Organizations need reliable, sophisticated security solutions that balance protection with practicality.",
-    whatIBuilt:
-      "Building a comprehensive security technology portfolio with a focus on R&D and innovation.",
-    result:
-      "Enhancing security capabilities for governments, corporations, and institutions.",
-    myRole: "Technical Co-founder",
-    technologies: [
-      "Next.js",
-      "TypeScript",
-      "Framer Motion",
-      "Three.js",
-      "Tailwind CSS",
-    ],
-    category: "web",
+      "Digital systems covering role-based access, dashboards, reporting, data management, exports, and administrative workflows.",
+    myRole: "Software engineer",
+    technologies: ["Web platforms", "Dashboards", "Role-based access", "Reporting"],
+    category: "systems",
     status: "live",
     featured: true,
-    links: {
-      live: "https://gettutlabs.com",
-    },
-    year: 2025,
+    links: {},
+  },
+  {
+    id: "stockpro",
+    title: "StockPro",
+    organization: "Business operations",
+    description:
+      "Inventory and sales management system covering stock, invoicing, clients, suppliers, and reporting.",
+    longDescription:
+      "StockPro is an inventory and sales management system designed around everyday business operations: products, stock movement, invoices, proformas, transfers, adjustments, suppliers, clients, debts, payments, serial tracking, and reports.",
+    context: "Businesses need a single system for inventory, sales documents, and related financial follow-up.",
+    challenge:
+      "Stock, invoicing, supplier, and client records often live in separate spreadsheets, which makes reporting and debt tracking difficult.",
+    solution:
+      "An operations system for products, stock in/out, invoices, proformas, transfers, adjustments, suppliers, clients, debts, payments, serial tracking, and reports.",
+    problem:
+      "Inventory and sales operations needed a structured system rather than disconnected records.",
+    whatIBuilt:
+      "Inventory and sales management workflows spanning stock, documents, parties, payments, and reporting.",
+    myRole: "Software engineer",
+    technologies: ["Web application", "MySQL", "Business workflows", "Reporting"],
+    category: "systems",
+    status: "live",
+    featured: true,
+    links: {},
+  },
+  {
+    id: "psta-accounting",
+    title: "PSTA Ticket Accounting System",
+    organization: "PSTA",
+    description:
+      "Software for airline ticket records, invoicing, commission reporting, authentication, and activity tracking.",
+    longDescription:
+      "A software system associated with airline ticket and accounting workflows. Developed capabilities include ticket records, invoicing, commission reporting, authentication and security, and activity tracking. This is distinct from the earlier Reservation Agent operations role at PSTA.",
+    context: "Airline ticket and accounting work requires a reliable record of tickets, invoices, and commissions.",
+    challenge:
+      "Ticket accounting and commission reporting need controlled access and a traceable activity history.",
+    solution:
+      "A system covering ticket records, invoicing, commission reporting, authentication, and activity tracking.",
+    problem:
+      "Airline ticket and accounting workflows needed structured digital records.",
+    whatIBuilt:
+      "Ticket records, invoicing, commission reporting, authentication/security functionality, and activity tracking.",
+    myRole: "Software engineer",
+    technologies: ["Web application", "Authentication", "Reporting", "Operational records"],
+    category: "systems",
+    status: "live",
+    featured: true,
+    period: "Associated with 2023–2024 PSTA work",
+    links: {},
+  },
+  {
+    id: "caritas-website",
+    title: "Caritas Rwanda Website",
+    organization: "Caritas Rwanda",
+    description:
+      "Website revamp and public digital presence work for Caritas Rwanda.",
+    longDescription:
+      "Public-facing website work for Caritas Rwanda, treated separately from the internal indicator and information-management systems.",
+    context: "Caritas Rwanda needed a renewed public website alongside its internal systems work.",
+    challenge: "The public website and internal information systems serve different audiences and should not be conflated.",
+    solution: "Website revamp / digital work for the public-facing Caritas Rwanda presence.",
+    problem: "The public digital presence required a website revamp distinct from internal systems.",
+    whatIBuilt: "Website revamp and related public digital work.",
+    myRole: "Software engineer",
+    technologies: ["Web", "Content", "Frontend"],
+    category: "web",
+    status: "live",
+    featured: false,
+    links: {},
+  },
+  {
+    id: "askfield",
+    title: "AskField",
+    organization: "Ethical Research Solutions / AskField",
+    description:
+      "Frontend development and API integration for a survey and data-collection platform.",
+    longDescription:
+      "Contribution to the AskField survey platform through frontend development and API integration, using React and Redux. This was team/organizational work, not sole product ownership.",
+    context:
+      "AskField is a survey and data-collection platform. Work was performed as part of Ethical Research Solutions / the product team.",
+    challenge:
+      "The product needed frontend interfaces connected to existing APIs for survey and data-collection workflows.",
+    solution:
+      "Frontend development and API integration using React and Redux.",
+    problem:
+      "The survey platform required frontend work and API integration.",
+    whatIBuilt:
+      "Frontend interfaces and API integration for survey/data-collection workflows.",
+    myRole: "Frontend development and API integration (team contribution)",
+    technologies: ["React", "Redux", "API integration"],
+    category: "web",
+    status: "live",
+    featured: false,
+    contribution: "contributor",
+    links: {},
   },
   {
     id: "gotallnews",
     title: "GotAllNews",
+    organization: "Independent product",
     description:
-      "A modern media platform aggregating news with intelligent categorization and personalized feeds.",
+      "Independent digital media product covering publishing, articles, video, accounts, and engagement.",
     longDescription:
-      "GotAllNews is a React-powered news aggregation platform with advanced search, FULLTEXT indexing, and Cloudinary-powered media pipeline.",
-    technologies: [
-      "React",
-      "PHP",
-      "MySQL",
-      "Cloudinary",
-      "Recharts",
-      "Tailwind CSS",
-    ],
-    category: "web",
-    status: "live",
+      "GotAllNews is an independent digital media and product-development project. Relevant work includes content management, articles, video, short-form media, recommendation concepts, user accounts, engagement features, and publishing workflows. This is experimental/product work, distinct from commercially deployed client systems.",
+    context: "An independent media product exploring publishing workflows and audience engagement.",
+    challenge:
+      "Publishing articles, video, and short-form media in one product requires accounts, workflows, and engagement features.",
+    solution:
+      "A media platform with content management, publishing workflows, user accounts, and engagement concepts.",
+    problem:
+      "Needed a product environment for articles, video, short-form media, and publishing workflows.",
+    whatIBuilt:
+      "Product work across CMS, articles, video, short-form media, recommendation concepts, accounts, engagement, and publishing.",
+    myRole: "Independent product development",
+    technologies: ["React", "PHP", "MySQL", "Content management"],
+    category: "product",
+    status: "in-progress",
     featured: false,
+    independent: true,
     links: {},
-    year: 2025,
-  },
-  {
-    id: "caritas-portal",
-    title: "Caritas Digital Portal",
-    description:
-      "A comprehensive web platform for a humanitarian organization with CMS, donation management, and impact reporting.",
-    technologies: ["Next.js", "TypeScript", "Prisma", "PostgreSQL", "Stripe"],
-    category: "web",
-    status: "live",
-    featured: false,
-    links: {},
-    year: 2024,
   },
 ];
 
@@ -201,56 +306,8 @@ export type BlogPost = {
   content?: string;
 };
 
-export const blogPosts: BlogPost[] = [
-  {
-    id: "building-ai-africa",
-    title: "Building AI Products for African Markets: Lessons Learned",
-    excerpt:
-      "What I've learned from building AI-powered tools for contexts where internet connectivity is limited and local languages are underrepresented in training data.",
-    category: "AI",
-    readTime: "8 min read",
-    date: "2025-07-15",
-    featured: true,
-    slug: "building-ai-africa",
-    tags: ["AI", "Africa", "Product Development", "Machine Learning"],
-  },
-  {
-    id: "from-student-to-founder",
-    title: "From Student to Founder: Building Lerony from Scratch",
-    excerpt:
-      "The raw, honest story of starting a technology company in Rwanda — the challenges, the wins, and everything in between.",
-    category: "Entrepreneurship",
-    readTime: "12 min read",
-    date: "2025-06-20",
-    featured: true,
-    slug: "from-student-to-founder",
-    tags: ["Entrepreneurship", "Rwanda", "Startups", "Lerony"],
-  },
-  {
-    id: "nextjs-performance-2025",
-    title: "Achieving 100 Lighthouse Score with Next.js in 2025",
-    excerpt:
-      "A practical, step-by-step guide to optimizing a Next.js application for perfect Lighthouse scores across all metrics.",
-    category: "Software Engineering",
-    readTime: "10 min read",
-    date: "2025-05-10",
-    featured: false,
-    slug: "nextjs-performance-2025",
-    tags: ["Next.js", "Performance", "Web Development", "Lighthouse"],
-  },
-  {
-    id: "why-i-code",
-    title: "Why I Code: On Purpose, Craft, and Impact",
-    excerpt:
-      "A reflection on what drives me to write software every day, and why I believe code is one of the most powerful tools for social change.",
-    category: "Leadership",
-    readTime: "6 min read",
-    date: "2025-04-05",
-    featured: false,
-    slug: "why-i-code",
-    tags: ["Leadership", "Career", "Purpose", "Software Engineering"],
-  },
-];
+/** Publish only verified writing. Empty is correct until real articles exist. */
+export const blogPosts: BlogPost[] = [];
 
 export type Skill = {
   name: string;
@@ -258,27 +315,29 @@ export type Skill = {
 };
 
 export const skills: Skill[] = [
-  // Frontend
-  { name: "Next.js", category: "Frontend" },
-  { name: "React", category: "Frontend" },
+  { name: "HTML", category: "Frontend" },
+  { name: "CSS", category: "Frontend" },
+  { name: "JavaScript", category: "Frontend" },
   { name: "TypeScript", category: "Frontend" },
+  { name: "React", category: "Frontend" },
+  { name: "Next.js", category: "Frontend" },
+  { name: "Vue", category: "Frontend" },
   { name: "Tailwind CSS", category: "Frontend" },
-  { name: "Framer Motion", category: "Frontend" },
-  // Backend
+  { name: "Bootstrap", category: "Frontend" },
+  { name: "PHP", category: "Backend" },
   { name: "Node.js", category: "Backend" },
-  { name: "Express", category: "Backend" },
-  { name: "PostgreSQL", category: "Backend" },
-  { name: "MySQL", category: "Backend" },
-  { name: "Prisma", category: "Backend" },
-  // AI/ML
-  { name: "OpenAI API", category: "AI/ML" },
-  { name: "LangChain", category: "AI/ML" },
-  { name: "Python", category: "AI/ML" },
-  // DevOps
-  { name: "Vercel", category: "DevOps" },
-  { name: "AWS", category: "DevOps" },
-  { name: "Docker", category: "DevOps" },
-  { name: "Git", category: "DevOps" },
+  { name: "API integration", category: "Backend" },
+  { name: "MySQL", category: "Data" },
+  { name: "SQL", category: "Data" },
+  { name: "Supabase", category: "Data" },
+  { name: "Python", category: "Data" },
+  { name: "Power BI", category: "Data" },
+  { name: "Vercel", category: "Infrastructure" },
+  { name: "Netlify", category: "Infrastructure" },
+  { name: "Render", category: "Infrastructure" },
+  { name: "Cloudflare", category: "Infrastructure" },
+  { name: "GitHub", category: "Infrastructure" },
+  { name: "PWA", category: "Infrastructure" },
 ];
 
 export type TimelineItem = {
@@ -291,44 +350,134 @@ export type TimelineItem = {
 
 export const timeline: TimelineItem[] = [
   {
-    year: "2025",
-    title: "Founder & CEO",
-    organization: "Lerony",
+    year: "2025–Present",
+    title: "Founder",
+    organization: "LERONY Ltd",
     description:
-      "Building a technology company focused on creating impactful software products for African markets.",
+      "Founded a Kigali-based technology and innovation company building digital solutions for organizations and businesses.",
     type: "work",
   },
   {
-    year: "2024",
-    title: "Full Stack Developer",
-    organization: "Freelance",
+    year: "2025–Present",
+    title: "Computer Science",
+    organization: "Kigali Independent University (ULK)",
     description:
-      "Delivering high-quality web applications for clients across Rwanda and internationally.",
-    type: "work",
-  },
-  {
-    year: "2024",
-    title: "AI Builder",
-    organization: "Independent",
-    description:
-      "Began specializing in AI-powered applications, building tools that leverage LLMs for real-world impact.",
-    type: "milestone",
-  },
-  {
-    year: "2023",
-    title: "Computer Science Studies",
-    organization: "University of Rwanda",
-    description:
-      "Deepening foundations in algorithms, data structures, and software engineering principles.",
+      "Undergraduate Computer Science studies. Degree in progress.",
     type: "education",
   },
   {
-    year: "2022",
-    title: "First Open Source Contribution",
-    organization: "GitHub",
+    year: "2023–2024",
+    title: "Reservation Agent",
+    organization: "PSTA",
     description:
-      "Started contributing to open source projects and building a public track record as a developer.",
-    type: "milestone",
+      "Airline reservation and ticketing operations and client support. Related software work later included a ticket accounting system.",
+    type: "work",
+  },
+  {
+    year: "2021–2024",
+    title: "Software Engineering",
+    organization: "SJITC Nyamirambo",
+    description:
+      "Secondary software engineering studies. Graduated with distinction in 2024.",
+    type: "education",
+  },
+];
+
+export type ExperienceItem = {
+  id: string;
+  organization: string;
+  role: string;
+  period: string;
+  location?: string;
+  summary: string;
+  highlights: string[];
+  type: "work" | "training";
+};
+
+export const experience: ExperienceItem[] = [
+  {
+    id: "lerony",
+    organization: "LERONY Ltd",
+    role: "Founder",
+    period: "2025–Present",
+    location: "Kigali, Rwanda",
+    summary:
+      "Founder of a technology and innovation company building custom software, digital systems, and practical AI-enabled solutions.",
+    highlights: [
+      "Custom software and web platforms",
+      "Enterprise and business systems",
+      "Digital transformation and technology consulting",
+      "AI-enabled product integration",
+    ],
+    type: "work",
+  },
+  {
+    id: "askfield",
+    organization: "Ethical Research Solutions / AskField",
+    role: "Frontend development & API integration",
+    period: "Selected engagement",
+    summary:
+      "Frontend development and API integration for the AskField survey and data-collection platform, using React and Redux. Contribution as part of a team — not sole product ownership.",
+    highlights: [
+      "React frontend development",
+      "Redux state management",
+      "REST API integration",
+    ],
+    type: "work",
+  },
+  {
+    id: "psta",
+    organization: "PSTA",
+    role: "Reservation Agent",
+    period: "2023–2024",
+    summary:
+      "Airline reservation and ticketing operations and client support. This operational role is separate from the ticket accounting software later associated with PSTA workflows.",
+    highlights: [
+      "Airline reservation and ticketing operations",
+      "Client support",
+      "Related later software: ticket records, invoicing, and commission reporting",
+    ],
+    type: "work",
+  },
+  {
+    id: "eshuri",
+    organization: "Eshuri Learning",
+    role: "Data Systems trainer",
+    period: "Training engagement",
+    summary:
+      "Technical training in data systems. One engagement included approximately 85 trainees. Exact session dates are not listed here pending verification.",
+    highlights: [
+      "Data systems training",
+      "Knowledge sharing with a cohort of approximately 85 trainees",
+    ],
+    type: "training",
+  },
+];
+
+export type EducationItem = {
+  id: string;
+  institution: string;
+  program: string;
+  period: string;
+  status: string;
+  note?: string;
+};
+
+export const education: EducationItem[] = [
+  {
+    id: "ulk",
+    institution: "Kigali Independent University (ULK)",
+    program: "Computer Science",
+    period: "2025–Present",
+    status: "Ongoing",
+    note: "Degree not yet completed.",
+  },
+  {
+    id: "sjitc",
+    institution: "SJITC Nyamirambo",
+    program: "Software Engineering",
+    period: "2021–2024",
+    status: "Graduated with distinction",
   },
 ];
 
@@ -337,26 +486,19 @@ export type SpeakingEngagement = {
   event: string;
   location: string;
   date: string;
-  type: "conference" | "workshop" | "panel" | "podcast";
+  type: "conference" | "workshop" | "panel" | "podcast" | "training";
   topic: string;
 };
 
 export const speakingEngagements: SpeakingEngagement[] = [
   {
-    title: "AI in African Contexts",
-    event: "Rwanda Tech Summit",
-    location: "Kigali, Rwanda",
-    date: "2025",
-    type: "conference",
-    topic: "Building AI products that work in low-resource environments",
-  },
-  {
-    title: "From Idea to Product",
-    event: "University of Rwanda Tech Week",
-    location: "Kigali, Rwanda",
-    date: "2024",
-    type: "workshop",
-    topic: "Entrepreneurship and software development for students",
+    title: "Data Systems training",
+    event: "Eshuri Learning",
+    location: "Rwanda",
+    date: "Training engagement",
+    type: "training",
+    topic:
+      "Technical training in data systems for a cohort of approximately 85 trainees.",
   },
 ];
 
@@ -370,59 +512,91 @@ export type Service = {
 
 export const services: Service[] = [
   {
-    id: "web-development",
-    title: "Web Development",
+    id: "software-engineering",
+    title: "Software Engineering",
     description:
-      "Building fast, accessible, and scalable web applications using modern technologies.",
+      "Design and development of production-oriented digital products for organizations and businesses.",
     features: [
-      "Next.js & React applications",
-      "Full-stack development",
-      "API design and integration",
-      "Performance optimization",
-      "Responsive & mobile-first",
+      "Production web applications",
+      "Authentication and access control",
+      "Deployment and hosting",
+      "Maintainable, documented delivery",
     ],
     icon: "globe",
+  },
+  {
+    id: "full-stack",
+    title: "Full-Stack Development",
+    description:
+      "Frontend, backend, database, and API-connected applications built as one system.",
+    features: [
+      "React and Next.js interfaces",
+      "PHP and Node.js application work",
+      "MySQL and Supabase data layers",
+      "REST API integration",
+    ],
+    icon: "layers",
   },
   {
     id: "ai-integration",
     title: "AI Integration",
     description:
-      "Integrating AI capabilities into your products and workflows to unlock new possibilities.",
+      "Practical AI functionality inside digital products and organizational workflows — not research theatre.",
     features: [
-      "LLM integration & fine-tuning",
-      "AI-powered features",
-      "Chatbots & assistants",
-      "Data analysis tools",
-      "Voice AI applications",
+      "AI-enabled product features",
+      "Workflow support inside existing systems",
+      "Integration with third-party APIs",
+      "Scoped to problems that can be substantiated",
     ],
     icon: "brain-circuit",
   },
   {
-    id: "consulting",
-    title: "Technical Consulting",
+    id: "business-systems",
+    title: "Business Systems",
     description:
-      "Strategic technology guidance for startups and established companies scaling their digital products.",
+      "Systems for operational workflows, data management, reporting, inventory, and administration.",
     features: [
-      "Architecture review",
-      "Tech stack selection",
-      "Code review & audits",
-      "Team mentoring",
-      "Growth strategy",
+      "Inventory and sales operations",
+      "Reporting and dashboards",
+      "Administrative workflows",
+      "Records, invoicing, and follow-up",
     ],
     icon: "puzzle",
   },
   {
-    id: "speaking",
-    title: "Speaking & Workshops",
+    id: "consulting",
+    title: "Technology Consulting",
     description:
-      "Sharing knowledge through keynotes, workshops, and panels at tech events and universities.",
+      "Technical planning and digital-solution guidance grounded in shipped systems. Larger commercial work may run through LERONY Ltd.",
     features: [
-      "Conference keynotes",
-      "Technical workshops",
-      "University talks",
-      "Podcast appearances",
-      "Panel discussions",
+      "Solution scoping",
+      "Architecture and stack guidance",
+      "Delivery planning",
+      "Engagements via LERONY Ltd where appropriate",
     ],
-    icon: "mic",
+    icon: "compass",
+  },
+];
+
+export const proofPoints = [
+  {
+    label: "Founder",
+    value: "LERONY Ltd",
+    detail: "Technology company, Kigali · 2025",
+  },
+  {
+    label: "Organizations",
+    value: "Caritas Rwanda, PSTA, AskField",
+    detail: "Systems, operations, and product work",
+  },
+  {
+    label: "Training",
+    value: "Data systems",
+    detail: "Eshuri Learning · ~85 trainees",
+  },
+  {
+    label: "Based in",
+    value: "Kigali, Rwanda",
+    detail: "Building for Africa and beyond",
   },
 ];

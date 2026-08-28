@@ -37,7 +37,7 @@ export default function TechMarquee({ skills }: { skills: Skill[] }) {
             The tools I work with.
           </h2>
           <p style={{ color: "var(--color-text-2)", maxWidth: "36rem", margin: "0 auto" }}>
-            A curated stack built for speed, scale, and real-world impact.
+            Tools used in production work — not a claim of expert-level mastery for every item.
           </p>
         </div>
       </div>

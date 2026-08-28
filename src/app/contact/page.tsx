@@ -1,62 +1,45 @@
 import type { Metadata } from "next";
-import { siteConfig } from "@/data/site-data";
-import AnimatedSection from "@/components/ui/AnimatedSection";
 import ContactForm from "./ContactForm";
-import { buildBreadcrumbJsonLd, buildPageMetadata, buildWebPageJsonLd } from "@/lib/seo";
+import { buildPageMetadata } from "@/lib/seo";
+import { buildBreadcrumbListJsonLd, buildGraph, buildWebPageJsonLd } from "@/lib/schema";
+import { JsonLd } from "@/components/seo/JsonLd";
+import Breadcrumbs from "@/components/seo/Breadcrumbs";
+
+const PAGE_DESCRIPTION =
+  "Contact Prince Parfait GANZA in Kigali about software systems, product work, or training. Email hello@princeparfait.com.";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Contact PPG — Hire Prince Parfait GANZA",
-  description:
-    "Contact Prince Parfait GANZA (PPG) for freelance projects, AI consulting, speaking engagements, and collaborations in Rwanda and globally.",
+  title: "Contact Prince Parfait GANZA",
+  description: PAGE_DESCRIPTION,
   path: "/contact",
-  keywords: ["Contact PPG", "Hire Prince Parfait GANZA", "PPG consulting", "software engineer Rwanda contact"],
+  absoluteTitle: true,
 });
 
-const contactPageSchema = {
-  "@context": "https://schema.org",
-  "@type": "ContactPage",
-  name: "Contact Prince Parfait GANZA",
-  url: `${siteConfig.url}/contact`,
-  description: "Contact page for Prince Parfait GANZA",
-  mainEntity: {
-    "@type": "Person",
-    name: "Prince Parfait GANZA",
-    alternateName: ["PPG", "Prince Parfait GANZA PPG"],
-    contactPoint: {
-      "@type": "ContactPoint",
-      contactType: "Professional",
-      email: siteConfig.contact.email,
-      availableLanguage: ["English", "French", "Kinyarwanda"],
-    },
-  },
-};
+const breadcrumbItems = [
+  { name: "Home", path: "/" },
+  { name: "Contact", path: "/contact" },
+];
 
 export default function ContactPage() {
-  const schema = [
-    contactPageSchema,
-    buildWebPageJsonLd({
-      name: "Contact Prince Parfait GANZA (PPG)",
-      description: "Get in touch with PPG for projects, consulting, and speaking.",
-      path: "/contact",
-    }),
-    buildBreadcrumbJsonLd([
-      { name: "Home", path: "/" },
-      { name: "Contact", path: "/contact" },
-    ]),
-  ];
-
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      <JsonLd
+        data={buildGraph([
+          buildWebPageJsonLd({
+            path: "/contact",
+            name: "Contact Prince Parfait GANZA",
+            description: PAGE_DESCRIPTION,
+            type: "ContactPage",
+          }),
+          buildBreadcrumbListJsonLd(breadcrumbItems, "/contact"),
+        ])}
       />
+      <Breadcrumbs items={breadcrumbItems} />
 
       <section
-        className="section pt-32 relative dot-grid overflow-hidden min-h-screen"
+        className="section pt-8 relative overflow-hidden min-h-screen"
         aria-label="Contact section"
       >
-        <div aria-hidden="true" className="absolute inset-0 bg-gradient-radial pointer-events-none" />
         <div className="container relative z-10">
           <ContactForm />
         </div>

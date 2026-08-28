@@ -19,26 +19,12 @@ import {
   RiCloseLine,
   RiMore2Line,
 } from "react-icons/ri";
-import { siteConfig } from "@/data/site-data";
+import { siteConfig, primaryNav } from "@/data/site-data";
 import ThemeToggle from "@/components/ui/ThemeToggle";
-import { getLocalSettings, SiteSettings, DEFAULT_SETTINGS } from "@/lib/supabase";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { socialIcon, socialsFor } from "@/lib/socials";
 
-const navLinks = [
-  { href: "/about",    label: "About" },
-  { href: "/projects", label: "Projects" },
-  { href: "/blog",     label: "Blog" },
-  { href: "/services", label: "Services" },
-  { href: "/speaking", label: "Speaking" },
-  { href: "/contact",  label: "Contact" },
-];
-
-const allSocials = [
-  { href: siteConfig.social.whatsapp, label: "WhatsApp", icon: RiWhatsappLine },
-  { href: siteConfig.social.linkedin, label: "LinkedIn", icon: RiLinkedinFill },
-  { href: siteConfig.social.instagram, label: "Instagram", icon: RiInstagramLine },
-  { href: siteConfig.social.github, label: "GitHub", icon: RiGithubFill },
-  { href: siteConfig.social.twitter, label: "X / Twitter", icon: RiTwitterXFill },
-];
+const navLinks = primaryNav;
 
 export default function Navbar() {
   const pathname   = usePathname();
@@ -48,17 +34,11 @@ export default function Navbar() {
   const [shareOpen, setShareOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [settings,  setSettings]  = useState<SiteSettings>(DEFAULT_SETTINGS);
-
-  useEffect(() => {
-    queueMicrotask(() => setSettings(getLocalSettings()));
-    const onUpdate: EventListener = (event) => {
-      const detail = (event as CustomEvent<SiteSettings>).detail;
-      if (detail) setSettings(detail);
-    };
-    window.addEventListener("site-settings-changed", onUpdate);
-    return () => window.removeEventListener("site-settings-changed", onUpdate);
-  }, []);
+  const settings = useSiteSettings();
+  const headerSocials = socialsFor(settings, "header");
+  const primarySocials = headerSocials.slice(0, settings.headerSocialLimit || 3);
+  const overflowSocials = headerSocials.slice(settings.headerSocialLimit || 3);
+  const isPill = (settings.navbarStyle || "pill") === "pill";
 
   const handleScroll = useCallback(() => {
     setIsScrolled(window.scrollY > 20);
@@ -97,7 +77,11 @@ export default function Navbar() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [shareOpen]);
 
-  // Removed scroll lock effect because it breaks scrolling when resizing to desktop
+  useEffect(() => {
+    const offset = isPill ? "4.15rem" : "4rem";
+    document.documentElement.style.setProperty("--public-nav-offset", offset);
+    document.documentElement.setAttribute("data-navbar", isPill ? "pill" : "full");
+  }, [isPill, settings.announcementIsActive]);
 
   const logoSrc = isDark
     ? "/brand/logos/logo-horizontal-light.png"
@@ -118,8 +102,6 @@ export default function Navbar() {
     active ? "var(--color-primary)" : "var(--color-text-2)";
   const navLinkBg = (active: boolean) =>
     active ? (isDark ? "rgba(14,82,168,0.15)" : "rgba(14,82,168,0.08)") : "transparent";
-  const primarySocials = allSocials.slice(0, settings.headerSocialLimit || 3);
-  const overflowSocials = allSocials.slice(settings.headerSocialLimit || 3);
   const getShareDetails = () => {
     const url = window.location.href.split("?")[0];
     const title = document.title || "Prince Parfait GANZA";
@@ -192,32 +174,43 @@ export default function Navbar() {
             )}
           </div>
         )}
-        <div style={{ padding: "0.5rem 0.75rem" }}>
-          <div
-            className="container"
+        <div style={{ padding: isPill ? "0.3rem 0.4rem 0" : 0 }}>
+        <div
           style={{
             background: pillBg,
-            backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
-            borderRadius: "9999px",
-            padding: "0.375rem 0.75rem",
+            backdropFilter: "blur(22px)",
+            WebkitBackdropFilter: "blur(22px)",
+            border: isPill ? `1px solid ${pillBorder}` : "none",
+            borderBottom: isPill ? "none" : `1px solid ${pillBorder}`,
+            borderRadius: isPill ? "9999px" : 0,
             boxShadow: pillShadow,
-            border: `1px solid ${pillBorder}`,
-            transition: "box-shadow 0.3s ease, background 0.3s ease, border-color 0.3s ease",
+            maxWidth: isPill ? "92rem" : undefined,
+            margin: isPill ? "0 auto" : undefined,
+            transition: "box-shadow 0.3s ease, background 0.3s ease, border-color 0.3s ease, border-radius 0.3s ease",
+          }}
+        >
+          <div
+            className={isPill ? undefined : "container"}
+          style={{
+            minHeight: isPill ? "3.55rem" : "3.75rem",
+            padding: isPill ? "0.3rem 0.75rem" : "0.45rem 0",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            gap: "0.5rem",
+            gap: "0.75rem",
+            width: "100%",
+            maxWidth: isPill ? "none" : undefined,
           }}
         >
 
           {/* Logo — horizontal, theme-aware */}
           <Link href="/" aria-label="Prince Parfait GANZA — Home" style={{ display: "flex", flexShrink: 0 }}>
-            <div style={{ position: "relative", width: "clamp(6rem, 18vw, 9rem)", height: "2.25rem" }}>
+            <div style={{ position: "relative", width: "clamp(7.5rem, 17vw, 10.75rem)", height: "2.3rem" }}>
               <Image
                 src={logoSrc}
                 alt="Prince Parfait GANZA"
                 fill
+                sizes="200px"
                 className="object-contain object-left"
                 priority
               />
@@ -225,51 +218,60 @@ export default function Navbar() {
           </Link>
 
           <nav aria-label="Main navigation" className="hidden md:flex" style={{ flex: 1, justifyContent: "center" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.125rem" }}>
-              {navLinks.map((link) => (
+            <div style={{ display: "flex", alignItems: "center", gap: "0.2rem" }}>
+              {navLinks.map((link) => {
+                const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
+                return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  aria-current={pathname === link.href ? "page" : undefined}
+                  aria-current={isActive ? "page" : undefined}
                   style={{
                     padding: "0.4rem 0.75rem",
                     borderRadius: "0.5rem",
                     fontSize: "0.85rem",
-                    fontWeight: pathname === link.href ? 700 : 500,
+                    fontWeight: isActive ? 700 : 600,
                     textDecoration: "none",
                     transition: "all 0.2s ease",
-                    color: navLinkColor(pathname === link.href),
-                    background: navLinkBg(pathname === link.href),
-                    letterSpacing: pathname === link.href ? "-0.01em" : "0",
+                    color: navLinkColor(isActive),
+                    background: navLinkBg(isActive),
+                    letterSpacing: isActive ? "-0.01em" : "0",
                   }}
                 >
                   {link.label}
                 </Link>
-              ))}
+                );
+              })}
             </div>
           </nav>
 
           {/* Right actions */}
-          <div style={{ display: "flex", alignItems: "center", gap: "0.25rem", flexShrink: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.45rem", flexShrink: 0 }}>
 
             <div className="hidden lg:flex" style={{ alignItems: "center", gap: "0.125rem", position: "relative" }}>
-              {primarySocials.map(({ href, label, icon: Icon }) => (
-                <a key={label} href={href} target="_blank" rel="noopener noreferrer" aria-label={label} title={label} className="nav-social-icon navbar-social-link">
-                  <Icon size={16} />
+              {primarySocials.map((link) => {
+                const Icon = socialIcon(link.platform);
+                return (
+                <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" aria-label={link.label} title={link.label} className="nav-social-icon navbar-social-link">
+                  <Icon size={15} />
                 </a>
-              ))}
+                );
+              })}
               {overflowSocials.length > 0 && (
                 <div style={{ position: "relative" }}>
                   <button type="button" onClick={() => setMoreOpen((open) => !open)} aria-label="More social links" aria-expanded={moreOpen} className="nav-social-icon navbar-social-link">
-                    <RiMore2Line size={16} />
+                    <RiMore2Line size={15} />
                   </button>
                   {moreOpen && (
                     <div className="navbar-more-menu" role="menu">
-                      {overflowSocials.map(({ href, label, icon: Icon }) => (
-                        <a key={label} href={href} target="_blank" rel="noopener noreferrer" role="menuitem" className="nav-more-item navbar-more-item">
-                          <Icon size={16} /> {label}
+                      {overflowSocials.map((link) => {
+                        const Icon = socialIcon(link.platform);
+                        return (
+                        <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" role="menuitem" className="nav-more-item navbar-more-item">
+                          <Icon size={15} /> {link.label}
                         </a>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -280,7 +282,7 @@ export default function Navbar() {
             <ThemeToggle />
 
             {/* CTA */}
-            <Link href="/contact" className="btn btn-primary btn-sm hidden sm:inline-flex" style={{ fontWeight: 700, letterSpacing: "-0.01em", padding: "0.4rem 1rem", fontSize: "0.8125rem" }}>
+            <Link href="/contact" className="btn btn-primary hidden sm:inline-flex" style={{ fontWeight: 700, letterSpacing: "-0.01em", padding: "0.48rem 1.05rem", fontSize: "0.84rem" }}>
               Let&apos;s Talk
             </Link>
 
@@ -302,8 +304,8 @@ export default function Navbar() {
               onClick={() => setIsOpen(!isOpen)}
               className="inline-flex md:hidden"
               style={{
-                width: "2.125rem",
-                height: "2.125rem",
+                width: "1.9rem",
+                height: "1.9rem",
                 borderRadius: "0.5rem",
                 alignItems: "center",
                 justifyContent: "center",
@@ -319,6 +321,7 @@ export default function Navbar() {
               {isOpen ? <RiMenuFoldLine size={18} /> : <RiMenuUnfoldLine size={18} />}
             </button>
           </div>
+        </div>
         </div>
         </div>
       </header>
@@ -454,24 +457,21 @@ export default function Navbar() {
             Let&apos;s Talk
           </Link>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", flexWrap: "wrap" }}>
-            {[
-              { href: siteConfig.social.whatsapp,  label: "WhatsApp",  icon: RiWhatsappLine },
-              { href: siteConfig.social.linkedin,   label: "LinkedIn",  icon: RiLinkedinFill },
-              { href: siteConfig.social.instagram,  label: "Instagram", icon: RiInstagramLine },
-              { href: siteConfig.social.twitter,    label: "X",         icon: RiTwitterXFill },
-              { href: siteConfig.social.github,     label: "GitHub",    icon: RiGithubFill },
-            ].map(({ href, label, icon: Icon }) => (
+            {socialsFor(settings, "header").map((link) => {
+              const Icon = socialIcon(link.platform);
+              return (
               <a
-                key={label}
-                href={href}
+                key={link.id}
+                href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label={label}
+                aria-label={link.label}
                 className="footer-social-icon"
               >
                 <Icon size={16} />
               </a>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

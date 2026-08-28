@@ -1,12 +1,19 @@
 {
-  "name": "Prince Parfait GANZA (PPG)",
-  "short_name": "PPG",
-  "description": "Official portfolio of Prince Parfait GANZA (PPG) — software engineer, AI builder, and founder from Rwanda.",
+  "name": "Prince Parfait GANZA",
+  "short_name": "Prince Parfait",
+  "description": "Personal website of Prince Parfait GANZA, founder and software engineer based in Kigali, Rwanda.",
   "start_url": "/",
   "scope": "/",
+  "id": "https://www.princeparfait.com/",
   "icons": [
     {
-      "src": "/images/profile/hero-photo.png",
+      "src": "/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/web-app-manifest-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"

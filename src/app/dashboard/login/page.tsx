@@ -3,12 +3,24 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { RiLockPasswordLine, RiMailLine, RiShieldUserLine, RiArrowRightLine } from "react-icons/ri";
+import Link from "next/link";
+import {
+  RiLockPasswordLine,
+  RiMailLine,
+  RiShieldUserLine,
+  RiArrowRightLine,
+  RiEyeLine,
+  RiEyeOffLine,
+} from "react-icons/ri";
+import { LAYOUT_HERO_IMAGES } from "@/lib/hero";
+import { siteConfig } from "@/data/site-data";
+import Footer from "@/components/layout/Footer";
 
 export default function AdminLoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -32,108 +44,97 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-bg)", padding: "1.5rem" }}>
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "26rem",
-          background: "var(--color-surface)",
-          border: "1px solid var(--color-border)",
-          borderRadius: "1.5rem",
-          padding: "2.5rem",
-          boxShadow: "var(--shadow-xl)",
-        }}
-      >
-        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-          <div style={{ position: "relative", width: "10rem", height: "3rem", margin: "0 auto 1rem" }}>
-            <Image
-              src="/brand/logos/logo-horizontal-dark.png"
-              alt="Prince Parfait GANZA"
-              fill
-              className="object-contain"
-            />
-          </div>
-          <h1 style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--color-text)", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
-            <RiShieldUserLine style={{ color: "var(--color-primary)" }} /> Admin Portal
-          </h1>
-          <p style={{ fontSize: "0.8125rem", color: "var(--color-text-3)", marginTop: "0.25rem" }}>
-            Sign in to access Control Center & Analytics
-          </p>
-        </div>
+    <div className="login-shell" data-theme="light">
+      <main className="login-split">
+        <aside className="login-visual" aria-hidden="true">
+          <p className="login-kicker">Control Center</p>
+          <p className="hero-centered-name login-visual-name">{siteConfig.name}</p>
+          <img
+            src={LAYOUT_HERO_IMAGES.full_centered_floating}
+            alt=""
+            className="login-visual-photo"
+          />
+        </aside>
 
-        {error && (
-          <div style={{ padding: "0.75rem 1rem", borderRadius: "0.75rem", background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.25)", color: "#ef4444", fontSize: "0.8125rem", marginBottom: "1.5rem", textAlign: "center" }}>
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-          <div>
-            <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, color: "var(--color-text-2)", marginBottom: "0.375rem" }}>
-              Admin Email
-            </label>
-            <div style={{ position: "relative" }}>
-              <RiMailLine size={18} style={{ position: "absolute", left: "0.875rem", top: "50%", transform: "translateY(-50%)", color: "var(--color-text-3)" }} />
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="ganzaparfait7@gmail.com"
-                style={{
-                  width: "100%",
-                  padding: "0.75rem 0.875rem 0.75rem 2.5rem",
-                  borderRadius: "0.75rem",
-                  background: "var(--color-bg)",
-                  border: "1px solid var(--color-border)",
-                  color: "var(--color-text)",
-                  fontSize: "0.875rem",
-                  outline: "none",
-                }}
+        <section className="login-panel">
+          <div className="login-card">
+            <Link href="/" aria-label={`${siteConfig.name} — Home`} className="login-logo">
+              <Image
+                src="/brand/logos/logo-horizontal-blue.png"
+                alt={siteConfig.name}
+                width={220}
+                height={52}
+                priority
+                style={{ width: "11.5rem", height: "auto" }}
               />
-            </div>
+            </Link>
+
+            <h1 className="login-title">
+              <RiShieldUserLine aria-hidden="true" />
+              Sign in
+            </h1>
+            <p className="login-subtitle">Access Control Center to manage the public site.</p>
+
+            {error ? (
+              <p className="login-error" role="alert">
+                {error}
+              </p>
+            ) : null}
+
+            <form onSubmit={handleSubmit} className="login-form">
+              <label className="login-label">
+                Email
+                <span className="login-field">
+                  <RiMailLine size={18} aria-hidden="true" />
+                  <input
+                    type="email"
+                    name="email"
+                    autoComplete="username"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Email address"
+                  />
+                </span>
+              </label>
+
+              <label className="login-label">
+                Password
+                <span className="login-field">
+                  <RiLockPasswordLine size={18} aria-hidden="true" />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    autoComplete="current-password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Password"
+                  />
+                  <button
+                    type="button"
+                    className="login-eye"
+                    onClick={() => setShowPassword((open) => !open)}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <RiEyeOffLine size={18} /> : <RiEyeLine size={18} />}
+                  </button>
+                </span>
+              </label>
+
+              <button type="submit" disabled={loading} className="btn btn-primary login-submit">
+                {loading ? "Signing in…" : <>Continue <RiArrowRightLine size={18} /></>}
+              </button>
+            </form>
+
+            <p className="login-back">
+              <Link href="/">Back to princeparfait.com</Link>
+            </p>
           </div>
+        </section>
+      </main>
 
-          <div>
-            <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, color: "var(--color-text-2)", marginBottom: "0.375rem" }}>
-              Password
-            </label>
-            <div style={{ position: "relative" }}>
-              <RiLockPasswordLine size={18} style={{ position: "absolute", left: "0.875rem", top: "50%", transform: "translateY(-50%)", color: "var(--color-text-3)" }} />
-              <input
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••"
-                style={{
-                  width: "100%",
-                  padding: "0.75rem 0.875rem 0.75rem 2.5rem",
-                  borderRadius: "0.75rem",
-                  background: "var(--color-bg)",
-                  border: "1px solid var(--color-border)",
-                  color: "var(--color-text)",
-                  fontSize: "0.875rem",
-                  outline: "none",
-                }}
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn btn-primary"
-            style={{ width: "100%", justifyContent: "center", marginTop: "0.5rem", padding: "0.875rem", gap: "0.5rem" }}
-          >
-            {loading ? "Authenticating..." : <>Sign In to Dashboard <RiArrowRightLine size={16} /></>}
-          </button>
-        </form>
-
-        <div style={{ marginTop: "1.5rem", textAlign: "center", fontSize: "0.75rem", color: "var(--color-text-3)" }}>
-          Target Email: ganzaparfait7@gmail.com
-        </div>
-      </div>
+      <Footer />
     </div>
   );
 }
