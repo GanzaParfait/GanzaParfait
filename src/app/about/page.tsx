@@ -78,6 +78,45 @@ export default function AboutPage() {
                 <p className="theme-copy leading-relaxed mb-6 text-lg">
                   I&apos;m <strong className="theme-heading">{siteConfig.name}</strong>, a Rwandan founder and software engineer. I build full-stack products and integrate AI to solve real-world problems across Africa and beyond.
                 </p>
+                <ul className="flex flex-wrap gap-2 mb-8" aria-label="Roles and positions">
+                  {siteConfig.positioning.split(" • ").map((role) => (
+                    <li
+                      key={role}
+                      className="text-sm font-semibold"
+                      style={{
+                        padding: "0.35rem 0.75rem",
+                        borderRadius: "999px",
+                        border: "1px solid var(--color-border)",
+                        background: "var(--color-surface)",
+                        color: "var(--color-text)",
+                      }}
+                    >
+                      {role}
+                    </li>
+                  ))}
+                  <li
+                    className="text-sm font-semibold"
+                    style={{
+                      padding: "0.35rem 0.75rem",
+                      borderRadius: "999px",
+                      border: "1px solid var(--color-border)",
+                      color: "var(--color-text-2)",
+                    }}
+                  >
+                    {siteConfig.company.role}, {siteConfig.company.name} · {siteConfig.company.established}
+                  </li>
+                  <li
+                    className="text-sm font-semibold"
+                    style={{
+                      padding: "0.35rem 0.75rem",
+                      borderRadius: "999px",
+                      border: "1px solid var(--color-border)",
+                      color: "var(--color-text-2)",
+                    }}
+                  >
+                    {siteConfig.contact.location}
+                  </li>
+                </ul>
                 <p className="theme-copy leading-relaxed mb-8">
                   In 2025 I founded{" "}
                   <a href={siteConfig.company.url} target="_blank" rel="noopener noreferrer" style={{ color: "var(--color-primary)", fontWeight: 700 }}>

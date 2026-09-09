@@ -10,7 +10,7 @@ import {
 } from "react-icons/ri";
 import { useState, useEffect } from "react";
 import { SiteSettings } from "@/lib/supabase";
-import { heroImageFor, setting, splitDisplayName } from "@/lib/hero";
+import { heroHighlights, heroImageFor, setting, splitDisplayName } from "@/lib/hero";
 import { socialIcon, heroSocialsFor } from "@/lib/socials";
 
 export default function SplitHero({
@@ -119,7 +119,7 @@ export default function SplitHero({
                   animation: "pulse 2s infinite",
                 }} aria-hidden="true" />
                 <span style={{ color: "#16a34a" }}>{availableText}</span>
-                <span style={{ width: "1px", height: "0.85rem", background: "rgba(0,0,0,0.12)" }} />
+                <span style={{ width: "1px", height: "0.85rem", background: "var(--color-border)" }} />
                 <RiMapPinLine size={12} style={{ color: "var(--color-text-3)" }} />
                 <span style={{ color: "var(--color-text-3)" }}>{settings.location}</span>
               </div>
@@ -300,7 +300,7 @@ export default function SplitHero({
               justifyContent: "center",
             }}>
               {/* Arch backdrop — light */}
-              <div aria-hidden="true" style={{
+              <div aria-hidden="true" className="light-arch" style={{
                 position: "absolute", bottom: 0, left: "50%",
                 transform: "translateX(-50%)",
                 width: "90%", height: "95%",
@@ -349,40 +349,30 @@ export default function SplitHero({
                 )}
               </div>
 
-              {/* Floating identity cards */}
+              {heroHighlights(settings).slice(0, 2).map((item, index) => (
               <div
+                key={`${item.value}-${item.label}`}
                 className="hero-stat-card animate-float"
                 style={{
-                  position: "absolute", top: "2rem", right: "-0.5rem",
-                  animationDelay: "0.3s", zIndex: 3, minWidth: "8.5rem",
+                  position: "absolute",
+                  top: index === 0 ? "2rem" : "8rem",
+                  right: index === 0 ? "-0.5rem" : undefined,
+                  left: index === 1 ? "-0.5rem" : undefined,
+                  animationDelay: index === 0 ? "0.3s" : "1s",
+                  zIndex: 3,
+                  minWidth: "8.5rem",
                   textAlign: "center",
                 }}
               >
                 <p style={{
                   fontFamily: "var(--font-heading)", fontSize: "1rem",
-                  fontWeight: 800, color: "var(--color-primary)", lineHeight: 1.2,
-                }}> {setting(settings, "heroStat1Value")}</p>
+                  fontWeight: 800, color: "var(--hover-icon)", lineHeight: 1.2,
+                }}>{item.value}</p>
                 <p style={{ fontSize: "0.7rem", color: "var(--color-text-3)", marginTop: "0.25rem", fontWeight: 500 }}>
-                  {setting(settings, "heroStat1Label")}
+                  {item.label}
                 </p>
               </div>
-
-              <div
-                className="hero-stat-card animate-float"
-                style={{
-                  position: "absolute", top: "8rem", left: "-0.5rem",
-                  animationDelay: "1s", zIndex: 3, minWidth: "8rem",
-                  textAlign: "center",
-                }}
-              >
-                <p style={{
-                  fontFamily: "var(--font-heading)", fontSize: "1rem",
-                  fontWeight: 800, color: "var(--color-primary)", lineHeight: 1.2,
-                }}> {setting(settings, "heroStat2Value")}</p>
-                <p style={{ fontSize: "0.7rem", color: "var(--color-text-3)", marginTop: "0.25rem", fontWeight: 500 }}>
-                  {setting(settings, "heroStat2Label")}
-                </p>
-              </div>
+              ))}
             </div>
           </div>
         </div>

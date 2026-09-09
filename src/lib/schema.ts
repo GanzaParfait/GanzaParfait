@@ -10,7 +10,7 @@ export const LERONY_ORG_ID = "https://lerony.com/#organization";
 
 /** Stable Person image URL for Google. Never point JSON-LD at a CMS/media URL. Replace this file in place if the portrait changes. */
 export const PORTRAIT_PATH = "/images/profile/prince-parfait-ganza-kigali-rwanda.webp";
-export const OG_IMAGE_PATH = "/images/og/prince-parfait-ganza.jpg";
+export const OG_IMAGE_PATH = "/images/og/seo-share-image.jpg";
 
 /** Date the public factual content was last revised. Do not stamp deploy time. */
 export const SITE_CONTENT_REVISED = "2026-08-28";
@@ -47,17 +47,25 @@ export function buildPersonJsonLd() {
     name: "Prince Parfait GANZA",
     givenName: "Prince Parfait",
     familyName: "GANZA",
-    alternateName: ["Prince Parfait Ganza"],
+    additionalName: "Parfait",
+    alternateName: ["Prince Parfait Ganza", "Prince Parfait"],
     url: `${CANONICAL_ORIGIN}/`,
     description: siteConfig.description,
+    disambiguatingDescription:
+      "Rwandan founder and software engineer based in Kigali. Founder of LERONY Ltd.",
     image: {
       "@type": "ImageObject",
       "@id": PERSON_IMAGE_ID,
       url: PORTRAIT_URL,
       contentUrl: PORTRAIT_URL,
       caption: "Prince Parfait GANZA",
+      name: "Prince Parfait GANZA",
     },
-    jobTitle: ["Founder", "Software Engineer"],
+    jobTitle: ["Founder", "Software Engineer", "AI Builder", "Speaker", "Entrepreneur"],
+    hasOccupation: [
+      { "@type": "Occupation", name: "Founder", occupationLocation: { "@type": "City", name: "Kigali" } },
+      { "@type": "Occupation", name: "Software Engineer" },
+    ],
     worksFor: leronyRef(),
     homeLocation: {
       "@type": "Place",
@@ -111,7 +119,7 @@ export function buildWebSiteJsonLd() {
     "@id": WEBSITE_ID,
     url: `${CANONICAL_ORIGIN}/`,
     name: "Prince Parfait GANZA",
-    alternateName: "Prince Parfait",
+    alternateName: ["Prince Parfait"],
     description: siteConfig.description,
     inLanguage: "en",
     publisher: personRef(),

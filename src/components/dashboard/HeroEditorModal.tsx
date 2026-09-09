@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState, type CSSProperties, type FormEvent, type ReactNode } from "react";
-import { RiCloseLine, RiSaveLine, RiImageAddLine, RiCheckLine, RiSunLine, RiMoonLine } from "react-icons/ri";
+import { RiCloseLine, RiSaveLine, RiImageAddLine, RiSunLine, RiMoonLine } from "react-icons/ri";
 import { SiteSettings, HeroLayoutType } from "@/lib/supabase";
-import { HERO_LAYOUTS, heroImageFor, imageKeyFor, layoutShows } from "@/lib/hero";
+import { HERO_LAYOUTS, heroImageFor, imageKeyFor, layoutShows, visibleHeroLayouts } from "@/lib/hero";
 import { resolvedSocials, heroSocialsFor, socialIcon, syncHeroSocialFlags } from "@/lib/socials";
 import { PORTRAIT_PATH } from "@/lib/schema";
 import HeroPreviewFrame from "@/components/hero/HeroPreviewFrame";
@@ -142,9 +142,9 @@ export default function HeroEditorModal({
 
         <div style={{ flex: 1, display: "flex", overflow: "hidden", minHeight: 0 }}>
           <div style={{ width: "24rem", minWidth: "22rem", overflowY: "auto", borderRight: "1px solid #e2e8f0", padding: "1.25rem", display: "flex", flexDirection: "column", gap: "1.15rem" }}>
-            <Field label="Layout" hint="Fields below match only what this banner actually shows. Preview updates as you type.">
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.45rem" }}>
-                {HERO_LAYOUTS.map((item) => {
+            <Field label="Layout">
+              <div style={{ display: "flex", background: "#f1f5f9", borderRadius: "0.7rem", padding: "0.22rem", gap: "0.2rem" }}>
+                {visibleHeroLayouts(formData).map((item) => {
                   const active = layout === item.id;
                   return (
                     <button
@@ -152,21 +152,19 @@ export default function HeroEditorModal({
                       type="button"
                       onClick={() => update({ bannerLayout: item.id })}
                       style={{
-                        textAlign: "left",
-                        padding: "0.7rem 0.85rem",
-                        borderRadius: "0.7rem",
-                        border: `2px solid ${active ? "#0e52a8" : "#e2e8f0"}`,
-                        background: active ? "#eff6ff" : "#ffffff",
+                        flex: 1,
+                        padding: "0.45rem 0.4rem",
+                        borderRadius: "0.55rem",
+                        border: "none",
+                        background: active ? "#ffffff" : "transparent",
+                        color: active ? "#0e52a8" : "#475569",
+                        fontWeight: 800,
+                        fontSize: "0.75rem",
                         cursor: "pointer",
+                        boxShadow: active ? "0 1px 2px rgba(15,23,42,0.08)" : "none",
                       }}
                     >
-                      <span style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontWeight: 800, color: active ? "#0e52a8" : "#0b192c", fontSize: "0.875rem" }}>
-                        {active && <RiCheckLine size={16} />}
-                        {item.name}
-                      </span>
-                      <span style={{ display: "block", fontSize: "0.75rem", color: "#64748b", marginTop: "0.2rem" }}>
-                        {item.description}
-                      </span>
+                      {item.short}
                     </button>
                   );
                 })}
@@ -258,8 +256,14 @@ export default function HeroEditorModal({
               </Field>
             )}
             {show("card") && (
-              <Field label="Detail card">
+              <Field label="Welcome card" hint="Keep this short. Highlights below appear as chips on the card.">
                 <input value={formData.heroCardLabel || ""} onChange={(event) => update({ heroCardLabel: event.target.value })} style={{ ...inputStyle, marginBottom: "0.4rem" }} />
+                <textarea
+                  rows={3}
+                  value={formData.heroCardBody || ""}
+                  onChange={(event) => update({ heroCardBody: event.target.value })}
+                  style={{ ...inputStyle, resize: "vertical", marginBottom: "0.4rem" }}
+                />
                 <div style={{ display: "grid", gridTemplateColumns: "1.2fr 0.8fr", gap: "0.4rem" }}>
                   <input value={formData.heroCardCtaLabel || ""} onChange={(event) => update({ heroCardCtaLabel: event.target.value })} style={inputStyle} />
                   <input value={formData.heroCardCtaHref || ""} onChange={(event) => update({ heroCardCtaHref: event.target.value })} style={inputStyle} />
@@ -267,26 +271,34 @@ export default function HeroEditorModal({
               </Field>
             )}
             {show("stat1") && (
-              <Field label="Highlight 1">
+              <Field label="Highlight 1" hint="Shared across every layout.">
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.4rem" }}>
-                  <input value={formData.heroStat1Value || ""} onChange={(event) => update({ heroStat1Value: event.target.value })} style={inputStyle} />
-                  <input value={formData.heroStat1Label || ""} onChange={(event) => update({ heroStat1Label: event.target.value })} style={inputStyle} />
+                  <input value={formData.heroStat1Value || ""} onChange={(event) => update({ heroStat1Value: event.target.value })} style={inputStyle} placeholder="Founder" />
+                  <input value={formData.heroStat1Label || ""} onChange={(event) => update({ heroStat1Label: event.target.value })} style={inputStyle} placeholder="LERONY Ltd · 2025" />
                 </div>
               </Field>
             )}
             {show("stat2") && (
               <Field label="Highlight 2">
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.4rem" }}>
-                  <input value={formData.heroStat2Value || ""} onChange={(event) => update({ heroStat2Value: event.target.value })} style={inputStyle} />
-                  <input value={formData.heroStat2Label || ""} onChange={(event) => update({ heroStat2Label: event.target.value })} style={inputStyle} />
+                  <input value={formData.heroStat2Value || ""} onChange={(event) => update({ heroStat2Value: event.target.value })} style={inputStyle} placeholder="Kigali" />
+                  <input value={formData.heroStat2Label || ""} onChange={(event) => update({ heroStat2Label: event.target.value })} style={inputStyle} placeholder="Rwanda" />
                 </div>
               </Field>
             )}
             {show("stat3") && (
               <Field label="Highlight 3">
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.4rem" }}>
-                  <input value={formData.heroStat3Value || ""} onChange={(event) => update({ heroStat3Value: event.target.value })} style={inputStyle} />
-                  <input value={formData.heroStat3Label || ""} onChange={(event) => update({ heroStat3Label: event.target.value })} style={inputStyle} />
+                  <input value={formData.heroStat3Value || ""} onChange={(event) => update({ heroStat3Value: event.target.value })} style={inputStyle} placeholder="2025" />
+                  <input value={formData.heroStat3Label || ""} onChange={(event) => update({ heroStat3Label: event.target.value })} style={inputStyle} placeholder="Company founded" />
+                </div>
+              </Field>
+            )}
+            {show("stat4") && (
+              <Field label="Highlight 4" hint="Maximum of four highlights across banners.">
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.4rem" }}>
+                  <input value={formData.heroStat4Value || ""} onChange={(event) => update({ heroStat4Value: event.target.value })} style={inputStyle} placeholder="Speaker" />
+                  <input value={formData.heroStat4Label || ""} onChange={(event) => update({ heroStat4Label: event.target.value })} style={inputStyle} placeholder="Talks & training" />
                 </div>
               </Field>
             )}
@@ -413,7 +425,7 @@ export default function HeroEditorModal({
                 {previewTheme === "dark" ? "Light" : "Dark"}
               </button>
             </div>
-            <HeroPreviewFrame key={`${layout}-${previewTheme}`} settings={formData} previewTheme={previewTheme} fit="width" />
+            <HeroPreviewFrame key={`${layout}-${previewTheme}`} settings={formData} previewTheme={previewTheme} fit="contain" />
           </div>
         </div>
       </form>

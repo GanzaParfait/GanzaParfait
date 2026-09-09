@@ -15,7 +15,7 @@ export const siteConfig = {
   shortIntro:
     "Prince Parfait GANZA is a Rwandan founder and software engineer based in Kigali, building practical digital products and software systems for organizations and businesses.",
   url: "https://www.princeparfait.com",
-  ogImage: "/images/og/prince-parfait-ganza.jpg",
+  ogImage: "/images/og/seo-share-image.jpg",
   locale: "en_US",
   keywords: [
     "Prince Parfait GANZA",

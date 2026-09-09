@@ -52,6 +52,7 @@ export interface SiteSettings {
   heroSecondaryCtaLabel?: string;
   heroSecondaryCtaHref?: string;
   heroCardLabel?: string;
+  heroCardBody?: string;
   heroCardCtaLabel?: string;
   heroCardCtaHref?: string;
   heroStat1Value?: string;
@@ -60,12 +61,18 @@ export interface SiteSettings {
   heroStat2Label?: string;
   heroStat3Value?: string;
   heroStat3Label?: string;
+  heroStat4Value?: string;
+  heroStat4Label?: string;
+  hiddenHeroLayouts?: HeroLayoutType[];
 }
 
 export const DEFAULT_SETTINGS: SiteSettings = {
   bannerLayout: "split_portrait",
   navbarStyle: "pill",
   heroImageUrl: "/images/profile/prince-parfait-ganza-kigali-rwanda.webp",
+  heroImageSplit: "/images/profile/hero-split-portrait.webp",
+  heroImageCentered: "/images/profile/hero-centered-portrait.webp",
+  heroImageOverlay: "/images/profile/hero-cinematic-overlay.webp",
   siteTitle: "Prince Parfait GANZA",
   siteSubtitle: "Founder • Software Engineer • AI Builder • Speaker • Entrepreneur",
   bio: "I build full-stack products and integrate AI to solve real-world problems across Africa and beyond.",
@@ -88,7 +95,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   announcementIsActive: false,
   heroGreeting: "Hi there, I'm",
   heroAvailableText: "Available for new projects",
-  heroHeadline: "Building software that creates impact.",
+  heroHeadline: "Software that creates impact.",
   heroInviteLine: "Do you have a project?",
   heroInviteCtaLabel: "Let’s Talk",
   heroInviteCtaHref: "/contact",
@@ -97,6 +104,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   heroSecondaryCtaLabel: "Contact",
   heroSecondaryCtaHref: "/contact",
   heroCardLabel: "Welcome",
+  heroCardBody: "Full-stack products and AI, built from Kigali for real operational work.",
   heroCardCtaLabel: "Discover more",
   heroCardCtaHref: "/about",
   heroStat1Value: "Founder",
@@ -105,6 +113,9 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   heroStat2Label: "Rwanda",
   heroStat3Value: "2025",
   heroStat3Label: "Company founded",
+  heroStat4Value: "Speaker",
+  heroStat4Label: "Talks & training",
+  hiddenHeroLayouts: [],
 };
 
 export interface AnalyticsMetrics {
@@ -183,6 +194,10 @@ export function getLocalSettings(): SiteSettings {
       if (parsed.bannerLayout === "split") parsed.bannerLayout = "split_portrait";
       if (parsed.bannerLayout === "tony_robbins") parsed.bannerLayout = "featured_overlay";
       if (parsed.bannerLayout === "portm") parsed.bannerLayout = "full_centered_floating";
+      if (parsed.heroStat3Value === "Software Engineer" && parsed.heroStat3Label === "Full-stack & AI") {
+        parsed.heroStat3Value = "2025";
+        parsed.heroStat3Label = "Company founded";
+      }
       if (!parsed.socialLinks?.length) parsed.socialLinks = DEFAULT_SOCIAL_LINKS;
       const hadBlob = SETTINGS_IMAGE_KEYS.some((key) => typeof parsed[key] === "string" && parsed[key].startsWith("blob:"));
       const cleaned = stripSettingsBlobs(parsed);

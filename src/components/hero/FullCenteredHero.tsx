@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { SiteSettings } from "@/lib/supabase";
-import { heroImageFor, setting } from "@/lib/hero";
+import { heroHighlights, heroImageFor, setting } from "@/lib/hero";
 import { socialIcon, heroSocialsFor } from "@/lib/socials";
 
 export default function FullCenteredHero({
@@ -19,32 +19,24 @@ export default function FullCenteredHero({
   const email = setting(settings, "contactEmail");
   const location = setting(settings, "location");
   const socials = heroSocialsFor(settings);
-  const highlights = [
-    { value: setting(settings, "heroStat1Value"), label: setting(settings, "heroStat1Label") },
-    { value: setting(settings, "heroStat2Value"), label: setting(settings, "heroStat2Label") },
-    { value: setting(settings, "heroStat3Value"), label: setting(settings, "heroStat3Label") },
-  ];
+  const highlights = heroHighlights(settings);
 
   return (
     <section
       className={isPreview ? "hero-centered hero-layout-preview" : "hero-centered"}
-      style={{
-        minHeight: isPreview ? "100%" : "100dvh",
-        height: isPreview ? "100%" : undefined,
-        paddingTop: isPreview ? "2rem" : undefined,
-      }}
     >
       <div className="hero-centered-box">
+        <div className="hero-centered-glow" aria-hidden="true" />
+        <img src={image} alt={name} className="hero-centered-photo" />
         <div className="hero-centered-caption">
           <h1 className="hero-centered-name">{name}</h1>
+          <p className="hero-centered-invite">
+            {setting(settings, "heroInviteLine")}{" "}
+            <Link href={setting(settings, "heroInviteCtaHref")} className="hero-centered-invite-link">
+              {setting(settings, "heroInviteCtaLabel")}
+            </Link>
+          </p>
         </div>
-        <img src={image} alt={name} className="hero-centered-photo" />
-        <p className="hero-centered-invite">
-          {setting(settings, "heroInviteLine")}{" "}
-          <Link href={setting(settings, "heroInviteCtaHref")} className="hero-centered-invite-link">
-            {setting(settings, "heroInviteCtaLabel")}
-          </Link>
-        </p>
       </div>
 
       <div className="hero-centered-info">

@@ -18,6 +18,7 @@ export const metadata: Metadata = buildPageMetadata({
   description: siteConfig.description,
   path: "/",
   absoluteTitle: true,
+  keywords: siteConfig.keywords,
 });
 
 const featuredProjects = projects.filter((p) => p.featured);

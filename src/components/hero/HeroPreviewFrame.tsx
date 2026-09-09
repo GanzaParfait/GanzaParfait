@@ -57,9 +57,13 @@ export default function HeroPreviewFrame({
           height: FRAME_HEIGHT,
           transform: `scale(${scale})`,
           transformOrigin: "top left",
-          pointerEvents: "none",
+          pointerEvents: "auto",
           background: isLight ? "#ffffff" : "#050816",
           colorScheme: isLight ? "light" : "dark",
+        }}
+        onClick={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
         }}
       >
         <HeroRenderer settings={settings} isPreview />

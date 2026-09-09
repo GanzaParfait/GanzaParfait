@@ -1,6 +1,5 @@
 import type { HeroLayoutType, SiteSettings } from "@/lib/supabase";
 import { DEFAULT_SETTINGS } from "@/lib/supabase";
-import { PORTRAIT_PATH } from "@/lib/schema";
 
 export const HERO_LAYOUTS: {
   id: HeroLayoutType;
@@ -12,19 +11,19 @@ export const HERO_LAYOUTS: {
     id: "split_portrait",
     name: "Split Portrait",
     short: "Default",
-    description: "Portrait on the right, introduction on the left. The standard professional layout.",
+    description: "Portrait on the right, introduction on the left. Professional, with identity highlights.",
   },
   {
     id: "full_centered_floating",
     name: "Centered Portrait",
     short: "Centered",
-    description: "Portm-style centered portrait, glass role/email pills, socials, and right-side highlights. Light and dark.",
+    description: "Centered portrait, glass role and email pills, socials, and up to four highlights.",
   },
   {
     id: "featured_overlay",
     name: "Cinematic Overlay",
     short: "Overlay",
-    description: "Full-bleed photograph with a short headline, one action, and a small detail card.",
+    description: "Full-bleed photograph, a short headline, one action, and a welcome card with highlights.",
   },
 ];
 
@@ -41,10 +40,22 @@ export function setting<K extends keyof SiteSettings>(settings: SiteSettings, ke
 }
 
 export const LAYOUT_HERO_IMAGES: Record<HeroLayoutType, string> = {
-  split_portrait: PORTRAIT_PATH,
+  split_portrait: "/images/profile/hero-split-portrait.webp",
   full_centered_floating: "/images/profile/hero-centered-portrait.webp",
   featured_overlay: "/images/profile/hero-cinematic-overlay.webp",
 };
+
+export const MAX_HERO_HIGHLIGHTS = 4;
+
+export function heroHighlights(settings: SiteSettings) {
+  const pairs = [
+    { value: setting(settings, "heroStat1Value"), label: setting(settings, "heroStat1Label") },
+    { value: setting(settings, "heroStat2Value"), label: setting(settings, "heroStat2Label") },
+    { value: setting(settings, "heroStat3Value"), label: setting(settings, "heroStat3Label") },
+    { value: setting(settings, "heroStat4Value"), label: setting(settings, "heroStat4Label") },
+  ];
+  return pairs.filter((item) => item.value.trim() || item.label.trim()).slice(0, MAX_HERO_HIGHLIGHTS);
+}
 
 export type HeroImageKey = "heroImageSplit" | "heroImageCentered" | "heroImageOverlay";
 
@@ -77,14 +88,28 @@ export type HeroEditorField =
   | "stat1"
   | "stat2"
   | "stat3"
+  | "stat4"
   | "heroSocials";
 
+export const SHARED_EDITOR_FIELDS: HeroEditorField[] = ["stat1", "stat2", "stat3", "stat4"];
+
 export const LAYOUT_EDITOR_FIELDS: Record<HeroLayoutType, HeroEditorField[]> = {
-  split_portrait: ["image", "name", "greeting", "availability", "location", "roles", "bio", "primaryCta", "secondaryCta", "stat1", "stat2", "heroSocials"],
-  full_centered_floating: ["image", "name", "roles", "location", "email", "invite", "stat1", "stat2", "stat3", "heroSocials"],
-  featured_overlay: ["image", "availability", "location", "headline", "bio", "primaryCta", "card"],
+  split_portrait: ["image", "name", "greeting", "availability", "location", "roles", "bio", "primaryCta", "secondaryCta", "heroSocials"],
+  full_centered_floating: ["image", "name", "roles", "location", "email", "invite", "heroSocials"],
+  featured_overlay: ["image", "availability", "location", "headline", "card", "primaryCta"],
 };
 
 export function layoutShows(layout: HeroLayoutType, field: HeroEditorField) {
-  return LAYOUT_EDITOR_FIELDS[layout].includes(field);
+  return LAYOUT_EDITOR_FIELDS[layout].includes(field) || SHARED_EDITOR_FIELDS.includes(field);
+}
+
+export function visibleHeroLayouts(settings: SiteSettings) {
+  const hidden = new Set(settings.hiddenHeroLayouts || []);
+  const visible = HERO_LAYOUTS.filter((layout) => !hidden.has(layout.id));
+  return visible.length ? visible : HERO_LAYOUTS;
+}
+
+export function hiddenHeroLayoutOptions(settings: SiteSettings) {
+  const hidden = new Set(settings.hiddenHeroLayouts || []);
+  return HERO_LAYOUTS.filter((layout) => hidden.has(layout.id));
 }
