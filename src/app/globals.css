@@ -978,59 +978,133 @@ code, pre {
 .hero-centered-box {
   position: relative;
   display: flex;
-  justify-content: center;
-  align-items: flex-end;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
   width: 100%;
   flex: 1;
   min-height: 0;
-  padding: 0 12px 70px;
+  padding: 0.25rem 12px 2.4rem;
 }
 
-.hero-centered-box::after {
-  content: "";
+.hero-centered-scene {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.hero-centered-grid {
+  position: absolute;
+  inset: 6% 8% 18%;
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--color-primary) 16%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--color-primary) 16%, transparent) 1px, transparent 1px);
+  background-size: 52px 52px;
+  -webkit-mask-image: radial-gradient(ellipse 48% 46% at 50% 46%, transparent 22%, #000 68%);
+  mask-image: radial-gradient(ellipse 48% 46% at 50% 46%, transparent 22%, #000 68%);
+  opacity: 0.7;
+}
+
+.hero-centered-orbit {
   position: absolute;
   left: 50%;
-  bottom: 50px;
-  transform: translateX(-50%);
-  width: min(80.25rem, 100%);
-  height: 150px;
-  background: linear-gradient(180deg, transparent 0%, var(--color-bg) 100%);
-  z-index: 4;
-  pointer-events: none;
+  top: 36%;
+  width: min(32rem, 52vw);
+  height: min(32rem, 52vw);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px dashed color-mix(in srgb, var(--color-primary) 32%, transparent);
+  box-shadow:
+    0 0 0 18px color-mix(in srgb, var(--color-primary) 5%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 18%, transparent);
+  animation: hero-orbit-spin 56s linear infinite;
+}
+
+.hero-centered-orbit::before,
+.hero-centered-orbit::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  background: var(--color-primary);
+}
+
+.hero-centered-orbit::before {
+  top: 6%;
+  left: 16%;
+  width: 7px;
+  height: 7px;
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-primary) 16%, transparent);
+}
+
+.hero-centered-orbit::after {
+  right: 8%;
+  bottom: 18%;
+  width: 5px;
+  height: 5px;
+  opacity: 0.55;
 }
 
 .hero-centered-glow {
   position: absolute;
   left: 50%;
-  bottom: 18%;
-  transform: translateX(-50%);
-  width: min(40rem, 62vw);
-  height: min(40rem, 62vw);
+  top: 34%;
+  transform: translate(-50%, -50%);
+  width: min(38rem, 58vw);
+  height: min(38rem, 58vw);
   border-radius: 50%;
-  background: radial-gradient(circle, var(--hero-orb-1) 0%, transparent 70%);
+  background: radial-gradient(circle, var(--hero-orb-1) 0%, transparent 68%);
   z-index: 1;
-  pointer-events: none;
+}
+
+.hero-centered-floor {
+  position: absolute;
+  left: 50%;
+  bottom: 16%;
+  transform: translateX(-50%);
+  width: min(26rem, 42vw);
+  height: 5.5rem;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, color-mix(in srgb, var(--color-primary) 22%, transparent) 0%, transparent 72%);
+  filter: blur(2px);
+}
+
+@keyframes hero-orbit-spin {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.hero-centered-figure {
+  position: relative;
+  z-index: 3;
+  flex: 1;
+  min-height: 0;
+  width: min(32rem, 42vw);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
 }
 
 .hero-centered-photo {
-  position: relative;
-  z-index: 3;
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
   display: block;
   width: auto;
-  max-width: min(46rem, 70vw);
-  height: auto;
-  max-height: 100%;
+  height: 100%;
+  max-width: 100%;
   object-fit: contain;
   object-position: bottom center;
   pointer-events: none;
+  filter: drop-shadow(0 18px 28px color-mix(in srgb, var(--color-primary) 18%, transparent));
 }
 
 .hero-centered-caption {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 11%;
+  position: relative;
   z-index: 5;
+  width: 100%;
+  margin-top: 0.15rem;
   text-align: center;
   padding: 0 15px;
 }
@@ -1137,6 +1211,18 @@ code, pre {
   background: radial-gradient(circle, rgba(37, 99, 235, 0.42) 0%, rgba(14, 82, 168, 0.16) 52%, transparent 72%);
 }
 
+[data-theme="dark"] .hero-centered-grid {
+  opacity: 0.85;
+}
+
+[data-theme="dark"] .hero-centered-floor {
+  background: radial-gradient(ellipse, rgba(37, 99, 235, 0.28) 0%, transparent 72%);
+}
+
+[data-theme="dark"] .hero-centered-photo {
+  filter: drop-shadow(0 22px 36px rgba(0, 0, 0, 0.45)) drop-shadow(0 0 28px rgba(37, 99, 235, 0.22));
+}
+
 [data-theme="dark"] .hero-centered-pill {
   background: rgba(12, 28, 54, 0.92);
   border: 1px solid rgba(147, 197, 253, 0.32);
@@ -1208,17 +1294,10 @@ code, pre {
   border-bottom: none;
 }
 
-@media (max-width: 1536px) {
-  .hero-centered-caption { bottom: 8%; }
-}
-@media (max-width: 1440px) {
-  .hero-centered-caption { bottom: 7%; }
-}
-@media (max-width: 1366px) {
-  .hero-centered-caption { bottom: 6%; }
-}
-@media (max-width: 1280px) {
-  .hero-centered-caption { bottom: 5%; }
+@media (max-width: 1100px) {
+  .hero-centered-figure {
+    width: min(28rem, 48vw);
+  }
 }
 
 @media (max-width: 900px) {
@@ -1245,32 +1324,45 @@ code, pre {
     flex: none;
     height: auto;
     min-height: 0;
-    padding: 0.75rem 12px 0;
+    padding: 0.75rem 12px 0.5rem;
     overflow: visible;
   }
 
-  .hero-centered-box::after {
-    bottom: 0;
+  .hero-centered-orbit {
+    top: 34%;
+    width: min(22rem, 88vw);
+    height: min(22rem, 88vw);
   }
 
   .hero-centered-glow {
+    top: 32%;
+    width: min(22rem, 86vw);
+    height: min(22rem, 86vw);
+  }
+
+  .hero-centered-floor {
     bottom: 22%;
-    width: min(28rem, 90vw);
-    height: min(28rem, 90vw);
+    width: min(18rem, 70vw);
+  }
+
+  .hero-centered-figure {
+    width: min(100%, 400px);
+    flex: none;
+    height: auto;
   }
 
   .hero-centered-photo {
     position: relative;
     left: auto;
+    bottom: auto;
     transform: none;
-    width: min(100%, 400px);
-    max-width: 400px;
+    width: 100%;
     height: auto;
     max-height: none;
   }
 
   .hero-centered-caption {
-    bottom: 30px;
+    margin-top: 0.35rem;
     padding: 0 15px;
   }
 
@@ -1360,18 +1452,20 @@ code, pre {
   .hero-layout-preview .hero-centered-box {
     min-height: 640px;
     height: 100%;
-    padding: 0 12px 70px;
+    padding: 0.25rem 12px 2.4rem;
     overflow: hidden;
   }
 
-  .hero-layout-preview .hero-centered-photo {
-    max-width: min(46rem, 70%);
-    width: auto;
-    max-height: 100%;
+  .hero-layout-preview .hero-centered-figure {
+    flex: 1;
+    width: min(32rem, 42%);
+    height: auto;
   }
 
-  .hero-layout-preview .hero-centered-caption {
-    bottom: 8%;
+  .hero-layout-preview .hero-centered-photo {
+    width: auto;
+    height: 100%;
+    max-height: 100%;
   }
 }
 

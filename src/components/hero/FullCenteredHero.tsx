@@ -26,8 +26,15 @@ export default function FullCenteredHero({
       className={isPreview ? "hero-centered hero-layout-preview" : "hero-centered"}
     >
       <div className="hero-centered-box">
-        <div className="hero-centered-glow" aria-hidden="true" />
-        <img src={image} alt={name} className="hero-centered-photo" />
+        <div className="hero-centered-scene" aria-hidden="true">
+          <div className="hero-centered-grid" />
+          <div className="hero-centered-orbit" />
+          <div className="hero-centered-glow" />
+          <div className="hero-centered-floor" />
+        </div>
+        <div className="hero-centered-figure">
+          <img src={image} alt={name} className="hero-centered-photo" />
+        </div>
         <div className="hero-centered-caption">
           <h1 className="hero-centered-name">{name}</h1>
           <p className="hero-centered-invite">
