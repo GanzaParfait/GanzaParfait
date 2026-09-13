@@ -211,6 +211,18 @@ export default function SettingsPage() {
               <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>WhatsApp number (digits)
                 <input style={{ ...inputStyle, marginTop: "0.3rem" }} value={settings.whatsappNumber} onChange={(e) => patch({ whatsappNumber: e.target.value })} />
               </label>
+              <label style={{ gridColumn: "1 / -1", fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>
+                Google Calendar booking page
+                <input
+                  style={{ ...inputStyle, marginTop: "0.3rem" }}
+                  value={settings.bookingCalendarUrl || ""}
+                  onChange={(e) => patch({ bookingCalendarUrl: e.target.value })}
+                  placeholder="https://calendar.app.google/…"
+                />
+                <span style={{ display: "block", fontWeight: 500, color: "#94a3b8", marginTop: "0.3rem" }}>
+                  Public appointment link only. Leave empty until the booking page exists. Private calendar addresses stay off the site.
+                </span>
+              </label>
             </div>
           )}
 

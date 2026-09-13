@@ -581,24 +581,24 @@ Every section must have meaningful content.
 
 # 12. Homepage Objectives
 
-A visitor should understand within approximately 10 seconds:
+The homepage is a guided story, not a stack of equal cards.
 
-WHO:
-Prince Parfait GANZA
+Order:
 
-WHAT:
-Founder and software engineer building practical digital products.
+1. Signature hero — who, where, and the action.
+2. Manifesto — ideas, technology, and execution.
+3. Selected work — Caritas information systems, StockPro, AskField, and the PSTA ticket accounting system. No invented outcomes.
+4. Knowledge system — strategy, product, technology, and data. No skill percentages.
+5. Journey — the verified public path. Exact employers stay on Experience.
+6. Ventures — LERONY Ltd, kept distinct from this personal site.
+7. Principles — how the work is done.
+8. Speaking and training — the documented data-systems engagement of about 85 trainees. No invented event name.
+9. Booking — a configured public Google Calendar appointment URL, plus email and WhatsApp. Do not hardcode a private calendar.
+10. Closing statement.
 
-WHERE:
-Kigali, Rwanda.
+A visitor should still understand within about 10 seconds: Prince Parfait GANZA, founder and technologist in Kigali, with real work and a way to start a conversation.
 
-PROOF:
-Real products, organizations, projects and experience.
-
-ACTION:
-View work / Contact / Work together.
-
-The homepage should prioritize clarity over animation.
+The homepage should prioritize clarity over animation. One visual behavior per section. Respect reduced motion. Light and dark themes both have to remain readable.
 
 ---
 

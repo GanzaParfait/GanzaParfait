@@ -89,7 +89,11 @@ export default function HeroSection() {
             />
           ))}
         </div>
-      ) : null}
+      ) : (
+        <a href="#manifesto" className="hero-story-cue">
+          <span>The story</span>
+        </a>
+      )}
     </div>
   );
 }

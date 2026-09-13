@@ -35,7 +35,7 @@ Prefer:
 
 | Label | Route | Job |
 |-------|-------|-----|
-| Home | `/` | Identity in ~10 seconds |
+| Home | `/` | Guided story: who, proof, knowledge, venture, and how to start |
 | About | `/about` | Person, education, positioning |
 | Work | `/projects` | Evidence of shipped systems |
 | Experience | `/experience` | Roles, timeline, training |

@@ -38,6 +38,7 @@ export interface SiteSettings {
   footerCompanyHeight?: FooterCompanyHeight;
   footerCompanyAlign?: FooterCompanyAlign;
   footerCompanyHref?: string;
+  bookingCalendarUrl?: string;
   announcementText?: string;
   announcementLink?: string;
   announcementIsActive?: boolean;
@@ -132,6 +133,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   footerCompanyHeight: "regular",
   footerCompanyAlign: "center",
   footerCompanyHref: "https://lerony.com",
+  bookingCalendarUrl: "",
   announcementText: "",
   announcementLink: "",
   announcementIsActive: false,

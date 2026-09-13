@@ -45,8 +45,8 @@ export default function ContactPage() {
           <div className="book-panel" style={{ marginBottom: "1.5rem" }}>
             <div>
               <p className="section-label">Book a call</p>
-              <h2>Prefer a time on the calendar?</h2>
-              <p>Propose a Google Calendar slot, or write the brief below.</p>
+              <h2>Book a conversation, or write the brief.</h2>
+              <p>The calendar button uses the public booking page when it is connected. Email remains available either way.</p>
             </div>
             <BookCall />
           </div>

@@ -111,6 +111,8 @@ Do not add Framer Motion to a page that already has Intersection Observer motion
 
 Homepage priority: **clarity over animation**.
 
+The homepage is a guided sequence: hero, manifesto, selected work, knowledge system, journey, ventures, principles, speaking, booking, closing. Signature dark bands are limited to the closing statement. Other sections use theme tokens so light mode stays light and dark mode stays dark. Booking uses `bookingCalendarUrl` from site settings. Empty means email and WhatsApp, not a private calendar link.
+
 Allowed:
 
 - Short fade/translate on scroll (`AnimatedSection`)
