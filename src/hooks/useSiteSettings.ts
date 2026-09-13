@@ -9,9 +9,9 @@ import {
 } from "@/lib/supabase";
 
 export function useSiteSettings() {
-  // Must match the server render. Reading localStorage here splits the first
-  // client tree from the SSR HTML and triggers a hydration mismatch.
-  const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
+  const [settings, setSettings] = useState<SiteSettings>(() =>
+    typeof window === "undefined" ? DEFAULT_SETTINGS : getLocalSettings()
+  );
 
   useEffect(() => {
     setSettings(getLocalSettings());

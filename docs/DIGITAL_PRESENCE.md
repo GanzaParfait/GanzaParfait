@@ -4,13 +4,11 @@
 
 Prince Parfait GANZA
 
-Software Engineer Rwanda
-
-AI Builder Africa
+Founder Entrepreneur Technologist
 
 Founder Lerony
 
-Full Stack Developer Rwanda
+Technology entrepreneur Rwanda
 
 ---
 

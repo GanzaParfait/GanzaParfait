@@ -13,7 +13,7 @@ export const PORTRAIT_PATH = "/images/profile/prince-parfait-ganza-kigali-rwanda
 export const OG_IMAGE_PATH = "/images/og/seo-share-image.jpg";
 
 /** Date the public factual content was last revised. Do not stamp deploy time. */
-export const SITE_CONTENT_REVISED = "2026-08-28";
+export const SITE_CONTENT_REVISED = "2026-09-13";
 
 export function canonicalUrl(path = "/"): string {
   if (!path || path === "/") return `${CANONICAL_ORIGIN}/`;
@@ -48,23 +48,29 @@ export function buildPersonJsonLd() {
     givenName: "Prince Parfait",
     familyName: "GANZA",
     additionalName: "Parfait",
-    alternateName: ["Prince Parfait Ganza", "Prince Parfait"],
+    alternateName: ["Prince Parfait Ganza", "Prince Parfait", "PPG"],
     url: `${CANONICAL_ORIGIN}/`,
     description: siteConfig.description,
     disambiguatingDescription:
-      "Rwandan founder and software engineer based in Kigali. Founder of LERONY Ltd.",
+      "Rwandan founder, entrepreneur and technologist based in Kigali. Software engineer and AI builder. Founder and CEO of LERONY Ltd.",
     image: {
       "@type": "ImageObject",
       "@id": PERSON_IMAGE_ID,
       url: PORTRAIT_URL,
       contentUrl: PORTRAIT_URL,
+      width: 1024,
+      height: 919,
+      encodingFormat: "image/webp",
       caption: "Prince Parfait GANZA",
       name: "Prince Parfait GANZA",
     },
-    jobTitle: ["Founder", "Software Engineer", "AI Builder", "Speaker", "Entrepreneur"],
+    jobTitle: ["Founder", "Entrepreneur", "Technologist", "Software Engineer", "AI Builder"],
     hasOccupation: [
       { "@type": "Occupation", name: "Founder", occupationLocation: { "@type": "City", name: "Kigali" } },
+      { "@type": "Occupation", name: "Entrepreneur" },
+      { "@type": "Occupation", name: "Technologist" },
       { "@type": "Occupation", name: "Software Engineer" },
+      { "@type": "Occupation", name: "AI Builder" },
     ],
     worksFor: leronyRef(),
     homeLocation: {
@@ -79,6 +85,18 @@ export function buildPersonJsonLd() {
     nationality: {
       "@type": "Country",
       name: "Rwanda",
+    },
+    alumniOf: {
+      "@type": "EducationalOrganization",
+      name: "SJITC Nyamirambo",
+    },
+    contactPoint: {
+      "@type": "ContactPoint",
+      contactType: "professional inquiries",
+      email: siteConfig.contact.email,
+      telephone: "+250792054846",
+      areaServed: "RW",
+      availableLanguage: "en",
     },
     sameAs: [
       siteConfig.social.linkedin,

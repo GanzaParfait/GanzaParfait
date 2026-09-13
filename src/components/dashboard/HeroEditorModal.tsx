@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState, type CSSProperties, type FormEvent, type ReactNode } from "react";
-import { RiCloseLine, RiSaveLine, RiImageAddLine, RiSunLine, RiMoonLine } from "react-icons/ri";
+import { RiCloseLine, RiSaveLine, RiImageAddLine, RiSunLine, RiMoonLine, RiArrowUpSLine, RiArrowDownSLine } from "react-icons/ri";
 import { SiteSettings, HeroLayoutType } from "@/lib/supabase";
-import { HERO_LAYOUTS, heroImageFor, imageKeyFor, layoutShows, visibleHeroLayouts } from "@/lib/hero";
+import { HERO_LAYOUTS, heroImageFor, imageKeyFor, layoutCopyFrom, layoutShows, settingsForLayout, visibleHeroLayouts } from "@/lib/hero";
 import { resolvedSocials, heroSocialsFor, socialIcon, syncHeroSocialFlags } from "@/lib/socials";
 import { PORTRAIT_PATH } from "@/lib/schema";
 import HeroPreviewFrame from "@/components/hero/HeroPreviewFrame";
@@ -68,10 +68,8 @@ export default function HeroEditorModal({
 
   useEffect(() => {
     if (!isOpen) return;
-    setFormData({
-      ...settings,
-      bannerLayout: initialLayout || settings.bannerLayout || "split_portrait",
-    });
+    const layout = initialLayout || settings.bannerLayout || "split_portrait";
+    setFormData(settingsForLayout(settings, layout));
     setPreviewTheme("light");
   }, [isOpen, settings, initialLayout]);
 
@@ -89,7 +87,17 @@ export default function HeroEditorModal({
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    const ok = await runSave(() => onSave(syncHeroSocialFlags(formData)), "Hero layout saved and activated.");
+    const synced = syncHeroSocialFlags(formData);
+    const active = synced.bannerLayout || "split_portrait";
+    const imageKey = imageKeyFor(active);
+    const ok = await runSave(() => onSave({
+      bannerLayout: active,
+      [imageKey]: synced[imageKey],
+      heroLayoutCopy: {
+        ...settings.heroLayoutCopy,
+        [active]: layoutCopyFrom(synced),
+      },
+    }), "This layout’s details were saved. Other layouts are unchanged.");
     if (ok) onClose();
   };
 
@@ -211,7 +219,7 @@ export default function HeroEditorModal({
               </Field>
             )}
             {show("roles") && (
-              <Field label={layout === "full_centered_floating" ? "Primary role" : "Roles (separated by •)"} hint={layout === "full_centered_floating" ? "First role before • is shown in the left pill." : undefined}>
+              <Field label="Roles" hint="Only this layout. Separate roles with · so people can read each one.">
                 <textarea rows={2} value={formData.siteSubtitle} onChange={(event) => update({ siteSubtitle: event.target.value })} style={{ ...inputStyle, resize: "vertical" }} />
               </Field>
             )}
@@ -271,7 +279,7 @@ export default function HeroEditorModal({
               </Field>
             )}
             {show("stat1") && (
-              <Field label="Highlight 1" hint="Shared across every layout.">
+              <Field label="Highlight 1" hint="Saved on this layout only.">
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.4rem" }}>
                   <input value={formData.heroStat1Value || ""} onChange={(event) => update({ heroStat1Value: event.target.value })} style={inputStyle} placeholder="Founder" />
                   <input value={formData.heroStat1Label || ""} onChange={(event) => update({ heroStat1Label: event.target.value })} style={inputStyle} placeholder="LERONY Ltd · 2025" />
@@ -295,7 +303,7 @@ export default function HeroEditorModal({
               </Field>
             )}
             {show("stat4") && (
-              <Field label="Highlight 4" hint="Maximum of four highlights across banners.">
+              <Field label="Highlight 4" hint="Up to four highlights, only on this layout.">
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.4rem" }}>
                   <input value={formData.heroStat4Value || ""} onChange={(event) => update({ heroStat4Value: event.target.value })} style={inputStyle} placeholder="Speaker" />
                   <input value={formData.heroStat4Label || ""} onChange={(event) => update({ heroStat4Label: event.target.value })} style={inputStyle} placeholder="Talks & training" />
@@ -305,7 +313,7 @@ export default function HeroEditorModal({
             {show("heroSocials") && (
               <Field
                 label="Social icons on this banner"
-                hint="These icons appear only on the homepage banner. Header and footer still use Site Settings."
+                hint="Order here is the order on this banner. Header and footer still use Site Settings."
               >
                 <div style={{ display: "flex", gap: "0.4rem", marginBottom: "0.65rem", flexWrap: "wrap" }}>
                   {[2, 3, 4, 5, 6].map((count) => (
@@ -358,31 +366,57 @@ export default function HeroEditorModal({
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
                   {resolvedSocials(formData).filter((link) => link.enabled).map((link) => {
                     const selected = (formData.heroSocialIds || []).includes(link.id);
+                    const ids = formData.heroSocialIds || [];
+                    const index = ids.indexOf(link.id);
                     return (
-                      <label key={link.id} style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.8rem", color: "#334155" }}>
-                        <input
-                          type="checkbox"
-                          checked={selected}
-                          onChange={() => {
-                            setFormData((prev) => {
-                              const current = prev.heroSocialIds || [];
-                              const isOn = current.includes(link.id);
-                              const unique = isOn
-                                ? current.filter((id) => id !== link.id)
-                                : [...current, link.id];
-                              const nextLimit = isOn
-                                ? (prev.heroSocialLimit || 4)
-                                : Math.min(6, Math.max(prev.heroSocialLimit || 4, unique.length, 2));
-                              return {
-                                ...prev,
-                                heroSocialIds: unique,
-                                heroSocialLimit: nextLimit,
-                              };
-                            });
-                          }}
-                        />
-                        {link.label}
-                      </label>
+                      <div key={link.id} style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
+                        <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.8rem", color: "#334155", flex: 1 }}>
+                          <input
+                            type="checkbox"
+                            checked={selected}
+                            onChange={() => {
+                              setFormData((prev) => {
+                                const current = prev.heroSocialIds || [];
+                                const isOn = current.includes(link.id);
+                                const unique = isOn
+                                  ? current.filter((id) => id !== link.id)
+                                  : [...current, link.id];
+                                const nextLimit = isOn
+                                  ? (prev.heroSocialLimit || 4)
+                                  : Math.min(6, Math.max(prev.heroSocialLimit || 4, unique.length, 2));
+                                return {
+                                  ...prev,
+                                  heroSocialIds: unique,
+                                  heroSocialLimit: nextLimit,
+                                };
+                              });
+                            }}
+                          />
+                          {link.label}
+                        </label>
+                        {selected ? (
+                          <span style={{ display: "flex", gap: "0.15rem" }}>
+                            <button type="button" aria-label={`Move ${link.label} up`} disabled={index <= 0} onClick={() => setFormData((prev) => {
+                              const current = [...(prev.heroSocialIds || [])];
+                              const at = current.indexOf(link.id);
+                              if (at <= 0) return prev;
+                              [current[at - 1], current[at]] = [current[at], current[at - 1]];
+                              return { ...prev, heroSocialIds: current };
+                            })} style={{ border: "1px solid #e2e8f0", background: "#fff", borderRadius: "0.3rem", cursor: index <= 0 ? "default" : "pointer", opacity: index <= 0 ? 0.4 : 1 }}>
+                              <RiArrowUpSLine size={14} />
+                            </button>
+                            <button type="button" aria-label={`Move ${link.label} down`} disabled={index < 0 || index >= ids.length - 1} onClick={() => setFormData((prev) => {
+                              const current = [...(prev.heroSocialIds || [])];
+                              const at = current.indexOf(link.id);
+                              if (at < 0 || at >= current.length - 1) return prev;
+                              [current[at + 1], current[at]] = [current[at], current[at + 1]];
+                              return { ...prev, heroSocialIds: current };
+                            })} style={{ border: "1px solid #e2e8f0", background: "#fff", borderRadius: "0.3rem", cursor: "pointer", opacity: index >= ids.length - 1 ? 0.4 : 1 }}>
+                              <RiArrowDownSLine size={14} />
+                            </button>
+                          </span>
+                        ) : null}
+                      </div>
                     );
                   })}
                 </div>

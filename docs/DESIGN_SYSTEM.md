@@ -2,7 +2,7 @@
 
 Visual and interaction rules for princeparfait.com.
 
-The site should feel clean, premium, modern, professional, and human. Primary visual family: blue.
+The public hero is a light split composition: name and identity on the left, portrait in a blue architectural frame on the right, with a faint grid concentrated near the portrait. Do not add a second decorative hero treatment.
 
 ---
 

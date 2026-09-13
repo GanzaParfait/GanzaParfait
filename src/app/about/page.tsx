@@ -15,9 +15,9 @@ import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "About Prince Parfait GANZA | Software Engineer in Rwanda",
+  title: "About Prince Parfait GANZA | Founder, Entrepreneur & Technologist",
   description:
-    "Background, education, and working principles of Prince Parfait GANZA, a founder and software engineer based in Kigali and founder of LERONY Ltd.",
+    "The founder story of Prince Parfait GANZA: leading Lerony from Kigali, building technology, products and ventures, with software engineering as evidence rather than the ceiling.",
   path: "/about",
   ogType: "profile",
   absoluteTitle: true,
@@ -56,7 +56,7 @@ export default function AboutPage() {
         data={buildGraph([
           buildProfilePageJsonLd({
             path: "/about",
-            name: "About Prince Parfait GANZA | Software Engineer in Rwanda",
+            name: "About Prince Parfait GANZA | Founder, Entrepreneur & Technologist",
             description: metadata.description as string,
           }),
           buildBreadcrumbListJsonLd(breadcrumbItems, "/about"),
@@ -64,22 +64,17 @@ export default function AboutPage() {
       />
       <Breadcrumbs items={breadcrumbItems} />
 
-      <section className="section pt-8 pb-16 relative overflow-hidden" aria-label="About header">
-        <div className="container relative z-10">
-          <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <AnimatedSection>
-                <p className="section-label">About</p>
-                <h1 className="theme-heading mb-5">
-                  Building from Kigali,
-                  <br />
-                  <span style={{ color: "var(--color-primary)" }}>for organizations that need systems.</span>
-                </h1>
-                <p className="theme-copy leading-relaxed mb-6 text-lg">
-                  I&apos;m <strong className="theme-heading">{siteConfig.name}</strong>, a Rwandan founder and software engineer. I build full-stack products and integrate AI to solve real-world problems across Africa and beyond.
+      <section className="section page-intro" aria-label="About header">
+        <div className="container page-intro-grid">
+          <div>
+            <p className="section-label">About</p>
+            <h1 className="page-title">Founder, entrepreneur, and the person who builds the system.</h1>
+            <p className="theme-copy leading-relaxed mb-6 text-lg">{siteConfig.shortIntro}</p>
+                <p className="theme-copy leading-relaxed mb-6">
+                  Founder names the authority: he leads {siteConfig.company.name} and decides what gets built. Entrepreneur names the form of the work: ideas are turned into ventures with a commercial path, not left as tasks. Technologist names the instrument. Software Engineer and AI Builder name the work that brings projects: the software and AI systems he builds.
                 </p>
                 <ul className="flex flex-wrap gap-2 mb-8" aria-label="Roles and positions">
-                  {siteConfig.positioning.split(" • ").map((role) => (
+                  {siteConfig.positioning.split(/\s*[•·]\s*/).map((role) => (
                     <li
                       key={role}
                       className="text-sm font-semibold"
@@ -139,24 +134,22 @@ export default function AboutPage() {
                     <RiLinkedinFill size={18} />
                   </PublicSocialAnchor>
                 </div>
-              </AnimatedSection>
             </div>
 
             <AnimatedSection delay={160} direction="right">
-              <div className="flex justify-center lg:justify-end">
-                <div className="relative w-72 h-72 rounded-3xl overflow-hidden glass border border-[rgba(14,82,168,0.3)]">
-                  <Image
-                    src="/images/profile/prince-parfait-ganza-kigali-rwanda.webp"
-                    alt="Prince Parfait GANZA"
-                    fill
-                    sizes="288px"
-                    className="object-cover object-top"
-                  />
-                </div>
-              </div>
+              <figure className="portrait-frame">
+                <Image
+                  src="/images/profile/prince-parfait-ganza-kigali-rwanda.webp"
+                  alt="Prince Parfait GANZA"
+                  width={1024}
+                  height={919}
+                  sizes="(max-width: 900px) 100vw, 28rem"
+                  priority
+                />
+                <figcaption>Prince Parfait GANZA</figcaption>
+              </figure>
             </AnimatedSection>
           </div>
-        </div>
       </section>
 
       <section className="section" aria-label="Education" style={{ background: "var(--color-bg-2)" }}>

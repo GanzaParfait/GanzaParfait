@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { SiteSettings } from "@/lib/supabase";
-import { heroHighlights, heroImageFor, setting } from "@/lib/hero";
+import { heroHighlights, heroImageFor, heroRoles, setting } from "@/lib/hero";
 import { socialIcon, heroSocialsFor } from "@/lib/socials";
 
 export default function FullCenteredHero({
@@ -12,8 +12,7 @@ export default function FullCenteredHero({
   settings: SiteSettings;
   isPreview?: boolean;
 }) {
-  const roles = setting(settings, "siteSubtitle").split(" • ").filter(Boolean);
-  const primaryRole = roles[0] || "Founder";
+  const roles = heroRoles(settings);
   const image = heroImageFor(settings, "full_centered_floating");
   const name = setting(settings, "siteTitle");
   const email = setting(settings, "contactEmail");
@@ -49,7 +48,11 @@ export default function FullCenteredHero({
       <div className="hero-centered-info">
         <div className="hero-centered-left">
           <div className="hero-centered-pill">
-            <p className="hero-centered-pill-title">{primaryRole}</p>
+            <ul className="hero-role-list">
+              {roles.map((role) => (
+                <li key={role}>{role}</li>
+              ))}
+            </ul>
             <p className="hero-centered-pill-sub">Based in {location}</p>
           </div>
           <div className="hero-centered-pill">
@@ -67,8 +70,9 @@ export default function FullCenteredHero({
                   href={social.url}
                   target="_blank"
                   rel="noopener noreferrer"
+                  data-tip={social.label}
                   aria-label={social.label}
-                  className="hero-centered-social"
+                  className="hero-centered-social social-tip"
                 >
                   <Icon size={18} />
                 </a>

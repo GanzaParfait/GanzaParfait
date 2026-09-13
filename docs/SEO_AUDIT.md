@@ -1,8 +1,10 @@
 # SEO Audit — princeparfait.com
 
-Last verified locally: 28 August 2026  
+Last verified locally: 13 September 2026  
 Canonical host: `https://www.princeparfait.com`  
 Factual source of truth: `docs/PORTFOLIO_CONTEXT.md`
+
+Public identity implemented in this repository: **Founder · Entrepreneur · Technologist · Software Engineer · AI Builder**. The August 2026 production fetch below is historical. It is not the copy this codebase now emits.
 
 This document records what was implemented, what was **verified in the local production build / dev output**, and what is **not solved until production is deployed and re-crawled**.
 
@@ -139,8 +141,13 @@ JSON-LD on the homepage (parsed locally) contained Person, Organization, WebSite
 
 | Page | Title | Description unique? |
 |------|--------|---------------------|
-| Home | Prince Parfait GANZA \| Founder & Software Engineer | Homepage direction from the brief |
-| About | About Prince Parfait GANZA \| Software Engineer in Rwanda | Yes |
+| Home | Prince Parfait GANZA \| Founder, Entrepreneur & Technologist | Implemented identity |
+| About | About Prince Parfait GANZA \| Founder, Entrepreneur & Technologist | Implemented |
+| Work | Projects & Case Studies \| Prince Parfait GANZA | Yes |
+| Experience | Experience \| Prince Parfait GANZA | Yes |
+| Ventures | Ventures \| Prince Parfait GANZA | Implemented |
+| Capabilities | Capabilities \| Prince Parfait GANZA | Secondary page |
+| Contact | Contact Prince Parfait GANZA | Yes |
 | Work | Projects & Case Studies \| Prince Parfait GANZA | Yes |
 | Experience | Experience \| Prince Parfait GANZA | Yes |
 | Services | Software Development Services \| Prince Parfait GANZA | Yes |

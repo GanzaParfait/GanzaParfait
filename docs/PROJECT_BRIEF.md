@@ -50,7 +50,7 @@ Projects
 
 Case Studies
 
-Services
+Ventures
 
 Blog
 

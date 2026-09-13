@@ -33,7 +33,11 @@ Associated, separate entity:
 
 Do not make princeparfait.com the Organization website for LERONY.
 
-Do not keyword-stuff "PPG" into titles, descriptions, manifests, or JSON-LD.
+Do not keyword-stuff "PPG" into titles, descriptions, or the public interface.
+
+Search engines may still need the abbreviation to resolve to this person. `PPG` appears once, as a Person `alternateName` only. It is not a public brand, not a page title, and not repeated across keywords.
+
+Birth date is not in the verified record. Do not invent `birthDate` in schema.
 
 ---
 
@@ -43,11 +47,12 @@ Unique, natural, not a role list:
 
 | Page | Title |
 |------|--------|
-| Home | Prince Parfait GANZA \| Founder & Software Engineer |
-| About | About Prince Parfait GANZA \| Software Engineer in Rwanda |
+| Home | Prince Parfait GANZA \| Founder, Entrepreneur & Technologist |
+| About | About Prince Parfait GANZA \| Founder, Entrepreneur & Technologist |
 | Work | Projects & Case Studies \| Prince Parfait GANZA |
 | Experience | Experience \| Prince Parfait GANZA |
-| Services | Software Development Services \| Prince Parfait GANZA |
+| Ventures | Ventures \| Prince Parfait GANZA |
+| Capabilities | Capabilities \| Prince Parfait GANZA |
 | Contact | Contact Prince Parfait GANZA |
 
 ---
@@ -86,7 +91,9 @@ FAQ schema is allowed only when the questions are visible on the page.
 
 ## Open Graph
 
-Default image: `/images/og/prince-parfait-ganza.jpg` (1200×630)
+Default image: `/images/og/seo-share-image.jpg` (1200×630).
+
+The artwork is fitted inside that frame so the name, portrait, and corner marks are not cropped. JPEG is the share format because Facebook, LinkedIn, X, WhatsApp, Slack, and iMessage read `og:image`. Declare width, height, and `image/jpeg`.
 
 Portrait: `/images/profile/prince-parfait-ganza-kigali-rwanda.webp`
 

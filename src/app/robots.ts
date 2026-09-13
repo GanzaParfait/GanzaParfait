@@ -7,10 +7,10 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/dashboard/", "/admin/"],
+        disallow: ["/api/", "/dashboard", "/dashboard/", "/admin", "/admin/"],
       },
     ],
-    sitemap: `${CANONICAL_ORIGIN}/sitemap.xml`,
+    sitemap: [`${CANONICAL_ORIGIN}/sitemap.xml`, `${CANONICAL_ORIGIN}/image-sitemap.xml`],
     host: CANONICAL_ORIGIN,
   };
 }

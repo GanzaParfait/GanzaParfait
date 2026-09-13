@@ -173,8 +173,8 @@ export default function Footer() {
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={link.label}
-                      title={link.label}
-                      className="footer-social-icon"
+                      data-tip={link.label}
+                      className="footer-social-icon social-tip"
                     >
                       <Icon size={16} />
                     </a>

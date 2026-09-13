@@ -39,7 +39,8 @@ Prefer:
 | About | `/about` | Person, education, positioning |
 | Work | `/projects` | Evidence of shipped systems |
 | Experience | `/experience` | Roles, timeline, training |
-| Services | `/services` | How organizations can work with him |
+| Ventures | `/ventures` | Lerony, his role, and a link to the company site |
+| Capabilities | `/services` | How engagements work. Not the public identity. |
 | Contact | `/contact` | Clear next step |
 
 ### Secondary

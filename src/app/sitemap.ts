@@ -11,7 +11,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: canonicalUrl("/about"), lastModified: revised, changeFrequency: "monthly", priority: 0.9 },
     { url: canonicalUrl("/projects"), lastModified: revised, changeFrequency: "monthly", priority: 0.9 },
     { url: canonicalUrl("/experience"), lastModified: revised, changeFrequency: "monthly", priority: 0.85 },
-    { url: canonicalUrl("/services"), lastModified: revised, changeFrequency: "monthly", priority: 0.8 },
+    { url: canonicalUrl("/services"), lastModified: revised, changeFrequency: "monthly", priority: 0.6 },
+    { url: canonicalUrl("/ventures"), lastModified: revised, changeFrequency: "monthly", priority: 0.85 },
     { url: canonicalUrl("/contact"), lastModified: revised, changeFrequency: "yearly", priority: 0.7 },
     { url: canonicalUrl("/speaking"), lastModified: revised, changeFrequency: "monthly", priority: 0.5 },
   ];

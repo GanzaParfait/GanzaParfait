@@ -19,7 +19,7 @@ const bingVerification = process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION;
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.princeparfait.com"),
   title: {
-    default: "Prince Parfait GANZA | Founder & Software Engineer",
+    default: "Prince Parfait GANZA | Founder, Entrepreneur & Technologist",
     template: `%s | Prince Parfait GANZA`,
   },
   description: siteConfig.description,
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    title: "Prince Parfait GANZA | Founder & Software Engineer",
+    title: "Prince Parfait GANZA | Founder, Entrepreneur & Technologist",
     description: siteConfig.description,
     siteName: "Prince Parfait GANZA",
     images: [
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
         url: OG_IMAGE_PATH,
         width: 1200,
         height: 630,
-        alt: "Prince Parfait GANZA, founder and software engineer in Kigali, Rwanda",
+        alt: "Prince Parfait GANZA, founder, entrepreneur, technologist and software engineer in Kigali",
         type: "image/jpeg",
       },
     ],
@@ -60,7 +60,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     site: "@prince_parfait1",
     creator: "@prince_parfait1",
-    title: "Prince Parfait GANZA | Founder & Software Engineer",
+    title: "Prince Parfait GANZA | Founder, Entrepreneur & Technologist",
     description: siteConfig.description,
     images: [OG_IMAGE_PATH],
   },

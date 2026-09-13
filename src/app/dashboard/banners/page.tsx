@@ -11,9 +11,11 @@ import {
 import { getLocalSettings, saveLocalSettings, SiteSettings, DEFAULT_SETTINGS, HeroLayoutType } from "@/lib/supabase";
 import {
   HERO_LAYOUTS,
+  carouselLayouts,
   heroHighlights,
   heroImageFor,
   hiddenHeroLayoutOptions,
+  settingsForLayout,
   visibleHeroLayouts,
 } from "@/lib/hero";
 import HeroEditorModal from "@/components/dashboard/HeroEditorModal";
@@ -51,7 +53,7 @@ export default function BannersPage() {
   const visible = visibleHeroLayouts(settings);
   const hidden = hiddenHeroLayoutOptions(settings);
   const liveId = settings.bannerLayout || "split_portrait";
-  const highlights = heroHighlights(settings);
+  const inCarousel = new Set(carouselLayouts(settings));
 
   const openEditor = (id: HeroLayoutType) => {
     setEditingLayout(id);
@@ -105,6 +107,86 @@ export default function BannersPage() {
         </h1>
       </div>
 
+      <section style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "1rem", padding: "1rem 1.1rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap", alignItems: "center" }}>
+          <div>
+            <h2 style={{ fontSize: "0.95rem", fontWeight: 800, color: "#0b192c" }}>Moving carousel</h2>
+            <p style={{ fontSize: "0.78rem", color: "#64748b", marginTop: "0.2rem", maxWidth: "36rem" }}>
+              Rotate the homepage through every visible layout, or only the ones you tick. Each layout keeps its own copy. Hover pauses the motion.
+            </p>
+          </div>
+          <label style={{ display: "flex", alignItems: "center", gap: "0.45rem", fontSize: "0.82rem", fontWeight: 700, color: "#0f172a" }}>
+            <input
+              type="checkbox"
+              checked={Boolean(settings.heroCarouselEnabled)}
+              onChange={(event) => handleSaveSettings({ heroCarouselEnabled: event.target.checked })}
+            />
+            Rotate layouts
+          </label>
+        </div>
+        {settings.heroCarouselEnabled ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "0.9rem" }}>
+            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+              {(["all", "selected"] as const).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => handleSaveSettings({ heroCarouselMode: mode })}
+                  style={{
+                    border: "1px solid #cbd5e1",
+                    borderRadius: "999px",
+                    padding: "0.35rem 0.75rem",
+                    background: (settings.heroCarouselMode || "all") === mode ? "#0e52a8" : "#fff",
+                    color: (settings.heroCarouselMode || "all") === mode ? "#fff" : "#0f172a",
+                    fontWeight: 700,
+                    fontSize: "0.75rem",
+                    cursor: "pointer",
+                  }}
+                >
+                  {mode === "all" ? "All visible layouts" : "Only selected"}
+                </button>
+              ))}
+              <label style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.78rem", color: "#334155", marginLeft: "0.25rem" }}>
+                Every
+                <input
+                  type="number"
+                  min={4}
+                  max={20}
+                  value={settings.heroCarouselInterval || 8}
+                  onChange={(event) => handleSaveSettings({ heroCarouselInterval: Number(event.target.value) || 8 })}
+                  style={{ width: "4rem", padding: "0.3rem 0.45rem", borderRadius: "0.4rem", border: "1px solid #cbd5e1" }}
+                />
+                seconds
+              </label>
+            </div>
+            {settings.heroCarouselMode === "selected" ? (
+              <div style={{ display: "flex", gap: "0.85rem", flexWrap: "wrap" }}>
+                {HERO_LAYOUTS.map((layout) => {
+                  const selected = (settings.heroCarouselLayouts || []).includes(layout.id);
+                  return (
+                    <label key={layout.id} style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.8rem", color: "#334155" }}>
+                      <input
+                        type="checkbox"
+                        checked={selected}
+                        onChange={() => {
+                          const current = settings.heroCarouselLayouts || [];
+                          handleSaveSettings({
+                            heroCarouselLayouts: selected
+                              ? current.filter((id) => id !== layout.id)
+                              : [...current, layout.id],
+                          });
+                        }}
+                      />
+                      {layout.name}
+                    </label>
+                  );
+                })}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+      </section>
+
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem", flexWrap: "wrap" }}>
         <div style={{ display: "inline-flex", background: "#f1f5f9", borderRadius: "0.7rem", padding: "0.22rem" }}>
           <span style={{
@@ -140,6 +222,7 @@ export default function BannersPage() {
         {visible.map((layout) => {
           const isActive = liveId === layout.id;
           const image = heroImageFor(settings, layout.id);
+          const highlights = heroHighlights(settingsForLayout(settings, layout.id));
           return (
             <article
               key={layout.id}
@@ -170,6 +253,11 @@ export default function BannersPage() {
                     {isActive && (
                       <span style={{ fontSize: "0.62rem", fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase", color: "#0e52a8", background: "#eff6ff", padding: "0.15rem 0.4rem", borderRadius: "999px" }}>
                         Live
+                      </span>
+                    )}
+                    {inCarousel.has(layout.id) && (
+                      <span style={{ fontSize: "0.62rem", fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase", color: "#0f172a", background: "#e2e8f0", padding: "0.15rem 0.4rem", borderRadius: "999px" }}>
+                        Carousel
                       </span>
                     )}
                   </div>

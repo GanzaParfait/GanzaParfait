@@ -4,26 +4,37 @@
 // Do not invent clients, results, titles, dates, or testimonials.
 // ============================================================
 
+export const identity = {
+  roleLine: "Founder · Entrepreneur · Technologist · Software Engineer · AI Builder",
+  positioning:
+    "Building technology, products and ventures that turn ambitious ideas into real-world impact.",
+  pageTitle: "Prince Parfait GANZA | Founder, Entrepreneur & Technologist",
+  description:
+    "Prince Parfait GANZA is a Rwandan founder, entrepreneur and technologist, and a software engineer and AI builder, based in Kigali.",
+  shortBio:
+    "Prince Parfait GANZA is a Rwandan founder, entrepreneur and technologist based in Kigali. He leads Lerony and works across technology, digital products and ventures that help organizations and ambitious ideas become reliable real-world solutions. His background combines software engineering, product delivery, data systems, client collaboration and technical training.",
+  compactBio:
+    "Rwandan founder, entrepreneur and technologist building technology, products and ventures from Kigali.",
+} as const;
+
 export const siteConfig = {
   name: "Prince Parfait GANZA",
-  title:
-    "Prince Parfait GANZA — Founder • Software Engineer • AI Builder • Speaker • Entrepreneur",
-  description:
-    "Prince Parfait GANZA is a Rwandan founder and software engineer based in Kigali, building practical digital products and software systems for organizations and businesses.",
-  tagline: "Building software that creates impact across Africa and beyond.",
-  positioning: "Founder • Software Engineer • AI Builder • Speaker • Entrepreneur",
-  shortIntro:
-    "Prince Parfait GANZA is a Rwandan founder and software engineer based in Kigali, building practical digital products and software systems for organizations and businesses.",
+  title: identity.pageTitle,
+  description: identity.description,
+  tagline: identity.positioning,
+  positioning: identity.roleLine,
+  shortIntro: identity.shortBio,
+  compactIntro: identity.compactBio,
   url: "https://www.princeparfait.com",
   ogImage: "/images/og/seo-share-image.jpg",
   locale: "en_US",
   keywords: [
     "Prince Parfait GANZA",
     "Prince Parfait Ganza",
-    "Software Engineer Rwanda",
+    "Founder Entrepreneur Technologist",
     "Founder LERONY Ltd",
-    "Full Stack Developer Kigali",
     "Technology entrepreneur Rwanda",
+    "Software Engineer Rwanda",
     "princeparfait.com",
   ],
   social: {
@@ -46,7 +57,7 @@ export const siteConfig = {
   company: {
     name: "LERONY Ltd",
     url: "https://lerony.com",
-    role: "Founder",
+    role: "Founder & CEO",
     established: "2025",
     location: "Kigali, Rwanda",
     summary:
@@ -58,7 +69,7 @@ export const primaryNav = [
   { href: "/about", label: "About" },
   { href: "/projects", label: "Work" },
   { href: "/experience", label: "Experience" },
-  { href: "/services", label: "Services" },
+  { href: "/ventures", label: "Ventures" },
   { href: "/contact", label: "Contact" },
 ] as const;
 
@@ -75,7 +86,8 @@ export const footerNav = [
   {
     label: "Work with me",
     links: [
-      { label: "Services", href: "/services" },
+      { label: "Ventures", href: "/ventures" },
+      { label: "Capabilities", href: "/services" },
       { label: "Speaking", href: "/speaking" },
       { label: "Insights", href: "/blog" },
       { label: "Contact", href: "/contact" },
@@ -133,7 +145,7 @@ export const projects: Project[] = [
       "Organizations need production digital systems that match real operational workflows.",
     whatIBuilt:
       "Founded LERONY Ltd as a Rwanda-based technology and innovation company.",
-    myRole: "Founder",
+    myRole: "Founder & CEO",
     outcome:
       "LERONY Ltd operates as the commercial vehicle for software, systems, and consulting work.",
     technologies: ["Next.js", "TypeScript", "React", "Node.js", "Supabase"],
@@ -351,10 +363,10 @@ export type TimelineItem = {
 export const timeline: TimelineItem[] = [
   {
     year: "2025–Present",
-    title: "Founder",
+    title: "Founder & CEO",
     organization: "LERONY Ltd",
     description:
-      "Founded a Kigali-based technology and innovation company building digital solutions for organizations and businesses.",
+      "Founded and leads a Kigali-based technology and innovation company that turns organizational problems into digital products and working systems.",
     type: "work",
   },
   {
@@ -398,11 +410,11 @@ export const experience: ExperienceItem[] = [
   {
     id: "lerony",
     organization: "LERONY Ltd",
-    role: "Founder",
+    role: "Founder & CEO",
     period: "2025–Present",
     location: "Kigali, Rwanda",
     summary:
-      "Founder of a technology and innovation company building custom software, digital systems, and practical AI-enabled solutions.",
+      "Founder and CEO of a technology and innovation company. The role is leadership of the venture: direction, delivery, and turning organizational problems into products and systems that can be operated.",
     highlights: [
       "Custom software and web platforms",
       "Enterprise and business systems",

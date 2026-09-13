@@ -174,7 +174,7 @@ export default function Navbar() {
             )}
           </div>
         )}
-        <div style={{ padding: isPill ? "0.3rem 0.4rem 0" : 0 }}>
+        <div style={{ padding: isPill ? "0.45rem clamp(1.1rem, 3vw, 2.75rem) 0" : 0 }}>
         <div
           style={{
             background: pillBg,
@@ -193,7 +193,7 @@ export default function Navbar() {
             className={isPill ? undefined : "container"}
           style={{
             minHeight: isPill ? "3.55rem" : "3.75rem",
-            padding: isPill ? "0.3rem 0.75rem" : "0.45rem 0",
+            padding: isPill ? "0.35rem 1rem" : "0.45rem 0",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -252,7 +252,7 @@ export default function Navbar() {
               {primarySocials.map((link) => {
                 const Icon = socialIcon(link.platform);
                 return (
-                <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" aria-label={link.label} title={link.label} className="nav-social-icon navbar-social-link">
+                <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" aria-label={link.label} data-tip={link.label} data-tip-place="below" className="nav-social-icon navbar-social-link social-tip">
                   <Icon size={15} />
                 </a>
                 );
@@ -466,7 +466,9 @@ export default function Navbar() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={link.label}
-                className="footer-social-icon"
+                data-tip={link.label}
+                data-tip-place="below"
+                className="footer-social-icon social-tip"
               >
                 <Icon size={16} />
               </a>

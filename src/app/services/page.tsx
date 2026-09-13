@@ -19,10 +19,10 @@ const SERVICE_ICONS: Record<string, ElementType> = {
 };
 
 const PAGE_DESCRIPTION =
-  "Software engineering, full-stack development, business systems, and practical AI integration. Larger commercial work may run through LERONY Ltd.";
+  "Engagements with Prince Parfait GANZA and LERONY Ltd: products, systems, and technology leadership. Capabilities, not the identity.";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Software Development Services | Prince Parfait GANZA",
+  title: "Capabilities | Prince Parfait GANZA",
   description: PAGE_DESCRIPTION,
   path: "/services",
   absoluteTitle: true,
@@ -40,7 +40,7 @@ export default function ServicesPage() {
         data={buildGraph([
           buildWebPageJsonLd({
             path: "/services",
-            name: "Software Development Services | Prince Parfait GANZA",
+            name: "Capabilities | Prince Parfait GANZA",
             description: PAGE_DESCRIPTION,
           }),
           buildBreadcrumbListJsonLd(breadcrumbItems, "/services"),
@@ -51,10 +51,10 @@ export default function ServicesPage() {
       <section className="section pt-8 pb-10" aria-label="Services header">
         <div className="container max-w-4xl">
           <AnimatedSection>
-            <p className="section-label">Services</p>
-            <h1 className="theme-heading mb-4">How we can work.</h1>
+            <p className="section-label">Capabilities</p>
+            <h1 className="theme-heading mb-4">How a serious engagement works.</h1>
             <p className="theme-copy text-lg leading-relaxed max-w-2xl">
-              Capabilities that match shipped work: production software, operational systems, and practical AI inside real workflows. For larger commercial engagements, {siteConfig.company.name} is the appropriate entity.
+              This page explains the work, not the identity. Software engineering, systems, and practical AI are capabilities used to deliver products and ventures. Larger commercial work runs through {siteConfig.company.name}.
             </p>
           </AnimatedSection>
         </div>

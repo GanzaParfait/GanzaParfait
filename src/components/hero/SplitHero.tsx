@@ -22,8 +22,8 @@ export default function SplitHero({
 }) {
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const roles = settings.siteSubtitle
-    ? settings.siteSubtitle.split(" • ")
-    : ["Founder", "Software Engineer", "AI Builder", "Speaker", "Entrepreneur"];
+    ? settings.siteSubtitle.split(/\s*[•·]\s*/).filter(Boolean)
+    : ["Founder", "Entrepreneur", "Technologist"];
   const [currentRoleIndex, setCurrentRoleIndex] = useState(0);
   const [visible, setVisible] = useState(false);
   const displayName = splitDisplayName(setting(settings, "siteTitle"));
@@ -223,9 +223,9 @@ export default function SplitHero({
                     key={link.id}
                     href={link.url}
                     target="_blank" rel="noopener noreferrer"
+                    data-tip={link.label}
                     aria-label={link.label}
-                    title={link.label}
-                    className="social-icon-btn"
+                    className="social-icon-btn social-tip"
                   >
                     <Icon size={17} />
                   </a>

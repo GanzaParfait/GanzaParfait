@@ -64,7 +64,45 @@ export interface SiteSettings {
   heroStat4Value?: string;
   heroStat4Label?: string;
   hiddenHeroLayouts?: HeroLayoutType[];
+  heroLayoutCopy?: Partial<Record<HeroLayoutType, HeroLayoutCopy>>;
+  heroCarouselEnabled?: boolean;
+  heroCarouselMode?: "all" | "selected";
+  heroCarouselLayouts?: HeroLayoutType[];
+  heroCarouselInterval?: number;
+  identityRevision?: number;
 }
+
+export type HeroLayoutCopy = {
+  siteTitle?: string;
+  siteSubtitle?: string;
+  bio?: string;
+  location?: string;
+  contactEmail?: string;
+  heroGreeting?: string;
+  heroAvailableText?: string;
+  heroHeadline?: string;
+  heroInviteLine?: string;
+  heroInviteCtaLabel?: string;
+  heroInviteCtaHref?: string;
+  heroPrimaryCtaLabel?: string;
+  heroPrimaryCtaHref?: string;
+  heroSecondaryCtaLabel?: string;
+  heroSecondaryCtaHref?: string;
+  heroCardLabel?: string;
+  heroCardBody?: string;
+  heroCardCtaLabel?: string;
+  heroCardCtaHref?: string;
+  heroStat1Value?: string;
+  heroStat1Label?: string;
+  heroStat2Value?: string;
+  heroStat2Label?: string;
+  heroStat3Value?: string;
+  heroStat3Label?: string;
+  heroStat4Value?: string;
+  heroStat4Label?: string;
+  heroSocialIds?: string[];
+  heroSocialLimit?: number;
+};
 
 export const DEFAULT_SETTINGS: SiteSettings = {
   bannerLayout: "split_portrait",
@@ -74,13 +112,17 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   heroImageCentered: "/images/profile/hero-centered-portrait.webp",
   heroImageOverlay: "/images/profile/hero-cinematic-overlay.webp",
   siteTitle: "Prince Parfait GANZA",
-  siteSubtitle: "Founder • Software Engineer • AI Builder • Speaker • Entrepreneur",
-  bio: "I build full-stack products and integrate AI to solve real-world problems across Africa and beyond.",
+  siteSubtitle: "Founder · Entrepreneur · Technologist · Software Engineer · AI Builder",
+  bio: "Rwandan founder, entrepreneur and technologist. Software engineer and AI builder working from Kigali.",
+  heroCarouselEnabled: false,
+  heroCarouselMode: "all",
+  heroCarouselLayouts: ["split_portrait", "full_centered_floating", "featured_overlay"],
+  heroCarouselInterval: 8,
   location: "Kigali, Rwanda",
   contactEmail: "hello@princeparfait.com",
   whatsappNumber: "250792054846",
   phoneNumber: "+250 792 054 846",
-  headerSocialLimit: 3,
+  headerSocialLimit: 2,
   socialLinks: DEFAULT_SOCIAL_LINKS,
   heroSocialIds: ["linkedin", "github", "twitter", "instagram"],
   heroSocialLimit: 4,
@@ -95,20 +137,20 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   announcementIsActive: false,
   heroGreeting: "Hi there, I'm",
   heroAvailableText: "Available for new projects",
-  heroHeadline: "Software that creates impact.",
+  heroHeadline: "Building technology, products and ventures that turn ambitious ideas into real-world impact.",
   heroInviteLine: "Do you have a project?",
   heroInviteCtaLabel: "Let’s Talk",
   heroInviteCtaHref: "/contact",
   heroPrimaryCtaLabel: "View selected work",
   heroPrimaryCtaHref: "/projects",
-  heroSecondaryCtaLabel: "Contact",
-  heroSecondaryCtaHref: "/contact",
-  heroCardLabel: "Welcome",
-  heroCardBody: "Full-stack products and AI, built from Kigali for real operational work.",
-  heroCardCtaLabel: "Discover more",
+  heroSecondaryCtaLabel: "About me",
+  heroSecondaryCtaHref: "/about",
+  heroCardLabel: "Founder & CEO",
+  heroCardBody: "LERONY · Kigali",
+  heroCardCtaLabel: "About me",
   heroCardCtaHref: "/about",
-  heroStat1Value: "Founder",
-  heroStat1Label: "LERONY Ltd · 2025",
+  heroStat1Value: "Founder & CEO",
+  heroStat1Label: "LERONY · Kigali",
   heroStat2Value: "Kigali",
   heroStat2Label: "Rwanda",
   heroStat3Value: "2025",
@@ -116,6 +158,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   heroStat4Value: "Speaker",
   heroStat4Label: "Talks & training",
   hiddenHeroLayouts: [],
+  identityRevision: 4,
 };
 
 export interface AnalyticsMetrics {
@@ -194,9 +237,35 @@ export function getLocalSettings(): SiteSettings {
       if (parsed.bannerLayout === "split") parsed.bannerLayout = "split_portrait";
       if (parsed.bannerLayout === "tony_robbins") parsed.bannerLayout = "featured_overlay";
       if (parsed.bannerLayout === "portm") parsed.bannerLayout = "full_centered_floating";
+      if ((parsed.identityRevision ?? 0) < 3) {
+        const oldSubtitle = "Founder • Software Engineer • AI Builder • Speaker • Entrepreneur";
+        const oldBio = "I build full-stack products and integrate AI to solve real-world problems across Africa and beyond.";
+        const oldHeadline = "Software that creates impact.";
+        if (!parsed.siteSubtitle || parsed.siteSubtitle === oldSubtitle) parsed.siteSubtitle = DEFAULT_SETTINGS.siteSubtitle;
+        if (!parsed.bio || parsed.bio === oldBio || parsed.bio === "Rwandan founder, entrepreneur and technologist building technology, products and ventures from Kigali.") {
+          parsed.bio = parsed.bio && parsed.bio !== oldBio ? parsed.bio : DEFAULT_SETTINGS.bio;
+        }
+        if (!parsed.heroHeadline || parsed.heroHeadline === oldHeadline) parsed.heroHeadline = DEFAULT_SETTINGS.heroHeadline;
+        if (!parsed.heroSecondaryCtaLabel || parsed.heroSecondaryCtaLabel === "Contact") {
+          parsed.heroSecondaryCtaLabel = DEFAULT_SETTINGS.heroSecondaryCtaLabel;
+          parsed.heroSecondaryCtaHref = DEFAULT_SETTINGS.heroSecondaryCtaHref;
+        }
+        parsed.identityRevision = 3;
+        localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(parsed));
+      }
       if (parsed.heroStat3Value === "Software Engineer" && parsed.heroStat3Label === "Full-stack & AI") {
         parsed.heroStat3Value = "2025";
         parsed.heroStat3Label = "Company founded";
+      }
+      if ((parsed.identityRevision ?? 0) < 4) {
+        const previousRoles = "Founder · Entrepreneur · Technologist";
+        const previousBio = "Rwandan founder, entrepreneur and technologist building technology, products and ventures from Kigali.";
+        if (!parsed.siteSubtitle || parsed.siteSubtitle === previousRoles) {
+          parsed.siteSubtitle = DEFAULT_SETTINGS.siteSubtitle;
+        }
+        if (!parsed.bio || parsed.bio === previousBio) parsed.bio = DEFAULT_SETTINGS.bio;
+        parsed.identityRevision = 4;
+        localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(parsed));
       }
       if (!parsed.socialLinks?.length) parsed.socialLinks = DEFAULT_SOCIAL_LINKS;
       const hadBlob = SETTINGS_IMAGE_KEYS.some((key) => typeof parsed[key] === "string" && parsed[key].startsWith("blob:"));

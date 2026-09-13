@@ -87,37 +87,43 @@ to make the footer look full.
 
 ## Primary positioning
 
-Founder • Software Engineer • AI Builder • Speaker • Entrepreneur
+Founder · Entrepreneur · Technologist · Software Engineer · AI Builder
+
+Building technology, products and ventures that turn ambitious ideas into real-world impact.
+
+Software Engineer and AI Builder stay visible with that line. That is the work that brings projects. Founder & CEO is used only for LERONY Ltd.
 
 ## Short introduction
 
-Prince Parfait GANZA is a Rwandan founder and software engineer based
-in Kigali, building full-stack products and integrating AI to solve
-real-world problems across Africa and beyond.
+Prince Parfait GANZA is a Rwandan founder, entrepreneur and technologist based
+in Kigali. He leads Lerony and works across technology, digital products and
+ventures that help organizations and ambitious ideas become reliable
+real-world solutions. His background combines software engineering, product
+delivery, data systems, client collaboration and technical training.
 
 ## Expanded positioning
 
-His work spans software engineering, digital transformation,
-business systems, AI-enabled solutions, technology entrepreneurship,
-training, and product development.
+The public identity is founder, entrepreneur, and technologist. Software
+engineering, systems, data, and practical AI sit underneath that identity as
+capabilities and evidence.
 
-He is the Founder of LERONY Ltd, a technology and innovation company
-based in Kigali, Rwanda.
+He is Founder and CEO of LERONY Ltd, a technology and innovation company
+based in Kigali, Rwanda. Public LinkedIn uses Founder & CEO. Use that title
+only for Lerony, not for unrelated work.
 
 ## Positioning Principle
 
 The portfolio should communicate:
 
-BUILD → SOLVE → DELIVER → IMPACT
+PERSON → IDEAS → SYSTEMS → PRODUCTS → IMPACT
 
-Avoid presenting Prince merely as someone who knows programming
-languages.
+Do not present Prince as only a software engineer, freelancer, or service
+provider. Do not present him as an ordinary practitioner whose ceiling is a
+job title. The words have weight:
 
-Present him as someone who uses technology to solve organizational
-and business problems.
-
-Job title on this site: **Founder**, not CEO, unless a later verified
-source explicitly uses CEO.
+- Founder: he leads Lerony and decides what gets built.
+- Entrepreneur: the work is meant to become a venture, not a one-off task.
+- Technologist: software, systems, and practical AI are the instruments.
 
 ---
 
@@ -550,12 +556,13 @@ as packaged services unless verified.
 
 Recommended primary navigation:
 
-- Home
 - About
 - Work
 - Experience
-- Services
+- Ventures
 - Contact
+
+Services remains a secondary page at `/services`.
 
 Potential secondary content:
 

@@ -35,10 +35,11 @@ public/
 │       ├── icon-black.png              # Mark only — light backgrounds
 │       └── icon-white.png              # Mark only — dark backgrounds
 └── images/
-    ├── profile/                         # Profile photos
+    ├── profile/                         # Profile photos. Public split hero uses hero-split-portrait.webp
+
     ├── projects/                        # Project screenshots
     └── blog/                            # Blog post cover images
-```
+``
 
 ---
 

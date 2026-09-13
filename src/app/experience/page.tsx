@@ -9,7 +9,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 
 const PAGE_DESCRIPTION =
-  "Professional roles, training, and education: founder of LERONY Ltd, software work with Caritas Rwanda, PSTA, and AskField, plus data-systems training.";
+  "Professional record for Prince Parfait GANZA: Founder and CEO of LERONY Ltd, with software engineering, client systems, and training kept as evidence.";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Experience | Prince Parfait GANZA",
@@ -42,9 +42,9 @@ export default function ExperiencePage() {
         <div className="container max-w-4xl">
           <AnimatedSection>
             <p className="section-label">Experience</p>
-            <h1 className="theme-heading mb-4">Roles, training, and study.</h1>
+            <h1 className="theme-heading mb-4">The record behind the identity.</h1>
             <p className="theme-copy text-lg leading-relaxed max-w-2xl">
-              Structured records only. Compensation, internal titles beyond what is confirmed, and unverified dates are omitted.
+              Founder and CEO of LERONY Ltd is the lead role. Software engineering, training, and client systems stay here as evidence. Compensation and unverified titles are omitted.
             </p>
           </AnimatedSection>
         </div>

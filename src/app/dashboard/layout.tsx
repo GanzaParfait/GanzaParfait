@@ -41,6 +41,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router = useRouter();
   const pathname = usePathname();
 
+  if (typeof window !== "undefined") {
+    try {
+      if (localStorage.getItem("ppg_admin_auth") === "true") {
+        document.cookie = "ppg_admin_auth=true; path=/; max-age=86400; SameSite=Lax";
+      }
+    } catch {}
+  }
+
   // Navigation & UI States
   const [sidebarOpen, setSidebarOpen] = useState(true);
 

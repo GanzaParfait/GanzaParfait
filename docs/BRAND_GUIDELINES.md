@@ -17,7 +17,13 @@
 
 ## Tagline
 
-> **"Building software that creates impact."**
+> **"Building technology, products and ventures that turn ambitious ideas into real-world impact."**
+
+## Identity
+
+> **Founder · Entrepreneur · Technologist · Software Engineer · AI Builder**
+
+Software engineering remains a capability and an employment record. It is not the public identity.
 
 This tagline should appear on:
 - Homepage hero
@@ -144,13 +150,13 @@ This tagline should appear on:
 
 ### Social Media
 - Profile photo: Consistent across all platforms
-- Bio: "Founder • Software Engineer • AI Builder • Speaker • Entrepreneur. Building software that creates impact. 🇷🇼"
+- Bio: "Founder · Entrepreneur · Technologist · Software Engineer · AI Builder. Building technology, products and ventures that turn ambitious ideas into real-world impact."
 - Use horizontal wordmark for profile banners/covers
 - Use icon variant for profile pictures if no photo is available
 
 ### Email Signature
 ```
 Prince Parfait GANZA
-Founder • Software Engineer • AI Builder
+Founder · Entrepreneur · Technologist · Software Engineer · AI Builder
 hello@princeparfait.com | princeparfait.com
 ```

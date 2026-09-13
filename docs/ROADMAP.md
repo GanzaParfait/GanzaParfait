@@ -9,12 +9,12 @@
 **Goal:** Establish the authoritative digital identity for Prince Parfait GANZA.
 
 ### Completed
-- [x] Homepage with hero, stats, skills, featured projects, blog preview
+- [x] Public identity set to Founder · Entrepreneur · Technologist, with Software Engineer and AI Builder visible
 - [x] About page with timeline, values, and skills by category
 - [x] Projects listing (featured + other)
 - [x] Blog listing with featured posts and category filter
 - [x] Individual blog post pages with JSON-LD schema
-- [x] Services page with offerings and process
+- [x] Ventures page for LERONY Ltd, with Services kept as a secondary capabilities page
 - [x] Speaking page with topics and past engagements
 - [x] Contact page with accessible form
 - [x] Custom 404 page

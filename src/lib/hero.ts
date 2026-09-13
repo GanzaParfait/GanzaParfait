@@ -1,4 +1,4 @@
-import type { HeroLayoutType, SiteSettings } from "@/lib/supabase";
+import type { HeroLayoutCopy, HeroLayoutType, SiteSettings } from "@/lib/supabase";
 import { DEFAULT_SETTINGS } from "@/lib/supabase";
 
 export const HERO_LAYOUTS: {
@@ -11,7 +11,8 @@ export const HERO_LAYOUTS: {
     id: "split_portrait",
     name: "Split Portrait",
     short: "Default",
-    description: "Portrait on the right, introduction on the left. Professional, with identity highlights.",
+    description:
+      "Name, portrait, and copy for the public split hero. Roles stay specific to this layout.",
   },
   {
     id: "full_centered_floating",
@@ -91,16 +92,78 @@ export type HeroEditorField =
   | "stat4"
   | "heroSocials";
 
-export const SHARED_EDITOR_FIELDS: HeroEditorField[] = ["stat1", "stat2", "stat3", "stat4"];
-
 export const LAYOUT_EDITOR_FIELDS: Record<HeroLayoutType, HeroEditorField[]> = {
   split_portrait: ["image", "name", "greeting", "availability", "location", "roles", "bio", "primaryCta", "secondaryCta", "heroSocials"],
-  full_centered_floating: ["image", "name", "roles", "location", "email", "invite", "heroSocials"],
-  featured_overlay: ["image", "availability", "location", "headline", "card", "primaryCta"],
+  full_centered_floating: ["image", "name", "roles", "location", "email", "invite", "heroSocials", "stat1", "stat2", "stat3", "stat4"],
+  featured_overlay: ["image", "availability", "location", "headline", "card", "primaryCta", "stat1", "stat2", "stat3", "stat4"],
 };
 
 export function layoutShows(layout: HeroLayoutType, field: HeroEditorField) {
-  return LAYOUT_EDITOR_FIELDS[layout].includes(field) || SHARED_EDITOR_FIELDS.includes(field);
+  return LAYOUT_EDITOR_FIELDS[layout].includes(field);
+}
+
+export const LAYOUT_COPY_KEYS = [
+  "siteTitle",
+  "siteSubtitle",
+  "bio",
+  "location",
+  "contactEmail",
+  "heroGreeting",
+  "heroAvailableText",
+  "heroHeadline",
+  "heroInviteLine",
+  "heroInviteCtaLabel",
+  "heroInviteCtaHref",
+  "heroPrimaryCtaLabel",
+  "heroPrimaryCtaHref",
+  "heroSecondaryCtaLabel",
+  "heroSecondaryCtaHref",
+  "heroCardLabel",
+  "heroCardBody",
+  "heroCardCtaLabel",
+  "heroCardCtaHref",
+  "heroStat1Value",
+  "heroStat1Label",
+  "heroStat2Value",
+  "heroStat2Label",
+  "heroStat3Value",
+  "heroStat3Label",
+  "heroStat4Value",
+  "heroStat4Label",
+  "heroSocialIds",
+  "heroSocialLimit",
+] as const;
+
+export function layoutCopyFrom(settings: SiteSettings): HeroLayoutCopy {
+  const copy: HeroLayoutCopy = {};
+  for (const key of LAYOUT_COPY_KEYS) {
+    const value = settings[key];
+    if (value !== undefined) copy[key] = value as never;
+  }
+  return copy;
+}
+
+export function settingsForLayout(settings: SiteSettings, layout: HeroLayoutType): SiteSettings {
+  const copy = settings.heroLayoutCopy?.[layout];
+  if (!copy) return { ...settings, bannerLayout: layout };
+  return { ...settings, ...copy, bannerLayout: layout };
+}
+
+export function heroRoles(settings: SiteSettings) {
+  return setting(settings, "siteSubtitle")
+    .split(/\s*[•·]\s*/)
+    .map((role) => role.trim())
+    .filter(Boolean);
+}
+
+export function carouselLayouts(settings: SiteSettings): HeroLayoutType[] {
+  if (!settings.heroCarouselEnabled) return [];
+  const visible = visibleHeroLayouts(settings).map((item) => item.id);
+  if (settings.heroCarouselMode === "selected") {
+    const picked = (settings.heroCarouselLayouts || []).filter((id) => visible.includes(id));
+    return picked;
+  }
+  return visible;
 }
 
 export function visibleHeroLayouts(settings: SiteSettings) {

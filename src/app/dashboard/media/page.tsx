@@ -89,6 +89,7 @@ function uploadWithProgress(files: File[], onProgress: (percent: number) => void
     files.forEach((file) => form.append("files", file));
     const xhr = new XMLHttpRequest();
     xhr.open("POST", "/api/media");
+    xhr.withCredentials = true;
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable) onProgress(Math.max(8, Math.round((event.loaded / event.total) * 90)));
     };
@@ -134,7 +135,7 @@ export default function MediaManagerPage({ onSelect, asModal, pickerMode = "any"
 
   const loadAssets = useCallback(async () => {
     try {
-      const res = await fetch("/api/media", { cache: "no-store" });
+      const res = await fetch("/api/media", { cache: "no-store", credentials: "include" });
       const payload = (await res.json()) as { assets?: MediaAsset[]; error?: string };
       if (!res.ok) throw new Error(payload.error || "Could not load media.");
       setAssets(payload.assets || []);
@@ -201,6 +202,7 @@ export default function MediaManagerPage({ onSelect, asModal, pickerMode = "any"
     try {
       const res = await fetch("/api/media/from-url", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: previewUrl, name: newName.trim(), alt: newAlt.trim() }),
       });
@@ -221,7 +223,7 @@ export default function MediaManagerPage({ onSelect, asModal, pickerMode = "any"
 
   const handleDelete = async (id: string) => {
     try {
-      const res = await fetch(`/api/media/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/media/${id}`, { method: "DELETE", credentials: "include" });
       const payload = (await res.json()) as { error?: string };
       if (!res.ok) throw new Error(payload.error || "Could not delete that asset.");
       setAssets((current) => current.filter((asset) => asset.id !== id));

@@ -30,7 +30,7 @@ export async function GET() {
   <channel>
     <title>Prince Parfait GANZA — Insights</title>
     <link>${siteConfig.url}/blog</link>
-    <description>Writing by Prince Parfait GANZA. Published only when articles exist.</description>
+    <description>Notes by Prince Parfait GANZA, founder, entrepreneur and technologist in Kigali. Published only when articles exist.</description>
     <language>en-us</language>
     <lastBuildDate>${new Date(`${SITE_CONTENT_REVISED}T00:00:00.000Z`).toUTCString()}</lastBuildDate>
     <atom:link href="${siteConfig.url}/feed.xml" rel="self" type="application/rss+xml"/>

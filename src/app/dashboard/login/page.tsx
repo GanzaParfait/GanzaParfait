@@ -32,7 +32,7 @@ export default function AdminLoginPage() {
     if (email.trim().toLowerCase() === "ganzaparfait7@gmail.com" && password === "0000") {
       if (typeof window !== "undefined") {
         localStorage.setItem("ppg_admin_auth", "true");
-        document.cookie = "ppg_admin_auth=true; path=/; max-age=86400";
+        document.cookie = "ppg_admin_auth=true; path=/; max-age=86400; SameSite=Lax";
       }
       setTimeout(() => {
         router.push("/dashboard");

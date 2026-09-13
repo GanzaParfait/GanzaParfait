@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import SubscribeWidget from "@/components/ui/SubscribeWidget";
+import SectionAdvance from "@/components/ui/SectionAdvance";
 import PageViewTracker from "@/components/analytics/PageViewTracker";
 import UtmCapture from "@/components/analytics/UtmCapture";
 
@@ -26,6 +27,7 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
         {children}
       </main>
       <Footer />
+      <SectionAdvance />
       <SubscribeWidget />
       <Suspense fallback={null}>
         <UtmCapture />

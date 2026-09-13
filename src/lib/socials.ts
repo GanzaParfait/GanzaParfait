@@ -64,11 +64,11 @@ export const SOCIAL_PLATFORM_OPTIONS = [
 ] as const;
 
 export const DEFAULT_SOCIAL_LINKS: SocialLink[] = [
-  { id: "whatsapp", platform: "whatsapp", label: "WhatsApp", url: siteConfig.social.whatsapp, enabled: true, header: true, footer: true, hero: false, contact: true, order: 1 },
-  { id: "linkedin", platform: "linkedin", label: "LinkedIn", url: siteConfig.social.linkedin, enabled: true, header: true, footer: true, hero: true, contact: true, order: 2 },
-  { id: "instagram", platform: "instagram", label: "Instagram", url: siteConfig.social.instagram, enabled: true, header: true, footer: true, hero: true, contact: false, order: 3 },
-  { id: "github", platform: "github", label: "GitHub", url: siteConfig.social.github, enabled: true, header: true, footer: true, hero: true, contact: true, order: 4 },
-  { id: "twitter", platform: "twitter", label: "X / Twitter", url: siteConfig.social.twitter, enabled: true, header: true, footer: true, hero: true, contact: true, order: 5 },
+  { id: "linkedin", platform: "linkedin", label: "LinkedIn", url: siteConfig.social.linkedin, enabled: true, header: true, footer: true, hero: true, contact: true, order: 1 },
+  { id: "github", platform: "github", label: "GitHub", url: siteConfig.social.github, enabled: true, header: true, footer: true, hero: true, contact: true, order: 2 },
+  { id: "whatsapp", platform: "whatsapp", label: "WhatsApp", url: siteConfig.social.whatsapp, enabled: true, header: false, footer: true, hero: false, contact: true, order: 3 },
+  { id: "instagram", platform: "instagram", label: "Instagram", url: siteConfig.social.instagram, enabled: true, header: false, footer: true, hero: false, contact: false, order: 4 },
+  { id: "twitter", platform: "twitter", label: "X / Twitter", url: siteConfig.social.twitter, enabled: true, header: false, footer: true, hero: false, contact: true, order: 5 },
   { id: "youtube", platform: "youtube", label: "YouTube", url: siteConfig.social.youtube, enabled: true, header: false, footer: true, hero: false, contact: false, order: 6 },
   { id: "tiktok", platform: "tiktok", label: "TikTok", url: siteConfig.social.tiktok, enabled: true, header: false, footer: true, hero: false, contact: false, order: 7 },
   { id: "threads", platform: "threads", label: "Threads", url: siteConfig.social.threads, enabled: true, header: false, footer: true, hero: false, contact: false, order: 8 },

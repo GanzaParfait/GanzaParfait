@@ -9,7 +9,7 @@
 
 **Official personal portfolio of Prince Parfait GANZA**
 
-Founder • Software Engineer • AI Builder • Speaker • Entrepreneur
+Founder · Entrepreneur · Technologist
 
 [Website](https://www.princeparfait.com) · [LinkedIn](https://www.linkedin.com/in/prince-parfait-ganza) · [GitHub](https://github.com/GanzaParfait)
 
@@ -19,9 +19,9 @@ Founder • Software Engineer • AI Builder • Speaker • Entrepreneur
 
 ## About
 
-This repository contains the source code for **princeparfait.com**, the official personal website and professional portfolio of **Prince Parfait GANZA**, a Rwandan founder and software engineer based in Kigali.
+This repository contains the source code for **princeparfait.com**, the official personal website of **Prince Parfait GANZA**, a Rwandan founder, entrepreneur and technologist based in Kigali.
 
-The portfolio presents work across software engineering, technology entrepreneurship, AI-enabled solutions, digital systems, training, and product development.
+The site presents him as a founder and leader whose technical skill supports a wider identity: technology, products, and ventures. Software engineering remains evidence, not the ceiling.
 
 It is designed to serve as the central source for professional identity, projects, experience, achievements, services, and public work.
 
@@ -39,7 +39,7 @@ The website is built to:
 
 ## Core Positioning
 
-> **Founder • Software Engineer • AI Builder • Speaker • Entrepreneur**
+> **Founder · Entrepreneur · Technologist**
 
 Prince builds full-stack products and integrates AI to solve real-world problems across Africa and beyond.
 
@@ -67,7 +67,7 @@ The website includes or is being developed around:
 - Experience
 - Work
 - Case Studies
-- Services
+- Ventures
 - Skills & Technologies
 - Education
 - Speaking & Training
@@ -140,7 +140,7 @@ The visual identity should remain clean, modern, professional, technology-orient
 
 <div align="center">
 
-Building software that creates impact across Africa and beyond.
+Building technology, products and ventures that turn ambitious ideas into real-world impact.
 
 © Prince Parfait GANZA
 

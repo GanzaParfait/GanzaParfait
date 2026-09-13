@@ -69,7 +69,7 @@ export default function SubscribeWidget() {
       style={{
         position: "fixed",
         bottom: "1.5rem",
-        right: "1.5rem",
+        left: "1.5rem",
         zIndex: 9999,
         background: "var(--color-surface)",
         border: "1px solid var(--color-border)",
@@ -131,7 +131,7 @@ export default function SubscribeWidget() {
             </h4>
           </div>
           <p style={{ fontSize: "0.875rem", color: "var(--color-text-2)", marginBottom: "1.25rem", lineHeight: 1.5 }}>
-            Subscribe to my newsletter to get the latest insights on AI and Software Engineering.
+            Notes from a founder, entrepreneur and technologist — published only when there is something worth saying.
           </p>
           
           <div style={{ position: "relative" }}>

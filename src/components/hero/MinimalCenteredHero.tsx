@@ -25,7 +25,7 @@ const primarySocials = [
 export default function MinimalCenteredHero({ settings }: { settings: SiteSettings }) {
   const roles = settings.siteSubtitle
     ? settings.siteSubtitle.split(" • ")
-    : ["Founder", "Software Engineer", "AI Builder", "Speaker", "Entrepreneur"];
+    : ["Founder · Entrepreneur · Technologist"];
   const [currentRoleIndex, setCurrentRoleIndex] = useState(0);
   const [visible, setVisible] = useState(false);
 

@@ -5,6 +5,8 @@ import {
   RiSaveLine,
   RiAddLine,
   RiDeleteBinLine,
+  RiArrowUpSLine,
+  RiArrowDownSLine,
   RiImageAddLine,
   RiUser3Line,
   RiPhoneLine,
@@ -117,6 +119,16 @@ export default function SettingsPage() {
     patch({ socialLinks: socials.filter((link) => link.id !== id) });
   };
 
+  const moveSocial = (id: string, direction: -1 | 1) => {
+    const ordered = [...socials].sort((a, b) => a.order - b.order);
+    const index = ordered.findIndex((link) => link.id === id);
+    const next = index + direction;
+    if (index < 0 || next < 0 || next >= ordered.length) return;
+    const swapped = [...ordered];
+    [swapped[index], swapped[next]] = [swapped[next], swapped[index]];
+    patch({ socialLinks: swapped.map((link, order) => ({ ...link, order: order + 1 })) });
+  };
+
   const imageFieldValue = (value?: string) => (value && isBlobUrl(value) ? "" : value || "");
 
   return (
@@ -178,8 +190,9 @@ export default function SettingsPage() {
               <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>Location
                 <input style={{ ...inputStyle, marginTop: "0.3rem" }} value={settings.location} onChange={(e) => patch({ location: e.target.value })} />
               </label>
-              <label style={{ gridColumn: "1 / -1", fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>Roles (separated by •)
+              <label style={{ gridColumn: "1 / -1", fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>Roles (separated by ·)
                 <input style={{ ...inputStyle, marginTop: "0.3rem" }} value={settings.siteSubtitle} onChange={(e) => patch({ siteSubtitle: e.target.value })} />
+                <span style={{ display: "block", fontWeight: 500, color: "#94a3b8", marginTop: "0.3rem" }}>Used until a hero layout is saved with its own roles. After that, that layout keeps its own line.</span>
               </label>
               <label style={{ gridColumn: "1 / -1", fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>Bio
                 <textarea rows={4} style={{ ...inputStyle, marginTop: "0.3rem", resize: "vertical" }} value={settings.bio} onChange={(e) => patch({ bio: e.target.value })} />
@@ -204,7 +217,7 @@ export default function SettingsPage() {
           {view === "socials" && (
             <div>
               <p style={{ fontSize: "0.75rem", color: "#64748b", marginBottom: "0.75rem" }}>
-                Header and footer use these links. Homepage banner icons are chosen in Hero layouts, so they are not duplicated here.
+                Use the arrows to set the order shown on the site. Hovering an icon shows its name. Homepage banner icons are chosen inside each hero layout.
               </p>
               <p style={{ fontSize: "0.75rem", color: "#64748b", marginBottom: "0.75rem" }}>Header shows this many before the overflow menu:</p>
               <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap", marginBottom: "1rem" }}>
@@ -229,9 +242,17 @@ export default function SettingsPage() {
                 ))}
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem" }}>
-                {socials.map((link) => (
+                {socials.map((link, index) => (
                   <div key={link.id} style={{ border: "1px solid #e2e8f0", borderRadius: "0.65rem", padding: "0.75rem", background: link.enabled ? "#fff" : "#f8fafc" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "8rem 1fr 1.6fr auto", gap: "0.5rem", alignItems: "center" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "auto 8rem 1fr 1.6fr auto", gap: "0.5rem", alignItems: "center" }}>
+                      <span style={{ display: "flex", flexDirection: "column" }}>
+                        <button type="button" aria-label={`Move ${link.label} up`} disabled={index === 0} onClick={() => moveSocial(link.id, -1)} style={{ border: "none", background: "none", cursor: index === 0 ? "default" : "pointer", color: "#64748b", opacity: index === 0 ? 0.35 : 1 }}>
+                          <RiArrowUpSLine size={16} />
+                        </button>
+                        <button type="button" aria-label={`Move ${link.label} down`} disabled={index === socials.length - 1} onClick={() => moveSocial(link.id, 1)} style={{ border: "none", background: "none", cursor: index === socials.length - 1 ? "default" : "pointer", color: "#64748b", opacity: index === socials.length - 1 ? 0.35 : 1 }}>
+                          <RiArrowDownSLine size={16} />
+                        </button>
+                      </span>
                       <select value={link.platform} onChange={(e) => updateSocial(link.id, { platform: e.target.value })} style={inputStyle}>
                         {SOCIAL_PLATFORM_OPTIONS.map((option) => (
                           <option key={option.id} value={option.id}>{option.label}</option>

@@ -46,7 +46,8 @@ Do not copy the factual biography into this file. `docs/PORTFOLIO_CONTEXT.md` is
 ## Implementation Rules
 
 - Read `docs/PORTFOLIO_CONTEXT.md` before content-heavy changes.
-- Keep primary navigation focused: Home, About, Work, Experience, Services, Contact. Insights belongs in the footer until verified articles exist.
+- Keep primary navigation focused: About, Work, Experience, Ventures, Contact. Services remains a secondary page. Insights belongs in the footer until verified articles exist.
+- New SQL migrations go in `supabase/migrations/<YYYY-MM-DD_HHMMSS>/<name>.sql`. Do not add flat files beside that folder.
 - Every public section must have meaningful, verified content.
 - Homepage copy must answer who, what, where, proof, and action within about 10 seconds.
 - Motion must be restrained and respect `prefers-reduced-motion`.
