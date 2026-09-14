@@ -31,6 +31,9 @@ export default function ProjectCard({ project, featured = false }: ProjectCardPr
       className={`card group relative flex flex-col h-full ${featured ? "p-7" : "p-6"}`}
       aria-label={`Project: ${project.title}`}
     >
+      {project.image && !project.image.includes("placeholder") ? (
+        <img src={project.image} alt="" loading="lazy" decoding="async" className="case-shot mb-4 rounded-xl border border-[var(--color-border)]" />
+      ) : null}
       {/* Status + Category */}
       <div className="flex items-center justify-between mb-4">
         <span className={`badge ${status.className}`}>{status.label}</span>

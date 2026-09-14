@@ -34,6 +34,7 @@ import {
   socialsFor,
 } from "@/lib/socials";
 import MediaManagerModal from "@/components/dashboard/MediaManagerModal";
+import AnnouncementEditor from "@/components/dashboard/AnnouncementEditor";
 import { FooterCompanyBand } from "@/components/layout/Footer";
 import { footerNav } from "@/data/site-data";
 import { setting } from "@/lib/hero";
@@ -57,7 +58,7 @@ const VIEWS: { id: SettingsView; label: string; hint: string; icon: typeof RiUse
   { id: "socials", label: "Social links", hint: "Where each link appears", icon: RiShareLine },
   { id: "navbar", label: "Public navbar", hint: "Pill or full width", icon: RiLayoutTopLine },
   { id: "footer", label: "Footer", hint: "Company image and layout", icon: RiImageLine },
-  { id: "announcement", label: "Announcement", hint: "Optional top bar", icon: RiMegaphoneLine },
+  { id: "announcement", label: "Announcement", hint: "Bar, sheet, and preview", icon: RiMegaphoneLine },
 ];
 
 function isBlobUrl(url: string) {
@@ -421,16 +422,7 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {view === "announcement" && (
-            <div style={{ display: "grid", gap: "0.75rem", maxWidth: "40rem" }}>
-              <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", fontWeight: 600, color: "#334155" }}>
-                <input type="checkbox" checked={settings.announcementIsActive || false} onChange={(e) => patch({ announcementIsActive: e.target.checked })} />
-                Show announcement banner
-              </label>
-              <input style={inputStyle} value={settings.announcementText || ""} onChange={(e) => patch({ announcementText: e.target.value })} placeholder="Announcement text" />
-              <input style={inputStyle} value={settings.announcementLink || ""} onChange={(e) => patch({ announcementLink: e.target.value })} placeholder="/projects" />
-            </div>
-          )}
+          {view === "announcement" && <AnnouncementEditor settings={settings} patch={patch} />}
         </div>
       </div>
 

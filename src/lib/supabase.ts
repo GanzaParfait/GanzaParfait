@@ -1,5 +1,17 @@
 import { createClient } from "@supabase/supabase-js";
 import { DEFAULT_SOCIAL_LINKS, type SocialLink } from "@/lib/socials";
+import type { HomepageContent } from "@/lib/homepage";
+import type { Project } from "@/data/site-data";
+
+export type AnnouncementMedia = {
+  id: string;
+  type: "image" | "video" | "document";
+  url: string;
+  poster?: string;
+  name?: string;
+};
+
+export type ProjectRecord = Project;
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://inykhcxyvzrxiysazhzq.supabase.co";
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlueWtoY3h5dnpyeGl5c2F6aHpxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwNzI1NTEsImV4cCI6MjA5MzY0ODU1MX0.VuNYC8EKmg-eXyOvchi_Fuj1YHCbVHq6do5EwEqa8Ts";
@@ -41,7 +53,24 @@ export interface SiteSettings {
   bookingCalendarUrl?: string;
   announcementText?: string;
   announcementLink?: string;
+  announcementCtaLabel?: string;
+  announcementImage?: string;
+  announcementDetail?: string;
   announcementIsActive?: boolean;
+  announcementEyebrow?: string;
+  announcementHeadline?: string;
+  announcementDate?: string;
+  announcementTime?: string;
+  announcementPlace?: string;
+  announcementLayout?: "side" | "stack";
+  announcementMedia?: AnnouncementMedia[];
+  announcementSecondaryLabel?: string;
+  announcementSecondaryHref?: string;
+  announcementShare?: boolean;
+  announcementClosing?: string;
+  announcementInterval?: number;
+  homepage?: HomepageContent;
+  projectRecords?: ProjectRecord[];
   heroGreeting?: string;
   heroAvailableText?: string;
   heroHeadline?: string;

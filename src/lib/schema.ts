@@ -246,7 +246,7 @@ export function buildCreativeWorkJsonLd(project: Project) {
     [roleProperty]: personRef(),
     isPartOf: websiteRef(),
     keywords: project.technologies.join(", "),
-    image: absoluteAssetUrl(project.image || OG_IMAGE_PATH),
+    image: (project.screenshots?.length ? project.screenshots : [project.image || OG_IMAGE_PATH]).map((src) => absoluteAssetUrl(src)),
     ...(project.links.live ? { sameAs: project.links.live } : {}),
   };
 }

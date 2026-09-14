@@ -1,3 +1,4 @@
+import { projects } from "@/data/site-data";
 import { OG_IMAGE_PATH, PORTRAIT_PATH, absoluteAssetUrl, canonicalUrl } from "@/lib/schema";
 
 const images = [
@@ -13,7 +14,21 @@ const images = [
     title: "Prince Parfait GANZA",
     caption: "Portrait of Prince Parfait GANZA",
   },
+  ...projects.flatMap((project) =>
+    (project.screenshots || (project.image ? [project.image] : []))
+      .filter((src) => src && !src.includes("placeholder"))
+      .map((src) => ({
+        page: canonicalUrl(`/projects/${project.id}`),
+        loc: absoluteAssetUrl(src),
+        title: project.title,
+        caption: `${project.title}. ${project.description}`,
+      })),
+  ),
 ];
+
+function xml(value: string) {
+  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
 
 export function GET() {
   const body = `<?xml version="1.0" encoding="UTF-8"?>
@@ -21,11 +36,11 @@ export function GET() {
 ${images
   .map(
     (image) => `  <url>
-    <loc>${image.page}</loc>
+    <loc>${xml(image.page)}</loc>
     <image:image>
-      <image:loc>${image.loc}</image:loc>
-      <image:title>${image.title}</image:title>
-      <image:caption>${image.caption}</image:caption>
+      <image:loc>${xml(image.loc)}</image:loc>
+      <image:title>${xml(image.title)}</image:title>
+      <image:caption>${xml(image.caption)}</image:caption>
     </image:image>
   </url>`
   )

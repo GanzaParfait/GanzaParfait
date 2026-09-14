@@ -21,7 +21,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     url: canonicalUrl(`/projects/${project.id}`),
     lastModified: revised,
     changeFrequency: "monthly" as const,
-    priority: 0.7,
+    priority: project.featured ? 0.8 : 0.7,
   }));
 
   const articleRoutes: MetadataRoute.Sitemap = blogPosts.map((post) => ({

@@ -16,6 +16,7 @@ import {
   RiMenuUnfoldLine,
   RiImageLine,
   RiSearchLine,
+  RiHome5Line,
 } from "react-icons/ri";
 
 import {
@@ -303,6 +304,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               { id: "blogs", path: "/dashboard/blogs", label: "Blog Articles", icon: RiBookOpenLine },
               { id: "projects", path: "/dashboard/projects", label: "Projects", icon: RiFolderLine },
               { id: "media", path: "/dashboard/media", label: "Media Library", icon: RiImageLine },
+              { id: "homepage", path: "/dashboard/homepage", label: "Homepage", icon: RiHome5Line },
               { id: "settings", path: "/dashboard/settings", label: "Site Settings", icon: RiSettings4Line },
             ].map((tab) => {
               const Icon = tab.icon;
@@ -394,7 +396,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         onClose={() => setIsProjectModalOpen(false)}
         project={editingProject}
         onSave={(proj) => { /* Only for search edit */ }}
-        onOpenMedia={() => triggerMediaPicker((url) => setEditingProject((prev) => (prev ? { ...prev, image: url } : null)))}
+        onPickMedia={(apply) => triggerMediaPicker(apply)}
       />
 
       <BlogEditorModal

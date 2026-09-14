@@ -11,11 +11,31 @@ import {
   RiLightbulbFlashLine,
   RiFocus2Line,
 } from "react-icons/ri";
+import { RiPlayFill } from "react-icons/ri";
+import { useState } from "react";
 import { Project, projects as defaultProjects } from "@/data/site-data";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import ShareActions from "@/components/ui/ShareActions";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+
+function PosterVideo({ src, poster, title }: { src: string; poster?: string; title: string }) {
+  const [ready, setReady] = useState(false);
+  if (!ready) {
+    return (
+      <button type="button" className="poster-video" onClick={() => setReady(true)} aria-label={`Play ${title}`}>
+        {poster ? <img src={poster} alt="" /> : <span className="announcement-video-fallback" style={{ minHeight: "16rem" }} />}
+        <span><RiPlayFill size={26} /></span>
+      </button>
+    );
+  }
+  return <video src={src} poster={poster} controls autoPlay preload="metadata" playsInline style={{ width: "100%", borderRadius: "1rem" }} />;
+}
 
 export default function ProjectCaseStudyClient({ project }: { project: Project }) {
+  const settings = useSiteSettings();
+  const saved = settings.projectRecords?.find((item) => item.id === project.id);
+  const live = saved ? { ...project, ...saved, title: saved.title || project.title, description: saved.description || project.description } : project;
+  project = live;
   return (
     <article className="min-h-screen bg-[var(--color-bg)] pt-8 pb-20">
       <div className="container max-w-4xl">
@@ -69,12 +89,15 @@ export default function ProjectCaseStudyClient({ project }: { project: Project }
         </AnimatedSection>
 
         {project.image && project.image !== "/images/projects/project-placeholder.png" && (
-          <AnimatedSection delay={100} className="mb-16 mt-10">
-            <div className="w-full aspect-[16/9] md:aspect-[21/9] relative rounded-3xl overflow-hidden border border-[var(--color-border)] shadow-2xl">
-              <img src={project.image} alt={project.title} className="w-full h-full object-cover" />
-            </div>
+          <AnimatedSection delay={100} className="mb-8 mt-10">
+            <img src={project.image} alt={`${project.title} interface`} className="case-shot rounded-3xl border border-[var(--color-border)]" />
           </AnimatedSection>
         )}
+        {project.video ? (
+          <div className="mb-8">
+            <PosterVideo src={project.video} poster={project.videoPoster || project.image} title={project.title} />
+          </div>
+        ) : null}
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 mt-12">
           <div className="md:col-span-8 flex flex-col gap-12">

@@ -26,10 +26,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!project) return { title: "Project Not Found", robots: { index: false, follow: true } };
 
   return buildPageMetadata({
-    title: `${project.title} | Case study`,
+    title: `${project.title} | Prince Parfait GANZA`,
     description: project.description,
     path: `/projects/${project.id}`,
     absoluteTitle: true,
+    keywords: [project.title, project.organization || "", "Prince Parfait GANZA", ...project.technologies].filter(Boolean),
+    ogImage: project.image,
+    ogImageAlt: `${project.title} — case study by Prince Parfait GANZA`,
   });
 }
 

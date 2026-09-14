@@ -121,6 +121,9 @@ export type Project = {
     case_study?: string;
   };
   image?: string;
+  video?: string;
+  videoPoster?: string;
+  documents?: string[];
   year?: number;
   period?: string;
   contribution?: "creator" | "contributor";
@@ -180,6 +183,8 @@ export const projects: Project[] = [
     category: "systems",
     status: "live",
     featured: true,
+    image: "/images/projects/caritas-systems.webp",
+    screenshots: ["/images/projects/caritas-systems.webp"],
     links: {},
   },
   {
@@ -204,6 +209,8 @@ export const projects: Project[] = [
     category: "systems",
     status: "live",
     featured: true,
+    image: "/images/projects/stockpro.webp",
+    screenshots: ["/images/projects/stockpro.webp"],
     links: {},
   },
   {
@@ -229,6 +236,8 @@ export const projects: Project[] = [
     status: "live",
     featured: true,
     period: "Associated with 2023–2024 PSTA work",
+    image: "/images/projects/psta.webp",
+    screenshots: ["/images/projects/psta.webp"],
     links: {},
   },
   {
@@ -249,6 +258,8 @@ export const projects: Project[] = [
     category: "web",
     status: "live",
     featured: false,
+    image: "/images/projects/caritas-website.webp",
+    screenshots: ["/images/projects/caritas-website.webp"],
     links: {},
   },
   {
@@ -275,6 +286,8 @@ export const projects: Project[] = [
     status: "live",
     featured: false,
     contribution: "contributor",
+    image: "/images/projects/askfield.webp",
+    screenshots: ["/images/projects/askfield.webp"],
     links: {},
   },
   {
@@ -300,6 +313,8 @@ export const projects: Project[] = [
     status: "in-progress",
     featured: false,
     independent: true,
+    image: "/images/projects/gotallnews.webp",
+    screenshots: ["/images/projects/gotallnews.webp"],
     links: {},
   },
 ];

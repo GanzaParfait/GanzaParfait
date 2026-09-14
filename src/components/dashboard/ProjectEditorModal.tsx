@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import { RiCloseLine, RiSaveLine, RiImageAddLine, RiFolderLine } from "react-icons/ri";
 import { Project } from "@/data/site-data";
 
@@ -10,7 +9,7 @@ interface ProjectEditorModalProps {
   onClose: () => void;
   project: Project | null;
   onSave: (savedProject: Project) => void;
-  onOpenMedia: () => void;
+  onPickMedia: (apply: (url: string) => void) => void;
   selectedMediaUrl?: string;
 }
 
@@ -19,7 +18,7 @@ export default function ProjectEditorModal({
   onClose,
   project,
   onSave,
-  onOpenMedia,
+  onPickMedia,
   selectedMediaUrl,
 }: ProjectEditorModalProps) {
   const [formData, setFormData] = useState<Partial<Project>>({
@@ -134,6 +133,8 @@ export default function ProjectEditorModal({
                 <option value="ai">AI / Machine Learning</option>
                 <option value="saas">SaaS Product</option>
                 <option value="open-source">Open Source</option>
+                <option value="systems">Systems</option>
+                <option value="product">Product</option>
               </select>
             </div>
           </div>
@@ -145,14 +146,56 @@ export default function ProjectEditorModal({
             <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
               <input
                 type="text"
-                value={formData.image}
+                value={formData.image || ""}
                 onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                 style={{ flex: 1, padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "var(--color-bg)", border: "1px solid var(--color-border)", color: "var(--color-text)", fontSize: "0.8125rem" }}
               />
-              <button type="button" onClick={onOpenMedia} className="btn btn-outline btn-sm" style={{ gap: "0.375rem", borderRadius: "0.375rem" }}>
+              <button type="button" onClick={() => onPickMedia((url) => setFormData((prev) => ({ ...prev, image: url })))} className="btn btn-outline btn-sm" style={{ gap: "0.375rem", borderRadius: "0.375rem" }}>
                 <RiImageAddLine size={16} /> Library
               </button>
             </div>
+            {formData.image && !formData.image.includes("placeholder") ? (
+              <img src={formData.image} alt="" style={{ marginTop: "0.5rem", width: "100%", maxHeight: "10rem", objectFit: "cover", borderRadius: "0.5rem", border: "1px solid var(--color-border)" }} />
+            ) : null}
+          </div>
+
+          <div>
+            <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--color-text-2)", marginBottom: "0.25rem" }}>
+              Gallery images
+            </label>
+            <button type="button" className="btn btn-outline btn-sm" onClick={() => onPickMedia((url) => setFormData((prev) => ({ ...prev, screenshots: [...(prev.screenshots || []), url] })))}>
+              <RiImageAddLine size={16} /> Add image
+            </button>
+            <div style={{ display: "flex", gap: "0.45rem", flexWrap: "wrap", marginTop: "0.55rem" }}>
+              {(formData.screenshots || []).map((src, index) => (
+                <div key={`${src}-${index}`} style={{ width: "6.5rem" }}>
+                  <img src={src} alt="" style={{ width: "6.5rem", height: "4rem", objectFit: "cover", borderRadius: "0.35rem", border: "1px solid var(--color-border)" }} />
+                  <button type="button" className="btn btn-ghost btn-sm" onClick={() => setFormData((prev) => ({ ...prev, screenshots: (prev.screenshots || []).filter((_, shot) => shot !== index) }))}>Remove</button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--color-text-2)", marginBottom: "0.25rem" }}>
+              Video
+            </label>
+            <div style={{ display: "flex", gap: "0.5rem" }}>
+              <input
+                type="text"
+                placeholder="Video URL. It loads only after play."
+                value={formData.video || ""}
+                onChange={(e) => setFormData({ ...formData, video: e.target.value })}
+                style={{ flex: 1, padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "var(--color-bg)", border: "1px solid var(--color-border)", color: "var(--color-text)", fontSize: "0.8125rem" }}
+              />
+              <button type="button" className="btn btn-outline btn-sm" onClick={() => onPickMedia((url) => setFormData((prev) => ({ ...prev, video: url, videoPoster: prev.image })))}>Library</button>
+            </div>
+            {formData.video ? (
+              <button type="button" className="poster-video" style={{ marginTop: "0.5rem", borderRadius: "0.5rem", overflow: "hidden" }} onClick={(event) => event.preventDefault()}>
+                {formData.videoPoster || formData.image ? <img src={formData.videoPoster || formData.image} alt="" /> : null}
+                <span>Play</span>
+              </button>
+            ) : null}
           </div>
 
           <div>
@@ -245,6 +288,22 @@ export default function ProjectEditorModal({
             </div>
           </div>
 
+          <div>
+            <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--color-text-2)", marginBottom: "0.25rem" }}>
+              Technologies, separated by commas
+            </label>
+            <input
+              type="text"
+              value={(formData.technologies || []).join(", ")}
+              onChange={(e) => setFormData({ ...formData, technologies: e.target.value.split(",").map((item) => item.trim()).filter(Boolean) })}
+              style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "var(--color-bg)", border: "1px solid var(--color-border)", color: "var(--color-text)", fontSize: "0.8125rem" }}
+            />
+          </div>
+          <label style={{ display: "flex", alignItems: "center", gap: "0.45rem", fontSize: "0.8rem", fontWeight: 600 }}>
+            <input type="checkbox" checked={Boolean(formData.featured)} onChange={(e) => setFormData({ ...formData, featured: e.target.checked })} />
+            Featured case
+          </label>
+          <p style={{ margin: 0, fontSize: "0.75rem", color: "var(--color-text-3)" }}>Do not add visitor counts, revenue, or other numbers taken from a screenshot.</p>
           <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem", marginTop: "0.5rem" }}>
             <button type="button" onClick={onClose} className="btn btn-ghost btn-sm" style={{ borderRadius: "0.375rem" }}>Cancel</button>
             <button type="submit" className="btn btn-primary btn-sm" style={{ gap: "0.375rem", borderRadius: "0.375rem" }}>

@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { footerNav } from "@/data/site-data";
-import BackToTop from "@/components/ui/BackToTop";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { socialByPlatform, socialIcon, socialsFor } from "@/lib/socials";
 import { setting } from "@/lib/hero";
@@ -264,7 +263,6 @@ export default function Footer() {
         </div>
       </footer>
 
-      <BackToTop />
     </>
   );
 }

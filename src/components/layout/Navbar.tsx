@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -23,6 +23,7 @@ import { siteConfig, primaryNav } from "@/data/site-data";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { socialIcon, socialsFor } from "@/lib/socials";
+import AnnouncementBar from "@/components/layout/AnnouncementBar";
 
 const navLinks = primaryNav;
 
@@ -34,6 +35,8 @@ export default function Navbar() {
   const [shareOpen, setShareOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [homeCue, setHomeCue] = useState(false);
+  const cueTimer = useRef<number | null>(null);
   const settings = useSiteSettings();
   const headerSocials = socialsFor(settings, "header");
   const primarySocials = headerSocials.slice(0, settings.headerSocialLimit || 3);
@@ -76,6 +79,27 @@ export default function Navbar() {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [shareOpen]);
+
+  useEffect(() => {
+    if (pathname === "/") {
+      setHomeCue(false);
+      return;
+    }
+    const reveal = () => {
+      setHomeCue(true);
+      if (cueTimer.current) window.clearTimeout(cueTimer.current);
+      cueTimer.current = window.setTimeout(() => setHomeCue(false), 1600);
+    };
+    window.addEventListener("pointermove", reveal, { passive: true });
+    window.addEventListener("touchstart", reveal, { passive: true });
+    window.addEventListener("scroll", reveal, { passive: true });
+    return () => {
+      window.removeEventListener("pointermove", reveal);
+      window.removeEventListener("touchstart", reveal);
+      window.removeEventListener("scroll", reveal);
+      if (cueTimer.current) window.clearTimeout(cueTimer.current);
+    };
+  }, [pathname]);
 
   useEffect(() => {
     const offset = isPill ? "4.15rem" : "4rem";
@@ -152,28 +176,7 @@ export default function Navbar() {
           padding: 0,
         }}
       >
-        {settings.announcementIsActive && settings.announcementText && (
-          <div style={{
-            background: "var(--color-primary)",
-            color: "#ffffff",
-            padding: "0.5rem 1rem",
-            textAlign: "center",
-            fontSize: "0.85rem",
-            fontWeight: 500,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: "0.5rem",
-            width: "100%",
-          }}>
-            <span>{settings.announcementText}</span>
-            {settings.announcementLink && (
-              <Link href={settings.announcementLink} style={{ color: "#ffffff", textDecoration: "underline", fontWeight: 700, flexShrink: 0 }}>
-                Explore Now &rarr;
-              </Link>
-            )}
-          </div>
-        )}
+        <AnnouncementBar settings={settings} />
         <div style={{ padding: isPill ? "0.45rem clamp(1.1rem, 3vw, 2.75rem) 0" : 0 }}>
         <div
           style={{
@@ -203,8 +206,14 @@ export default function Navbar() {
           }}
         >
 
-          {/* Logo — horizontal, theme-aware */}
-          <Link href="/" aria-label="Prince Parfait GANZA — Home" style={{ display: "flex", flexShrink: 0 }}>
+          {/* Logo is the home link. There is no Home item in the nav. */}
+          <Link
+            href="/"
+            aria-label="Prince Parfait GANZA — Home"
+            className="home-logo"
+            data-home-cue={pathname !== "/" && homeCue ? "true" : undefined}
+            style={{ display: "flex", flexShrink: 0 }}
+          >
             <div style={{ position: "relative", width: "clamp(7.5rem, 17vw, 10.75rem)", height: "2.3rem" }}>
               <Image
                 src={logoSrc}
@@ -214,10 +223,15 @@ export default function Navbar() {
                 className="object-contain object-left"
                 priority
               />
-            </div>
-          </Link>
+              </div>
+              <span className="home-logo-cue">Home</span>
+            </Link>
 
-          <nav aria-label="Main navigation" className="hidden md:flex" style={{ flex: 1, justifyContent: "center" }}>
+          <nav
+            aria-label="Main navigation"
+            className="hidden md:flex"
+            style={{ flex: 1, justifyContent: "center" }}
+          >
             <div style={{ display: "flex", alignItems: "center", gap: "0.2rem" }}>
               {navLinks.map((link) => {
                 const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
@@ -278,11 +292,11 @@ export default function Navbar() {
               )}
             </div>
 
-            {/* Theme toggle */}
-            <ThemeToggle />
+            <span className="nav-desktop-only">
+              <ThemeToggle />
+            </span>
 
-            {/* CTA */}
-            <Link href="/contact" className="btn btn-primary hidden sm:inline-flex" style={{ fontWeight: 700, letterSpacing: "-0.01em", padding: "0.48rem 1.05rem", fontSize: "0.84rem" }}>
+            <Link href="/contact" className="btn btn-primary nav-talk" style={{ fontWeight: 700, letterSpacing: "-0.01em", padding: "0.48rem 1.05rem", fontSize: "0.84rem" }}>
               Let&apos;s Talk
             </Link>
 
@@ -444,18 +458,19 @@ export default function Navbar() {
         </nav>
 
         {/* Bottom actions */}
-        <div style={{ marginTop: "0.5rem", paddingTop: "0.5rem", borderTop: "1px solid var(--color-border)" }}>
+        <div style={{ marginTop: "0.5rem", paddingTop: "0.5rem", borderTop: "1px solid var(--color-border)", display: "grid", gap: "0.55rem" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem" }}>
+            <span style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--color-text-2)" }}>Appearance</span>
+            <ThemeToggle />
+          </div>
           <button
             type="button"
             className="btn btn-outline btn-sm"
             onClick={() => { setIsOpen(false); setShareOpen(true); }}
-            style={{ width: "100%", justifyContent: "center", marginBottom: "0.5rem" }}
+            style={{ width: "100%", justifyContent: "center" }}
           >
             <RiShareLine size={16} /> Share this page
           </button>
-          <Link href="/contact" className="btn btn-primary btn-sm" style={{ width: "100%", justifyContent: "center", marginBottom: "0.5rem" }}>
-            Let&apos;s Talk
-          </Link>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", flexWrap: "wrap" }}>
             {socialsFor(settings, "header").map((link) => {
               const Icon = socialIcon(link.platform);

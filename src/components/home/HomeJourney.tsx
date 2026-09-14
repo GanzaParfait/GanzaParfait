@@ -3,83 +3,25 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { RiArrowRightLine } from "react-icons/ri";
-import { projects, siteConfig, speakingEngagements, timeline } from "@/data/site-data";
+import { siteConfig, timeline } from "@/data/site-data";
 import { configuredBookingUrl, WHATSAPP_CALL_URL } from "@/lib/booking";
+import { homepageFrom } from "@/lib/homepage";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { socialsFor, socialIcon } from "@/lib/socials";
-
-const WORK_IDS = ["caritas-systems", "stockpro", "askfield", "psta-accounting"] as const;
-
-const WORK_FOCUS: Record<string, { tags: string[]; line: string; support: string }> = {
-  "caritas-systems": {
-    tags: ["Systems", "Data"],
-    line: "Organizational reporting, held in one dependable system.",
-    support: "Product delivery · Systems · Data",
-  },
-  stockpro: {
-    tags: ["Product", "Systems"],
-    line: "Inventory and sales, without a pile of separate records.",
-    support: "Product · Business systems",
-  },
-  askfield: {
-    tags: ["Product", "Data"],
-    line: "Survey workflows, connected through the interface.",
-    support: "Frontend integration · Product experience",
-  },
-  "psta-accounting": {
-    tags: ["Systems"],
-    line: "Ticket accounting with a record someone can trace.",
-    support: "Automation · Financial workflows",
-  },
-};
-
-const KNOWLEDGE = [
-  {
-    id: "strategy",
-    title: "Strategy & Discovery",
-    body: "Requirements, problem framing, and solution planning before a line of interface is treated as the answer.",
-  },
-  {
-    id: "product",
-    title: "Product & Experience",
-    body: "Product thinking, workflows, and interfaces people can actually follow.",
-  },
-  {
-    id: "technology",
-    title: "Technology & Systems",
-    body: "React, Next.js, PHP, APIs, integrations, and databases already used in the documented work.",
-  },
-  {
-    id: "data",
-    title: "Data & Operations",
-    body: "SQL, reporting systems, dashboards, and operational records.",
-  },
-];
-
-const PRINCIPLES = [
-  { n: "01", title: "Understand before building", body: "The strongest solution begins with the right problem." },
-  { n: "02", title: "Make complexity useful", body: "Technology matters when people can depend on it." },
-  { n: "03", title: "Build for progress", body: "Every product should create a meaningful next step." },
-];
-
-const CONVERSATIONS = [
-  { title: "Introductory conversation", time: "20 minutes", body: "An idea, or a first introduction." },
-  { title: "Project discovery", time: "30 minutes", body: "Requirements and whether a collaboration fits." },
-  { title: "Partnership discussion", time: "45 minutes", body: "Lerony, a venture, or an institutional brief." },
-];
+import StoryVisual from "@/components/home/StoryVisual";
 
 export default function HomeJourney() {
   const settings = useSiteSettings();
+  const home = homepageFrom(settings);
   const booking = configuredBookingUrl(settings.bookingCalendarUrl);
   const socials = socialsFor(settings, "footer").slice(0, 4);
-  const stories = WORK_IDS.map((id) => projects.find((project) => project.id === id)).filter((project) => project != null);
+  const stories = home.work.stories;
   const [focus, setFocus] = useState("All");
-  const [knowledge, setKnowledge] = useState(KNOWLEDGE[0].id);
+  const [knowledge, setKnowledge] = useState(0);
   const [progress, setProgress] = useState(0);
   const [pageProgress, setPageProgress] = useState(0);
-  const training = speakingEngagements[0];
-  const filters = ["All", "Product", "Systems", "Data"];
-  const visible = stories.filter((project) => focus === "All" || WORK_FOCUS[project.id]?.tags.includes(focus));
+  const filters = ["All", ...Array.from(new Set(stories.flatMap((story) => story.tags)))];
+  const visible = stories.filter((story) => focus === "All" || story.tags.includes(focus));
 
   useEffect(() => {
     const node = document.getElementById("journey");
@@ -114,24 +56,20 @@ export default function HomeJourney() {
       </div>
 
       <section className="manifesto" id="manifesto" aria-label="Opening statement">
-        <img
-          src="/images/profile/prince-parfait-ganza-kigali-rwanda.webp"
-          alt=""
-          className="manifesto-photo"
-          width={1024}
-          height={919}
-        />
-        <div className="container manifesto-copy">
-          <p className="section-label">The work</p>
-          <h2>I work where ideas, technology and execution meet.</h2>
-          <p>
-            From digital systems and client platforms to products and new ventures, the work is turning a complex need into something useful and dependable.
-          </p>
-          <ol>
-            <li><strong>Think clearly</strong><span>Understand the real challenge.</span></li>
-            <li><strong>Build purposefully</strong><span>Create technology around actual needs.</span></li>
-            <li><strong>Deliver reliably</strong><span>Turn the concept into something people can use.</span></li>
-          </ol>
+        <div className="container manifesto-grid">
+          <div className="manifesto-copy">
+            <p className="section-label">{home.manifesto.label}</p>
+            <h2>{home.manifesto.title}</h2>
+            <p>{home.manifesto.body}</p>
+            <ol>
+              {home.manifesto.points.map((point) => (
+                <li key={point.title}><strong>{point.title}</strong><span>{point.body}</span></li>
+              ))}
+            </ol>
+          </div>
+          {home.manifesto.image ? (
+            <img src={home.manifesto.image} alt="" className="manifesto-photo" width={1024} height={1536} />
+          ) : null}
         </div>
       </section>
 
@@ -139,8 +77,8 @@ export default function HomeJourney() {
         <div className="container">
           <div className="work-stories-head">
             <div>
-              <p className="section-label">01 / Selected work</p>
-              <h2>Evidence, one case at a time.</h2>
+              <p className="section-label">{home.work.label}</p>
+              <h2>{home.work.title}</h2>
             </div>
             <div className="work-filters" role="tablist" aria-label="Filter work">
               {filters.map((item) => (
@@ -148,31 +86,24 @@ export default function HomeJourney() {
                   {item}
                 </button>
               ))}
-              <a href="#ventures">Ventures</a>
             </div>
           </div>
           <div className="work-story-list">
-            {visible.map((project, index) => {
-              const meta = WORK_FOCUS[project.id];
-              return (
-                <article key={project.id} className={`work-story work-story-${index % 4}`}>
+            {visible.map((story) => (
+                <article key={story.id} className="work-story">
                   <div className="work-story-copy">
-                    <p>{String(stories.indexOf(project) + 1).padStart(2, "0")}</p>
-                    <h3>{project.title}</h3>
-                    <p className="work-story-line">{meta?.line}</p>
-                    <p className="work-story-support">{meta?.support}</p>
-                    <p><strong>Challenge. </strong>{project.challenge || project.problem}</p>
-                    <p><strong>Contribution. </strong>{project.whatIBuilt || project.myRole}</p>
-                    <p><strong>Status. </strong>{project.outcome || project.result || "Documented as built. No public metric is claimed."}</p>
-                    <Link href={`/projects/${project.id}`}>View case study <RiArrowRightLine size={16} /></Link>
+                    <p>{String(stories.findIndex((item) => item.id === story.id) + 1).padStart(2, "0")}</p>
+                    <h3>{story.title}</h3>
+                    <p className="work-story-line">{story.line}</p>
+                    <p className="work-story-support">{story.support}</p>
+                    <p><strong>Challenge. </strong>{story.challenge}</p>
+                    <p><strong>Contribution. </strong>{story.contribution}</p>
+                    <p><strong>Status. </strong>{story.status}</p>
+                    <Link href={story.href}>View case study <RiArrowRightLine size={16} /></Link>
                   </div>
-                  <div className="work-story-visual" aria-hidden="true">
-                    <span>{project.organization}</span>
-                    <strong>{project.title}</strong>
-                  </div>
+                  <StoryVisual images={story.images} title={story.title} organization={story.organization} />
                 </article>
-              );
-            })}
+            ))}
           </div>
           <Link href="/projects" className="btn btn-outline" style={{ marginTop: "1.5rem" }}>All work</Link>
         </div>
@@ -180,16 +111,16 @@ export default function HomeJourney() {
 
       <section className="knowledge" id="knowledge" aria-label="Knowledge system">
         <div className="container">
-          <p className="section-label">Knowledge</p>
-          <h2>How ideas become working systems.</h2>
+          <p className="section-label">{home.knowledge.label}</p>
+          <h2>{home.knowledge.title}</h2>
           <div className="knowledge-map">
-            {KNOWLEDGE.map((item) => (
+            {home.knowledge.items.map((item, index) => (
               <button
-                key={item.id}
+                key={item.title}
                 type="button"
-                className={knowledge === item.id ? "is-on" : undefined}
-                aria-expanded={knowledge === item.id}
-                onClick={() => setKnowledge(item.id)}
+                className={knowledge === index ? "is-on" : undefined}
+                aria-expanded={knowledge === index}
+                onClick={() => setKnowledge(index)}
               >
                 <strong>{item.title}</strong>
                 <span>{item.body}</span>
@@ -201,9 +132,9 @@ export default function HomeJourney() {
 
       <section className="journey" id="journey" aria-label="Journey">
         <div className="container">
-          <p className="section-label">Journey</p>
-          <h2>How the work developed.</h2>
-          <p className="journey-note">The exact employers and dates live on Experience. This is the public path.</p>
+          <p className="section-label">{home.journey.label}</p>
+          <h2>{home.journey.title}</h2>
+          <p className="journey-note">{home.journey.note}</p>
           <ol className="journey-list">
             <span className="journey-line" style={{ transform: `scaleY(${progress})` }} />
             {timeline.slice().reverse().map((item) => (
@@ -215,18 +146,16 @@ export default function HomeJourney() {
               </li>
             ))}
           </ol>
-          <Link href="/experience" className="btn btn-outline">Explore this record</Link>
+          <Link href="/experience" className="btn btn-outline">{home.journey.cta}</Link>
         </div>
       </section>
 
       <section className="ventures-band" id="ventures" aria-label="Ventures">
         <div className="container ventures-band-grid">
           <div>
-            <p className="section-label">Ventures</p>
-            <h2>Building beyond individual projects.</h2>
-            <p>
-              Through {siteConfig.company.name}, organizational challenges and ambitious ideas are turned into digital solutions. This site remains the person. The company lives at lerony.com.
-            </p>
+            <p className="section-label">{home.ventures.label}</p>
+            <h2>{home.ventures.title}</h2>
+            <p>{home.ventures.body}</p>
           </div>
           <article>
             <p>{siteConfig.company.role}</p>
@@ -243,10 +172,10 @@ export default function HomeJourney() {
 
       <section className="principles" aria-label="Working principles">
         <div className="container">
-          <p className="section-label">Principles</p>
-          <h2>How the work is actually done.</h2>
+          <p className="section-label">{home.principles.label}</p>
+          <h2>{home.principles.title}</h2>
           <ol>
-            {PRINCIPLES.map((item) => (
+            {home.principles.items.map((item) => (
               <li key={item.n}>
                 <span>{item.n}</span>
                 <h3>{item.title}</h3>
@@ -258,26 +187,22 @@ export default function HomeJourney() {
       </section>
 
       <section className="speaking-band" aria-label="Speaking and training">
-        <img src="/images/profile/prince-parfait-ganza-kigali-casual.webp" alt="" className="speaking-photo" width={1024} height={1024} />
+        {home.speaking.image ? <img src={home.speaking.image} alt="" className="speaking-photo" width={1024} height={1024} /> : null}
         <div className="container speaking-copy">
-          <p className="section-label">Speaking and training</p>
-          <h2>Knowledge becomes more valuable when it moves.</h2>
-          {training ? (
-            <p>
-              {training.topic} The engagement is {training.event}. Exact session dates are not published until they are verified. No conference or keynote is claimed.
-            </p>
-          ) : null}
-          <Link href="/speaking" className="btn btn-primary">Explore speaking and training <RiArrowRightLine size={16} /></Link>
+          <p className="section-label">{home.speaking.label}</p>
+          <h2>{home.speaking.title}</h2>
+          {home.speaking.body ? <p>{home.speaking.body}</p> : null}
+          <Link href="/speaking" className="btn btn-primary">{home.speaking.cta} <RiArrowRightLine size={16} /></Link>
         </div>
       </section>
 
       <section className="booking-band" id="book" aria-label="Book a conversation">
         <div className="container">
-          <p className="section-label">A conversation</p>
-          <h2>Have an ambitious idea worth discussing?</h2>
-          <p>A focused introduction about a product, partnership, venture, or digital challenge.</p>
+          <p className="section-label">{home.booking.label}</p>
+          <h2>{home.booking.title}</h2>
+          <p>{home.booking.body}</p>
           <ul>
-            {CONVERSATIONS.map((item) => (
+            {home.booking.items.map((item) => (
               <li key={item.title}>
                 <strong>{item.title}</strong>
                 <span>{item.time}</span>
@@ -300,11 +225,11 @@ export default function HomeJourney() {
 
       <section className="closing-band" aria-label="Closing">
         <div className="container">
-          <h2>The next meaningful product starts with a clear conversation.</h2>
+          <h2>{home.closing.title}</h2>
           <img src="/brand/logos/logo-horizontal-light.png" alt="" width={168} height={40} className="closing-mark" />
-          <p className="closing-name">{siteConfig.name}</p>
-          <p>Founder · Entrepreneur · Technologist</p>
-          <p>Kigali, Rwanda</p>
+          <p className="closing-name">{settings.siteTitle || siteConfig.name}</p>
+          <p>{home.closing.roles}</p>
+          <p>{settings.location || "Kigali, Rwanda"}</p>
           <a href={`mailto:${settings.contactEmail || siteConfig.contact.email}`}>{settings.contactEmail || siteConfig.contact.email}</a>
           <div className="closing-socials">
             {socials.map((link) => {

@@ -16,6 +16,7 @@ export interface PageSeoInput {
   keywords?: string[];
   ogType?: "website" | "article" | "profile";
   ogImage?: string;
+  ogImageAlt?: string;
   publishedTime?: string;
   noIndex?: boolean;
   absoluteTitle?: boolean;
@@ -27,7 +28,9 @@ export function absoluteUrl(path: string): string {
 
 export function buildPageMetadata(input: PageSeoInput): Metadata {
   const canonical = canonicalUrl(input.path);
-  const ogImage = absoluteAssetUrl(input.ogImage || DEFAULT_OG_IMAGE);
+  const ogPath = input.ogImage || DEFAULT_OG_IMAGE;
+  const ogImage = absoluteAssetUrl(ogPath);
+  const ogType = ogPath.endsWith(".webp") ? "image/webp" : ogPath.endsWith(".png") ? "image/png" : "image/jpeg";
   const robots = input.noIndex
     ? { index: false, follow: true }
     : { index: true, follow: true };
@@ -51,8 +54,8 @@ export function buildPageMetadata(input: PageSeoInput): Metadata {
           url: ogImage,
           width: 1200,
           height: 630,
-          alt: "Prince Parfait GANZA, founder, entrepreneur, technologist and software engineer in Kigali",
-          type: "image/jpeg",
+          alt: input.ogImageAlt || "Prince Parfait GANZA, founder, entrepreneur, technologist and software engineer in Kigali",
+          type: ogType,
         },
       ],
     },
