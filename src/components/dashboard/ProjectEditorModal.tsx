@@ -4,6 +4,10 @@ import { useState, useEffect } from "react";
 import { RiCloseLine, RiSaveLine, RiImageAddLine, RiFolderLine } from "react-icons/ri";
 import { Project } from "@/data/site-data";
 
+function projectVideos(project: Partial<Project>) {
+  return project.videos?.length ? project.videos : project.video ? [project.video] : [];
+}
+
 interface ProjectEditorModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -83,7 +87,7 @@ export default function ProjectEditorModal({
       <div
         style={{
           width: "100%",
-          maxWidth: "40rem",
+          maxWidth: "72rem",
           maxHeight: "90vh",
           background: "var(--color-surface)",
           border: "1px solid var(--color-border)",
@@ -135,67 +139,60 @@ export default function ProjectEditorModal({
                 <option value="open-source">Open Source</option>
                 <option value="systems">Systems</option>
                 <option value="product">Product</option>
+                <option value="other">Other</option>
               </select>
+              {formData.category === "other" ? (
+                <input
+                  type="text"
+                  placeholder="Name this category"
+                  value={formData.categoryNote || ""}
+                  onChange={(e) => setFormData({ ...formData, categoryNote: e.target.value })}
+                  style={{ width: "100%", marginTop: "0.4rem", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "var(--color-bg)", border: "1px solid var(--color-border)", color: "var(--color-text)", fontSize: "0.8125rem" }}
+                />
+              ) : null}
             </div>
           </div>
 
           <div>
-            <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--color-text-2)", marginBottom: "0.25rem" }}>
-              Project Cover Image
+            <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--color-text-2)", marginBottom: "0.45rem" }}>
+              Images
             </label>
-            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-              <input
-                type="text"
-                value={formData.image || ""}
-                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                style={{ flex: 1, padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "var(--color-bg)", border: "1px solid var(--color-border)", color: "var(--color-text)", fontSize: "0.8125rem" }}
-              />
-              <button type="button" onClick={() => onPickMedia((url) => setFormData((prev) => ({ ...prev, image: url })))} className="btn btn-outline btn-sm" style={{ gap: "0.375rem", borderRadius: "0.375rem" }}>
-                <RiImageAddLine size={16} /> Library
-              </button>
-            </div>
-            {formData.image && !formData.image.includes("placeholder") ? (
-              <img src={formData.image} alt="" style={{ marginTop: "0.5rem", width: "100%", maxHeight: "10rem", objectFit: "cover", borderRadius: "0.5rem", border: "1px solid var(--color-border)" }} />
-            ) : null}
-          </div>
-
-          <div>
-            <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--color-text-2)", marginBottom: "0.25rem" }}>
-              Gallery images
-            </label>
-            <button type="button" className="btn btn-outline btn-sm" onClick={() => onPickMedia((url) => setFormData((prev) => ({ ...prev, screenshots: [...(prev.screenshots || []), url] })))}>
-              <RiImageAddLine size={16} /> Add image
-            </button>
-            <div style={{ display: "flex", gap: "0.45rem", flexWrap: "wrap", marginTop: "0.55rem" }}>
+            <div style={{ display: "flex", gap: "0.7rem", alignItems: "stretch", flexWrap: "wrap" }}>
+              <div style={{ flex: "1 1 18rem", minHeight: "14rem", borderRadius: "0.85rem", overflow: "hidden", border: "1px solid var(--color-border)", background: "#0b192c" }}>
+                {formData.image && !formData.image.includes("placeholder") ? (
+                  <img src={formData.image} alt="" style={{ width: "100%", height: "14rem", objectFit: "cover" }} />
+                ) : (
+                  <div style={{ height: "14rem", display: "grid", placeItems: "center", color: "#94a3b8", fontSize: "0.8rem" }}>Preview</div>
+                )}
+              </div>
               {(formData.screenshots || []).map((src, index) => (
-                <div key={`${src}-${index}`} style={{ width: "6.5rem" }}>
-                  <img src={src} alt="" style={{ width: "6.5rem", height: "4rem", objectFit: "cover", borderRadius: "0.35rem", border: "1px solid var(--color-border)" }} />
-                  <button type="button" className="btn btn-ghost btn-sm" onClick={() => setFormData((prev) => ({ ...prev, screenshots: (prev.screenshots || []).filter((_, shot) => shot !== index) }))}>Remove</button>
+                <div key={`${src}-${index}`} style={{ width: "11rem" }}>
+                  <img src={src} alt="" style={{ width: "11rem", height: "8.5rem", objectFit: "cover", borderRadius: "0.85rem", border: "1px solid var(--color-border)" }} />
+                  <button type="button" className="btn btn-ghost btn-sm" onClick={() => setFormData((prev) => ({ ...prev, screenshots: (prev.screenshots || []).filter((_, shot) => shot !== index), image: prev.image === src ? (prev.screenshots || []).find((item) => item !== src) || "" : prev.image }))}>Remove</button>
                 </div>
               ))}
+              <button type="button" className="media-add-card" aria-label="Add image" onClick={() => onPickMedia((url) => setFormData((prev) => ({ ...prev, image: prev.image && !prev.image.includes("placeholder") ? prev.image : url, screenshots: [...(prev.screenshots || []), url] })))}>
+                <RiImageAddLine size={28} />
+              </button>
             </div>
           </div>
 
           <div>
-            <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--color-text-2)", marginBottom: "0.25rem" }}>
-              Video
+            <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--color-text-2)", marginBottom: "0.45rem" }}>
+              Videos
             </label>
-            <div style={{ display: "flex", gap: "0.5rem" }}>
-              <input
-                type="text"
-                placeholder="Video URL. It loads only after play."
-                value={formData.video || ""}
-                onChange={(e) => setFormData({ ...formData, video: e.target.value })}
-                style={{ flex: 1, padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "var(--color-bg)", border: "1px solid var(--color-border)", color: "var(--color-text)", fontSize: "0.8125rem" }}
-              />
-              <button type="button" className="btn btn-outline btn-sm" onClick={() => onPickMedia((url) => setFormData((prev) => ({ ...prev, video: url, videoPoster: prev.image })))}>Library</button>
-            </div>
-            {formData.video ? (
-              <button type="button" className="poster-video" style={{ marginTop: "0.5rem", borderRadius: "0.5rem", overflow: "hidden" }} onClick={(event) => event.preventDefault()}>
-                {formData.videoPoster || formData.image ? <img src={formData.videoPoster || formData.image} alt="" /> : null}
-                <span>Play</span>
+            <div style={{ display: "flex", gap: "0.7rem", flexWrap: "wrap" }}>
+              {projectVideos(formData).map((src, index) => (
+                <div key={`${src}-${index}`} style={{ width: "11rem" }}>
+                  <div style={{ height: "8.5rem", borderRadius: "0.85rem", background: "#07111f", color: "#fff", display: "grid", placeItems: "center", fontSize: "0.75rem" }}>Video {index + 1}</div>
+                  <button type="button" className="btn btn-ghost btn-sm" onClick={() => setFormData((prev) => ({ ...prev, videos: projectVideos(prev).filter((_, videoIndex) => videoIndex !== index), video: projectVideos(prev).filter((_, videoIndex) => videoIndex !== index)[0] || "" }))}>Remove</button>
+                </div>
+              ))}
+              <button type="button" className="media-add-card" aria-label="Add video" onClick={() => onPickMedia((url) => setFormData((prev) => ({ ...prev, videos: [...projectVideos(prev), url], video: prev.video || url, videoPoster: prev.image })))}>
+                <RiImageAddLine size={28} />
               </button>
-            ) : null}
+            </div>
+            <p style={{ margin: "0.45rem 0 0", fontSize: "0.75rem", color: "var(--color-text-3)" }}>Videos stay unloaded on the public site until someone presses play.</p>
           </div>
 
           <div>
@@ -288,6 +285,57 @@ export default function ProjectEditorModal({
             </div>
           </div>
 
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.875rem" }}>
+            <div>
+              <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--color-text-2)", marginBottom: "0.25rem" }}>Tagline</label>
+              <input type="text" value={formData.tagline || ""} onChange={(e) => setFormData({ ...formData, tagline: e.target.value })} style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "var(--color-bg)", border: "1px solid var(--color-border)", color: "var(--color-text)", fontSize: "0.8125rem" }} />
+            </div>
+            <div>
+              <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--color-text-2)", marginBottom: "0.25rem" }}>Client / organization</label>
+              <input type="text" value={formData.organization || ""} onChange={(e) => setFormData({ ...formData, organization: e.target.value })} style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "var(--color-bg)", border: "1px solid var(--color-border)", color: "var(--color-text)", fontSize: "0.8125rem" }} />
+            </div>
+            <div>
+              <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--color-text-2)", marginBottom: "0.25rem" }}>Duration</label>
+              <input type="text" placeholder="Only if the dates are verified" value={formData.period || ""} onChange={(e) => setFormData({ ...formData, period: e.target.value })} style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "var(--color-bg)", border: "1px solid var(--color-border)", color: "var(--color-text)", fontSize: "0.8125rem" }} />
+            </div>
+            <div>
+              <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--color-text-2)", marginBottom: "0.25rem" }}>Script line</label>
+              <input type="text" value={formData.flourish || ""} onChange={(e) => setFormData({ ...formData, flourish: e.target.value })} style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "var(--color-bg)", border: "1px solid var(--color-border)", color: "var(--color-text)", fontSize: "0.8125rem" }} />
+            </div>
+          </div>
+          <div>
+            <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--color-text-2)", marginBottom: "0.25rem" }}>Key highlights, one per line</label>
+            <textarea rows={3} value={(formData.highlights || []).join("\n")} onChange={(e) => setFormData({ ...formData, highlights: e.target.value.split("\n").map((item) => item.trim()).filter(Boolean) })} style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "var(--color-bg)", border: "1px solid var(--color-border)", color: "var(--color-text)", fontSize: "0.8125rem" }} />
+          </div>
+          <div>
+            <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--color-text-2)", marginBottom: "0.25rem" }}>Features, one per line</label>
+            <textarea rows={3} value={(formData.features || []).join("\n")} onChange={(e) => setFormData({ ...formData, features: e.target.value.split("\n").map((item) => item.trim()).filter(Boolean) })} style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "var(--color-bg)", border: "1px solid var(--color-border)", color: "var(--color-text)", fontSize: "0.8125rem" }} />
+          </div>
+          <div>
+            <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--color-text-2)", marginBottom: "0.25rem" }}>What I learned</label>
+            <textarea rows={3} value={formData.learned || ""} onChange={(e) => setFormData({ ...formData, learned: e.target.value })} style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "var(--color-bg)", border: "1px solid var(--color-border)", color: "var(--color-text)", fontSize: "0.8125rem" }} />
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1.2fr 0.8fr", gap: "0.875rem" }}>
+            <div>
+              <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--color-text-2)", marginBottom: "0.25rem" }}>Quote</label>
+              <textarea rows={2} placeholder="Leave empty unless you have permission to publish it" value={formData.quote || ""} onChange={(e) => setFormData({ ...formData, quote: e.target.value })} style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "var(--color-bg)", border: "1px solid var(--color-border)", color: "var(--color-text)", fontSize: "0.8125rem" }} />
+            </div>
+            <div>
+              <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--color-text-2)", marginBottom: "0.25rem" }}>Quote attribution</label>
+              <input type="text" value={formData.quoteBy || ""} onChange={(e) => setFormData({ ...formData, quoteBy: e.target.value })} style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "var(--color-bg)", border: "1px solid var(--color-border)", color: "var(--color-text)", fontSize: "0.8125rem" }} />
+            </div>
+          </div>
+          <div>
+            <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--color-text-2)", marginBottom: "0.25rem" }}>Case study file</label>
+            <div style={{ display: "flex", gap: "0.5rem" }}>
+              <input type="text" value={formData.caseStudyFile || ""} onChange={(e) => setFormData({ ...formData, caseStudyFile: e.target.value })} style={{ flex: 1, padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "var(--color-bg)", border: "1px solid var(--color-border)", color: "var(--color-text)", fontSize: "0.8125rem" }} />
+              <button type="button" className="btn btn-outline btn-sm" onClick={() => onPickMedia((url) => setFormData((prev) => ({ ...prev, caseStudyFile: url })))}>Choose file</button>
+            </div>
+          </div>
+          <div>
+            <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--color-text-2)", marginBottom: "0.25rem" }}>Screenshot captions, one per line, in image order</label>
+            <textarea rows={3} value={(formData.screenshotCaptions || []).join("\n")} onChange={(e) => setFormData({ ...formData, screenshotCaptions: e.target.value.split("\n") })} style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "var(--color-bg)", border: "1px solid var(--color-border)", color: "var(--color-text)", fontSize: "0.8125rem" }} />
+          </div>
           <div>
             <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--color-text-2)", marginBottom: "0.25rem" }}>
               Technologies, separated by commas

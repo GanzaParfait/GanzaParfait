@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Outfit } from "next/font/google";
+import { Caveat, Outfit } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import LayoutShell from "@/components/layout/LayoutShell";
@@ -11,6 +11,12 @@ const outfit = Outfit({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-outfit",
+});
+
+const caveat = Caveat({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-script",
 });
 
 const googleVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
@@ -100,7 +106,7 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#0E52A8" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
       </head>
-      <body className={`${outfit.variable} antialiased`} suppressHydrationWarning>
+      <body className={`${outfit.variable} ${caveat.variable} antialiased`} suppressHydrationWarning>
         <Script
           id="theme-init"
           strategy="beforeInteractive"

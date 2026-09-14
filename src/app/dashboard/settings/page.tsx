@@ -133,8 +133,8 @@ export default function SettingsPage() {
   const imageFieldValue = (value?: string) => (value && isBlobUrl(value) ? "" : value || "");
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, height: "100%", background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "0.85rem", overflow: "hidden" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem", padding: "1rem 1.25rem", borderBottom: "1px solid #e2e8f0", flexShrink: 0 }}>
+    <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, height: "100%", gap: "0.85rem" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem", flexShrink: 0 }}>
         <div>
           <p style={{ fontSize: "0.7rem", fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "#0e52a8" }}>Control center</p>
           <h1 style={{ fontSize: "1.2rem", fontWeight: 800, color: "#0b192c" }}>{activeView.label}</h1>
@@ -146,7 +146,7 @@ export default function SettingsPage() {
       </div>
 
       <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
-        <nav style={{ width: "13.5rem", flexShrink: 0, borderRight: "1px solid #e2e8f0", padding: "0.75rem", overflowY: "auto", background: "#f8fafc" }}>
+        <nav style={{ width: "13.5rem", flexShrink: 0, padding: "0.15rem 0.75rem 0.15rem 0", overflowY: "auto" }}>
           {VIEWS.map((item) => {
             const Icon = item.icon;
             const active = view === item.id;
@@ -182,7 +182,7 @@ export default function SettingsPage() {
           })}
         </nav>
 
-        <div style={{ flex: 1, overflowY: "auto", padding: "1.25rem 1.4rem 1.75rem" }}>
+        <div style={{ flex: 1, overflowY: "auto", padding: "0 0 1rem 0.15rem" }}>
           {view === "identity" && (
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", maxWidth: "44rem" }}>
               <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>Display name

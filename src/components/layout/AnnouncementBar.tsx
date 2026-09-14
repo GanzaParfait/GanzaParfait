@@ -7,6 +7,7 @@ import {
   RiCalendarLine,
   RiCloseLine,
   RiFileTextLine,
+  RiLink,
   RiMapPinLine,
   RiFacebookFill,
   RiLinkedinFill,
@@ -197,7 +198,7 @@ export function AnnouncementCard({
           <div className="announcement-share">
             {share.length ? (
               <div>
-                <p>Share this</p>
+                <p>Share this event</p>
                 <div>
                   {share.map((link) => {
                     const Icon = link.icon;
@@ -207,6 +208,9 @@ export function AnnouncementCard({
                       </a>
                     );
                   })}
+                  <button type="button" aria-label="Copy link" onClick={() => navigator.clipboard.writeText(window.location.href.split("?")[0])}>
+                    <RiLink size={16} />
+                  </button>
                 </div>
               </div>
             ) : <span />}

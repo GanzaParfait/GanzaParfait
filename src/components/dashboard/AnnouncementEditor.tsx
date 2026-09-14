@@ -28,6 +28,7 @@ export default function AnnouncementEditor({
   const [mediaOpen, setMediaOpen] = useState(false);
   const [kind, setKind] = useState<AnnouncementMedia["type"]>("image");
   const [fullPreview, setFullPreview] = useState(false);
+  const [editing, setEditing] = useState(false);
   const media = settings.announcementMedia || [];
 
   const addMedia = (url: string) => {
@@ -42,7 +43,19 @@ export default function AnnouncementEditor({
   };
 
   return (
-    <div className="announcement-editor" style={{ display: "grid", gridTemplateColumns: "minmax(0, 24rem) minmax(0, 1fr)", gap: "1.25rem", alignItems: "start" }}>
+    <div style={{ display: "grid", gap: "0.85rem", maxWidth: "52rem" }}>
+      <AnnouncementCard settings={settings} preview />
+      <button type="button" className="btn btn-primary" style={{ width: "100%", justifyContent: "center" }} onClick={() => setEditing(true)}>
+        Edit announcement
+      </button>
+      {editing ? (
+        <div className="announcement-layer" role="presentation" onClick={() => setEditing(false)} style={{ zIndex: 220 }}>
+          <div className="dash-edit-modal" onClick={(event) => event.stopPropagation()}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem" }}>
+              <h2 style={{ margin: 0, fontSize: "1.15rem" }}>Edit announcement</h2>
+              <button type="button" className="btn btn-outline btn-sm" onClick={() => setEditing(false)}>Close</button>
+            </div>
+            <div className="announcement-editor" style={{ display: "grid", gridTemplateColumns: "minmax(0, 22rem) minmax(0, 1fr)", gap: "1.25rem", alignItems: "start" }}>
       <div style={{ display: "grid", gap: "0.7rem" }}>
         <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", fontWeight: 600, color: "#334155" }}>
           <input type="checkbox" checked={settings.announcementIsActive || false} onChange={(event) => patch({ announcementIsActive: event.target.checked })} />
@@ -61,7 +74,7 @@ export default function AnnouncementEditor({
         <Field label="Button link" value={settings.announcementLink || ""} onChange={(announcementLink) => patch({ announcementLink })} placeholder="/contact or https://" />
         <Field label="Second button" value={settings.announcementSecondaryLabel || ""} onChange={(announcementSecondaryLabel) => patch({ announcementSecondaryLabel })} placeholder="Add to calendar" />
         <Field label="Second link" value={settings.announcementSecondaryHref || ""} onChange={(announcementSecondaryHref) => patch({ announcementSecondaryHref })} />
-        <Field label="Closing line" value={settings.announcementClosing || ""} onChange={(announcementClosing) => patch({ announcementClosing })} />
+        <Field label="Closing line" value={settings.announcementClosing || ""} onChange={(announcementClosing) => patch({ announcementClosing })} placeholder="See you there!" />
         <label style={{ display: "grid", gap: "0.3rem", fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>
           Layout
           <select style={inputStyle} value={settings.announcementLayout || "side"} onChange={(event) => patch({ announcementLayout: event.target.value as "side" | "stack" })}>
@@ -95,16 +108,12 @@ export default function AnnouncementEditor({
           ))}
         </div>
         <p style={{ margin: 0, fontSize: "0.75rem", color: "#64748b" }}>Only publish details you can stand behind. A video stays unloaded until someone presses play. On a phone the panel is always a bottom sheet.</p>
-        <button type="button" className="btn btn-primary btn-sm" onClick={() => setFullPreview(true)}>Open full preview</button>
       </div>
-      <div>
-        <p style={{ margin: "0 0 0.5rem", fontSize: "0.72rem", fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "#64748b" }}>Preview</p>
-        <button type="button" className="announcement-bar" onClick={() => setFullPreview(true)} style={{ marginBottom: "0.75rem" }}>
-          <span>{settings.announcementText || "Announcement text"}</span>
-          <span className="announcement-bar-cta">{settings.announcementCtaLabel || "Continue"}</span>
-        </button>
-        <AnnouncementCard settings={settings} preview />
-      </div>
+      <AnnouncementCard settings={settings} preview />
+            </div>
+          </div>
+        </div>
+      ) : null}
       {fullPreview ? <AnnouncementOverlay settings={settings} onClose={() => setFullPreview(false)} /> : null}
       <MediaManagerModal isOpen={mediaOpen} onClose={() => setMediaOpen(false)} onSelect={(url) => { addMedia(url); setMediaOpen(false); }} />
     </div>

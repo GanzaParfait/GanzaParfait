@@ -21,6 +21,7 @@ const categoryLabels: Record<Project["category"], string> = {
   "open-source": "Open Source",
   systems: "Systems",
   product: "Product",
+  other: "Other",
 };
 
 export default function ProjectCard({ project, featured = false }: ProjectCardProps) {

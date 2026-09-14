@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { RiImageAddLine, RiSaveLine } from "react-icons/ri";
 import MediaManagerModal from "@/components/dashboard/MediaManagerModal";
 import { useDashboardFeedback } from "@/components/dashboard/DashboardFeedback";
-import StoryVisual from "@/components/home/StoryVisual";
+import ManifestoSection from "@/components/home/ManifestoSection";
+import SelectedWork from "@/components/home/SelectedWork";
 import { DEFAULT_HOMEPAGE, homepageFrom, type HomepageContent, type WorkStory } from "@/lib/homepage";
 import { getLocalSettings, saveLocalSettings } from "@/lib/supabase";
 
@@ -38,6 +39,7 @@ export default function HomepageEditorPage() {
   const [section, setSection] = useState<SectionId>("manifesto");
   const [storyIndex, setStoryIndex] = useState(0);
   const [mediaOpen, setMediaOpen] = useState(false);
+  const [editing, setEditing] = useState(false);
   const { runSave, saving } = useDashboardFeedback();
 
   useEffect(() => {
@@ -62,7 +64,7 @@ export default function HomepageEditorPage() {
   };
 
   return (
-    <div style={{ padding: "1.25rem", display: "grid", gap: "1rem" }}>
+    <div style={{ display: "grid", gap: "0.85rem" }}>
       <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", alignItems: "center", flexWrap: "wrap" }}>
         <div>
           <p style={{ margin: 0, fontSize: "0.72rem", fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "#64748b" }}>Control center</p>
@@ -96,6 +98,36 @@ export default function HomepageEditorPage() {
         ))}
       </div>
 
+      <div style={{ border: "1px solid #e2e8f0", borderRadius: "1rem", overflow: "hidden", background: "#fff" }}>
+        <div style={{ padding: "0.85rem" }}>
+          {section === "manifesto" && <ManifestoSection manifesto={content.manifesto} embedded />}
+          {section === "work" && <SelectedWork work={content.work} records={getLocalSettings().projectRecords} embedded />}
+          {section !== "manifesto" && section !== "work" && (
+            <div>
+              <p className="section-label">{SECTIONS.find((item) => item.id === section)?.label}</p>
+              <h2 style={{ marginTop: "0.3rem" }}>
+                {section === "knowledge" && content.knowledge.title}
+                {section === "journey" && content.journey.title}
+                {section === "ventures" && content.ventures.title}
+                {section === "principles" && content.principles.title}
+                {section === "speaking" && content.speaking.title}
+                {section === "booking" && content.booking.title}
+                {section === "closing" && content.closing.title}
+              </h2>
+            </div>
+          )}
+        </div>
+      </div>
+      <button type="button" className="btn btn-primary" style={{ width: "100%", justifyContent: "center" }} onClick={() => setEditing(true)}>
+        Edit this section
+      </button>
+      {editing ? (
+        <div className="announcement-layer" role="presentation" onClick={() => setEditing(false)} style={{ zIndex: 220 }}>
+          <div className="dash-edit-modal" onClick={(event) => event.stopPropagation()}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.8rem" }}>
+              <h2 style={{ margin: 0, fontSize: "1.15rem" }}>Edit {SECTIONS.find((item) => item.id === section)?.label}</h2>
+              <button type="button" className="btn btn-outline btn-sm" onClick={() => setEditing(false)}>Close</button>
+            </div>
       <div className="homepage-editor" style={{ display: "grid", gridTemplateColumns: "minmax(0, 24rem) minmax(0, 1fr)", gap: "1.25rem", alignItems: "start" }}>
         <div style={{ display: "grid", gap: "0.7rem" }}>
           {section === "manifesto" && (
@@ -104,6 +136,12 @@ export default function HomepageEditorPage() {
               <Field label="Title" value={content.manifesto.title} onChange={(title) => setContent({ ...content, manifesto: { ...content.manifesto, title } })} />
               <Field label="Body" value={content.manifesto.body} area onChange={(body) => setContent({ ...content, manifesto: { ...content.manifesto, body } })} />
               <button type="button" className="btn btn-outline btn-sm" onClick={() => setMediaOpen(true)}><RiImageAddLine size={15} /> Change portrait</button>
+              <Field label="Quote" value={content.manifesto.quote} area onChange={(quote) => setContent({ ...content, manifesto: { ...content.manifesto, quote } })} />
+              <Field label="Name" value={content.manifesto.attribution} onChange={(attribution) => setContent({ ...content, manifesto: { ...content.manifesto, attribution } })} />
+              <Field label="Roles" value={content.manifesto.roles} onChange={(roles) => setContent({ ...content, manifesto: { ...content.manifesto, roles } })} />
+              <Field label="Script line" value={content.manifesto.script} onChange={(script) => setContent({ ...content, manifesto: { ...content.manifesto, script } })} />
+              <Field label="Side labels" value={content.manifesto.rail.join(", ")} onChange={(value) => setContent({ ...content, manifesto: { ...content.manifesto, rail: value.split(",").map((item) => item.trim()).filter(Boolean) } })} />
+              <Field label="Bottom line" value={content.manifesto.chip} onChange={(chip) => setContent({ ...content, manifesto: { ...content.manifesto, chip } })} />
               {content.manifesto.points.map((point, index) => (
                 <div key={index} style={{ display: "grid", gap: "0.35rem" }}>
                   <Field label={`Point ${index + 1}`} value={point.title} onChange={(title) => {
@@ -114,6 +152,10 @@ export default function HomepageEditorPage() {
                     const points = content.manifesto.points.map((item, itemIndex) => itemIndex === index ? { ...item, body } : item);
                     setContent({ ...content, manifesto: { ...content.manifesto, points } });
                   }} />
+                  <Field label="Tag" value={point.tag || ""} onChange={(tag) => {
+                    const points = content.manifesto.points.map((item, itemIndex) => itemIndex === index ? { ...item, tag } : item);
+                    setContent({ ...content, manifesto: { ...content.manifesto, points } });
+                  }} />
                 </div>
               ))}
             </>
@@ -122,6 +164,12 @@ export default function HomepageEditorPage() {
             <>
               <Field label="Section label" value={content.work.label} onChange={(label) => setContent({ ...content, work: { ...content.work, label } })} />
               <Field label="Section title" value={content.work.title} onChange={(title) => setContent({ ...content, work: { ...content.work, title } })} />
+              <Field label="Intro" value={content.work.intro} area onChange={(intro) => setContent({ ...content, work: { ...content.work, intro } })} />
+              <Field label="Button" value={content.work.cta} onChange={(cta) => setContent({ ...content, work: { ...content.work, cta } })} />
+              <Field label="Script line" value={content.work.flourish} onChange={(flourish) => setContent({ ...content, work: { ...content.work, flourish } })} />
+              <Field label="More label" value={content.work.moreLabel} onChange={(moreLabel) => setContent({ ...content, work: { ...content.work, moreLabel } })} />
+              <Field label="More title" value={content.work.moreTitle} onChange={(moreTitle) => setContent({ ...content, work: { ...content.work, moreTitle } })} />
+              <Field label="More body" value={content.work.moreBody} area onChange={(moreBody) => setContent({ ...content, work: { ...content.work, moreBody } })} />
               <label style={{ display: "grid", gap: "0.3rem", fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>
                 Case
                 <select style={inputStyle} value={storyIndex} onChange={(event) => setStoryIndex(Number(event.target.value))}>
@@ -132,19 +180,13 @@ export default function HomepageEditorPage() {
               <Field label="Line" value={story.line} onChange={(line) => patchStory({ line })} />
               <Field label="Support" value={story.support} onChange={(support) => patchStory({ support })} />
               <Field label="Tags" value={story.tags.join(", ")} onChange={(value) => patchStory({ tags: value.split(",").map((item) => item.trim()).filter(Boolean) })} />
+              <Field label="Role" value={story.role || ""} onChange={(role) => patchStory({ role })} />
+              <Field label="Duration" value={story.period || ""} onChange={(period) => patchStory({ period })} />
+              <Field label="Client" value={story.client || ""} onChange={(client) => patchStory({ client })} />
               <Field label="Challenge" value={story.challenge} area onChange={(challenge) => patchStory({ challenge })} />
               <Field label="Contribution" value={story.contribution} area onChange={(contribution) => patchStory({ contribution })} />
               <Field label="Status" value={story.status} area onChange={(status) => patchStory({ status })} />
-              <button type="button" className="btn btn-outline btn-sm" onClick={() => setMediaOpen(true)}><RiImageAddLine size={15} /> Add image</button>
-              <div style={{ display: "grid", gap: "0.4rem" }}>
-                {story.images.map((src, index) => (
-                  <div key={`${src}-${index}`} style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
-                    <img src={src} alt="" style={{ width: "4.5rem", height: "2.8rem", objectFit: "cover", borderRadius: "0.35rem" }} />
-                    <span style={{ flex: 1, fontSize: "0.72rem", color: "#64748b", overflow: "hidden", textOverflow: "ellipsis" }}>{src}</span>
-                    <button type="button" className="btn btn-ghost btn-sm" onClick={() => patchStory({ images: story.images.filter((_, imageIndex) => imageIndex !== index) })}>Remove</button>
-                  </div>
-                ))}
-              </div>
+              <p style={{ margin: 0, fontSize: "0.75rem", color: "#64748b" }}>Images are added on Projects, next to that case’s preview. This page only edits the words so the same picture is not uploaded twice.</p>
             </>
           )}
           {section === "knowledge" && (
@@ -244,26 +286,8 @@ export default function HomepageEditorPage() {
         <div style={{ border: "1px solid #e2e8f0", borderRadius: "1rem", overflow: "hidden", background: "#fff" }}>
           <p style={{ margin: 0, padding: "0.7rem 1rem", fontSize: "0.72rem", fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "#64748b", borderBottom: "1px solid #e2e8f0" }}>Preview</p>
           <div style={{ padding: "1.1rem" }}>
-            {section === "manifesto" && (
-              <div style={{ display: "grid", gridTemplateColumns: "1.1fr 0.7fr", gap: "1rem", alignItems: "center" }}>
-                <div>
-                  <p style={{ color: "#0e52a8", fontSize: "0.72rem", fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase" }}>{content.manifesto.label}</p>
-                  <h2 style={{ margin: "0.3rem 0", fontSize: "1.6rem", lineHeight: 1.1 }}>{content.manifesto.title}</h2>
-                  <p style={{ color: "#475569" }}>{content.manifesto.body}</p>
-                </div>
-                {content.manifesto.image ? <img src={content.manifesto.image} alt="" style={{ width: "100%", maxHeight: "16rem", objectFit: "contain" }} /> : null}
-              </div>
-            )}
-            {section === "work" && story && (
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", alignItems: "center" }}>
-                <div>
-                  <h3 style={{ marginTop: 0 }}>{story.title}</h3>
-                  <p style={{ fontWeight: 700 }}>{story.line}</p>
-                  <p style={{ color: "#64748b" }}>{story.status}</p>
-                </div>
-                <StoryVisual images={story.images} title={story.title} organization={story.organization} />
-              </div>
-            )}
+            {section === "manifesto" && <ManifestoSection manifesto={content.manifesto} embedded />}
+            {section === "work" && <SelectedWork work={content.work} records={getLocalSettings().projectRecords} embedded />}
             {section !== "manifesto" && section !== "work" && (
               <p style={{ margin: 0, color: "#334155" }}>
                 {section === "knowledge" && content.knowledge.title}
@@ -286,10 +310,12 @@ export default function HomepageEditorPage() {
           if (url.startsWith("blob:")) return;
           if (section === "manifesto") setContent({ ...content, manifesto: { ...content.manifesto, image: url } });
           else if (section === "speaking") setContent({ ...content, speaking: { ...content.speaking, image: url } });
-          else if (section === "work" && story && !story.images.includes(url)) patchStory({ images: [...story.images, url] });
           setMediaOpen(false);
         }}
-      />
+        />
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

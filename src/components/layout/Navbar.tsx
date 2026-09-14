@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -36,7 +36,6 @@ export default function Navbar() {
   const [moreOpen, setMoreOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [homeCue, setHomeCue] = useState(false);
-  const cueTimer = useRef<number | null>(null);
   const settings = useSiteSettings();
   const headerSocials = socialsFor(settings, "header");
   const primarySocials = headerSocials.slice(0, settings.headerSocialLimit || 3);
@@ -81,24 +80,7 @@ export default function Navbar() {
   }, [shareOpen]);
 
   useEffect(() => {
-    if (pathname === "/") {
-      setHomeCue(false);
-      return;
-    }
-    const reveal = () => {
-      setHomeCue(true);
-      if (cueTimer.current) window.clearTimeout(cueTimer.current);
-      cueTimer.current = window.setTimeout(() => setHomeCue(false), 1600);
-    };
-    window.addEventListener("pointermove", reveal, { passive: true });
-    window.addEventListener("touchstart", reveal, { passive: true });
-    window.addEventListener("scroll", reveal, { passive: true });
-    return () => {
-      window.removeEventListener("pointermove", reveal);
-      window.removeEventListener("touchstart", reveal);
-      window.removeEventListener("scroll", reveal);
-      if (cueTimer.current) window.clearTimeout(cueTimer.current);
-    };
+    if (pathname === "/") setHomeCue(false);
   }, [pathname]);
 
   useEffect(() => {
@@ -168,6 +150,8 @@ export default function Navbar() {
       {/* ── TOP BAR ── */}
       <header
         role="banner"
+        onMouseEnter={() => setHomeCue(pathname !== "/")}
+        onMouseLeave={() => setHomeCue(false)}
         style={{
           position: "fixed",
           top: 0, left: 0, right: 0,

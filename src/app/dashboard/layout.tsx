@@ -376,7 +376,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           height: "100%",
           minHeight: 0,
           overflowY: pathname.startsWith("/dashboard/settings") || pathname.startsWith("/dashboard/media") ? "hidden" : "auto",
-          padding: pathname.startsWith("/dashboard/settings") || pathname.startsWith("/dashboard/media") ? "1.1rem 1.25rem" : "1.75rem 2rem",
+          padding: pathname.startsWith("/dashboard/media") ? "1.1rem 1.25rem" : "1rem 1.15rem",
           background: "#eef2f7",
           display: pathname.startsWith("/dashboard/settings") || pathname.startsWith("/dashboard/media") ? "flex" : undefined,
           flexDirection: pathname.startsWith("/dashboard/settings") || pathname.startsWith("/dashboard/media") ? "column" : undefined,

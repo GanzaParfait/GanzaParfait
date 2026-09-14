@@ -3,18 +3,21 @@
 import Link from "next/link";
 import {
   RiArrowLeftLine,
+  RiArrowRightLine,
   RiExternalLinkLine,
   RiGithubFill,
   RiBuilding2Line,
+  RiUser3Line,
+  RiCalendarLine,
+  RiStackLine,
   RiCodeBoxLine,
-  RiCheckDoubleLine,
-  RiLightbulbFlashLine,
-  RiFocus2Line,
+  RiCheckboxCircleLine,
+  RiDownloadLine,
+  RiFileCopyLine,
 } from "react-icons/ri";
 import { RiPlayFill } from "react-icons/ri";
 import { useState } from "react";
 import { Project, projects as defaultProjects } from "@/data/site-data";
-import AnimatedSection from "@/components/ui/AnimatedSection";
 import ShareActions from "@/components/ui/ShareActions";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
@@ -31,219 +34,181 @@ function PosterVideo({ src, poster, title }: { src: string; poster?: string; tit
   return <video src={src} poster={poster} controls autoPlay preload="metadata" playsInline style={{ width: "100%", borderRadius: "1rem" }} />;
 }
 
+const STATUS = { live: "Live", "in-progress": "In progress", archived: "Archived" };
+const CATEGORY: Record<string, string> = {
+  web: "Web app",
+  mobile: "Mobile",
+  ai: "AI-enabled",
+  saas: "Company",
+  "open-source": "Open source",
+  systems: "Systems",
+  product: "Product",
+  other: "Other",
+};
+
 export default function ProjectCaseStudyClient({ project }: { project: Project }) {
   const settings = useSiteSettings();
   const saved = settings.projectRecords?.find((item) => item.id === project.id);
   const live = saved ? { ...project, ...saved, title: saved.title || project.title, description: saved.description || project.description } : project;
   project = live;
+  const list = defaultProjects.map((item) => settings.projectRecords?.find((savedItem) => savedItem.id === item.id) || item);
+  const index = list.findIndex((item) => item.id === project.id);
+  const previous = index > 0 ? list[index - 1] : null;
+  const next = index >= 0 && index < list.length - 1 ? list[index + 1] : null;
+  const shots = (project.screenshots || []).filter((src) => src && !src.includes("placeholder"));
+  const cover = project.image && !project.image.includes("placeholder") ? project.image : shots[0];
+  const category = project.category === "other" && project.categoryNote ? project.categoryNote : CATEGORY[project.category] || project.category;
+  const tabs = [
+    { id: "overview", label: "Overview", show: Boolean(project.longDescription || project.description || project.context || project.highlights?.length) },
+    { id: "features", label: "Features", show: Boolean(project.features?.length || project.solution) },
+    { id: "role", label: "My Role", show: Boolean(project.myRole || project.whatIBuilt) },
+    { id: "stack", label: "Tech Stack", show: Boolean(project.technologies?.length) },
+    { id: "results", label: "Results", show: Boolean(project.outcome || project.result) },
+    { id: "gallery", label: "Gallery", show: shots.length > 0 },
+    { id: "challenges", label: "Challenges", show: Boolean(project.challenge || project.problem) },
+    { id: "learned", label: "What I Learned", show: Boolean(project.learned) },
+  ].filter((tab) => tab.show);
+  const [tab, setTab] = useState(tabs[0]?.id || "overview");
+  const [shot, setShot] = useState(0);
+  const activeShot = shots[shot] || shots[0];
+
   return (
-    <article className="min-h-screen bg-[var(--color-bg)] pt-8 pb-20">
-      <div className="container max-w-4xl">
-        <Link
-          href="/projects"
-          className="inline-flex items-center gap-2 text-sm font-bold text-[var(--color-text-3)] hover:text-[var(--color-primary)] transition-colors mb-8"
-        >
-          <RiArrowLeftLine /> Back to work
-        </Link>
-
-        <AnimatedSection>
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-xs font-bold uppercase tracking-widest mb-4">
-            {project.category}
-          </div>
-          <h1 className="text-4xl md:text-6xl font-extrabold text-[var(--color-text)] tracking-tight leading-[1.1] mb-6">
-            {project.title}
-          </h1>
-          <p className="text-lg md:text-xl text-[var(--color-text-2)] leading-relaxed mb-8">
-            {project.longDescription || project.description}
-          </p>
-
-          <div className="flex flex-wrap gap-4 mb-8">
-            {project.links?.live && (
-              <a
-                href={project.links.live}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-primary px-6 py-3 rounded-xl gap-2 font-bold shadow-lg shadow-blue-500/20"
-              >
-                Live Project <RiExternalLinkLine size={18} />
-              </a>
-            )}
-            {project.links?.github && (
-              <a
-                href={project.links.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-outline px-6 py-3 rounded-xl gap-2 font-bold"
-              >
-                <RiGithubFill size={18} /> Source Code
-              </a>
-            )}
-          </div>
-
-          <ShareActions
-            title={`${project.title} by Prince Parfait GANZA`}
-            excerpt={project.description}
-            campaign={`project-${project.id}`}
-            content={project.id}
-          />
-        </AnimatedSection>
-
-        {project.image && project.image !== "/images/projects/project-placeholder.png" && (
-          <AnimatedSection delay={100} className="mb-8 mt-10">
-            <img src={project.image} alt={`${project.title} interface`} className="case-shot rounded-3xl border border-[var(--color-border)]" />
-          </AnimatedSection>
-        )}
-        {project.video ? (
-          <div className="mb-8">
-            <PosterVideo src={project.video} poster={project.videoPoster || project.image} title={project.title} />
-          </div>
-        ) : null}
-
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 mt-12">
-          <div className="md:col-span-8 flex flex-col gap-12">
-            {project.context && (
-              <AnimatedSection delay={160}>
-                <h2 className="text-2xl font-bold text-[var(--color-text)] mb-4">Context</h2>
-                <p className="text-[var(--color-text-2)] leading-loose text-lg">{project.context}</p>
-              </AnimatedSection>
-            )}
-
-            {(project.challenge || project.problem) && (
-              <AnimatedSection delay={200}>
-                <h2 className="flex items-center gap-3 text-2xl font-bold text-[var(--color-text)] mb-4">
-                  <div className="p-2 bg-red-500/10 text-red-500 rounded-lg">
-                    <RiFocus2Line size={20} />
-                  </div>
-                  Challenge
-                </h2>
-                <p className="text-[var(--color-text-2)] leading-loose text-lg">{project.challenge || project.problem}</p>
-              </AnimatedSection>
-            )}
-
-            {(project.solution || project.whatIBuilt) && (
-              <AnimatedSection delay={280}>
-                <h2 className="flex items-center gap-3 text-2xl font-bold text-[var(--color-text)] mb-4">
-                  <div className="p-2 bg-blue-500/10 text-blue-500 rounded-lg">
-                    <RiBuilding2Line size={20} />
-                  </div>
-                  Solution
-                </h2>
-                <p className="text-[var(--color-text-2)] leading-loose text-lg">{project.solution || project.whatIBuilt}</p>
-              </AnimatedSection>
-            )}
-
-            {(project.outcome || project.result) && (
-              <AnimatedSection delay={360}>
-                <h2 className="flex items-center gap-3 text-2xl font-bold text-[var(--color-text)] mb-4">
-                  <div className="p-2 bg-green-500/10 text-green-500 rounded-lg">
-                    <RiCheckDoubleLine size={20} />
-                  </div>
-                  Outcome
-                </h2>
-                <div className="p-6 border border-[var(--color-border)] rounded-2xl bg-[var(--color-surface)]">
-                  <p className="text-[var(--color-text-2)] leading-loose text-lg">{project.outcome || project.result}</p>
-                </div>
-              </AnimatedSection>
-            )}
-
-            {project.independent && (
-              <p className="text-sm text-[var(--color-text-3)]">
-                Independent product-development work, distinct from commercially deployed client systems.
-              </p>
-            )}
-
-            {project.screenshots && project.screenshots.length > 0 && (
-              <AnimatedSection delay={440}>
-                <h2 className="text-2xl font-bold text-[var(--color-text)] mb-6">Evidence</h2>
-                <div className="grid grid-cols-1 gap-6">
-                  {project.screenshots.map((src, idx) => (
-                    <div key={idx} className="w-full rounded-2xl overflow-hidden border border-[var(--color-border)]">
-                      <img src={src} alt={`${project.title} screenshot ${idx + 1}`} className="w-full h-auto" />
-                    </div>
-                  ))}
-                </div>
-              </AnimatedSection>
-            )}
-          </div>
-
-          <div className="md:col-span-4">
-            <AnimatedSection delay={300} className="sticky top-24 flex flex-col gap-8">
-              <div className="p-6 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-sm">
-                <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-[var(--color-text-3)] mb-4">
-                  <RiCodeBoxLine size={16} /> Technologies
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {project.technologies.map((tech) => (
-                    <span
-                      key={tech}
-                      className="px-3 py-1.5 bg-[var(--color-bg)] border border-[var(--color-border)] text-sm font-semibold rounded-lg text-[var(--color-text-2)]"
-                    >
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {project.myRole && (
-                <div className="p-6 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-sm">
-                  <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-[var(--color-text-3)] mb-4">
-                    <RiLightbulbFlashLine size={16} /> My Role
-                  </h3>
-                  <p className="text-[var(--color-text)] font-semibold">{project.myRole}</p>
-                </div>
-              )}
-
-              <div className="p-6 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-sm">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--color-text-3)] mb-4">
-                  Project Info
-                </h3>
-                <div className="flex flex-col gap-4">
-                  <div>
-                    <p className="text-xs text-[var(--color-text-3)] font-bold mb-1">PERIOD</p>
-                    <p className="text-sm font-semibold text-[var(--color-text)]">
-                      {project.period || (project.year ? String(project.year) : "Not published")}
-                    </p>
-                  </div>
-                  {project.organization && (
-                    <div>
-                      <p className="text-xs text-[var(--color-text-3)] font-bold mb-1">ORGANIZATION</p>
-                      <p className="text-sm font-semibold text-[var(--color-text)]">{project.organization}</p>
-                    </div>
-                  )}
-                  <div>
-                    <p className="text-xs text-[var(--color-text-3)] font-bold mb-1">STATUS</p>
-                    <p className="text-sm font-semibold text-[var(--color-text)] capitalize">
-                      {project.status.replace("-", " ")}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </AnimatedSection>
+    <article className="case-study">
+      <div className="container">
+        <div className="case-nav">
+          <Link href="/projects"><RiArrowLeftLine /> Back to projects</Link>
+          <div>
+            {previous ? <Link href={`/projects/${previous.id}`}><RiArrowLeftLine /> Previous</Link> : <span />}
+            {next ? <Link href={`/projects/${next.id}`}>Next <RiArrowRightLine /></Link> : null}
           </div>
         </div>
 
-        <AnimatedSection className="mt-16">
-          <h2 className="text-2xl font-bold text-[var(--color-text)] mb-6">Related work</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {defaultProjects
-              .filter((item) => item.id !== project.id)
-              .slice(0, 4)
-              .map((item) => (
-                <Link
-                  key={item.id}
-                  href={`/projects/${item.id}`}
-                  className="card p-5"
-                  style={{ textDecoration: "none" }}
-                >
-                  <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: "var(--color-primary)" }}>
-                    {item.organization || "Work"}
-                  </p>
-                  <h3 className="theme-heading text-lg mb-2">{item.title}</h3>
-                  <p className="text-sm theme-copy">{item.description}</p>
-                </Link>
-              ))}
+        <div className="case-hero">
+          <div>
+            <p className="section-label">{category}</p>
+            <h1>{project.title}</h1>
+            <p>{project.tagline || project.description}</p>
+            <div className="case-actions">
+              {project.links?.live ? (
+                <a className="btn btn-primary" href={project.links.live} target="_blank" rel="noopener noreferrer">Visit live site <RiExternalLinkLine size={16} /></a>
+              ) : null}
+              {project.links?.github ? (
+                <a className="btn btn-outline" href={project.links.github} target="_blank" rel="noopener noreferrer"><RiGithubFill size={16} /> View source code</a>
+              ) : null}
+            </div>
           </div>
-        </AnimatedSection>
+          <div className="selected-visual">
+            <figure>
+              {cover ? <img src={cover} alt="" /> : null}
+            </figure>
+            {project.flourish ? <p className="selected-flourish">{project.flourish}</p> : null}
+          </div>
+        </div>
+
+        <dl className="case-meta">
+          {project.myRole ? <div><RiUser3Line /><div><dt>My role</dt><dd>{project.myRole}</dd></div></div> : null}
+          {project.period || project.year ? <div><RiCalendarLine /><div><dt>Duration</dt><dd>{project.period || project.year}</dd></div></div> : null}
+          {project.organization ? <div><RiBuilding2Line /><div><dt>Client</dt><dd>{project.organization}</dd></div></div> : null}
+          <div><RiStackLine /><div><dt>Category</dt><dd>{category}</dd></div></div>
+          {project.technologies?.length ? <div><RiCodeBoxLine /><div><dt>Tech stack</dt><dd>{project.technologies.join(", ")}</dd></div></div> : null}
+          <div><RiCheckboxCircleLine /><div><dt>Status</dt><dd className={project.status === "live" ? "is-live" : undefined}>{STATUS[project.status]}</dd></div></div>
+        </dl>
+
+        <div className="case-layout">
+          <div>
+            <div className="case-tabs" role="tablist">
+              {tabs.map((item) => (
+                <button key={item.id} type="button" role="tab" aria-selected={tab === item.id} className={tab === item.id ? "is-on" : undefined} onClick={() => setTab(item.id)}>
+                  {item.label}
+                </button>
+              ))}
+            </div>
+            <div className="case-panel" role="tabpanel">
+              {tab === "overview" && (
+                <>
+                  <h2>Project overview</h2>
+                  <p>{project.longDescription || project.context || project.description}</p>
+                  {project.highlights?.length ? (
+                    <div className="case-highlights">
+                      <h3>Key highlights</h3>
+                      <ul>
+                        {project.highlights.map((item) => <li key={item}><RiFileCopyLine /> {item}</li>)}
+                      </ul>
+                    </div>
+                  ) : null}
+                </>
+              )}
+              {tab === "features" && (
+                <>
+                  <h2>Features</h2>
+                  {project.features?.length ? <ul className="case-list">{project.features.map((item) => <li key={item}>{item}</li>)}</ul> : <p>{project.solution}</p>}
+                </>
+              )}
+              {tab === "role" && (
+                <>
+                  <h2>My role</h2>
+                  {project.myRole ? <p>{project.myRole}</p> : null}
+                  {project.whatIBuilt ? <p>{project.whatIBuilt}</p> : null}
+                </>
+              )}
+              {tab === "stack" && (
+                <>
+                  <h2>Tech stack</h2>
+                  <ul className="case-list">{project.technologies.map((item) => <li key={item}>{item}</li>)}</ul>
+                </>
+              )}
+              {tab === "results" && (
+                <>
+                  <h2>Results</h2>
+                  <p>{project.outcome || project.result}</p>
+                </>
+              )}
+              {tab === "gallery" && activeShot && (
+                <>
+                  <h2>Project screenshots</h2>
+                  <div className="case-gallery">
+                    <button type="button" aria-label="Previous screenshot" onClick={() => setShot((current) => (current - 1 + shots.length) % shots.length)}><RiArrowLeftLine /></button>
+                    <figure>
+                      <img src={activeShot} alt="" />
+                      {project.screenshotCaptions?.[shot] ? <figcaption>{project.screenshotCaptions[shot]}</figcaption> : null}
+                    </figure>
+                    <button type="button" aria-label="Next screenshot" onClick={() => setShot((current) => (current + 1) % shots.length)}><RiArrowRightLine /></button>
+                  </div>
+                </>
+              )}
+              {tab === "challenges" && (
+                <>
+                  <h2>Challenges</h2>
+                  <p>{project.challenge || project.problem}</p>
+                </>
+              )}
+              {tab === "learned" && (
+                <>
+                  <h2>What I learned</h2>
+                  <p>{project.learned}</p>
+                </>
+              )}
+            </div>
+            {(project.videos?.length ? project.videos : project.video ? [project.video] : []).map((src) => (
+              <div className="case-video" key={src}>
+                <PosterVideo src={src} poster={project.videoPoster || cover} title={project.title} />
+              </div>
+            ))}
+          </div>
+          <aside>
+            {project.quote ? (
+              <blockquote>
+                <p>“{project.quote}”</p>
+                {project.quoteBy ? <footer>— {project.quoteBy}</footer> : null}
+              </blockquote>
+            ) : null}
+            <Link href="/contact" className="btn btn-primary">Let&apos;s discuss a similar project <RiArrowRightLine /></Link>
+            {project.caseStudyFile ? (
+              <a className="btn btn-outline" href={project.caseStudyFile}><RiDownloadLine /> Download case study</a>
+            ) : null}
+            <ShareActions title={`${project.title} by Prince Parfait GANZA`} excerpt={project.description} campaign={`project-${project.id}`} content={project.id} />
+          </aside>
+        </div>
       </div>
     </article>
   );

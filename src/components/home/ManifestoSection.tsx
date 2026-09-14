@@ -1,0 +1,73 @@
+import { RiArrowRightLine, RiBarChartBoxLine, RiLightbulbFlashLine, RiSettings3Line } from "react-icons/ri";
+import type { HomepageContent } from "@/lib/homepage";
+import ManifestoStepDeck from "@/components/home/ManifestoStepDeck";
+
+const ICONS = [RiLightbulbFlashLine, RiSettings3Line, RiBarChartBoxLine];
+
+export default function ManifestoSection({ manifesto, embedded = false }: { manifesto: HomepageContent["manifesto"]; embedded?: boolean }) {
+  const Tag = embedded ? "div" : "section";
+  return (
+    <Tag className={embedded ? "manifesto manifesto-embedded" : "manifesto"} id={embedded ? undefined : "manifesto"} aria-label="Opening statement">
+      <div className="container manifesto-stage">
+        <div className="manifesto-intro">
+          <p className="section-label">{manifesto.label}</p>
+          <h2>{manifesto.title}</h2>
+          <p>{manifesto.body}</p>
+        </div>
+        <div className="manifesto-figure">
+          <div className="manifesto-portrait">
+            <div className="manifesto-halo" aria-hidden="true" />
+            {manifesto.image ? <img src={manifesto.image} alt="" className="manifesto-photo" width={1024} height={1536} /> : null}
+            {manifesto.chip ? (
+              <p className="manifesto-chip">
+                {manifesto.chip.split("·").map((part) => part.trim()).filter(Boolean).map((part) => (
+                  <span key={part}>{part}</span>
+                ))}
+                <img src="/brand/icons/icon-blue.png" alt="" className="logo-light" />
+                <img src="/brand/icons/icon-white.png" alt="" className="logo-dark" />
+              </p>
+            ) : null}
+          </div>
+          <div className="manifesto-aside">
+            {manifesto.rail.length ? (
+              <ol className="manifesto-rail">
+                {manifesto.rail.map((item) => <li key={item}>{item}</li>)}
+              </ol>
+            ) : null}
+            {manifesto.script ? <p className="manifesto-script">{manifesto.script}</p> : null}
+          </div>
+        </div>
+        <ol className="manifesto-steps">
+          {manifesto.points.map((point, index) => {
+            const Icon = ICONS[index % ICONS.length];
+            return (
+              <li key={`${point.title}-${index}`}>
+                {index > 0 ? <span className="manifesto-arrow" aria-hidden="true"><RiArrowRightLine size={14} /></span> : null}
+                <article className="manifesto-card">
+                  <div>
+                    <span>{String(index + 1).padStart(2, "0")}</span>
+                    <span><Icon size={18} /></span>
+                  </div>
+                  <strong>{point.title}</strong>
+                  <p>{point.body}</p>
+                  {point.tag ? <small>{point.tag}</small> : null}
+                </article>
+              </li>
+            );
+          })}
+        </ol>
+        <ManifestoStepDeck points={manifesto.points} />
+        <div className="manifesto-foot">
+          {manifesto.quote ? <blockquote>{manifesto.quote}</blockquote> : null}
+          <div className="manifesto-sign">
+            <span aria-hidden="true" />
+            <div>
+              <strong>{manifesto.attribution}</strong>
+              <p>{manifesto.roles}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Tag>
+  );
+}

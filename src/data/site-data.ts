@@ -111,7 +111,8 @@ export type Project = {
   outcome?: string;
   result?: string;
   screenshots?: string[];
-  category: "web" | "mobile" | "ai" | "saas" | "open-source" | "systems" | "product";
+  category: "web" | "mobile" | "ai" | "saas" | "open-source" | "systems" | "product" | "other";
+  categoryNote?: string;
   status: "live" | "in-progress" | "archived";
   featured: boolean;
   independent?: boolean;
@@ -122,8 +123,18 @@ export type Project = {
   };
   image?: string;
   video?: string;
+  videos?: string[];
   videoPoster?: string;
   documents?: string[];
+  tagline?: string;
+  highlights?: string[];
+  features?: string[];
+  learned?: string;
+  quote?: string;
+  quoteBy?: string;
+  caseStudyFile?: string;
+  screenshotCaptions?: string[];
+  flourish?: string;
   year?: number;
   period?: string;
   contribution?: "creator" | "contributor";

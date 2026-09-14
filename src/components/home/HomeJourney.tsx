@@ -8,21 +8,17 @@ import { configuredBookingUrl, WHATSAPP_CALL_URL } from "@/lib/booking";
 import { homepageFrom } from "@/lib/homepage";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { socialsFor, socialIcon } from "@/lib/socials";
-import StoryVisual from "@/components/home/StoryVisual";
+import ManifestoSection from "@/components/home/ManifestoSection";
+import SelectedWork from "@/components/home/SelectedWork";
 
 export default function HomeJourney() {
   const settings = useSiteSettings();
   const home = homepageFrom(settings);
   const booking = configuredBookingUrl(settings.bookingCalendarUrl);
   const socials = socialsFor(settings, "footer").slice(0, 4);
-  const stories = home.work.stories;
-  const [focus, setFocus] = useState("All");
   const [knowledge, setKnowledge] = useState(0);
   const [progress, setProgress] = useState(0);
   const [pageProgress, setPageProgress] = useState(0);
-  const filters = ["All", ...Array.from(new Set(stories.flatMap((story) => story.tags)))];
-  const visible = stories.filter((story) => focus === "All" || story.tags.includes(focus));
-
   useEffect(() => {
     const node = document.getElementById("journey");
     if (!node) return;
@@ -55,59 +51,9 @@ export default function HomeJourney() {
         <span style={{ transform: `scaleX(${pageProgress})` }} />
       </div>
 
-      <section className="manifesto" id="manifesto" aria-label="Opening statement">
-        <div className="container manifesto-grid">
-          <div className="manifesto-copy">
-            <p className="section-label">{home.manifesto.label}</p>
-            <h2>{home.manifesto.title}</h2>
-            <p>{home.manifesto.body}</p>
-            <ol>
-              {home.manifesto.points.map((point) => (
-                <li key={point.title}><strong>{point.title}</strong><span>{point.body}</span></li>
-              ))}
-            </ol>
-          </div>
-          {home.manifesto.image ? (
-            <img src={home.manifesto.image} alt="" className="manifesto-photo" width={1024} height={1536} />
-          ) : null}
-        </div>
-      </section>
+      <ManifestoSection manifesto={{ ...home.manifesto, attribution: home.manifesto.attribution || settings.siteTitle }} />
 
-      <section className="work-stories" id="work" aria-label="Selected work">
-        <div className="container">
-          <div className="work-stories-head">
-            <div>
-              <p className="section-label">{home.work.label}</p>
-              <h2>{home.work.title}</h2>
-            </div>
-            <div className="work-filters" role="tablist" aria-label="Filter work">
-              {filters.map((item) => (
-                <button key={item} type="button" role="tab" aria-selected={focus === item} className={focus === item ? "is-on" : undefined} onClick={() => setFocus(item)}>
-                  {item}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="work-story-list">
-            {visible.map((story) => (
-                <article key={story.id} className="work-story">
-                  <div className="work-story-copy">
-                    <p>{String(stories.findIndex((item) => item.id === story.id) + 1).padStart(2, "0")}</p>
-                    <h3>{story.title}</h3>
-                    <p className="work-story-line">{story.line}</p>
-                    <p className="work-story-support">{story.support}</p>
-                    <p><strong>Challenge. </strong>{story.challenge}</p>
-                    <p><strong>Contribution. </strong>{story.contribution}</p>
-                    <p><strong>Status. </strong>{story.status}</p>
-                    <Link href={story.href}>View case study <RiArrowRightLine size={16} /></Link>
-                  </div>
-                  <StoryVisual images={story.images} title={story.title} organization={story.organization} />
-                </article>
-            ))}
-          </div>
-          <Link href="/projects" className="btn btn-outline" style={{ marginTop: "1.5rem" }}>All work</Link>
-        </div>
-      </section>
+      <SelectedWork work={home.work} records={settings.projectRecords} />
 
       <section className="knowledge" id="knowledge" aria-label="Knowledge system">
         <div className="container">

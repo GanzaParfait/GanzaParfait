@@ -7,7 +7,7 @@ import ProjectEditorModal from "@/components/dashboard/ProjectEditorModal";
 import MediaManagerModal from "@/components/dashboard/MediaManagerModal";
 import { getLocalSettings, saveLocalSettings } from "@/lib/supabase";
 
-const PAGE_SIZE = 6;
+const PAGE_SIZE = 5;
 const STORAGE_KEY = "ppg_dashboard_projects";
 
 function storedProjects(): Project[] {
@@ -86,6 +86,7 @@ export default function ProjectsPage() {
           <option value="saas">SaaS</option>
           <option value="ai">AI</option>
           <option value="mobile">Mobile</option>
+          <option value="other">Other</option>
         </select>
         <select value={status} onChange={(event) => { setStatus(event.target.value); setPage(1); }} style={selectStyle}>
           <option value="all">All statuses</option>
@@ -137,11 +138,11 @@ export default function ProjectsPage() {
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem" }}>
         <p style={{ margin: 0, fontSize: "0.78rem", color: "#64748b" }}>{filtered.length} shown</p>
-        <div style={{ display: "flex", gap: "0.4rem" }}>
-          <button type="button" className="btn btn-outline btn-sm" disabled={currentPage <= 1} onClick={() => setPage(currentPage - 1)}>Previous</button>
-          <span style={{ fontSize: "0.8rem", alignSelf: "center" }}>{currentPage} / {pages}</span>
-          <button type="button" className="btn btn-outline btn-sm" disabled={currentPage >= pages} onClick={() => setPage(currentPage + 1)}>Next</button>
-        </div>
+        <nav className="page-text-nav" aria-label="Project pages">
+          <button type="button" disabled={currentPage <= 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>Previous</button>
+          <span>{currentPage} of {pages}</span>
+          <button type="button" disabled={currentPage >= pages} onClick={() => setPage((value) => value + 1)}>Next</button>
+        </nav>
       </div>
 
       <ProjectEditorModal
