@@ -1,7 +1,34 @@
-import { projects, siteConfig, speakingEngagements } from "@/data/site-data";
+import { projects, siteConfig, speakingEngagements, timeline } from "@/data/site-data";
 import type { SiteSettings } from "@/lib/supabase";
 
 export type HomePoint = { title: string; body: string; tag?: string };
+export type KnowledgeIcon = "strategy" | "product" | "technology" | "data";
+export type KnowledgeItem = {
+  title: string;
+  body: string;
+  href?: string;
+  icon?: KnowledgeIcon;
+};
+export type KnowledgeStat = { value: string; label: string };
+export type JourneyType = "education" | "work" | "leadership" | "milestone";
+export type JourneyEntry = {
+  id: string;
+  year: string;
+  title: string;
+  organization: string;
+  description: string;
+  type: JourneyType;
+  location?: string;
+  summary?: string;
+  highlights?: string[];
+  website?: string;
+  industry?: string;
+  team?: string;
+  status?: string;
+  relatedHref?: string;
+  showDetails: boolean;
+  detailsBlocked: boolean;
+};
 export type WorkStory = {
   id: string;
   title: string;
@@ -14,9 +41,6 @@ export type WorkStory = {
   href: string;
   tags: string[];
   images: string[];
-  role?: string;
-  period?: string;
-  client?: string;
 };
 
 export type HomepageContent = {
@@ -42,10 +66,49 @@ export type HomepageContent = {
     moreLabel: string;
     moreTitle: string;
     moreBody: string;
+    rail: string[];
     stories: WorkStory[];
   };
-  knowledge: { label: string; title: string; items: HomePoint[] };
-  journey: { label: string; title: string; note: string; cta: string };
+  knowledge: {
+    label: string;
+    title: string;
+    body: string;
+    script: string;
+    rail: string[];
+    items: KnowledgeItem[];
+    learnMore: string;
+    statement: string;
+    statementMark: string;
+    stats: KnowledgeStat[];
+    quote: string;
+    attribution: string;
+    display: {
+      showScript: boolean;
+      showRail: boolean;
+      showStatement: boolean;
+      showStats: boolean;
+      showQuote: boolean;
+      showIndex: boolean;
+      showGo: boolean;
+    };
+  };
+  journey: {
+    label: string;
+    title: string;
+    note: string;
+    cta: string;
+    moreTitle: string;
+    moreBody: string;
+    moreCta: string;
+    stats: KnowledgeStat[];
+    entries: JourneyEntry[];
+    display: {
+      showStats: boolean;
+      showMoreCard: boolean;
+      showFilters: boolean;
+      showSort: boolean;
+    };
+  };
   ventures: { label: string; title: string; body: string };
   principles: { label: string; title: string; items: { n: string; title: string; body: string }[] };
   speaking: { label: string; title: string; body: string; image: string; cta: string };
@@ -57,7 +120,7 @@ function project(id: string) {
   return projects.find((item) => item.id === id);
 }
 
-function story(id: string, extra: { line: string; support: string; tags: string[]; images: string[]; status?: string; role?: string; period?: string; client?: string }): WorkStory {
+function story(id: string, extra: { line: string; support: string; tags: string[]; images: string[]; status?: string }): WorkStory {
   const item = project(id);
   return {
     id,
@@ -71,9 +134,6 @@ function story(id: string, extra: { line: string; support: string; tags: string[
     href: `/projects/${id}`,
     tags: extra.tags,
     images: extra.images,
-    role: extra.role,
-    period: extra.period,
-    client: extra.client,
   };
 }
 
@@ -106,59 +166,127 @@ export const DEFAULT_HOMEPAGE: HomepageContent = {
     moreLabel: "More projects",
     moreTitle: "Explore more of my work.",
     moreBody: "Systems, web applications, data solutions, and ventures — each built to solve a real problem.",
+    rail: ["Ideas", "Systems", "Impact"],
     stories: [
       story("caritas-systems", {
         line: "Organizational reporting, held in one dependable system.",
-        support: "A role-based management system for indicators, departmental data, reports and administrative workflows.",
-        tags: ["Systems"],
+        support: "Organizational digital systems for indicator tracking, reporting, and information management.",
+        tags: ["Systems", "Data"],
         images: ["/images/projects/caritas-systems.webp"],
-        role: "Lead Developer",
-        period: "Sep 2025 – Oct 2026",
-        client: "Caritas Rwanda",
       }),
       story("askfield", {
-        line: "Survey platform for data collection, organization management, and connected workflows.",
-        support: "Frontend integration for a survey and data-collection platform.",
-        tags: ["Web app"],
+        line: "Survey workflows, connected through the interface.",
+        support: "Frontend development and API integration for a survey and data-collection platform.",
+        tags: ["Product", "Data"],
         images: ["/images/projects/askfield.webp"],
         status: "Team contribution. No public metric is claimed.",
-        role: "Frontend Integrator",
-        period: "2024 – 2026",
       }),
       story("stockpro", {
-        line: "Inventory and sales management for businesses, with invoices, stock tracking and reporting.",
-        support: "Products, stock, invoices, clients, suppliers, and reporting in one system.",
-        tags: ["Product"],
+        line: "Inventory and sales, without a pile of separate records.",
+        support: "Inventory and sales management system covering stock, invoicing, clients, suppliers, and reporting.",
+        tags: ["Product", "Systems"],
         images: ["/images/projects/stockpro.webp"],
-        role: "Product Developer",
-        period: "2024 – 2026",
       }),
       story("gotallnews", {
-        line: "News and media platform with publishing, video, and engagement features.",
-        support: "Independent product work across content, video, and accounts.",
-        tags: ["Web app"],
+        line: "An independent publishing product, still in progress.",
+        support: "Independent digital media product covering publishing, articles, video, accounts, and engagement.",
+        tags: ["Product", "Ventures"],
         images: ["/images/projects/gotallnews.webp"],
         status: "Independent product work. No traffic or audience metric is claimed.",
-        role: "Full-Stack Developer",
-        period: "2024 – 2025",
       }),
     ],
   },
   knowledge: {
     label: "Knowledge",
     title: "How ideas become working systems.",
+    body: "A practical approach that turns complex problems into useful, scalable and people-centered solutions.",
+    script: "From ideas to impact",
+    rail: ["People", "Process", "Technology", "Impact"],
+    learnMore: "Learn more",
     items: [
-      { title: "Strategy & Discovery", body: "Requirements, problem framing, and solution planning before a line of interface is treated as the answer." },
-      { title: "Product & Experience", body: "Product thinking, workflows, and interfaces people can actually follow." },
-      { title: "Technology & Systems", body: "React, Next.js, PHP, APIs, integrations, and databases already used in the documented work." },
-      { title: "Data & Operations", body: "SQL, reporting systems, dashboards, and operational records." },
+      {
+        title: "Strategy & Discovery",
+        body: "Requirements, problem framing, and solution planning before a line of interface is treated as the answer.",
+        href: "/services",
+        icon: "strategy",
+      },
+      {
+        title: "Product & Experience",
+        body: "Product thinking, workflows, and interfaces people can actually follow.",
+        href: "/services",
+        icon: "product",
+      },
+      {
+        title: "Technology & Systems",
+        body: "React, Next.js, PHP, APIs, integrations, and databases already used in the documented work.",
+        href: "/services",
+        icon: "technology",
+      },
+      {
+        title: "Data & Operations",
+        body: "SQL, reporting systems, dashboards, and operational records.",
+        href: "/services",
+        icon: "data",
+      },
     ],
+    statement: "Knowledge matters most when it creates real value.",
+    statementMark: "real value",
+    stats: [
+      { value: "4+", label: "Focus Areas" },
+      { value: `${projects.length}+`, label: "Projects Applied" },
+      { value: "Real World", label: "Impact" },
+      { value: "Continuous", label: "Learning" },
+    ],
+    quote: "Better systems create brighter opportunities.",
+    attribution: "Prince Parfait GANZA",
+    display: {
+      showScript: false,
+      showRail: true,
+      showStatement: false,
+      showStats: true,
+      showQuote: true,
+      showIndex: false,
+      showGo: false,
+    },
   },
   journey: {
     label: "Journey",
-    title: "How the work developed.",
-    note: "The exact employers and dates live on Experience. This is the public path.",
-    cta: "Explore this record",
+    title: "A journey of continuous building.",
+    note: "From learning to leading — a timeline of the key places, roles, and milestones that shaped the path.",
+    cta: "Open full timeline",
+    moreTitle: "Need more details?",
+    moreBody: "View the complete record on Experience, including roles, education, and training with verified context.",
+    moreCta: "Open full timeline",
+    stats: [
+      { value: `${timeline.length}+`, label: "Roles" },
+      { value: `${new Set(timeline.map((item) => item.organization)).size}`, label: "Organizations" },
+      { value: "2021", label: "Started" },
+      { value: "Ongoing", label: "Building" },
+    ],
+    entries: timeline.map((item) => ({
+      id: item.id,
+      year: item.year,
+      title: item.title,
+      organization: item.organization,
+      description: item.description,
+      type: item.type,
+      location: item.location,
+      summary: item.summary,
+      highlights: item.highlights,
+      website: item.website,
+      industry: item.industry,
+      team: item.team,
+      status: item.status,
+      relatedHref: item.relatedHref || "/experience",
+      showDetails: true,
+      detailsBlocked: false,
+    })),
+    display: {
+      showStats: true,
+      showMoreCard: true,
+      showFilters: true,
+      showSort: true,
+    },
   },
   ventures: {
     label: "Ventures",
@@ -234,32 +362,45 @@ export function homepageFrom(settings: SiteSettings): HomepageContent {
       moreLabel: saved.work?.moreLabel || DEFAULT_HOMEPAGE.work.moreLabel,
       moreTitle: saved.work?.moreTitle || DEFAULT_HOMEPAGE.work.moreTitle,
       moreBody: saved.work?.moreBody || DEFAULT_HOMEPAGE.work.moreBody,
+      rail: saved.work?.rail?.length ? saved.work.rail : DEFAULT_HOMEPAGE.work.rail,
       label: !saved.work?.label || saved.work.label === "01 / Selected work" || saved.work.label === "Selected work" ? DEFAULT_HOMEPAGE.work.label : saved.work.label,
       title: !saved.work?.title || saved.work.title === "Evidence, one case at a time." ? DEFAULT_HOMEPAGE.work.title : saved.work.title,
       stories: DEFAULT_HOMEPAGE.work.stories.map((fallback) => {
-        const savedStory = saved.work?.stories?.find((item) => item.id === fallback.id);
-        const staleLine = new Set([
-          "Inventory and sales, without a pile of separate records.",
-          "Survey workflows, connected through the interface.",
-          "An independent publishing product, still in progress.",
-          "A public site, kept apart from the internal systems.",
-          "Ticket accounting with a record someone can trace.",
-        ]);
+        const story = saved.work?.stories?.find((item) => item.id === fallback.id);
+        if (!story) return fallback;
+        return { ...fallback, ...story, images: story.images?.length ? story.images : fallback.images };
+      }),
+    },
+    knowledge: {
+      ...DEFAULT_HOMEPAGE.knowledge,
+      ...saved.knowledge,
+      rail: saved.knowledge?.rail?.length ? saved.knowledge.rail : DEFAULT_HOMEPAGE.knowledge.rail,
+      stats: saved.knowledge?.stats?.length ? saved.knowledge.stats : DEFAULT_HOMEPAGE.knowledge.stats,
+      display: { ...DEFAULT_HOMEPAGE.knowledge.display, ...saved.knowledge?.display },
+      items: (saved.knowledge?.items?.length ? saved.knowledge.items : DEFAULT_HOMEPAGE.knowledge.items).map((item, index) => ({
+        ...DEFAULT_HOMEPAGE.knowledge.items[index],
+        ...item,
+        icon: item.icon || DEFAULT_HOMEPAGE.knowledge.items[index]?.icon || "strategy",
+        href: item.href || DEFAULT_HOMEPAGE.knowledge.items[index]?.href || "/services",
+      })),
+    },
+    journey: {
+      ...DEFAULT_HOMEPAGE.journey,
+      ...saved.journey,
+      stats: saved.journey?.stats?.length ? saved.journey.stats : DEFAULT_HOMEPAGE.journey.stats,
+      display: { ...DEFAULT_HOMEPAGE.journey.display, ...saved.journey?.display },
+      entries: (saved.journey?.entries?.length ? saved.journey.entries : DEFAULT_HOMEPAGE.journey.entries).map((entry) => {
+        const fallback = DEFAULT_HOMEPAGE.journey.entries.find((item) => item.id === entry.id);
         return {
           ...fallback,
-          ...savedStory,
-          line: !savedStory?.line || staleLine.has(savedStory.line) ? fallback.line : savedStory.line,
-          support: savedStory?.support && !savedStory.support.includes(" · ") ? savedStory.support : fallback.support,
-          role: savedStory?.role || fallback.role,
-          period: savedStory?.period || fallback.period,
-          client: savedStory?.client || fallback.client,
-          tags: fallback.tags,
-          images: savedStory?.images?.length ? savedStory.images : fallback.images,
+          ...entry,
+          type: entry.type || fallback?.type || "work",
+          highlights: entry.highlights?.length ? entry.highlights : fallback?.highlights || [],
+          showDetails: entry.showDetails ?? fallback?.showDetails ?? true,
+          detailsBlocked: entry.detailsBlocked ?? fallback?.detailsBlocked ?? false,
         };
       }),
     },
-    knowledge: { ...DEFAULT_HOMEPAGE.knowledge, ...saved.knowledge, items: saved.knowledge?.items?.length ? saved.knowledge.items : DEFAULT_HOMEPAGE.knowledge.items },
-    journey: { ...DEFAULT_HOMEPAGE.journey, ...saved.journey },
     ventures: { ...DEFAULT_HOMEPAGE.ventures, ...saved.ventures },
     principles: { ...DEFAULT_HOMEPAGE.principles, ...saved.principles, items: saved.principles?.items?.length ? saved.principles.items : DEFAULT_HOMEPAGE.principles.items },
     speaking: { ...DEFAULT_HOMEPAGE.speaking, ...saved.speaking },

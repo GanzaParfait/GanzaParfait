@@ -25,6 +25,7 @@ export type NavbarStyle = "full" | "pill";
 export type FooterCompanyFit = "contain" | "cover";
 export type FooterCompanyHeight = "compact" | "regular" | "tall";
 export type FooterCompanyAlign = "left" | "center";
+export type EmailHeaderLayout = "brand_tagline" | "nav_socials" | "banner" | "profile";
 
 export interface SiteSettings {
   bannerLayout: HeroLayoutType;
@@ -50,6 +51,14 @@ export interface SiteSettings {
   footerCompanyHeight?: FooterCompanyHeight;
   footerCompanyAlign?: FooterCompanyAlign;
   footerCompanyHref?: string;
+  /** Focal point for the footer band image (0–100). */
+  footerCompanyPositionX?: number;
+  footerCompanyPositionY?: number;
+  footerCompanyWholeImage?: boolean;
+  footerCompanyZoom?: number;
+  footerCompanyMediaType?: "image" | "video" | "carousel";
+  footerCompanyMedia?: string[];
+  footerCompanyCarouselInterval?: number;
   bookingCalendarUrl?: string;
   announcementText?: string;
   announcementLink?: string;
@@ -71,6 +80,33 @@ export interface SiteSettings {
   announcementInterval?: number;
   homepage?: HomepageContent;
   projectRecords?: ProjectRecord[];
+  /** Outbound email branding (thanks, contact, newsletter shell). */
+  emailHeaderLayout?: EmailHeaderLayout;
+  emailShowSignature?: boolean;
+  emailSignatureQuote?: string;
+  emailShowSocials?: boolean;
+  emailShowPhone?: boolean;
+  emailPrimaryColor?: string;
+  emailTagline?: string;
+  emailBannerKicker?: string;
+  emailBannerHeadline?: string;
+  emailHeaderNav?: string;
+  emailFooterNote?: string;
+  emailWelcomeEyebrow?: string;
+  emailWelcomeTitle?: string;
+  emailWelcomeBody?: string;
+  emailWelcomeFeatures?: string;
+  emailWelcomeCtaLabel?: string;
+  emailNewsletterEyebrow?: string;
+  emailNewsletterTitle?: string;
+  emailNewsletterBody?: string;
+  emailNewsletterCtaLabel?: string;
+  emailNewsletterImageUrl?: string;
+  emailContactBadge?: string;
+  emailContactTip?: string;
+  emailPreferencesUrl?: string;
+  emailUnsubscribeUrl?: string;
+  emailPortraitUrl?: string;
   heroGreeting?: string;
   heroAvailableText?: string;
   heroHeadline?: string;
@@ -162,10 +198,43 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   footerCompanyHeight: "regular",
   footerCompanyAlign: "center",
   footerCompanyHref: "https://lerony.com",
+  footerCompanyPositionX: 50,
+  footerCompanyPositionY: 40,
+  footerCompanyWholeImage: false,
+  footerCompanyZoom: 100,
+  footerCompanyMediaType: "image",
+  footerCompanyMedia: [],
+  footerCompanyCarouselInterval: 5,
   bookingCalendarUrl: "",
   announcementText: "",
   announcementLink: "",
   announcementIsActive: false,
+  emailHeaderLayout: "brand_tagline",
+  emailShowSignature: true,
+  emailSignatureQuote: "I only send something when there is something worth sharing.",
+  emailShowSocials: true,
+  emailShowPhone: true,
+  emailPrimaryColor: "#0E52AB",
+  emailTagline: "Ideas. Projects. Real Impact.",
+  emailBannerKicker: "Turning ideas into",
+  emailBannerHeadline: "Real solutions",
+  emailHeaderNav: "About|/about\nContact|/contact",
+  emailFooterNote: "",
+  emailWelcomeEyebrow: "Welcome aboard",
+  emailWelcomeTitle: "Thanks for joining!",
+  emailWelcomeBody: "You are on the list for notes from a founder, entrepreneur and technologist — published only when there is something worth saying.",
+  emailWelcomeFeatures: "Ideas & perspectives\nSelected projects & case studies\nImportant announcements\nOpportunities and collaborations",
+  emailWelcomeCtaLabel: "Explore princeparfait.com →",
+  emailNewsletterEyebrow: "From the desk",
+  emailNewsletterTitle: "Ideas. Projects. Real Impact.",
+  emailNewsletterBody: "Updates on software, systems, and work that turns complex needs into something people can use.",
+  emailNewsletterCtaLabel: "Read the latest on the site →",
+  emailNewsletterImageUrl: "",
+  emailContactBadge: "New contact message",
+  emailContactTip: "Quick tip: Reply directly to this email or use the Control Center to manage this conversation, add notes, or convert it to a project.",
+  emailPreferencesUrl: "/contact",
+  emailUnsubscribeUrl: "/contact",
+  emailPortraitUrl: "/images/profile/prince-parfait-ganza-kigali-rwanda.webp",
   heroGreeting: "Hi there, I'm",
   heroAvailableText: "Available for new projects",
   heroHeadline: "Building technology, products and ventures that turn ambitious ideas into real-world impact.",
@@ -199,14 +268,19 @@ export interface AnalyticsMetrics {
   avgDuration: string;
   bounceRate: string;
   countryBreakdown: { country: string; flag: string; count: number; percentage: number }[];
-  pageBreakdown: { path: string; name: string; views: number }[];
-  deviceBreakdown: { device: string; icon: string; percentage: number }[];
+  pageBreakdown: { path: string; name: string; views: number; percentage?: number }[];
+  deviceBreakdown: { device: string; icon: string; percentage: number; count?: number }[];
   recentSessions: {
     id: string;
     time: string;
     country: string;
     flag: string;
+    city?: string;
+    region?: string;
+    latitude?: number | null;
+    longitude?: number | null;
     device: string;
+    browser?: string;
     ip: string;
     pageCount: number;
     duration: string;
@@ -221,6 +295,20 @@ export interface AnalyticsMetrics {
     visits: number;
     percentage: number;
   }[];
+  series: { date: string; label: string; sessions: number; visitors: number; pageviews: number }[];
+  previousSeries: { date: string; label: string; sessions: number; visitors: number; pageviews: number }[];
+  sparklines: {
+    sessions: number[];
+    visitors: number[];
+    pageviews: number[];
+    duration: number[];
+  };
+  range: {
+    preset: string;
+    from: string;
+    to: string;
+    label: string;
+  };
   telemetryActive: boolean;
   changes: {
     totalVisitors: string;
@@ -330,25 +418,15 @@ export function saveLocalSettings(settings: Partial<SiteSettings>): SiteSettings
 
 export async function persistSettingsRemote(settings: SiteSettings) {
   try {
-    const payload = {
-      banner_layout: settings.bannerLayout,
-      site_title: settings.siteTitle,
-      site_subtitle: settings.siteSubtitle,
-      bio: settings.bio,
-      location: settings.location,
-      contact_email: settings.contactEmail,
-      whatsapp_number: settings.whatsappNumber,
-      header_social_limit: settings.headerSocialLimit,
-      navbar_style: settings.navbarStyle,
-      settings_json: settings,
-      social_links: settings.socialLinks || DEFAULT_SOCIAL_LINKS,
-      updated_at: new Date().toISOString(),
-    };
-    const { data } = await supabase.from("site_settings").select("id").limit(1).maybeSingle();
-    if (data?.id) {
-      await supabase.from("site_settings").update(payload).eq("id", data.id);
-    } else {
-      await supabase.from("site_settings").insert(payload);
+    const res = await fetch("/api/settings", {
+      method: "PUT",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(settings),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      console.error("Could not persist site settings remotely:", body.error || res.statusText);
     }
   } catch (error) {
     console.error("Could not persist site settings remotely:", error);
@@ -357,27 +435,9 @@ export async function persistSettingsRemote(settings: SiteSettings) {
 
 export async function fetchRemoteSettings(): Promise<SiteSettings | null> {
   try {
-    const { data, error } = await supabase
-      .from("site_settings")
-      .select("settings_json, social_links, navbar_style, contact_email, whatsapp_number, location, site_title, site_subtitle, bio, header_social_limit, banner_layout")
-      .limit(1)
-      .maybeSingle();
-    if (error || !data) return null;
-    const json = (data.settings_json || {}) as Partial<SiteSettings>;
-    return {
-      ...DEFAULT_SETTINGS,
-      ...json,
-      bannerLayout: (json.bannerLayout || data.banner_layout || DEFAULT_SETTINGS.bannerLayout) as SiteSettings["bannerLayout"],
-      navbarStyle: json.navbarStyle || data.navbar_style || DEFAULT_SETTINGS.navbarStyle,
-      contactEmail: json.contactEmail || data.contact_email || DEFAULT_SETTINGS.contactEmail,
-      whatsappNumber: json.whatsappNumber || data.whatsapp_number || DEFAULT_SETTINGS.whatsappNumber,
-      location: json.location || data.location || DEFAULT_SETTINGS.location,
-      siteTitle: json.siteTitle || data.site_title || DEFAULT_SETTINGS.siteTitle,
-      siteSubtitle: json.siteSubtitle || data.site_subtitle || DEFAULT_SETTINGS.siteSubtitle,
-      bio: json.bio || data.bio || DEFAULT_SETTINGS.bio,
-      headerSocialLimit: json.headerSocialLimit ?? data.header_social_limit ?? DEFAULT_SETTINGS.headerSocialLimit,
-      socialLinks: json.socialLinks?.length ? json.socialLinks : data.social_links || DEFAULT_SOCIAL_LINKS,
-    };
+    const res = await fetch("/api/settings", { cache: "no-store", credentials: "same-origin" });
+    if (!res.ok) return null;
+    return (await res.json()) as SiteSettings;
   } catch {
     return null;
   }

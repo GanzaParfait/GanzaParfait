@@ -1491,12 +1491,30 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node@npm:*":
+  version: 26.5.1
+  resolution: "@types/node@npm:26.5.1"
+  dependencies:
+    undici-types: "npm:~8.9.0"
+  checksum: 10c0/40aa7aa4c099c8a08bf39b5bcb15eaf2cc073666c2191b1d9ac8243ce6b68b23ace904a044c521f6d310b70e94514b531be5f4fc184f141a7ce7f0679ebc7bb3
+  languageName: node
+  linkType: hard
+
 "@types/node@npm:^20":
   version: 20.19.43
   resolution: "@types/node@npm:20.19.43"
   dependencies:
     undici-types: "npm:~6.21.0"
   checksum: 10c0/9bcec3b5295bdd77ff0b44a528a69f7e22028c347507ba2c69be47ec84e30299f45043b222e9c86c510e138c9c53b2419dd5cd34920602a4a5a381c288075318
+  languageName: node
+  linkType: hard
+
+"@types/nodemailer@npm:^8.0.1":
+  version: 8.0.1
+  resolution: "@types/nodemailer@npm:8.0.1"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10c0/4370ac478a6811faaa64fcf769556515c72b78c66961cde22be75bb975ce8a964cfbe5e7c0988a99250f3250faa34357c73958b019b3c63dd138ea3784442032
   languageName: node
   linkType: hard
 
@@ -5114,6 +5132,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"nodemailer@npm:^10.0.10":
+  version: 10.0.10
+  resolution: "nodemailer@npm:10.0.10"
+  checksum: 10c0/062bf0861e4986eca150b8d78b8289c55f33ad689e9596aa71b4abd4ab4358b9c4881cec8acca3251643814d84d26ca6b1082153f47d35d65639d4ce858cfd67
+  languageName: node
+  linkType: hard
+
 "nth-check@npm:^2.0.0":
   version: 2.1.1
   resolution: "nth-check@npm:2.1.1"
@@ -6099,6 +6124,7 @@ __metadata:
     "@supabase/supabase-js": "npm:^2.112.2"
     "@tailwindcss/postcss": "npm:^4"
     "@types/node": "npm:^20"
+    "@types/nodemailer": "npm:^8.0.1"
     "@types/react": "npm:^19"
     "@types/react-dom": "npm:^19"
     "@uiw/react-md-editor": "npm:^4.1.1"
@@ -6109,6 +6135,7 @@ __metadata:
     next: "npm:16.3.0"
     next-remove-imports: "npm:^1.0.13"
     next-themes: "npm:^0.4.6"
+    nodemailer: "npm:^10.0.10"
     react: "npm:19.2.8"
     react-dom: "npm:19.2.8"
     react-icons: "npm:^5.7.0"
@@ -6491,6 +6518,13 @@ __metadata:
   version: 6.21.0
   resolution: "undici-types@npm:6.21.0"
   checksum: 10c0/c01ed51829b10aa72fc3ce64b747f8e74ae9b60eafa19a7b46ef624403508a54c526ffab06a14a26b3120d055e1104d7abe7c9017e83ced038ea5cf52f8d5e04
+  languageName: node
+  linkType: hard
+
+"undici-types@npm:~8.9.0":
+  version: 8.9.0
+  resolution: "undici-types@npm:8.9.0"
+  checksum: 10c0/51c712c20c087368f62c6fc0f2bc49fa76bfe5dec28ff01584bb677ff29b0622569783c02d43e151143808c48c0503f804093bd2c491b10f2a830138034cb451
   languageName: node
   linkType: hard
 

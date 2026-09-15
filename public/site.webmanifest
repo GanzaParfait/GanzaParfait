@@ -4,7 +4,6 @@
   "description": "Personal website of Prince Parfait GANZA, founder, entrepreneur and technologist based in Kigali, Rwanda.",
   "start_url": "/",
   "scope": "/",
-  "id": "https://www.princeparfait.com/",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",

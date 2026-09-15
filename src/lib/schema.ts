@@ -1,7 +1,9 @@
 import { siteConfig, type Project } from "@/data/site-data";
 
 /** Production canonical origin. Always used for JSON-LD @id values. */
-export const CANONICAL_ORIGIN = "https://www.princeparfait.com";
+export const CANONICAL_ORIGIN =
+  (typeof process !== "undefined" && process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "")) ||
+  "https://www.princeparfait.com";
 
 export const PERSON_ID = `${CANONICAL_ORIGIN}/#person`;
 export const PERSON_IMAGE_ID = `${CANONICAL_ORIGIN}/#person-image`;

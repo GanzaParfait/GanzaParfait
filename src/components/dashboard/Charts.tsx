@@ -5,19 +5,18 @@ export function BarChart({
 }) {
   const max = Math.max(...items.map((item) => item.value), 1);
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
+    <div className="chart-bars">
       {items.map((item) => (
-        <div key={item.label}>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.3rem", fontSize: "0.8rem" }}>
-            <span style={{ fontWeight: 700, color: "#0b192c" }}>{item.label}</span>
-            <span style={{ color: "#64748b", fontWeight: 700 }}>{item.value.toLocaleString()}</span>
+        <div key={item.label} className="chart-bar-row">
+          <div className="chart-bar-meta">
+            <span>{item.label}</span>
+            <strong>{item.value.toLocaleString()}</strong>
           </div>
-          <div style={{ height: "0.55rem", borderRadius: "999px", background: "#e2e8f0", overflow: "hidden" }}>
+          <div className="chart-bar-track">
             <div
+              className="chart-bar-fill"
               style={{
                 width: `${Math.max((item.value / max) * 100, 4)}%`,
-                height: "100%",
-                borderRadius: "999px",
                 background: item.color || "linear-gradient(90deg, #0e52a8, #60a5fa)",
               }}
             />
@@ -30,16 +29,21 @@ export function BarChart({
 
 export function DonutChart({
   items,
+  centerValue,
+  centerLabel = "Sessions",
 }: {
   items: { label: string; value: number; color: string }[];
+  centerValue?: number | string;
+  centerLabel?: string;
 }) {
   const total = items.reduce((sum, item) => sum + item.value, 0) || 1;
   const radius = 54;
   const circumference = 2 * Math.PI * radius;
   let offset = 0;
+  const display = centerValue ?? Math.round(total);
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "1.25rem", flexWrap: "wrap" }}>
+    <div className="chart-donut">
       <svg width="148" height="148" viewBox="0 0 148 148" aria-hidden="true">
         <circle cx="74" cy="74" r={radius} fill="none" stroke="#e2e8f0" strokeWidth="16" />
         {items.map((item) => {
@@ -63,18 +67,18 @@ export function DonutChart({
           return circle;
         })}
         <text x="74" y="70" textAnchor="middle" fontSize="18" fontWeight="800" fill="#0b192c">
-          {Math.round(total)}
+          {display}
         </text>
         <text x="74" y="90" textAnchor="middle" fontSize="10" fill="#64748b">
-          mix
+          {centerLabel}
         </text>
       </svg>
-      <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.55rem", margin: 0, padding: 0 }}>
+      <ul className="chart-donut-legend">
         {items.map((item) => (
-          <li key={item.label} style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.82rem" }}>
-            <span style={{ width: "0.65rem", height: "0.65rem", borderRadius: "999px", background: item.color }} />
-            <strong style={{ color: "#0b192c" }}>{item.label}</strong>
-            <span style={{ color: "#64748b" }}>{Math.round((item.value / total) * 100)}%</span>
+          <li key={item.label}>
+            <span style={{ background: item.color }} />
+            <strong>{item.label}</strong>
+            <em>{Math.round((item.value / total) * 100)}%</em>
           </li>
         ))}
       </ul>
@@ -82,29 +86,118 @@ export function DonutChart({
   );
 }
 
-export function ColumnChart({
-  items,
+export function Sparkline({
+  values,
+  color = "#0e52a8",
 }: {
-  items: { label: string; value: number }[];
+  values: number[];
+  color?: string;
 }) {
-  const max = Math.max(...items.map((item) => item.value), 1);
+  const points = values.length ? values : [0, 0];
+  const max = Math.max(...points, 1);
+  const min = Math.min(...points, 0);
+  const span = Math.max(max - min, 1);
+  const width = 120;
+  const height = 36;
+  const step = points.length > 1 ? width / (points.length - 1) : width;
+  const path = points
+    .map((value, index) => {
+      const x = index * step;
+      const y = height - ((value - min) / span) * (height - 4) - 2;
+      return `${index === 0 ? "M" : "L"}${x.toFixed(1)} ${y.toFixed(1)}`;
+    })
+    .join(" ");
+
   return (
-    <div style={{ display: "flex", alignItems: "flex-end", gap: "0.85rem", height: "11rem", paddingTop: "0.5rem" }}>
-      {items.map((item) => (
-        <div key={item.label} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", height: "100%", justifyContent: "flex-end", gap: "0.45rem" }}>
-          <span style={{ fontSize: "0.75rem", fontWeight: 800, color: "#0b192c" }}>{item.value.toLocaleString()}</span>
-          <div
-            style={{
-              width: "100%",
-              maxWidth: "3rem",
-              height: `${Math.max((item.value / max) * 100, 8)}%`,
-              borderRadius: "0.65rem 0.65rem 0.2rem 0.2rem",
-              background: "linear-gradient(180deg, #60a5fa, #0e52a8)",
-            }}
-          />
-          <span style={{ fontSize: "0.72rem", color: "#64748b", fontWeight: 600, textAlign: "center" }}>{item.label}</span>
-        </div>
-      ))}
+    <svg className="chart-sparkline" width={width} height={height} viewBox={`0 0 ${width} ${height}`} aria-hidden="true">
+      <path d={path} fill="none" stroke={color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function smoothPath(points: { x: number; y: number }[]) {
+  if (points.length === 0) return "";
+  if (points.length === 1) return `M ${points[0].x} ${points[0].y}`;
+  let d = `M ${points[0].x} ${points[0].y}`;
+  for (let i = 0; i < points.length - 1; i += 1) {
+    const current = points[i];
+    const next = points[i + 1];
+    const cx = (current.x + next.x) / 2;
+    d += ` C ${cx} ${current.y}, ${cx} ${next.y}, ${next.x} ${next.y}`;
+  }
+  return d;
+}
+
+export function LineChart({
+  current,
+  previous,
+}: {
+  current: { label: string; value: number }[];
+  previous?: { label: string; value: number }[];
+}) {
+  const width = 640;
+  const height = 220;
+  const padX = 28;
+  const padY = 24;
+  const values = [...current.map((item) => item.value), ...(previous || []).map((item) => item.value)];
+  const max = Math.max(...values, 1);
+  const plotW = width - padX * 2;
+  const plotH = height - padY * 2;
+
+  const toPoints = (items: { label: string; value: number }[]) =>
+    items.map((item, index) => ({
+      x: padX + (items.length > 1 ? (index / (items.length - 1)) * plotW : plotW / 2),
+      y: padY + plotH - (item.value / max) * plotH,
+      value: item.value,
+      label: item.label,
+    }));
+
+  const currentPoints = toPoints(current);
+  const previousPoints = previous?.length ? toPoints(previous) : [];
+  const currentPath = smoothPath(currentPoints);
+  const previousPath = previousPoints.length ? smoothPath(previousPoints) : "";
+
+  const ticks = [0, 0.25, 0.5, 0.75, 1].map((ratio) => ({
+    y: padY + plotH - ratio * plotH,
+    label: Math.round(max * ratio),
+  }));
+
+  const labelEvery = Math.max(1, Math.ceil(current.length / 6));
+
+  return (
+    <div className="chart-line-wrap">
+      <svg className="chart-line" viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Sessions over time">
+        {ticks.map((tick) => (
+          <g key={tick.y}>
+            <line x1={padX} x2={width - padX} y1={tick.y} y2={tick.y} stroke="#e2e8f0" strokeWidth="1" />
+            <text x={8} y={tick.y + 3} fontSize="10" fill="#94a3b8">
+              {tick.label}
+            </text>
+          </g>
+        ))}
+        {previousPath ? (
+          <path d={previousPath} fill="none" stroke="#cbd5e1" strokeWidth="2" strokeDasharray="5 5" />
+        ) : null}
+        <path d={currentPath} fill="none" stroke="#0e52a8" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+        {currentPoints.map((point, index) => (
+          <circle key={`${point.label}-${index}`} cx={point.x} cy={point.y} r="3.2" fill="#0e52a8" />
+        ))}
+        {current.map((item, index) =>
+          index % labelEvery === 0 || index === current.length - 1 ? (
+            <text key={`label-${item.label}-${index}`} x={currentPoints[index].x} y={height - 6} textAnchor="middle" fontSize="10" fill="#64748b">
+              {item.label}
+            </text>
+          ) : null
+        )}
+      </svg>
+      <div className="chart-line-legend">
+        <span>
+          <i className="is-current" /> This period
+        </span>
+        <span>
+          <i className="is-previous" /> Previous period
+        </span>
+      </div>
     </div>
   );
 }

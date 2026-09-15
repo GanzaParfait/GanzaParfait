@@ -20,11 +20,15 @@ export default function ManifestoSection({ manifesto, embedded = false }: { mani
             {manifesto.image ? <img src={manifesto.image} alt="" className="manifesto-photo" width={1024} height={1536} /> : null}
             {manifesto.chip ? (
               <p className="manifesto-chip">
-                {manifesto.chip.split("·").map((part) => part.trim()).filter(Boolean).map((part) => (
-                  <span key={part}>{part}</span>
-                ))}
-                <img src="/brand/icons/icon-blue.png" alt="" className="logo-light" />
-                <img src="/brand/icons/icon-white.png" alt="" className="logo-dark" />
+                <span className="manifesto-chip-text">
+                  {manifesto.chip.split("·").map((part) => part.trim()).filter(Boolean).map((part) => (
+                    <span key={part}>{part}</span>
+                  ))}
+                </span>
+                <span className="manifesto-chip-mark" aria-hidden="true">
+                  <img src="/brand/icons/icon-blue.png" alt="" className="logo-light" />
+                  <img src="/brand/icons/icon-white.png" alt="" className="logo-dark" />
+                </span>
               </p>
             ) : null}
           </div>

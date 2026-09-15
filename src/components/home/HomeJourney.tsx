@@ -3,40 +3,34 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { RiArrowRightLine } from "react-icons/ri";
-import { siteConfig, timeline } from "@/data/site-data";
+import { siteConfig } from "@/data/site-data";
 import { configuredBookingUrl, WHATSAPP_CALL_URL } from "@/lib/booking";
 import { homepageFrom } from "@/lib/homepage";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { socialsFor, socialIcon } from "@/lib/socials";
 import ManifestoSection from "@/components/home/ManifestoSection";
 import SelectedWork from "@/components/home/SelectedWork";
+import KnowledgeSection from "@/components/home/KnowledgeSection";
+import JourneySection from "@/components/home/JourneySection";
 
 export default function HomeJourney() {
   const settings = useSiteSettings();
   const home = homepageFrom(settings);
   const booking = configuredBookingUrl(settings.bookingCalendarUrl);
   const socials = socialsFor(settings, "footer").slice(0, 4);
-  const [knowledge, setKnowledge] = useState(0);
-  const [progress, setProgress] = useState(0);
   const [pageProgress, setPageProgress] = useState(0);
+
   useEffect(() => {
-    const node = document.getElementById("journey");
-    if (!node) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const update = () => {
-      const rect = node.getBoundingClientRect();
-      const total = rect.height - window.innerHeight * 0.35;
-      const seen = Math.min(Math.max(-rect.top + window.innerHeight * 0.2, 0), Math.max(total, 1));
-      setProgress(total <= 0 ? 1 : seen / total);
       const height = document.documentElement.scrollHeight - window.innerHeight;
       setPageProgress(height <= 0 ? 0 : window.scrollY / height);
     };
     update();
-      if (reduce) {
-        setProgress(1);
-        setPageProgress(0);
-        return;
-      }
+    if (reduce) {
+      setPageProgress(0);
+      return;
+    }
     window.addEventListener("scroll", update, { passive: true });
     window.addEventListener("resize", update);
     return () => {
@@ -55,46 +49,9 @@ export default function HomeJourney() {
 
       <SelectedWork work={home.work} records={settings.projectRecords} />
 
-      <section className="knowledge" id="knowledge" aria-label="Knowledge system">
-        <div className="container">
-          <p className="section-label">{home.knowledge.label}</p>
-          <h2>{home.knowledge.title}</h2>
-          <div className="knowledge-map">
-            {home.knowledge.items.map((item, index) => (
-              <button
-                key={item.title}
-                type="button"
-                className={knowledge === index ? "is-on" : undefined}
-                aria-expanded={knowledge === index}
-                onClick={() => setKnowledge(index)}
-              >
-                <strong>{item.title}</strong>
-                <span>{item.body}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
+      <KnowledgeSection knowledge={home.knowledge} />
 
-      <section className="journey" id="journey" aria-label="Journey">
-        <div className="container">
-          <p className="section-label">{home.journey.label}</p>
-          <h2>{home.journey.title}</h2>
-          <p className="journey-note">{home.journey.note}</p>
-          <ol className="journey-list">
-            <span className="journey-line" style={{ transform: `scaleY(${progress})` }} />
-            {timeline.slice().reverse().map((item) => (
-              <li key={`${item.year}-${item.title}`}>
-                <p>{item.year}</p>
-                <h3>{item.title}</h3>
-                <p>{item.organization}</p>
-                <p>{item.description}</p>
-              </li>
-            ))}
-          </ol>
-          <Link href="/experience" className="btn btn-outline">{home.journey.cta}</Link>
-        </div>
-      </section>
+      <JourneySection journey={home.journey} />
 
       <section className="ventures-band" id="ventures" aria-label="Ventures">
         <div className="container ventures-band-grid">

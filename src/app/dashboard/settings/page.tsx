@@ -14,6 +14,7 @@ import {
   RiLayoutTopLine,
   RiImageLine,
   RiMegaphoneLine,
+  RiMailSendLine,
 } from "react-icons/ri";
 import {
   getLocalSettings,
@@ -35,6 +36,8 @@ import {
 } from "@/lib/socials";
 import MediaManagerModal from "@/components/dashboard/MediaManagerModal";
 import AnnouncementEditor from "@/components/dashboard/AnnouncementEditor";
+import EmailEditor from "@/components/dashboard/EmailEditor";
+import FooterFocusDragPreview from "@/components/dashboard/FooterFocusDragPreview";
 import { FooterCompanyBand } from "@/components/layout/Footer";
 import { footerNav } from "@/data/site-data";
 import { setting } from "@/lib/hero";
@@ -50,7 +53,7 @@ const inputStyle = {
   outline: "none",
 } as const;
 
-type SettingsView = "identity" | "contact" | "socials" | "navbar" | "footer" | "announcement";
+type SettingsView = "identity" | "contact" | "socials" | "navbar" | "footer" | "announcement" | "email";
 
 const VIEWS: { id: SettingsView; label: string; hint: string; icon: typeof RiUser3Line }[] = [
   { id: "identity", label: "Identity", hint: "Name, location, roles, bio", icon: RiUser3Line },
@@ -59,6 +62,7 @@ const VIEWS: { id: SettingsView; label: string; hint: string; icon: typeof RiUse
   { id: "navbar", label: "Public navbar", hint: "Pill or full width", icon: RiLayoutTopLine },
   { id: "footer", label: "Footer", hint: "Company image and layout", icon: RiImageLine },
   { id: "announcement", label: "Announcement", hint: "Bar, sheet, and preview", icon: RiMegaphoneLine },
+  { id: "email", label: "Email", hint: "Header layouts, signature, copy", icon: RiMailSendLine },
 ];
 
 function isBlobUrl(url: string) {
@@ -369,6 +373,69 @@ export default function SettingsPage() {
                     </select>
                   </label>
                 </div>
+
+                <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155", gridColumn: "1 / -1" }}>
+                  Media mode
+                  <select
+                    style={{ ...inputStyle, marginTop: "0.3rem" }}
+                    value={settings.footerCompanyMediaType || "image"}
+                    onChange={(e) => patch({ footerCompanyMediaType: e.target.value as "image" | "video" | "carousel" })}
+                  >
+                    <option value="image">Single image</option>
+                    <option value="video">Video</option>
+                    <option value="carousel">Carousel (up to 3 images)</option>
+                  </select>
+                </label>
+
+                <div style={{ gridColumn: "1 / -1", display: "grid", gap: "0.45rem" }}>
+                  <p style={{ margin: 0, fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>Media URLs (max 3)</p>
+                  {[0, 1, 2].map((index) => (
+                    <div key={index} style={{ display: "flex", gap: "0.4rem" }}>
+                      <input
+                        style={inputStyle}
+                        value={(settings.footerCompanyMedia || [])[index] || (index === 0 ? imageFieldValue(settings.footerCompanyImage) : "")}
+                        onChange={(e) => {
+                          const next = [...(settings.footerCompanyMedia || [])];
+                          while (next.length < 3) next.push("");
+                          next[index] = isBlobUrl(e.target.value) ? "" : e.target.value;
+                          const cleaned = next.filter(Boolean).slice(0, 3);
+                          patch({
+                            footerCompanyMedia: cleaned,
+                            footerCompanyImage: cleaned[0] || settings.footerCompanyImage,
+                          });
+                        }}
+                        placeholder={index === 0 ? "Primary image or video URL" : `Optional slide ${index + 1}`}
+                        disabled={(settings.footerCompanyMediaType || "image") === "video" && index > 0}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline"
+                        onClick={() => {
+                          setMediaTarget("light");
+                        }}
+                      >
+                        <RiImageAddLine />
+                      </button>
+                    </div>
+                  ))}
+                  {(settings.footerCompanyMediaType || "image") === "carousel" ? (
+                    <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>
+                      Carousel interval (seconds)
+                      <input
+                        type="number"
+                        min={3}
+                        max={20}
+                        style={{ ...inputStyle, marginTop: "0.3rem" }}
+                        value={settings.footerCompanyCarouselInterval ?? 5}
+                        onChange={(e) => patch({ footerCompanyCarouselInterval: Number(e.target.value) || 5 })}
+                      />
+                    </label>
+                  ) : null}
+                </div>
+
+                <div style={{ display: "grid", gap: "0.75rem", gridColumn: "1 / -1" }}>
+                  <FooterFocusDragPreview settings={settings} patch={patch} />
+                </div>
               </div>
 
               <div style={{ border: "1px solid #e2e8f0", borderRadius: "1rem", overflow: "hidden", background: "#ffffff" }}>
@@ -423,6 +490,7 @@ export default function SettingsPage() {
           )}
 
           {view === "announcement" && <AnnouncementEditor settings={settings} patch={patch} />}
+          {view === "email" && <EmailEditor settings={settings} patch={patch} />}
         </div>
       </div>
 
@@ -431,8 +499,15 @@ export default function SettingsPage() {
         onClose={() => setMediaTarget(null)}
         onSelect={(url) => {
           if (isBlobUrl(url)) return;
-          if (mediaTarget === "dark") patch({ footerCompanyImageDark: url });
-          else patch({ footerCompanyImage: url });
+          if (mediaTarget === "dark") {
+            patch({ footerCompanyImageDark: url });
+          } else {
+            const next = [...(settings.footerCompanyMedia || [])];
+            if (!next.length && settings.footerCompanyImage) next.push(settings.footerCompanyImage);
+            if (next.length >= 3) next[next.length - 1] = url;
+            else next.push(url);
+            patch({ footerCompanyImage: next[0] || url, footerCompanyMedia: next.slice(0, 3) });
+          }
           setMediaTarget(null);
         }}
       />

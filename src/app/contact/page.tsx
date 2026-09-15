@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import ContactForm from "./ContactForm";
-import BookCall from "@/components/ui/BookCall";
 import { buildPageMetadata } from "@/lib/seo";
 import { buildBreadcrumbListJsonLd, buildGraph, buildWebPageJsonLd } from "@/lib/schema";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -38,18 +37,12 @@ export default function ContactPage() {
       <Breadcrumbs items={breadcrumbItems} />
 
       <section
-        className="section pt-8 relative overflow-hidden min-h-screen"
+        id="send"
+        className="section pt-8 relative overflow-hidden"
         aria-label="Contact section"
+        style={{ paddingBottom: "4.5rem" }}
       >
         <div className="container relative z-10">
-          <div className="book-panel" style={{ marginBottom: "1.5rem" }}>
-            <div>
-              <p className="section-label">Book a call</p>
-              <h2>Book a conversation, or write the brief.</h2>
-              <p>The calendar button uses the public booking page when it is connected. Email remains available either way.</p>
-            </div>
-            <BookCall />
-          </div>
           <ContactForm />
         </div>
       </section>

@@ -8,6 +8,8 @@ import type { HeroLayoutType, SiteSettings } from "@/lib/supabase";
 import { carouselLayouts, settingsForLayout } from "@/lib/hero";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
+const MOBILE_MAX = 900;
+
 export function HeroRenderer({
   settings,
   isPreview = false,
@@ -26,18 +28,24 @@ export function HeroRenderer({
 
 export default function HeroSection() {
   const settings = useSiteSettings();
-  const [ready, setReady] = useState(false);
   const [index, setIndex] = useState(0);
   const [fading, setFading] = useState(false);
   const [paused, setPaused] = useState(false);
-  const rotating = carouselLayouts(settings);
+  // Start false so SSR + mobile first paint only show the live DB layout (no carousel flash).
+  const [allowCarousel, setAllowCarousel] = useState(false);
+
   const live = (settings.bannerLayout || "split_portrait") as HeroLayoutType;
-  const sequence = rotating.length > 1 ? rotating : [live];
+  const rotating = carouselLayouts(settings);
+  const sequence = allowCarousel && rotating.length > 1 ? rotating : [live];
   const active = sequence[index] && sequence.includes(sequence[index]) ? sequence[index] : sequence[0];
   const intervalSeconds = Math.min(20, Math.max(4, settings.heroCarouselInterval || 8));
 
   useEffect(() => {
-    setReady(true);
+    const media = window.matchMedia(`(max-width: ${MOBILE_MAX}px)`);
+    const sync = () => setAllowCarousel(!media.matches);
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
   }, []);
 
   useEffect(() => {
@@ -46,7 +54,7 @@ export default function HeroSection() {
   }, [live, sequence.join("|")]);
 
   useEffect(() => {
-    if (!ready || sequence.length < 2 || paused) return;
+    if (sequence.length < 2 || paused) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced) return;
     const timer = window.setInterval(() => {
@@ -57,11 +65,7 @@ export default function HeroSection() {
       }, 280);
     }, intervalSeconds * 1000);
     return () => window.clearInterval(timer);
-  }, [ready, sequence.length, paused, intervalSeconds, sequence.join("|")]);
-
-  if (!ready) {
-    return <section aria-hidden="true" style={{ minHeight: "100dvh", background: "var(--color-bg)" }} />;
-  }
+  }, [sequence.length, paused, intervalSeconds, sequence.join("|")]);
 
   return (
     <div

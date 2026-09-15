@@ -24,22 +24,30 @@ export default function AdminLoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    if (email.trim().toLowerCase() === "ganzaparfait7@gmail.com" && password === "0000") {
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setLoading(false);
+        setError(data.error || "Invalid credentials. Please verify email and password.");
+        return;
+      }
       if (typeof window !== "undefined") {
         localStorage.setItem("ppg_admin_auth", "true");
-        document.cookie = "ppg_admin_auth=true; path=/; max-age=86400; SameSite=Lax";
       }
-      setTimeout(() => {
-        router.push("/dashboard");
-      }, 300);
-    } else {
+      router.push("/dashboard");
+    } catch {
       setLoading(false);
-      setError("Invalid credentials. Please verify email and password.");
+      setError("Could not sign in. Try again.");
     }
   };
 

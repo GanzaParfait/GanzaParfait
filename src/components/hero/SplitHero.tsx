@@ -57,7 +57,7 @@ export default function SplitHero({
 
   return (
     <section
-      className={isPreview ? "relative overflow-hidden hero-layout-preview" : "relative overflow-hidden"}
+      className={isPreview ? "relative overflow-hidden hero-layout-preview hero-split" : "relative overflow-hidden hero-split"}
       aria-label="Hero Section"
       style={{
         minHeight: isPreview ? "100%" : "100dvh",
@@ -90,7 +90,7 @@ export default function SplitHero({
 
       <div className="container" style={{ position: "relative", zIndex: 10 }}>
         <div
-          className={isPreview ? undefined : "grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center"}
+          className={isPreview ? "hero-split-grid is-preview" : "hero-split-grid grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center"}
           style={isPreview ? {
             display: "grid",
             gridTemplateColumns: "1fr 1fr",
@@ -330,20 +330,21 @@ export default function SplitHero({
               }} />
 
               {/* Photo */}
-              <div style={{ position: "relative", zIndex: 2, width: "88%", height: "98%", bottom: 0 }}>
+              <div className="hero-split-shot" style={{ position: "relative", zIndex: 2, width: "88%", height: "98%", bottom: 0 }}>
                 {splitIsStatic ? (
                   <Image
                     src={splitImage}
                     alt={setting(settings, "siteTitle")}
                     fill
                     priority
-                    sizes="(max-width: 1024px) 72vw, 28rem"
-                    className="object-contain object-bottom"
+                    sizes="(max-width: 1024px) 92vw, 28rem"
+                    className="object-contain object-bottom hero-split-img"
                   />
                 ) : (
                   <img
                     src={splitImage}
                     alt={setting(settings, "siteTitle")}
+                    className="hero-split-img"
                     style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "bottom" }}
                   />
                 )}

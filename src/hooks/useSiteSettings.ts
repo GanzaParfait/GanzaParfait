@@ -7,18 +7,25 @@ import {
   getLocalSettings,
   type SiteSettings,
 } from "@/lib/supabase";
+import { useSiteSettingsContext } from "@/components/providers/SiteSettingsProvider";
 
+/**
+ * Public UI settings. Prefer server-provided context so the first paint matches the database.
+ * Falls back to local/defaults only outside the provider (e.g. dashboard tools).
+ */
 export function useSiteSettings() {
-  const [settings, setSettings] = useState<SiteSettings>(() =>
+  const fromServer = useSiteSettingsContext();
+  const [fallback, setFallback] = useState<SiteSettings>(() =>
     typeof window === "undefined" ? DEFAULT_SETTINGS : getLocalSettings()
   );
 
   useEffect(() => {
-    setSettings(getLocalSettings());
+    if (fromServer) return;
 
+    setFallback(getLocalSettings());
     const onUpdate = (event: Event) => {
       const detail = (event as CustomEvent<SiteSettings>).detail;
-      if (detail) setSettings(detail);
+      if (detail) setFallback(detail);
     };
     window.addEventListener("site-settings-changed", onUpdate);
 
@@ -27,11 +34,11 @@ export function useSiteSettings() {
       try {
         if (localStorage.getItem("ppg_site_settings")) return;
       } catch {}
-      setSettings(remote);
+      setFallback(remote);
     });
 
     return () => window.removeEventListener("site-settings-changed", onUpdate);
-  }, []);
+  }, [fromServer]);
 
-  return settings;
+  return fromServer || fallback;
 }

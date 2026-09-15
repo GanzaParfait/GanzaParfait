@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { RiMailSendLine, RiCloseLine, RiCheckDoubleLine } from "react-icons/ri";
-import { supabase } from "@/lib/supabase";
 
 export default function SubscribeWidget() {
   const [isVisible, setIsVisible] = useState(false);
@@ -46,11 +45,13 @@ export default function SubscribeWidget() {
         console.warn("Could not fetch location", e);
       }
 
-      const { error } = await supabase
-        .from("subscribers")
-        .insert([{ email, device, location, country }]);
-
-      if (error && error.code !== '23505') throw error; // Ignore if already subscribed
+      const response = await fetch("/api/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, device, location, country }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Subscribe failed");
 
       setStatus("success");
       setTimeout(() => {

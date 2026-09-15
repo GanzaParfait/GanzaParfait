@@ -3,9 +3,11 @@ import { Caveat, Outfit } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import LayoutShell from "@/components/layout/LayoutShell";
+import { SiteSettingsProvider } from "@/components/providers/SiteSettingsProvider";
 import { siteConfig } from "@/data/site-data";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { OG_IMAGE_PATH, buildIdentityGraph, canonicalUrl } from "@/lib/schema";
+import { getServerSiteSettings } from "@/lib/site-settings-server";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -95,9 +97,11 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const settings = await getServerSiteSettings();
+
   return (
     <html lang="en" dir="ltr" id="top" data-theme="light" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
@@ -114,7 +118,9 @@ export default function RootLayout({
             __html: `(function(){try{var t=localStorage.getItem('theme');document.documentElement.setAttribute('data-theme',t==='dark'?'dark':'light');}catch(e){}})();`,
           }}
         />
-        <LayoutShell>{children}</LayoutShell>
+        <SiteSettingsProvider initial={settings}>
+          <LayoutShell>{children}</LayoutShell>
+        </SiteSettingsProvider>
       </body>
     </html>
   );

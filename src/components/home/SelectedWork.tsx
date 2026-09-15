@@ -1,10 +1,40 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { RiArrowRightLine, RiBuilding2Line, RiCalendarLine, RiCloseLine, RiExternalLinkLine, RiUser3Line } from "react-icons/ri";
+import { RiArrowRightLine, RiBuilding2Line, RiCalendarLine, RiExternalLinkLine, RiUser3Line } from "react-icons/ri";
 import { projects, type Project } from "@/data/site-data";
 import { imagesForStory, type HomepageContent, type WorkStory } from "@/lib/homepage";
+import MediaPreview, { type PreviewItem } from "@/components/ui/MediaPreview";
+
+const CATEGORY: Record<string, string> = {
+  web: "Web app",
+  mobile: "Mobile",
+  ai: "AI-enabled",
+  saas: "Company",
+  "open-source": "Open source",
+  systems: "Systems",
+  product: "Product",
+  other: "Other",
+};
+
+function mediaFor(project: Project | undefined, images: string[]): PreviewItem[] {
+  const shots = images.map((src, index) => ({
+    src,
+    kind: "image" as const,
+    caption: project?.screenshotCaptions?.[index],
+  }));
+  const videos = (project?.videos?.length ? project.videos : project?.video ? [project.video] : []).map((src) => ({
+    src,
+    kind: "video" as const,
+  }));
+  const seen = new Set<string>();
+  return [...shots, ...videos].filter((item) => {
+    if (!item.src || seen.has(item.src)) return false;
+    seen.add(item.src);
+    return true;
+  });
+}
 
 export default function SelectedWork({
   work,
@@ -15,18 +45,13 @@ export default function SelectedWork({
   records?: Project[];
   embedded?: boolean;
 }) {
-  const [preview, setPreview] = useState<string | null>(null);
-  const stories = work.stories.slice(0, 4);
+  const stories = work.stories.slice(0, 4).map((story, index) => ({
+    story,
+    index,
+    project: matchProject(story.id, records),
+  }));
+  const [preview, setPreview] = useState<{ title: string; items: PreviewItem[]; start: number } | null>(null);
   const Tag = embedded ? "div" : "section";
-
-  useEffect(() => {
-    if (!preview) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setPreview(null);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [preview]);
 
   return (
     <Tag className={embedded ? "selected-work selected-work-embedded" : "selected-work"} id={embedded ? undefined : "work"} aria-label="Selected work">
@@ -38,23 +63,27 @@ export default function SelectedWork({
           </div>
           <div>
             <p>{work.intro}</p>
-            <Link href="/projects">{work.cta} <RiArrowRightLine size={16} /></Link>
+            <Link href="/projects" className="selected-all">{work.cta} <span aria-hidden="true"><RiArrowRightLine size={16} /></span></Link>
           </div>
         </header>
         <div className="selected-board">
-          {stories.map((story, index) => (
-            <ProjectPanel
-              key={story.id}
-              story={story}
-              project={matchProject(story.id, records)}
-              images={imagesForStory(story, records)}
-              wide={index === 0 || index === 3}
-              flourish={index === 0 ? work.flourish : ""}
-              number={index + 1}
-              featured={index === 0}
-              onPreview={setPreview}
-            />
-          ))}
+          {stories.map(({ story, index, project }) => {
+            const images = imagesForStory(story, records);
+            const items = mediaFor(project, images);
+            return (
+              <ProjectPanel
+                key={story.id}
+                story={story}
+                project={project}
+                cover={images[0]}
+                mediaCount={items.length}
+                wide={index === 0 || index === 3}
+                flourish={index === 0 ? work.flourish : ""}
+                number={index + 1}
+                onPreview={() => setPreview({ title: story.title, items, start: 0 })}
+              />
+            );
+          })}
         </div>
         <div className="selected-more">
           <div>
@@ -64,17 +93,12 @@ export default function SelectedWork({
           </div>
           <Link href="/projects" className="btn btn-primary">{work.cta} <RiArrowRightLine size={16} /></Link>
           <ol>
-            <li>Ideas</li>
-            <li>Systems</li>
-            <li>Impact</li>
+            {work.rail.map((item) => <li key={item}>{item}</li>)}
           </ol>
         </div>
       </div>
       {preview ? (
-        <div className="image-preview" role="dialog" aria-modal="true" aria-label="Image preview" onClick={() => setPreview(null)}>
-          <button type="button" aria-label="Close preview" onClick={() => setPreview(null)}><RiCloseLine size={22} /></button>
-          <img src={preview} alt="" onClick={(event) => event.stopPropagation()} />
-        </div>
+        <MediaPreview title={preview.title} items={preview.items} start={preview.start} onClose={() => setPreview(null)} />
       ) : null}
     </Tag>
   );
@@ -83,62 +107,67 @@ export default function SelectedWork({
 function ProjectPanel({
   story,
   project,
-  images,
+  cover,
+  mediaCount,
   wide,
   flourish,
   number,
-  featured,
   onPreview,
 }: {
   story: WorkStory;
   project?: Project;
-  images: string[];
+  cover?: string;
+  mediaCount: number;
   wide: boolean;
   flourish: string;
   number: number;
-  featured: boolean;
-  onPreview: (src: string) => void;
+  onPreview: () => void;
 }) {
-  const cover = images[0];
-  const role = story.role || project?.myRole;
-  const period = story.period || project?.period;
-  const client = story.client || (wide ? project?.organization || story.organization : "");
+  const category = project?.category === "other" && project.categoryNote
+    ? project.categoryNote
+    : CATEGORY[project?.category || ""] || story.tags[0];
+  const body = project?.description || story.support;
+  const role = project?.myRole;
+  const period = project?.period;
+  const client = project?.organization || story.organization;
+
   return (
     <article className={wide ? "selected-card is-wide" : "selected-card"}>
       <div>
         <div className="selected-kicker">
           <span>{String(number).padStart(2, "0")}</span>
-          {story.tags[0] ? <em>{story.tags[0]}</em> : null}
-          {featured ? <em className="is-featured">Featured</em> : null}
+          {category ? <em>{category}</em> : null}
+          {project?.featured ? <em className="is-featured">Featured</em> : null}
         </div>
         <h3>{story.title}</h3>
         <p className="selected-line">{story.line}</p>
-        {wide ? <p>{story.support}</p> : null}
+        <p>{body}</p>
         <ul>
           {role ? <li><RiUser3Line size={15} /> <span>My role</span><strong>{role}</strong></li> : null}
           {period ? <li><RiCalendarLine size={15} /> <span>Duration</span><strong>{period}</strong></li> : null}
           {client ? <li><RiBuilding2Line size={15} /> <span>Client</span><strong>{client}</strong></li> : null}
         </ul>
         <div className="selected-actions">
-          <Link href={story.href} className="btn btn-primary">View case study <RiArrowRightLine size={16} /></Link>
+          <Link href={story.href} className={wide ? "btn btn-primary" : "selected-study"}>
+            View case study <RiArrowRightLine size={16} />
+          </Link>
           {project?.links?.live ? (
-            <a href={project.links.live} className="btn btn-outline" target="_blank" rel="noopener noreferrer">Live site <RiExternalLinkLine size={15} /></a>
+            <a href={project.links.live} className="selected-live" target="_blank" rel="noopener noreferrer">
+              Live site <RiExternalLinkLine size={15} />
+            </a>
           ) : null}
         </div>
       </div>
       <div className="selected-visual">
-        <figure>
-          {cover ? (
-            <button type="button" onClick={() => onPreview(cover)} aria-label={`Open ${story.title} preview`}>
-              <img src={cover} alt="" />
-            </button>
-          ) : <span>{story.title}</span>}
-        </figure>
-        {flourish ? (
-          <p className="selected-flourish">
-            <span>{flourish}</span>
-          </p>
-        ) : null}
+        {cover ? (
+          <button type="button" className="selected-shot" onClick={onPreview} aria-label={`Preview ${story.title}`}>
+            <img src={cover} alt="" />
+            {mediaCount > 1 ? <em>{mediaCount}</em> : null}
+          </button>
+        ) : (
+          <figure><span>{story.title}</span></figure>
+        )}
+        {flourish ? <p className="selected-flourish">{flourish}</p> : null}
       </div>
     </article>
   );

@@ -4,6 +4,10 @@ export interface GeoResult {
   country_code: string;
   country_name: string;
   country_flag: string;
+  city?: string | null;
+  region?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   resolved_ip?: string | null;
   is_local?: boolean;
 }
@@ -16,10 +20,21 @@ function geoFromHeaders(headers: Headers): GeoResult | null {
 
   if (!code || code === "XX" || code === "T1") return null;
 
+  const city = headers.get("x-vercel-ip-city") || headers.get("cf-ipcity") || null;
+  const region = headers.get("x-vercel-ip-country-region") || headers.get("cf-region") || null;
+  const latitudeRaw = headers.get("x-vercel-ip-latitude");
+  const longitudeRaw = headers.get("x-vercel-ip-longitude");
+  const latitude = latitudeRaw ? Number(latitudeRaw) : null;
+  const longitude = longitudeRaw ? Number(longitudeRaw) : null;
+
   return {
     country_code: code.toUpperCase(),
     country_name: getCountryName(code),
     country_flag: countryCodeToFlag(code),
+    city: city ? decodeURIComponent(city) : null,
+    region,
+    latitude: Number.isFinite(latitude) ? latitude : null,
+    longitude: Number.isFinite(longitude) ? longitude : null,
   };
 }
 
@@ -52,6 +67,11 @@ export function getClientIp(headers: Headers): string | null {
   return headers.get("x-real-ip") || headers.get("cf-connecting-ip") || headers.get("x-vercel-forwarded-for") || null;
 }
 
+function parseCoord(value: unknown): number | null {
+  const num = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(num) ? num : null;
+}
+
 async function lookupIpGeo(ip: string): Promise<GeoResult | null> {
   try {
     const res = await fetch(`https://ipapi.co/${encodeURIComponent(ip)}/json/`, {
@@ -66,6 +86,10 @@ async function lookupIpGeo(ip: string): Promise<GeoResult | null> {
           country_code: data.country_code,
           country_name: data.country_name || getCountryName(data.country_code),
           country_flag: countryCodeToFlag(data.country_code),
+          city: data.city || null,
+          region: data.region || data.region_code || null,
+          latitude: parseCoord(data.latitude),
+          longitude: parseCoord(data.longitude),
           resolved_ip: data.ip || ip,
         };
       }
@@ -75,9 +99,10 @@ async function lookupIpGeo(ip: string): Promise<GeoResult | null> {
   }
 
   try {
-    const res = await fetch(`http://ip-api.com/json/${encodeURIComponent(ip)}?fields=status,country,countryCode,query`, {
-      cache: "no-store",
-    });
+    const res = await fetch(
+      `http://ip-api.com/json/${encodeURIComponent(ip)}?fields=status,country,countryCode,regionName,city,lat,lon,query`,
+      { cache: "no-store" }
+    );
     if (res.ok) {
       const data = await res.json();
       if (data.status === "success" && data.countryCode) {
@@ -85,6 +110,10 @@ async function lookupIpGeo(ip: string): Promise<GeoResult | null> {
           country_code: data.countryCode,
           country_name: data.country || getCountryName(data.countryCode),
           country_flag: countryCodeToFlag(data.countryCode),
+          city: data.city || null,
+          region: data.regionName || null,
+          latitude: parseCoord(data.lat),
+          longitude: parseCoord(data.lon),
           resolved_ip: data.query || ip,
         };
       }
@@ -110,6 +139,10 @@ async function lookupPublicGeo(): Promise<GeoResult | null> {
           country_code: data.country_code,
           country_name: data.country_name || getCountryName(data.country_code),
           country_flag: countryCodeToFlag(data.country_code),
+          city: data.city || null,
+          region: data.region || data.region_code || null,
+          latitude: parseCoord(data.latitude),
+          longitude: parseCoord(data.longitude),
           resolved_ip: data.ip || null,
           is_local: true,
         };
@@ -139,6 +172,10 @@ export async function resolveGeo(headers: Headers, ip: string | null): Promise<G
       country_code: "RW",
       country_name: "Rwanda",
       country_flag: "🇷🇼",
+      city: "Kigali",
+      region: "Kigali",
+      latitude: -1.9441,
+      longitude: 30.0619,
       resolved_ip: null,
       is_local: true,
     };
@@ -153,6 +190,10 @@ export async function resolveGeo(headers: Headers, ip: string | null): Promise<G
     country_code: "XX",
     country_name: "Unknown",
     country_flag: "🌍",
+    city: null,
+    region: null,
+    latitude: null,
+    longitude: null,
     resolved_ip: normalizedIp,
     is_local: false,
   };

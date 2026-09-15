@@ -4,7 +4,7 @@ import {
   RiLinkedinFill,
   RiTwitterXFill,
   RiYoutubeFill,
-  RiInstagramLine,
+  RiInstagramFill,
   RiTiktokFill,
   RiWhatsappLine,
   RiThreadsLine,
@@ -34,7 +34,7 @@ export interface SocialLink {
 export const SOCIAL_ICON_MAP: Record<string, IconType> = {
   whatsapp: RiWhatsappLine,
   linkedin: RiLinkedinFill,
-  instagram: RiInstagramLine,
+  instagram: RiInstagramFill,
   github: RiGithubFill,
   twitter: RiTwitterXFill,
   youtube: RiYoutubeFill,

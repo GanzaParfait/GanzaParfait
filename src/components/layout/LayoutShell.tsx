@@ -11,9 +11,10 @@ import UtmCapture from "@/components/analytics/UtmCapture";
 
 export default function LayoutShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isDashboard = pathname?.startsWith("/dashboard");
+  const isBare =
+    pathname?.startsWith("/dashboard") || pathname?.startsWith("/email-preview");
 
-  if (isDashboard) {
+  if (isBare) {
     return <>{children}</>;
   }
 

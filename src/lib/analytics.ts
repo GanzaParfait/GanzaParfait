@@ -115,13 +115,13 @@ export function formatDuration(seconds: number): string {
   return `${mins}m ${secs}s`;
 }
 
-export function formatPercentChange(current: number, previous: number): string {
+export function formatPercentChange(current: number, previous: number, label = "vs previous period"): string {
   if (previous === 0) {
-    return current > 0 ? "+100% vs last month" : "No prior data";
+    return current > 0 ? `+100% ${label}` : "No prior data";
   }
   const change = ((current - previous) / previous) * 100;
   const sign = change >= 0 ? "+" : "";
-  return `${sign}${change.toFixed(1)}% vs last month`;
+  return `${sign}${change.toFixed(1)}% ${label}`;
 }
 
 export function pagePathToName(path: string): string {

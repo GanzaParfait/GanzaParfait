@@ -87,9 +87,7 @@ export const footerNav = [
     label: "Work with me",
     links: [
       { label: "Ventures", href: "/ventures" },
-      { label: "Capabilities", href: "/services" },
       { label: "Speaking", href: "/speaking" },
-      { label: "Insights", href: "/blog" },
       { label: "Contact", href: "/contact" },
     ],
   },
@@ -217,9 +215,9 @@ export const projects: Project[] = [
       "Inventory and sales management workflows spanning stock, documents, parties, payments, and reporting.",
     myRole: "Software engineer",
     technologies: ["Web application", "MySQL", "Business workflows", "Reporting"],
-    category: "systems",
+    category: "product",
     status: "live",
-    featured: true,
+    featured: false,
     image: "/images/projects/stockpro.webp",
     screenshots: ["/images/projects/stockpro.webp"],
     links: {},
@@ -320,7 +318,7 @@ export const projects: Project[] = [
       "Product work across CMS, articles, video, short-form media, recommendation concepts, accounts, engagement, and publishing.",
     myRole: "Independent product development",
     technologies: ["React", "PHP", "MySQL", "Content management"],
-    category: "product",
+    category: "web",
     status: "in-progress",
     featured: false,
     independent: true,
@@ -379,45 +377,92 @@ export const skills: Skill[] = [
 ];
 
 export type TimelineItem = {
+  id: string;
   year: string;
   title: string;
   organization: string;
   description: string;
-  type: "education" | "work" | "milestone";
+  type: "education" | "work" | "leadership" | "milestone";
+  location?: string;
+  summary?: string;
+  highlights?: string[];
+  website?: string;
+  industry?: string;
+  team?: string;
+  status?: string;
+  relatedHref?: string;
 };
 
 export const timeline: TimelineItem[] = [
   {
+    id: "lerony",
     year: "2025–Present",
     title: "Founder & CEO",
     organization: "LERONY Ltd",
     description:
       "Founded and leads a Kigali-based technology and innovation company that turns organizational problems into digital products and working systems.",
-    type: "work",
+    type: "leadership",
+    location: "Kigali, Rwanda",
+    summary:
+      "Founder and CEO of a technology and innovation company. The role is leadership of the venture: direction, delivery, and turning organizational problems into products and systems that can be operated.",
+    highlights: [
+      "Custom software and web platforms",
+      "Enterprise and business systems",
+      "Digital transformation and technology consulting",
+      "AI-enabled product integration",
+    ],
+    website: "https://lerony.com",
+    industry: "Technology & Innovation",
+    team: "Solo / partners / contractors as needed",
+    status: "Ongoing",
+    relatedHref: "/ventures",
   },
   {
+    id: "ulk",
     year: "2025–Present",
     title: "Computer Science",
     organization: "Kigali Independent University (ULK)",
     description:
       "Undergraduate Computer Science studies. Degree in progress.",
     type: "education",
+    location: "Kigali, Rwanda",
+    summary: "Undergraduate Computer Science studies at ULK. Degree in progress — not presented as complete.",
+    highlights: ["Computer Science coursework", "Degree in progress"],
+    status: "In progress",
+    relatedHref: "/experience",
   },
   {
+    id: "psta",
     year: "2023–2024",
     title: "Reservation Agent",
     organization: "PSTA",
     description:
       "Airline reservation and ticketing operations and client support. Related software work later included a ticket accounting system.",
     type: "work",
+    location: "Rwanda",
+    summary:
+      "Airline reservation and ticketing operations and client support. This operational role is separate from the ticket accounting software later associated with PSTA workflows.",
+    highlights: [
+      "Airline reservation and ticketing operations",
+      "Client support",
+      "Related later software: ticket records, invoicing, and commission reporting",
+    ],
+    status: "Completed",
+    relatedHref: "/projects/psta-accounting",
   },
   {
+    id: "sjitc",
     year: "2021–2024",
     title: "Software Engineering",
     organization: "SJITC Nyamirambo",
     description:
       "Secondary software engineering studies. Graduated with distinction in 2024.",
     type: "education",
+    location: "Kigali, Rwanda",
+    summary: "Secondary software engineering studies at SJITC Nyamirambo. Graduated with distinction in 2024.",
+    highlights: ["Software engineering studies", "Graduated with distinction in 2024"],
+    status: "Completed",
+    relatedHref: "/experience",
   },
 ];
 

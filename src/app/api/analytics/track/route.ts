@@ -76,9 +76,17 @@ export async function POST(request: NextRequest) {
       ip_address: storedIp,
     };
 
+    const geoRecord = {
+      city: geo.city || null,
+      region: geo.region || null,
+      latitude: geo.latitude ?? null,
+      longitude: geo.longitude ?? null,
+    };
+
     const extendedRecord = {
       ...baseRecord,
       ...utmFields,
+      ...geoRecord,
       visitor_id: visitorId,
       session_id: sessionId,
       user_agent: userAgent.slice(0, 500),
@@ -86,6 +94,17 @@ export async function POST(request: NextRequest) {
     };
 
     let { error } = await supabase.from("page_views").insert(extendedRecord);
+    if (error && /column|schema cache/i.test(error.message)) {
+      const withoutGeo = {
+        ...baseRecord,
+        ...utmFields,
+        visitor_id: visitorId,
+        session_id: sessionId,
+        user_agent: userAgent.slice(0, 500),
+        device_type: deviceType,
+      };
+      ({ error } = await supabase.from("page_views").insert(withoutGeo));
+    }
     if (error && /column|schema cache/i.test(error.message)) {
       const withoutUtm = {
         ...baseRecord,

@@ -106,17 +106,35 @@ Framer Motion can be added in V2 if complex 3D/physics animations are needed.
 
 ## Environment Variables
 
+Copy `.env.example` to `.env.local` and fill in values. Production values go in Vercel.
+
 ```bash
-# Required for production
-NEXT_PUBLIC_SITE_URL=https://princeparfait.com
+# Public
+NEXT_PUBLIC_SITE_URL=https://www.princeparfait.com
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 
-# Optional (for future newsletter/email integration)
-RESEND_API_KEY=re_...
+# Server
+SUPABASE_SERVICE_ROLE_KEY=...
+ADMIN_EMAIL=you@princeparfait.com
+ADMIN_PASSWORD=...
 
-# Optional (for analytics)
-NEXT_PUBLIC_GA_ID=G-...
-NEXT_PUBLIC_VERCEL_ANALYTICS=true
+# Mail (Resend or SMTP)
+RESEND_API_KEY=
+# or
+SMTP_HOST=
+SMTP_USER=noreply@princeparfait.com
+SMTP_PASS=
+
+# Mailbox From addresses
+EMAIL_NOREPLY=noreply@princeparfait.com
+EMAIL_THANKS=thanks@princeparfait.com
+EMAIL_CONTACT=contact@princeparfait.com
+EMAIL_HELLO=hello@princeparfait.com
+EMAIL_REPLY_TO=hello@princeparfait.com
 ```
+
+Subscriber thank-you mail is sent from `EMAIL_THANKS` after a successful `/api/subscribe`. Dashboard login uses `ADMIN_EMAIL` / `ADMIN_PASSWORD` via `/api/auth/login`.
 
 ---
 
