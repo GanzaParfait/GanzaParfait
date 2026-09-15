@@ -6,6 +6,7 @@ import { projects as initialProjects, type Project } from "@/data/site-data";
 import ProjectEditorModal from "@/components/dashboard/ProjectEditorModal";
 import MediaManagerModal from "@/components/dashboard/MediaManagerModal";
 import { getLocalSettings, saveLocalSettings } from "@/lib/supabase";
+import CustomSelect from "@/components/ui/CustomSelect";
 
 const PAGE_SIZE = 5;
 const STORAGE_KEY = "ppg_dashboard_projects";
@@ -78,22 +79,40 @@ export default function ProjectsPage() {
           <RiSearchLine size={15} color="#64748b" />
           <input value={query} onChange={(event) => { setQuery(event.target.value); setPage(1); }} placeholder="Search title, organization, technology" style={{ border: 0, outline: "none", width: "100%", fontSize: "0.82rem" }} />
         </label>
-        <select value={category} onChange={(event) => { setCategory(event.target.value); setPage(1); }} style={selectStyle}>
-          <option value="all">All categories</option>
-          <option value="systems">Systems</option>
-          <option value="web">Web</option>
-          <option value="product">Product</option>
-          <option value="saas">SaaS</option>
-          <option value="ai">AI</option>
-          <option value="mobile">Mobile</option>
-          <option value="other">Other</option>
-        </select>
-        <select value={status} onChange={(event) => { setStatus(event.target.value); setPage(1); }} style={selectStyle}>
-          <option value="all">All statuses</option>
-          <option value="live">Live</option>
-          <option value="in-progress">In progress</option>
-          <option value="archived">Archived</option>
-        </select>
+        <CustomSelect
+          value={category}
+          aria-label="Category"
+          options={[
+            { value: "all", label: "All categories" },
+            { value: "systems", label: "Systems" },
+            { value: "web", label: "Web" },
+            { value: "product", label: "Product" },
+            { value: "saas", label: "SaaS" },
+            { value: "ai", label: "AI" },
+            { value: "mobile", label: "Mobile" },
+            { value: "other", label: "Other" },
+          ]}
+          onChange={(value) => {
+            setCategory(value);
+            setPage(1);
+          }}
+          className="dash-cselect"
+        />
+        <CustomSelect
+          value={status}
+          aria-label="Status"
+          options={[
+            { value: "all", label: "All statuses" },
+            { value: "live", label: "Live" },
+            { value: "in-progress", label: "In progress" },
+            { value: "archived", label: "Archived" },
+          ]}
+          onChange={(value) => {
+            setStatus(value);
+            setPage(1);
+          }}
+          className="dash-cselect"
+        />
       </div>
 
       <div style={{ overflowX: "auto", background: "#fff", border: "1px solid #e2e8f0", borderRadius: "0.75rem" }}>
@@ -164,14 +183,6 @@ export default function ProjectsPage() {
     </div>
   );
 }
-
-const selectStyle = {
-  padding: "0.45rem 0.65rem",
-  borderRadius: "0.5rem",
-  border: "1px solid #e2e8f0",
-  background: "#fff",
-  fontSize: "0.82rem",
-} as const;
 
 const th = { padding: "0.75rem 0.85rem", fontWeight: 800 } as const;
 const td = { padding: "0.75rem 0.85rem", fontSize: "0.82rem", color: "#334155", verticalAlign: "middle" } as const;

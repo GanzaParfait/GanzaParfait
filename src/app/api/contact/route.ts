@@ -1,6 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { createServerSupabase } from "@/lib/supabase-server";
-import { contactNotifyMail, sendMail } from "@/lib/mail";
+import { contactAckMail, contactNotifyMail, sendMail } from "@/lib/mail";
+import { getServerSiteSettings } from "@/lib/site-settings-server";
+import { mailboxes } from "@/lib/env";
+import { upsertSubscriber } from "@/lib/subscribers";
 
 export async function POST(request: Request) {
   try {
@@ -17,7 +20,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "A valid email is required." }, { status: 400 });
     }
     if (!message || message.length < 10) {
-      return NextResponse.json({ error: "Please write a short message." }, { status: 400 });
+      return NextResponse.json({ error: "Please write a short message (at least 10 characters)." }, { status: 400 });
     }
     if (message.length > 1000) {
       return NextResponse.json({ error: "Message is too long." }, { status: 400 });
@@ -35,25 +38,63 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Could not save your message." }, { status: 500 });
     }
 
+    let subscribeOffer = false;
     try {
-      await sendMail({
-        ...(await contactNotifyMail({
-          name,
-          email,
-          message,
-          subject: reason || "Project / Collaboration",
-        })),
-        log: {
-          kind: "contact_notify",
-          relatedType: "contact_message",
-          relatedId: data?.id,
-        },
+      const result = await upsertSubscriber(supabase, {
+        email,
+        name,
+        source: "contact",
+        confirmed: false,
       });
-    } catch (mailError) {
-      console.error("Contact notify mail failed", mailError);
+      subscribeOffer = !result.row?.confirmed;
+    } catch (subError) {
+      console.error("contact subscriber upsert failed", subError);
     }
 
-    return NextResponse.json({ ok: true, id: data?.id });
+    after(async () => {
+      const site = await getServerSiteSettings();
+      const relatedId = data?.id;
+      const primaryTo = (site.contactEmail || "").trim() || mailboxes.contact() || mailboxes.hello();
+
+      try {
+        const notify = await contactNotifyMail(
+          {
+            name,
+            email,
+            message,
+            subject: reason || "Project / Collaboration",
+          },
+          site,
+        );
+        await sendMail({
+          ...notify,
+          to: primaryTo,
+          log: {
+            kind: "contact_notify",
+            relatedType: "contact_message",
+            relatedId,
+          },
+        });
+      } catch (mailError) {
+        console.error("Contact notify mail failed", mailError);
+      }
+
+      try {
+        const ack = await contactAckMail({ name, email, subject: reason || undefined }, site);
+        await sendMail({
+          ...ack,
+          log: {
+            kind: "contact_ack",
+            relatedType: "contact_message",
+            relatedId,
+          },
+        });
+      } catch (mailError) {
+        console.error("Contact acknowledgment mail failed", mailError);
+      }
+    });
+
+    return NextResponse.json({ ok: true, id: data?.id, subscribeOffer, email });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: "Could not send message." }, { status: 500 });

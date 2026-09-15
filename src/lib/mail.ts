@@ -30,7 +30,12 @@ function smtpConfigured() {
   return Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
 }
 
-async function logOutbound(mail: OutboundMail, status: "sent" | "failed") {
+function errorMessage(error: unknown) {
+  if (error instanceof Error) return error.message.slice(0, 2000);
+  return String(error).slice(0, 2000);
+}
+
+async function logOutbound(mail: OutboundMail, status: "sent" | "failed", err?: unknown) {
   if (!mail.log) return;
   try {
     const { createServerSupabase } = await import("@/lib/supabase-server");
@@ -46,6 +51,7 @@ async function logOutbound(mail: OutboundMail, status: "sent" | "failed") {
         related_type: mail.log.relatedType || null,
         related_id: mail.log.relatedId || null,
         status,
+        error_message: status === "failed" && err ? errorMessage(err) : null,
       },
     ]);
   } catch (error) {
@@ -78,9 +84,7 @@ async function sendWithResend(mail: OutboundMail) {
   return true;
 }
 
-async function sendWithSmtp(mail: OutboundMail) {
-  if (!smtpConfigured() && !process.env.SMTP_THANKS_PASS && !process.env.SMTP_CONTACT_PASS) return false;
-  const from = mail.from || mailboxes.noreply();
+function smtpAuthForFrom(from: string) {
   const thanks = mailboxes.thanks();
   const contact = mailboxes.contact();
   const hello = mailboxes.hello();
@@ -96,14 +100,36 @@ async function sendWithSmtp(mail: OutboundMail) {
     user = process.env.SMTP_HELLO_USER;
     pass = process.env.SMTP_HELLO_PASS;
   }
-  if (!process.env.SMTP_HOST || !user || !pass) return false;
+  return { user, pass };
+}
+
+async function sendWithSmtp(mail: OutboundMail) {
+  const host = process.env.SMTP_HOST;
+  if (!host) return false;
+  const from = mail.from || mailboxes.noreply();
+  const { user, pass } = smtpAuthForFrom(from);
+  if (!user || !pass) {
+    throw new Error(`SMTP auth missing for From ${from}`);
+  }
+
   const port = Number(process.env.SMTP_PORT || 465);
+  const secure = process.env.SMTP_SECURE !== "false" && port === 465;
+  const servername = process.env.SMTP_TLS_SERVERNAME || "princeparfait.com";
+
   const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
+    host,
     port,
-    secure: process.env.SMTP_SECURE !== "false" && port === 465,
+    secure,
     auth: { user, pass },
+    connectionTimeout: 20_000,
+    greetingTimeout: 20_000,
+    tls: {
+      servername,
+      // When SMTP_HOST is an IP, the cert CN is the domain — allow that mismatch if configured.
+      rejectUnauthorized: process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== "false",
+    },
   });
+
   await transporter.sendMail({
     from,
     to: mail.to,
@@ -115,24 +141,73 @@ async function sendWithSmtp(mail: OutboundMail) {
   return true;
 }
 
+/**
+ * Prefer SMTP when configured (custom domain mailboxes), then Resend.
+ * Namecheap/cPanel: if the apex A record is CDN/proxy, set SMTP_HOST to the
+ * hosting IP (or a mail.* A record) and SMTP_TLS_SERVERNAME=yourdomain.com.
+ */
 export async function sendMail(mail: OutboundMail) {
-  try {
-    let sent = false;
-    if (process.env.RESEND_API_KEY) {
-      sent = await sendWithResend(mail);
-    } else {
+  let lastError: unknown = null;
+  let sent = false;
+
+  const trySmtp = smtpConfigured() || Boolean(process.env.SMTP_THANKS_PASS || process.env.SMTP_CONTACT_PASS);
+  if (trySmtp) {
+    try {
       sent = await sendWithSmtp(mail);
+    } catch (error) {
+      lastError = error;
+      console.error("SMTP send failed", error);
     }
-    if (sent) {
-      await logOutbound(mail, "sent");
-      return true;
-    }
-    if (mail.log) await logOutbound(mail, "failed");
-    return false;
-  } catch (error) {
-    if (mail.log) await logOutbound(mail, "failed");
-    throw error;
   }
+
+  if (!sent && process.env.RESEND_API_KEY) {
+    try {
+      sent = await sendWithResend(mail);
+    } catch (error) {
+      lastError = error;
+      console.error("Resend send failed", error);
+    }
+  }
+
+  if (sent) {
+    await logOutbound(mail, "sent");
+    return true;
+  }
+
+  if (!lastError) {
+    lastError = new Error(
+      "No mail transport succeeded. Check SMTP_HOST/credentials (or set RESEND_API_KEY with a verified domain).",
+    );
+  }
+
+  if (mail.log) await logOutbound(mail, "failed", lastError);
+  throw lastError;
+}
+
+export async function contactAckMail(
+  input: { name: string; email: string; subject?: string },
+  settings?: SiteSettings,
+) {
+  const site = settings || (await getServerSiteSettings());
+  const brand = emailBrandFromSettings(site);
+  const first = input.name.split(/\s+/)[0] || input.name;
+  const topic = input.subject ? ` about “${input.subject}”` : "";
+  const content = {
+    preheader: `Thanks ${first}, I received your message.`,
+    eyebrow: "Message received",
+    title: `Thanks, ${first}.`,
+    body: `I received your message${topic}. I usually reply within 24–48 hours on business days (Kigali, EAT).`,
+    ctaLabel: "Visit the site",
+    ctaHref: brand.origin,
+  };
+  return {
+    to: input.email,
+    from: mailboxes.thanks() || mailboxes.hello(),
+    replyTo: mailboxes.replyTo(),
+    subject: `Thanks for writing — ${site.siteTitle || "Prince Parfait GANZA"}`,
+    text: brandEmailText(content, site),
+    html: brandEmailHtml(content, site),
+  } satisfies OutboundMail;
 }
 
 export async function subscriberThanksMail(to: string, settings?: SiteSettings) {
@@ -178,6 +253,30 @@ export async function newsletterSampleMail(settings?: SiteSettings) {
     from: mailboxes.noreply(),
     replyTo: mailboxes.replyTo(),
     subject: content.title,
+    text: brandEmailText(content, site),
+    html: brandEmailHtml(content, site),
+  } satisfies OutboundMail;
+}
+
+export async function bulkNewsletterMail(
+  input: { to: string; subject: string; title: string; body: string; ctaLabel?: string; ctaHref?: string },
+  settings?: SiteSettings,
+) {
+  const site = settings || (await getServerSiteSettings());
+  const brand = emailBrandFromSettings(site);
+  const content = {
+    preheader: input.subject,
+    eyebrow: "Update",
+    title: input.title,
+    body: input.body,
+    ctaLabel: input.ctaLabel || "Visit the site",
+    ctaHref: input.ctaHref || brand.origin,
+  };
+  return {
+    to: input.to,
+    from: mailboxes.noreply(),
+    replyTo: mailboxes.replyTo(),
+    subject: input.subject,
     text: brandEmailText(content, site),
     html: brandEmailHtml(content, site),
   } satisfies OutboundMail;

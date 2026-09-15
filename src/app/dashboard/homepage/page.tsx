@@ -31,6 +31,7 @@ import {
 } from "@/lib/homepage";
 import { getLocalSettings, saveLocalSettings } from "@/lib/supabase";
 import { siteConfig } from "@/data/site-data";
+import CustomSelect from "@/components/ui/CustomSelect";
 
 type SectionId = "manifesto" | "work" | "knowledge" | "journey" | "ventures" | "principles" | "speaking" | "booking" | "closing";
 type EditorTab = "content" | "style" | "display";
@@ -246,14 +247,11 @@ export default function HomepageEditorPage() {
                             <Field label="Learn more link" value={item.href || ""} onChange={(href) => patchItem(index, { href })} />
                             <label className="hp-field">
                               <span>Icon</span>
-                              <select
+                              <CustomSelect
                                 value={item.icon || meta.value}
-                                onChange={(event) => patchItem(index, { icon: event.target.value as KnowledgeIcon })}
-                              >
-                                {ICON_OPTIONS.map((option) => (
-                                  <option key={option.value} value={option.value}>{option.label}</option>
-                                ))}
-                              </select>
+                                options={ICON_OPTIONS.map((option) => ({ value: option.value, label: option.label }))}
+                                onChange={(value) => patchItem(index, { icon: value as KnowledgeIcon })}
+                              />
                             </label>
                           </div>
                         ) : null}
@@ -652,10 +650,12 @@ function OtherSectionFields({
               <Field label="Side labels" value={content.work.rail.join(", ")} onChange={(value) => setContent({ ...content, work: { ...content.work, rail: value.split(",").map((item) => item.trim()).filter(Boolean) } })} />
         <label className="hp-field">
           <span>Case</span>
-          <select value={storyIndex} onChange={(event) => setStoryIndex(Number(event.target.value))}>
-                  {content.work.stories.map((item, index) => <option key={item.id} value={index}>{item.title}</option>)}
-                </select>
-              </label>
+          <CustomSelect
+            value={String(storyIndex)}
+            options={content.work.stories.map((item, index) => ({ value: String(index), label: item.title }))}
+            onChange={(value) => setStoryIndex(Number(value))}
+          />
+        </label>
               <Field label="Title" value={story.title} onChange={(title) => patchStory({ title })} />
               <Field label="Line" value={story.line} onChange={(line) => patchStory({ line })} />
               <Field label="Support" value={story.support} onChange={(support) => patchStory({ support })} />

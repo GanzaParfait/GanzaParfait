@@ -6,32 +6,17 @@ export default function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
   if (items.length < 2) return null;
 
   return (
-    <nav aria-label="Breadcrumb" className="container" style={{ paddingTop: "calc(var(--public-nav-offset, 3.6rem) + 1.25rem)", paddingBottom: 0 }}>
-      <ol
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "0.4rem",
-          listStyle: "none",
-          fontSize: "0.8125rem",
-          color: "var(--color-text-3)",
-          margin: 0,
-          padding: 0,
-        }}
-      >
+    <nav aria-label="Breadcrumb" className="container crumbs">
+      <ol className="crumbs-list">
         {items.map((item, index) => {
           const last = index === items.length - 1;
           return (
-            <li key={`${item.path}-${item.name}`} style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem" }}>
+            <li key={`${item.path}-${item.name}`}>
               {index > 0 && <span aria-hidden="true">/</span>}
               {last ? (
-                <span aria-current="page" style={{ color: "var(--color-text-2)", fontWeight: 600 }}>
-                  {item.name}
-                </span>
+                <span aria-current="page">{item.name}</span>
               ) : (
-                <Link href={item.path} style={{ color: "var(--color-text-3)", textDecoration: "none" }}>
-                  {item.name}
-                </Link>
+                <Link href={item.path}>{item.name}</Link>
               )}
             </li>
           );

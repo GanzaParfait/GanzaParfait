@@ -148,16 +148,8 @@ export default function MessagesPage() {
 
       {error ? <p style={{ color: "#b91c1c", fontSize: "0.85rem" }}>{error}</p> : null}
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "minmax(0, 18rem) minmax(0, 1fr)",
-          gap: "0.85rem",
-          flex: 1,
-          minHeight: 0,
-        }}
-      >
-        <div style={{ border: "1px solid #e2e8f0", borderRadius: "0.85rem", background: "#fff", overflow: "auto" }}>
+      <div className="dash-inbox-grid">
+        <div className="dash-inbox-list">
           {loading ? (
             <p style={{ padding: "1rem", color: "#64748b", fontSize: "0.85rem" }}>Loading…</p>
           ) : visible.length === 0 ? (
@@ -167,57 +159,24 @@ export default function MessagesPage() {
               <button
                 key={item.id}
                 type="button"
+                className={selected?.id === item.id ? "dash-inbox-item is-active" : "dash-inbox-item"}
                 onClick={() => {
                   setSelected(item);
                   setReply(item.replyText || "");
                 }}
-                style={{
-                  width: "100%",
-                  textAlign: "left",
-                  padding: "0.85rem",
-                  border: "none",
-                  borderBottom: "1px solid #e2e8f0",
-                  background: selected?.id === item.id ? "#eaf2fb" : "#fff",
-                  cursor: "pointer",
-                }}
               >
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "0.3rem",
-                    fontSize: "0.62rem",
-                    fontWeight: 800,
-                    letterSpacing: "0.06em",
-                    textTransform: "uppercase",
-                    color: typeColor(item.type),
-                    marginBottom: "0.3rem",
-                  }}
-                >
+                <span className="dash-inbox-type" style={{ color: typeColor(item.type) }}>
                   {typeIcon(item.type)} {item.type}
                 </span>
-                <strong style={{ display: "block", fontSize: "0.86rem", color: "#0b192c" }}>{item.title}</strong>
-                <span style={{ display: "block", fontSize: "0.72rem", color: "#64748b" }}>{item.email}</span>
-                <span style={{ display: "block", marginTop: "0.2rem", fontSize: "0.7rem", color: "#94a3b8" }}>
-                  {item.subtitle}
-                </span>
+                <strong>{item.title}</strong>
+                <span className="dash-inbox-email">{item.email}</span>
+                <span className="dash-inbox-sub">{item.subtitle}</span>
               </button>
             ))
           )}
         </div>
 
-        <div
-          style={{
-            border: "1px solid #e2e8f0",
-            borderRadius: "0.85rem",
-            background: "#fff",
-            padding: "1rem",
-            display: "grid",
-            gap: "0.85rem",
-            alignContent: "start",
-            overflow: "auto",
-          }}
-        >
+        <div className="dash-inbox-detail">
           {!selected ? (
             <div style={{ display: "grid", placeItems: "center", minHeight: "16rem", color: "#94a3b8" }}>
               <div style={{ textAlign: "center" }}>

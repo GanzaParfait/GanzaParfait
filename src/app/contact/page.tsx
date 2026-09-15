@@ -35,17 +35,7 @@ export default function ContactPage() {
         ])}
       />
       <Breadcrumbs items={breadcrumbItems} />
-
-      <section
-        id="send"
-        className="section pt-8 relative overflow-hidden"
-        aria-label="Contact section"
-        style={{ paddingBottom: "4.5rem" }}
-      >
-        <div className="container relative z-10">
-          <ContactForm />
-        </div>
-      </section>
+      <ContactForm />
     </>
   );
 }

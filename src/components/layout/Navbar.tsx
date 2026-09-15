@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -37,6 +37,7 @@ export default function Navbar() {
   const [copied, setCopied] = useState(false);
   const [homeCue, setHomeCue] = useState(false);
   const settings = useSiteSettings();
+  const headerRef = useRef<HTMLElement>(null);
   const headerSocials = socialsFor(settings, "header");
   const primarySocials = headerSocials.slice(0, settings.headerSocialLimit || 3);
   const overflowSocials = headerSocials.slice(settings.headerSocialLimit || 3);
@@ -84,10 +85,30 @@ export default function Navbar() {
   }, [pathname]);
 
   useEffect(() => {
-    const offset = isPill ? "4.15rem" : "4rem";
-    document.documentElement.style.setProperty("--public-nav-offset", offset);
     document.documentElement.setAttribute("data-navbar", isPill ? "pill" : "full");
-  }, [isPill, settings.announcementIsActive]);
+    const el = headerRef.current;
+    if (!el) return;
+
+    const applyOffset = () => {
+      const height = Math.ceil(el.getBoundingClientRect().height);
+      // Buffer so page content never sits under the fixed announcement + nav.
+      const px = Math.max(height + 4, isPill ? 70 : 64);
+      document.documentElement.style.setProperty("--public-nav-offset", `${px}px`);
+    };
+
+    applyOffset();
+    const observer = new ResizeObserver(applyOffset);
+    observer.observe(el);
+    window.addEventListener("resize", applyOffset);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", applyOffset);
+    };
+  }, [isPill, settings.announcementIsActive, settings.announcementText, settings.announcementBarPosition]);
+
+  const barPosition = settings.announcementBarPosition === "bottom" ? "bottom" : "top";
+  const showTopBar = settings.announcementIsActive && Boolean(settings.announcementText?.trim()) && barPosition === "top";
+  const showBottomBar = settings.announcementIsActive && Boolean(settings.announcementText?.trim()) && barPosition === "bottom";
 
   const logoSrc = isDark
     ? "/brand/logos/logo-horizontal-light.png"
@@ -106,8 +127,6 @@ export default function Navbar() {
 
   const navLinkColor = (active: boolean) =>
     active ? "var(--color-primary)" : "var(--color-text-2)";
-  const navLinkBg = (active: boolean) =>
-    active ? (isDark ? "rgba(14,82,168,0.15)" : "rgba(14,82,168,0.08)") : "transparent";
   const getShareDetails = () => {
     const url = window.location.href.split("?")[0];
     const title = document.title || "Prince Parfait GANZA";
@@ -149,6 +168,7 @@ export default function Navbar() {
     <>
       {/* ── TOP BAR ── */}
       <header
+        ref={headerRef}
         role="banner"
         onMouseEnter={() => setHomeCue(pathname !== "/")}
         onMouseLeave={() => setHomeCue(false)}
@@ -160,7 +180,7 @@ export default function Navbar() {
           padding: 0,
         }}
       >
-        <AnnouncementBar settings={settings} />
+        {showTopBar ? <AnnouncementBar settings={settings} /> : null}
         <div style={{ padding: isPill ? "0.45rem clamp(1.1rem, 3vw, 2.75rem) 0" : 0 }}>
         <div
           style={{
@@ -224,16 +244,18 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   aria-current={isActive ? "page" : undefined}
+                  className={isActive ? "nav-link is-active" : "nav-link"}
                   style={{
-                    padding: "0.4rem 0.75rem",
-                    borderRadius: "0.5rem",
+                    padding: "0.4rem 0.65rem",
+                    borderRadius: 0,
                     fontSize: "0.85rem",
                     fontWeight: isActive ? 700 : 600,
                     textDecoration: "none",
-                    transition: "all 0.2s ease",
+                    transition: "color 0.2s ease",
                     color: navLinkColor(isActive),
-                    background: navLinkBg(isActive),
+                    background: "transparent",
                     letterSpacing: isActive ? "-0.01em" : "0",
+                    position: "relative",
                   }}
                 >
                   {link.label}
@@ -417,27 +439,31 @@ export default function Navbar() {
         {/* Nav links — compact grid for very small screens */}
         <nav aria-label="Mobile navigation">
           <div style={{ display: "flex", flexDirection: "column", gap: "0.0625rem" }}>
-            {navLinks.map((link, i) => (
+            {navLinks.map((link, i) => {
+              const active = pathname === link.href || pathname.startsWith(`${link.href}/`);
+              return (
               <Link
                 key={link.href}
                 href={link.href}
-                aria-current={pathname === link.href ? "page" : undefined}
+                aria-current={active ? "page" : undefined}
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  padding: "0.5rem 0.75rem",
-                  borderRadius: "0.5rem",
+                  padding: "0.55rem 0.75rem",
+                  borderRadius: 0,
                   fontSize: "0.875rem",
-                  fontWeight: 500,
+                  fontWeight: active ? 700 : 500,
                   textDecoration: "none",
                   transitionDelay: isOpen ? `${i * 30}ms` : "0ms",
-                  color: pathname === link.href ? "var(--color-primary)" : "var(--color-text-2)",
-                  background: pathname === link.href ? "rgba(14,82,168,0.07)" : "transparent",
+                  color: active ? "var(--color-primary)" : "var(--color-text-2)",
+                  background: "transparent",
+                  borderLeft: active ? "2px solid var(--color-primary)" : "2px solid transparent",
                 }}
               >
                 {link.label}
               </Link>
-            ))}
+              );
+            })}
           </div>
         </nav>
 
@@ -476,6 +502,7 @@ export default function Navbar() {
           </div>
         </div>
       </div>
+      {showBottomBar ? <AnnouncementBar settings={settings} /> : null}
     </>
   );
 }

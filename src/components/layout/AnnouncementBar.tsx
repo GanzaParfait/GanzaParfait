@@ -3,10 +3,12 @@
 import { useEffect, useId, useState, type ReactNode } from "react";
 import Link from "next/link";
 import {
+  RiArrowDownSLine,
   RiArrowRightLine,
   RiCalendarLine,
   RiCloseLine,
   RiFileTextLine,
+  RiGroupLine,
   RiLink,
   RiMapPinLine,
   RiFacebookFill,
@@ -15,23 +17,43 @@ import {
   RiTimeLine,
   RiTwitterXFill,
   RiWhatsappLine,
+  RiCheckLine,
 } from "react-icons/ri";
-import type { SiteSettings } from "@/lib/supabase";
-import { announcementMedia, fileName } from "@/lib/announcement";
+import type { AnnouncementSharePlatform, SiteSettings } from "@/lib/supabase";
+import {
+  announcementMedia,
+  announcementSharePath,
+  announcementSharePlatforms,
+  fileName,
+  shouldAutoOpenAnnouncement,
+} from "@/lib/announcement";
+import { buildShareUrl, SHARE_PRESETS } from "@/lib/utm";
 
 export default function AnnouncementBar({ settings }: { settings: SiteSettings }) {
   const [open, setOpen] = useState(false);
   const text = settings.announcementText?.trim() || "";
-  const label = settings.announcementCtaLabel?.trim() || "Continue";
+  const position = settings.announcementBarPosition === "bottom" ? "bottom" : "top";
+
+  useEffect(() => {
+    if (!settings.announcementIsActive || !text) return;
+    if (typeof window === "undefined") return;
+    if (shouldAutoOpenAnnouncement(window.location.search)) {
+      setOpen(true);
+    }
+  }, [settings.announcementIsActive, text]);
 
   if (!settings.announcementIsActive || !text) return null;
 
   return (
     <>
-      <button type="button" className="announcement-bar" onClick={() => setOpen(true)}>
+      <button
+        type="button"
+        className={`announcement-bar is-${position}`}
+        onClick={() => setOpen(true)}
+      >
         <span>{text}</span>
         <span className="announcement-bar-cta">
-          {label} <RiArrowRightLine size={14} />
+          Continue <RiArrowRightLine size={14} />
         </span>
       </button>
       {open ? <AnnouncementOverlay settings={settings} onClose={() => setOpen(false)} /> : null}
@@ -79,6 +101,7 @@ export function AnnouncementCard({
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const [copied, setCopied] = useState(false);
   const layout = settings.announcementLayout === "stack" ? "stack" : "side";
   const headline = settings.announcementHeadline?.trim() || settings.announcementText?.trim() || "Announcement";
   const detail = settings.announcementDetail?.trim() || "";
@@ -88,15 +111,12 @@ export function AnnouncementCard({
   const secondaryHref = settings.announcementSecondaryHref?.trim() || "";
   const interval = Math.min(Math.max(settings.announcementInterval || 5, 3), 20);
   const frame = visuals[index];
-  const [share, setShare] = useState<ReturnType<typeof shareLinks>>([]);
-
-  useEffect(() => {
-    if (settings.announcementShare === false) {
-      setShare([]);
-      return;
-    }
-    setShare(shareLinks(headline));
-  }, [settings.announcementShare, headline]);
+  const platforms = settings.announcementShare === false ? [] : announcementSharePlatforms(settings);
+  const mediaKicker = settings.announcementMediaKicker?.trim() || "";
+  const mediaTitle = settings.announcementMediaTitle?.trim() || "";
+  const audience = settings.announcementAudience?.trim() || "";
+  const dateShort = shortDateLabel(settings.announcementDate);
+  const placeShort = shortPlaceLabel(settings.announcementPlace);
 
   useEffect(() => {
     setIndex(0);
@@ -109,6 +129,39 @@ export function AnnouncementCard({
     const timer = window.setInterval(() => setIndex((current) => (current + 1) % visuals.length), interval * 1000);
     return () => window.clearInterval(timer);
   }, [visuals.length, paused, playing, interval]);
+
+  const copyAnnouncementLink = async () => {
+    if (typeof window === "undefined") return;
+    const base = `${window.location.origin}${announcementSharePath(window.location.pathname)}`;
+    const url = buildShareUrl(base, SHARE_PRESETS.copy("announcement", "open_announcement"));
+    const withFlag = new URL(url);
+    withFlag.searchParams.set("announce", "1");
+    await navigator.clipboard.writeText(withFlag.toString());
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1800);
+  };
+
+  const shareHref = (platform: Exclude<AnnouncementSharePlatform, "link">) => {
+    if (typeof window === "undefined") return "#";
+    const base = `${window.location.origin}${announcementSharePath(window.location.pathname)}`;
+    const preset =
+      platform === "linkedin"
+        ? SHARE_PRESETS.linkedin("announcement", "share")
+        : platform === "twitter"
+          ? SHARE_PRESETS.twitter("announcement", "share")
+          : platform === "facebook"
+            ? SHARE_PRESETS.facebook("announcement", "share")
+            : SHARE_PRESETS.whatsapp("announcement", "share");
+    const shared = buildShareUrl(base, preset);
+    const flagged = new URL(shared);
+    flagged.searchParams.set("announce", "1");
+    const encoded = encodeURIComponent(flagged.toString());
+    const text = encodeURIComponent(headline);
+    if (platform === "linkedin") return `https://www.linkedin.com/sharing/share-offsite/?url=${encoded}`;
+    if (platform === "twitter") return `https://twitter.com/intent/tweet?text=${text}&url=${encoded}`;
+    if (platform === "facebook") return `https://www.facebook.com/sharer/sharer.php?u=${encoded}`;
+    return `https://wa.me/?text=${text}%20${encoded}`;
+  };
 
   return (
     <div
@@ -142,7 +195,9 @@ export function AnnouncementCard({
             ) : (
               <button type="button" className="announcement-play" onClick={() => setPlaying(true)}>
                 {frame.poster ? <img src={frame.poster} alt="" /> : <span className="announcement-video-fallback" />}
-                <span className="announcement-play-button" aria-hidden="true"><RiPlayFill size={28} /></span>
+                <span className="announcement-play-button" aria-hidden="true">
+                  <RiPlayFill size={28} />
+                </span>
               </button>
             )
           ) : (
@@ -151,6 +206,34 @@ export function AnnouncementCard({
         ) : (
           <div className="announcement-video-fallback" />
         )}
+
+        {(mediaKicker || mediaTitle) && !playing ? (
+          <div className="announcement-media-copy">
+            {mediaKicker ? <p className="announcement-media-kicker">{mediaKicker}</p> : null}
+            {mediaTitle ? <p className="announcement-media-title">{mediaTitle}</p> : null}
+          </div>
+        ) : null}
+
+        {(dateShort || placeShort || audience) && !playing ? (
+          <div className="announcement-media-meta">
+            {dateShort ? (
+              <span>
+                <RiCalendarLine size={13} /> {dateShort}
+              </span>
+            ) : null}
+            {placeShort ? (
+              <span>
+                <RiMapPinLine size={13} /> {placeShort}
+              </span>
+            ) : null}
+            {audience ? (
+              <span>
+                <RiGroupLine size={13} /> {audience}
+              </span>
+            ) : null}
+          </div>
+        ) : null}
+
         {visuals.length > 1 ? (
           <div className="announcement-dots" role="tablist" aria-label="Announcement media">
             {visuals.map((item, frameIndex) => (
@@ -160,7 +243,10 @@ export function AnnouncementCard({
                 role="tab"
                 aria-selected={frameIndex === index}
                 className={frameIndex === index ? "is-on" : undefined}
-                onClick={() => { setIndex(frameIndex); setPlaying(false); }}
+                onClick={() => {
+                  setIndex(frameIndex);
+                  setPlaying(false);
+                }}
               />
             ))}
           </div>
@@ -169,51 +255,89 @@ export function AnnouncementCard({
       <div className="announcement-copy">
         <p className="announcement-kicker">{settings.announcementEyebrow?.trim() || "Announcement"}</p>
         <h2 id={titleId}>{headline}</h2>
-        {detail ? <p>{detail}</p> : null}
-        {(settings.announcementDate || settings.announcementTime || settings.announcementPlace) ? (
+        {detail ? <p className="announcement-detail">{detail}</p> : null}
+        {settings.announcementDate || settings.announcementTime || settings.announcementPlace ? (
           <ul className="announcement-facts">
-            {settings.announcementDate ? <li><RiCalendarLine size={16} /><span>{settings.announcementDate}</span></li> : null}
-            {settings.announcementTime ? <li><RiTimeLine size={16} /><span>{settings.announcementTime}</span></li> : null}
-            {settings.announcementPlace ? <li><RiMapPinLine size={16} /><span>{settings.announcementPlace}</span></li> : null}
+            {settings.announcementDate ? (
+              <li>
+                <RiCalendarLine size={15} />
+                <span>{settings.announcementDate}</span>
+              </li>
+            ) : null}
+            {settings.announcementTime ? (
+              <li>
+                <RiTimeLine size={15} />
+                <span>{settings.announcementTime}</span>
+              </li>
+            ) : null}
+            {settings.announcementPlace ? (
+              <li>
+                <RiMapPinLine size={15} />
+                <span>{settings.announcementPlace}</span>
+              </li>
+            ) : null}
           </ul>
         ) : null}
         <div className="announcement-actions">
-          {href ? <ActionLink href={href} className="btn btn-primary" onClick={onClose}>{label} <RiArrowRightLine size={16} /></ActionLink> : null}
-          {secondaryLabel && secondaryHref ? (
-            <ActionLink href={secondaryHref} className="btn btn-outline" onClick={onClose}>
-              <RiCalendarLine size={16} /> {secondaryLabel}
+          {href ? (
+            <ActionLink href={href} className="btn btn-primary" onClick={onClose}>
+              {label} <RiArrowRightLine size={15} />
             </ActionLink>
+          ) : null}
+          {secondaryLabel ? (
+            secondaryHref ? (
+              <ActionLink href={secondaryHref} className="btn btn-outline" onClick={onClose}>
+                <RiCalendarLine size={15} /> {secondaryLabel} <RiArrowDownSLine size={15} />
+              </ActionLink>
+            ) : (
+              <span className="btn btn-outline announcement-secondary-static">
+                <RiCalendarLine size={15} /> {secondaryLabel} <RiArrowDownSLine size={15} />
+              </span>
+            )
           ) : null}
         </div>
         {documents.length ? (
           <div className="announcement-docs">
             {documents.map((item) => (
               <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer">
-                <RiFileTextLine size={16} /> {item.name || fileName(item.url)}
+                <RiFileTextLine size={15} /> {item.name || fileName(item.url)}
               </a>
             ))}
           </div>
         ) : null}
-        {share.length || settings.announcementClosing ? (
+        {platforms.length || settings.announcementClosing ? (
           <div className="announcement-share">
-            {share.length ? (
+            {platforms.length ? (
               <div>
                 <p>Share this event</p>
                 <div>
-                  {share.map((link) => {
-                    const Icon = link.icon;
+                  {platforms.map((platform) => {
+                    if (platform === "link") {
+                      return (
+                        <button key="link" type="button" aria-label={copied ? "Copied" : "Copy link"} onClick={() => void copyAnnouncementLink()}>
+                          {copied ? <RiCheckLine size={15} /> : <RiLink size={15} />}
+                        </button>
+                      );
+                    }
+                    const Icon =
+                      platform === "linkedin"
+                        ? RiLinkedinFill
+                        : platform === "twitter"
+                          ? RiTwitterXFill
+                          : platform === "facebook"
+                            ? RiFacebookFill
+                            : RiWhatsappLine;
                     return (
-                      <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer" aria-label={link.label}>
+                      <a key={platform} href={shareHref(platform)} target="_blank" rel="noopener noreferrer" aria-label={platform}>
                         <Icon size={15} />
                       </a>
                     );
                   })}
-                  <button type="button" aria-label="Copy link" onClick={() => navigator.clipboard.writeText(window.location.href.split("?")[0])}>
-                    <RiLink size={16} />
-                  </button>
                 </div>
               </div>
-            ) : <span />}
+            ) : (
+              <span />
+            )}
             {settings.announcementClosing ? <p className="announcement-closing">{settings.announcementClosing}</p> : null}
           </div>
         ) : null}
@@ -222,21 +346,31 @@ export function AnnouncementCard({
   );
 }
 
-function shareLinks(title: string) {
-  if (typeof window === "undefined") return [];
-  const url = encodeURIComponent(window.location.href.split("?")[0]);
-  const text = encodeURIComponent(title);
-  return [
-    { label: "LinkedIn", icon: RiLinkedinFill, href: `https://www.linkedin.com/sharing/share-offsite/?url=${url}` },
-    { label: "X", icon: RiTwitterXFill, href: `https://twitter.com/intent/tweet?text=${text}&url=${url}` },
-    { label: "Facebook", icon: RiFacebookFill, href: `https://www.facebook.com/sharer/sharer.php?u=${url}` },
-    { label: "WhatsApp", icon: RiWhatsappLine, href: `https://wa.me/?text=${text}%20${url}` },
-  ];
+function shortDateLabel(value?: string) {
+  const text = value?.trim() || "";
+  if (!text) return "";
+  const match = text.match(/([A-Za-z]{3})\w*\s+(\d{1,2}),?\s+(\d{4})/);
+  if (match) return `${match[1].toUpperCase()} ${match[2]}, ${match[3]}`;
+  return text.toUpperCase();
+}
+
+function shortPlaceLabel(value?: string) {
+  const text = value?.trim() || "";
+  if (!text) return "";
+  return text.split(",")[0]?.trim().toUpperCase() || text.toUpperCase();
 }
 
 function ActionLink({ href, className, onClick, children }: { href: string; className: string; onClick?: () => void; children: ReactNode }) {
   if (href.startsWith("/")) {
-    return <Link href={href} className={className} onClick={onClick}>{children}</Link>;
+    return (
+      <Link href={href} className={className} onClick={onClick}>
+        {children}
+      </Link>
+    );
   }
-  return <a className={className} href={href} target="_blank" rel="noopener noreferrer" onClick={onClick}>{children}</a>;
+  return (
+    <a className={className} href={href} target="_blank" rel="noopener noreferrer" onClick={onClick}>
+      {children}
+    </a>
+  );
 }

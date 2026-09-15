@@ -169,4 +169,10 @@ export const SHARE_PRESETS = {
     campaign,
     content,
   }),
+  facebook: (campaign: string, content?: string): ShareUtmOptions => ({
+    source: "facebook",
+    medium: "social",
+    campaign,
+    content,
+  }),
 } as const;

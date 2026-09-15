@@ -1,7 +1,12 @@
 import { createClient } from "@supabase/supabase-js";
 import { DEFAULT_SOCIAL_LINKS, type SocialLink } from "@/lib/socials";
 import type { HomepageContent } from "@/lib/homepage";
+import type { ContactPageContent } from "@/lib/contact-page";
+import type { AboutPageContent } from "@/lib/about-page";
 import type { Project } from "@/data/site-data";
+
+export type AnnouncementSharePlatform = "linkedin" | "twitter" | "facebook" | "whatsapp" | "link";
+export type AnnouncementBarPosition = "top" | "bottom";
 
 export type AnnouncementMedia = {
   id: string;
@@ -76,9 +81,16 @@ export interface SiteSettings {
   announcementSecondaryLabel?: string;
   announcementSecondaryHref?: string;
   announcementShare?: boolean;
+  announcementSharePlatforms?: AnnouncementSharePlatform[];
   announcementClosing?: string;
   announcementInterval?: number;
+  announcementBarPosition?: AnnouncementBarPosition;
+  announcementMediaKicker?: string;
+  announcementMediaTitle?: string;
+  announcementAudience?: string;
   homepage?: HomepageContent;
+  contactPage?: ContactPageContent;
+  aboutPage?: AboutPageContent;
   projectRecords?: ProjectRecord[];
   /** Outbound email branding (thanks, contact, newsletter shell). */
   emailHeaderLayout?: EmailHeaderLayout;
@@ -206,9 +218,29 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   footerCompanyMedia: [],
   footerCompanyCarouselInterval: 5,
   bookingCalendarUrl: "",
-  announcementText: "",
-  announcementLink: "",
-  announcementIsActive: false,
+  announcementIsActive: true,
+  announcementText: "New Achievement... Event to be held at Kigali Marriott Hotel.!",
+  announcementLink: "/contact",
+  announcementCtaLabel: "View Event Details",
+  announcementEyebrow: "Announcement",
+  announcementHeadline: "New Achievement... Event to be held at Kigali Marriott Hotel.!",
+  announcementDetail:
+    "Join leaders, innovators, and change-makers for an evening focused on technology and impact across Africa.",
+  announcementDate: "Saturday, Sep 20, 2026",
+  announcementTime: "2:00 PM (GMT+2)",
+  announcementPlace: "Kigali Marriott Hotel, Kigali, Rwanda",
+  announcementLayout: "side",
+  announcementSecondaryLabel: "Add to Calendar",
+  announcementSecondaryHref: "",
+  announcementShare: true,
+  announcementSharePlatforms: ["linkedin", "twitter", "facebook", "whatsapp", "link"],
+  announcementClosing: "See you there! 👋",
+  announcementInterval: 5,
+  announcementBarPosition: "top",
+  announcementMediaKicker: "Speak · Learn · Connect",
+  announcementMediaTitle: "Building Impact Together",
+  announcementAudience: "Leaders · Innovators · Change-makers",
+  announcementMedia: [],
   emailHeaderLayout: "brand_tagline",
   emailShowSignature: true,
   emailSignatureQuote: "I only send something when there is something worth sharing.",

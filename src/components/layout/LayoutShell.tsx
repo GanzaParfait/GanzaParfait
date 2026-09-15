@@ -13,6 +13,7 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const isBare =
     pathname?.startsWith("/dashboard") || pathname?.startsWith("/email-preview");
+  const isHome = pathname === "/";
 
   if (isBare) {
     return <>{children}</>;
@@ -24,7 +25,12 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
         Skip to main content
       </a>
       <Navbar />
-      <main id="main-content" role="main" tabIndex={-1}>
+      <main
+        id="main-content"
+        role="main"
+        tabIndex={-1}
+        className={isHome ? "site-main is-home" : "site-main"}
+      >
         {children}
       </main>
       <Footer />

@@ -38,6 +38,7 @@ import MediaManagerModal from "@/components/dashboard/MediaManagerModal";
 import AnnouncementEditor from "@/components/dashboard/AnnouncementEditor";
 import EmailEditor from "@/components/dashboard/EmailEditor";
 import FooterFocusDragPreview from "@/components/dashboard/FooterFocusDragPreview";
+import CustomSelect from "@/components/ui/CustomSelect";
 import { FooterCompanyBand } from "@/components/layout/Footer";
 import { footerNav } from "@/data/site-data";
 import { setting } from "@/lib/hero";
@@ -270,11 +271,11 @@ export default function SettingsPage() {
                           <RiArrowDownSLine size={16} />
                         </button>
                       </span>
-                      <select value={link.platform} onChange={(e) => updateSocial(link.id, { platform: e.target.value })} style={inputStyle}>
-                        {SOCIAL_PLATFORM_OPTIONS.map((option) => (
-                          <option key={option.id} value={option.id}>{option.label}</option>
-                        ))}
-                      </select>
+                      <CustomSelect
+                        value={link.platform}
+                        options={SOCIAL_PLATFORM_OPTIONS.map((option) => ({ value: option.id, label: option.label }))}
+                        onChange={(value) => updateSocial(link.id, { platform: value })}
+                      />
                       <input value={link.label} onChange={(e) => updateSocial(link.id, { label: e.target.value })} style={inputStyle} />
                       <input value={link.url} onChange={(e) => updateSocial(link.id, { url: e.target.value })} style={inputStyle} />
                       <button type="button" onClick={() => removeSocial(link.id)} style={{ border: "none", background: "none", color: "#ef4444", cursor: "pointer" }} aria-label="Remove">
@@ -359,32 +360,40 @@ export default function SettingsPage() {
                   <input style={{ ...inputStyle, marginTop: "0.3rem" }} value={settings.footerCompanyHref || ""} onChange={(e) => patch({ footerCompanyHref: e.target.value })} />
                 </label>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
-                  <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>Fit
-                    <select style={{ ...inputStyle, marginTop: "0.3rem" }} value={settings.footerCompanyFit || "cover"} onChange={(e) => patch({ footerCompanyFit: e.target.value as FooterCompanyFit })}>
-                      <option value="cover">Cover (full width)</option>
-                      <option value="contain">Contain</option>
-                    </select>
+                  <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155", display: "grid", gap: "0.3rem" }}>Fit
+                    <CustomSelect
+                      value={settings.footerCompanyFit || "cover"}
+                      options={[
+                        { value: "cover", label: "Cover (full width)" },
+                        { value: "contain", label: "Contain" },
+                      ]}
+                      onChange={(value) => patch({ footerCompanyFit: value as FooterCompanyFit })}
+                    />
                   </label>
-                  <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>Height
-                    <select style={{ ...inputStyle, marginTop: "0.3rem" }} value={settings.footerCompanyHeight || "regular"} onChange={(e) => patch({ footerCompanyHeight: e.target.value as FooterCompanyHeight })}>
-                      <option value="compact">Compact</option>
-                      <option value="regular">Regular</option>
-                      <option value="tall">Tall</option>
-                    </select>
+                  <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155", display: "grid", gap: "0.3rem" }}>Height
+                    <CustomSelect
+                      value={settings.footerCompanyHeight || "regular"}
+                      options={[
+                        { value: "compact", label: "Compact" },
+                        { value: "regular", label: "Regular" },
+                        { value: "tall", label: "Tall" },
+                      ]}
+                      onChange={(value) => patch({ footerCompanyHeight: value as FooterCompanyHeight })}
+                    />
                   </label>
                 </div>
 
-                <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155", gridColumn: "1 / -1" }}>
+                <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155", gridColumn: "1 / -1", display: "grid", gap: "0.3rem" }}>
                   Media mode
-                  <select
-                    style={{ ...inputStyle, marginTop: "0.3rem" }}
+                  <CustomSelect
                     value={settings.footerCompanyMediaType || "image"}
-                    onChange={(e) => patch({ footerCompanyMediaType: e.target.value as "image" | "video" | "carousel" })}
-                  >
-                    <option value="image">Single image</option>
-                    <option value="video">Video</option>
-                    <option value="carousel">Carousel (up to 3 images)</option>
-                  </select>
+                    options={[
+                      { value: "image", label: "Single image" },
+                      { value: "video", label: "Video" },
+                      { value: "carousel", label: "Carousel (up to 3 images)" },
+                    ]}
+                    onChange={(value) => patch({ footerCompanyMediaType: value as "image" | "video" | "carousel" })}
+                  />
                 </label>
 
                 <div style={{ gridColumn: "1 / -1", display: "grid", gap: "0.45rem" }}>

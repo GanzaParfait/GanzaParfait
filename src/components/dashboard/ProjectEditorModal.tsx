@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { RiCloseLine, RiSaveLine, RiImageAddLine, RiFolderLine } from "react-icons/ri";
 import { Project } from "@/data/site-data";
+import CustomSelect from "@/components/ui/CustomSelect";
 
 function projectVideos(project: Partial<Project>) {
   return project.videos?.length ? project.videos : project.video ? [project.video] : [];
@@ -127,20 +128,20 @@ export default function ProjectEditorModal({
               <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--color-text-2)", marginBottom: "0.25rem" }}>
                 Category
               </label>
-              <select
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
-                style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", background: "var(--color-bg)", border: "1px solid var(--color-border)", color: "var(--color-text)", fontSize: "0.8125rem" }}
-              >
-                <option value="web">Web Application</option>
-                <option value="mobile">Mobile App</option>
-                <option value="ai">AI / Machine Learning</option>
-                <option value="saas">SaaS Product</option>
-                <option value="open-source">Open Source</option>
-                <option value="systems">Systems</option>
-                <option value="product">Product</option>
-                <option value="other">Other</option>
-              </select>
+              <CustomSelect
+                value={formData.category || "web"}
+                options={[
+                  { value: "web", label: "Web Application" },
+                  { value: "mobile", label: "Mobile App" },
+                  { value: "ai", label: "AI / Machine Learning" },
+                  { value: "saas", label: "SaaS Product" },
+                  { value: "open-source", label: "Open Source" },
+                  { value: "systems", label: "Systems" },
+                  { value: "product", label: "Product" },
+                  { value: "other", label: "Other" },
+                ]}
+                onChange={(value) => setFormData({ ...formData, category: value as Project["category"] })}
+              />
               {formData.category === "other" ? (
                 <input
                   type="text"

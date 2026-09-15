@@ -16,6 +16,7 @@ import {
   RiLinkM,
 } from "react-icons/ri";
 import type { HomepageContent, JourneyEntry, JourneyType } from "@/lib/homepage";
+import CustomSelect from "@/components/ui/CustomSelect";
 
 type FilterId = "all" | JourneyType;
 type SortId = "latest" | "oldest";
@@ -179,10 +180,15 @@ export default function JourneySection({
               {journey.display.showSort ? (
                 <label className="journey-sort">
                   <span className="sr-only">Sort</span>
-                  <select value={sort} onChange={(event) => setSort(event.target.value as SortId)}>
-                    <option value="latest">Latest first</option>
-                    <option value="oldest">Oldest first</option>
-                  </select>
+                  <CustomSelect
+                    aria-label="Sort"
+                    value={sort}
+                    options={[
+                      { value: "latest", label: "Latest first" },
+                      { value: "oldest", label: "Oldest first" },
+                    ]}
+                    onChange={(value) => setSort(value as SortId)}
+                  />
                 </label>
               ) : null}
             </div>

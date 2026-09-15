@@ -17,6 +17,11 @@ import {
   RiSearchLine,
   RiHome5Line,
   RiMailLine,
+  RiContactsBook2Line,
+  RiPagesLine,
+  RiArrowDownSLine,
+  RiUser3Line,
+  RiUserHeartLine,
 } from "react-icons/ri";
 
 import {
@@ -52,6 +57,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   // Navigation & UI States
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [pagesOpen, setPagesOpen] = useState(
+    () =>
+      pathname.startsWith("/dashboard/homepage") ||
+      pathname.startsWith("/dashboard/contact") ||
+      pathname.startsWith("/dashboard/about"),
+  );
 
   // Search & Global State
   const [searchQuery, setSearchQuery] = useState("");
@@ -64,6 +75,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     avatarUrl: "/images/profile/prince-parfait-ganza-kigali-rwanda.webp",
     role: "Super Admin",
   });
+
+  useEffect(() => {
+    if (pathname.startsWith("/dashboard/homepage") || pathname.startsWith("/dashboard/contact")) {
+      setPagesOpen(true);
+    }
+  }, [pathname]);
 
   // Load settings + sidebar state client-side only
   useEffect(() => {
@@ -174,12 +191,81 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               { id: "blogs", path: "/dashboard/blogs", label: "Blog Articles", icon: RiBookOpenLine },
               { id: "projects", path: "/dashboard/projects", label: "Projects", icon: RiFolderLine },
               { id: "media", path: "/dashboard/media", label: "Media Library", icon: RiImageLine },
-              { id: "homepage", path: "/dashboard/homepage", label: "Homepage", icon: RiHome5Line },
-              { id: "messages", path: "/dashboard/messages", label: "Messages", icon: RiMailLine },
-              { id: "settings", path: "/dashboard/settings", label: "Site Settings", icon: RiSettings4Line },
             ].map((tab) => {
               const Icon = tab.icon;
               const active = tab.path === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(tab.path);
+              return (
+                <Link
+                  key={tab.id}
+                  href={tab.path}
+                  title={tab.label}
+                  className={active ? "dash-nav-link is-active" : "dash-nav-link"}
+                >
+                  <Icon size={19} />
+                  {sidebarOpen ? <span>{tab.label}</span> : null}
+                </Link>
+              );
+            })}
+
+            <div
+              className={
+                pagesOpen ||
+                pathname.startsWith("/dashboard/homepage") ||
+                pathname.startsWith("/dashboard/contact") ||
+                pathname.startsWith("/dashboard/about")
+                  ? "dash-nav-group is-open"
+                  : "dash-nav-group"
+              }
+            >
+              <button
+                type="button"
+                className={
+                  pathname.startsWith("/dashboard/homepage") ||
+                  pathname.startsWith("/dashboard/contact") ||
+                  pathname.startsWith("/dashboard/about")
+                    ? "dash-nav-link is-active"
+                    : "dash-nav-link"
+                }
+                title="Pages"
+                aria-expanded={pagesOpen}
+                onClick={() => setPagesOpen((current) => !current)}
+              >
+                <RiPagesLine size={19} />
+                {sidebarOpen ? <span>Pages</span> : null}
+                {sidebarOpen ? <RiArrowDownSLine size={16} className="dash-nav-caret" /> : null}
+              </button>
+              {pagesOpen || !sidebarOpen ? (
+                <div className="dash-nav-sub" hidden={!pagesOpen && sidebarOpen}>
+                  {[
+                    { id: "homepage", path: "/dashboard/homepage", label: "Homepage", icon: RiHome5Line },
+                    { id: "about", path: "/dashboard/about", label: "About", icon: RiUser3Line },
+                    { id: "contact", path: "/dashboard/contact", label: "Contact", icon: RiContactsBook2Line },
+                  ].map((tab) => {
+                    const Icon = tab.icon;
+                    const active = pathname.startsWith(tab.path);
+                    return (
+                      <Link
+                        key={tab.id}
+                        href={tab.path}
+                        title={tab.label}
+                        className={active ? "dash-nav-link is-sub is-active" : "dash-nav-link is-sub"}
+                      >
+                        <Icon size={17} />
+                        {sidebarOpen ? <span>{tab.label}</span> : null}
+                      </Link>
+                    );
+                  })}
+                </div>
+              ) : null}
+            </div>
+
+            {[
+              { id: "messages", path: "/dashboard/messages", label: "Messages", icon: RiMailLine },
+              { id: "subscribers", path: "/dashboard/subscribers", label: "Subscribers", icon: RiUserHeartLine },
+              { id: "settings", path: "/dashboard/settings", label: "Site Settings", icon: RiSettings4Line },
+            ].map((tab) => {
+              const Icon = tab.icon;
+              const active = pathname.startsWith(tab.path);
               return (
                 <Link
                   key={tab.id}

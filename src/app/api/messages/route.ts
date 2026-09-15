@@ -49,11 +49,14 @@ export async function GET(request: Request) {
       sourceId: row.id as string,
       type: "subscribe" as const,
       direction: "inbound" as const,
-      title: "New subscriber",
+      title: (row.name as string | null) || "New subscriber",
       email: row.email as string,
-      subtitle: [row.location, row.country].filter(Boolean).join(", ") || "Newsletter signup",
+      subtitle:
+        [row.confirmed ? "Confirmed" : "Unconfirmed", row.source, row.location, row.country]
+          .filter(Boolean)
+          .join(" · ") || "Newsletter signup",
       body: `Subscribed from ${row.device || "unknown device"}.`,
-      status: "new",
+      status: row.confirmed ? "confirmed" : "unconfirmed",
       replyText: null as string | null,
       previewHtml: null as string | null,
       createdAt: row.created_at as string,
