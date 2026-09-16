@@ -15,8 +15,14 @@ import {
   RiDownloadLine,
   RiFileCopyLine,
   RiPlayFill,
+  RiShieldCheckLine,
+  RiDatabase2Line,
+  RiBarChartBoxLine,
+  RiSettings3Line,
+  RiTeamLine,
+  RiFlashlightLine,
 } from "react-icons/ri";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { Project, projects as defaultProjects } from "@/data/site-data";
 import ShareActions from "@/components/ui/ShareActions";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
@@ -58,6 +64,41 @@ const CATEGORY: Record<string, string> = {
   other: "Other",
 };
 
+const HIGHLIGHT_ICONS = [
+  RiShieldCheckLine,
+  RiDatabase2Line,
+  RiBarChartBoxLine,
+  RiSettings3Line,
+  RiTeamLine,
+  RiFlashlightLine,
+  RiFileCopyLine,
+  RiCodeBoxLine,
+];
+
+function MetaItem({
+  icon,
+  label,
+  value,
+  live,
+}: {
+  icon: ReactNode;
+  label: string;
+  value: string;
+  live?: boolean;
+}) {
+  return (
+    <div className="case-meta-item">
+      <span className="case-meta-icon" aria-hidden="true">
+        {icon}
+      </span>
+      <div>
+        <dt>{label}</dt>
+        <dd className={live ? "is-live" : undefined}>{value}</dd>
+      </div>
+    </div>
+  );
+}
+
 export default function ProjectCaseStudyClient({ project: seed }: { project: Project }) {
   const settings = useSiteSettings();
   const project = useMemo(() => {
@@ -74,10 +115,13 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
   const index = list.findIndex((item) => item.id === project.id);
   const previous = index > 0 ? list[index - 1] : null;
   const next = index >= 0 && index < list.length - 1 ? list[index + 1] : null;
-  const shots = (project.screenshots || []).filter((src) => src && !src.includes("placeholder"));
+  const shots = (project.screenshots?.length ? project.screenshots : project.image ? [project.image] : []).filter(
+    (src) => src && !src.includes("placeholder"),
+  );
   const cover = project.image && !project.image.includes("placeholder") ? project.image : shots[0];
   const category =
     project.category === "other" && project.categoryNote ? project.categoryNote : CATEGORY[project.category] || project.category;
+  const flourish = (project.flourish || "").trim() || "Data People Impact";
   const tabs = [
     { id: "overview", label: "Overview", show: Boolean(project.longDescription || project.description || project.context || project.highlights?.length) },
     { id: "features", label: "Features", show: Boolean(project.features?.length || project.solution) },
@@ -89,37 +133,48 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
     { id: "learned", label: "What I Learned", show: Boolean(project.learned) },
   ].filter((tab) => tab.show);
   const [tab, setTab] = useState(tabs[0]?.id || "overview");
-  const [shot, setShot] = useState(0);
-  const activeShot = shots[shot] || shots[0];
+  const [shotStart, setShotStart] = useState(0);
+  const visibleShots = Math.min(4, shots.length);
+  const shotWindow = shots.slice(shotStart, shotStart + visibleShots);
+
+  const shiftGallery = (delta: number) => {
+    if (shots.length <= visibleShots) return;
+    setShotStart((current) => {
+      const nextIndex = current + delta;
+      if (nextIndex < 0) return Math.max(0, shots.length - visibleShots);
+      if (nextIndex > shots.length - visibleShots) return 0;
+      return nextIndex;
+    });
+  };
 
   return (
-    <article className="case-study" data-page-section>
+    <article className="case-study">
       <div className="container">
-        <div className="case-nav">
-          <Link href="/projects">
-            <RiArrowLeftLine /> Back to projects
+        <div className="case-nav" data-page-section>
+          <Link href="/projects" className="case-nav-link">
+            <RiArrowLeftLine size={16} /> Back to projects
           </Link>
-          <div>
+          <div className="case-nav-peers">
             {previous ? (
-              <Link href={`/projects/${previous.id}`}>
-                <RiArrowLeftLine /> Previous
+              <Link href={`/projects/${previous.id}`} className="case-nav-link">
+                <RiArrowLeftLine size={16} /> Previous
               </Link>
             ) : (
               <span />
             )}
             {next ? (
-              <Link href={`/projects/${next.id}`}>
-                Next <RiArrowRightLine />
+              <Link href={`/projects/${next.id}`} className="case-nav-link">
+                Next <RiArrowRightLine size={16} />
               </Link>
             ) : null}
           </div>
         </div>
 
-        <div className="case-hero">
-          <div>
+        <header className="case-hero" data-page-section>
+          <div className="case-hero-copy">
             <p className="case-pill">{category}</p>
             <h1>{project.title}</h1>
-            <p>{project.tagline || project.description}</p>
+            <p className="case-hero-lead">{project.tagline || project.description}</p>
             <div className="case-actions">
               {project.links?.live ? (
                 <a className="btn btn-primary" href={project.links.live} target="_blank" rel="noopener noreferrer">
@@ -134,72 +189,44 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
             </div>
           </div>
           <div className="case-hero-visual">
+            <div className="case-hero-glow" aria-hidden="true" />
             <figure className="case-hero-shot">
               {cover ? <img src={cover} alt="" /> : <span>{project.title}</span>}
             </figure>
-            {(project.flourish || "").trim() ? (
-              <p className="case-flourish" aria-hidden="true">
-                {project.flourish}
-              </p>
-            ) : null}
+            <p className="case-flourish" aria-hidden="true">
+              {flourish}
+            </p>
           </div>
-        </div>
+        </header>
 
-        <dl className="case-meta">
+        <dl className="case-meta" data-page-section>
           {project.myRole ? (
-            <div>
-              <RiUser3Line />
-              <div>
-                <dt>My role</dt>
-                <dd>{project.myRole}</dd>
-              </div>
-            </div>
+            <MetaItem icon={<RiUser3Line size={18} />} label="My role" value={project.myRole} />
           ) : null}
           {project.period || project.year ? (
-            <div>
-              <RiCalendarLine />
-              <div>
-                <dt>Duration</dt>
-                <dd>{project.period || project.year}</dd>
-              </div>
-            </div>
+            <MetaItem icon={<RiCalendarLine size={18} />} label="Duration" value={String(project.period || project.year)} />
           ) : null}
           {project.organization ? (
-            <div>
-              <RiBuilding2Line />
-              <div>
-                <dt>Client</dt>
-                <dd>{project.organization}</dd>
-              </div>
-            </div>
+            <MetaItem icon={<RiBuilding2Line size={18} />} label="Client" value={project.organization} />
           ) : null}
-          <div>
-            <RiStackLine />
-            <div>
-              <dt>Category</dt>
-              <dd>{category}</dd>
-            </div>
-          </div>
+          <MetaItem icon={<RiStackLine size={18} />} label="Category" value={category} />
           {project.technologies?.length ? (
-            <div>
-              <RiCodeBoxLine />
-              <div>
-                <dt>Tech stack</dt>
-                <dd>{project.technologies.slice(0, 4).join(", ")}</dd>
-              </div>
-            </div>
+            <MetaItem
+              icon={<RiCodeBoxLine size={18} />}
+              label="Tech stack"
+              value={project.technologies.slice(0, 4).join(", ")}
+            />
           ) : null}
-          <div>
-            <RiCheckboxCircleLine />
-            <div>
-              <dt>Status</dt>
-              <dd className={project.status === "live" ? "is-live" : undefined}>{STATUS[project.status]}</dd>
-            </div>
-          </div>
+          <MetaItem
+            icon={<RiCheckboxCircleLine size={18} />}
+            label="Status"
+            value={STATUS[project.status]}
+            live={project.status === "live"}
+          />
         </dl>
 
-        <div className="case-layout">
-          <div>
+        <div className="case-layout" data-page-section>
+          <div className="case-main">
             <div className="case-tabs" role="tablist" aria-label="Case study sections">
               {tabs.map((item) => (
                 <button
@@ -208,12 +235,20 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
                   role="tab"
                   aria-selected={tab === item.id}
                   className={tab === item.id ? "is-on" : undefined}
-                  onClick={() => setTab(item.id)}
+                  onClick={() => {
+                    setTab(item.id);
+                    if (item.id === "gallery") {
+                      window.requestAnimationFrame(() => {
+                        document.getElementById("case-shots")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                      });
+                    }
+                  }}
                 >
                   {item.label}
                 </button>
               ))}
             </div>
+
             <div className="case-panel" role="tabpanel">
               {tab === "overview" && (
                 <>
@@ -223,11 +258,17 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
                     <div className="case-highlights">
                       <h3>Key highlights</h3>
                       <ul>
-                        {project.highlights.map((item) => (
-                          <li key={item}>
-                            <RiFileCopyLine /> {item}
-                          </li>
-                        ))}
+                        {project.highlights.map((item, highlightIndex) => {
+                          const Icon = HIGHLIGHT_ICONS[highlightIndex % HIGHLIGHT_ICONS.length];
+                          return (
+                            <li key={item}>
+                              <span className="case-highlight-icon" aria-hidden="true">
+                                <Icon size={16} />
+                              </span>
+                              <span>{item}</span>
+                            </li>
+                          );
+                        })}
                       </ul>
                     </div>
                   ) : null}
@@ -238,9 +279,17 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
                   <h2>Features</h2>
                   {project.features?.length ? (
                     <ul className="case-list">
-                      {project.features.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
+                      {project.features.map((item, featureIndex) => {
+                        const Icon = HIGHLIGHT_ICONS[featureIndex % HIGHLIGHT_ICONS.length];
+                        return (
+                          <li key={item}>
+                            <span className="case-highlight-icon" aria-hidden="true">
+                              <Icon size={16} />
+                            </span>
+                            <span>{item}</span>
+                          </li>
+                        );
+                      })}
                     </ul>
                   ) : (
                     <p>{project.solution}</p>
@@ -250,14 +299,14 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
               {tab === "role" && (
                 <>
                   <h2>My role</h2>
-                  {project.myRole ? <p>{project.myRole}</p> : null}
+                  {project.myRole ? <p className="case-role-title">{project.myRole}</p> : null}
                   {project.whatIBuilt ? <p>{project.whatIBuilt}</p> : null}
                 </>
               )}
               {tab === "stack" && (
                 <>
                   <h2>Tech stack</h2>
-                  <ul className="case-list">
+                  <ul className="case-tech">
                     {project.technologies.map((item) => (
                       <li key={item}>{item}</li>
                     ))}
@@ -270,44 +319,10 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
                   <p>{project.outcome || project.result}</p>
                 </>
               )}
-              {tab === "gallery" && activeShot && (
+              {tab === "gallery" && shots.length > 0 && (
                 <>
                   <h2>Project screenshots</h2>
-                  <div className="case-gallery">
-                    <button
-                      type="button"
-                      aria-label="Previous screenshot"
-                      onClick={() => setShot((current) => (current - 1 + shots.length) % shots.length)}
-                    >
-                      <RiArrowLeftLine />
-                    </button>
-                    <figure>
-                      <img src={activeShot} alt="" />
-                      {project.screenshotCaptions?.[shot] ? <figcaption>{project.screenshotCaptions[shot]}</figcaption> : null}
-                    </figure>
-                    <button
-                      type="button"
-                      aria-label="Next screenshot"
-                      onClick={() => setShot((current) => (current + 1) % shots.length)}
-                    >
-                      <RiArrowRightLine />
-                    </button>
-                  </div>
-                  {shots.length > 1 ? (
-                    <div className="case-thumbs" role="tablist" aria-label="Screenshot thumbnails">
-                      {shots.map((src, thumbIndex) => (
-                        <button
-                          key={`${src}-${thumbIndex}`}
-                          type="button"
-                          className={thumbIndex === shot ? "is-on" : undefined}
-                          aria-label={project.screenshotCaptions?.[thumbIndex] || `Screenshot ${thumbIndex + 1}`}
-                          onClick={() => setShot(thumbIndex)}
-                        >
-                          <img src={src} alt="" />
-                        </button>
-                      ))}
-                    </div>
-                  ) : null}
+                  <p className="case-gallery-note">The screenshot gallery is shown below this section.</p>
                 </>
               )}
               {tab === "challenges" && (
@@ -323,27 +338,36 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
                 </>
               )}
             </div>
+
             {(project.videos?.length ? project.videos : project.video ? [project.video] : []).map((src) => (
               <div className="case-video" key={src}>
                 <PosterVideo src={src} poster={project.videoPoster || cover} title={project.title} />
               </div>
             ))}
           </div>
-          <aside>
-            {project.quote ? (
-              <blockquote>
-                <p>“{project.quote}”</p>
-                {project.quoteBy ? <footer>— {project.quoteBy}</footer> : null}
-              </blockquote>
-            ) : null}
-            <Link href="/contact" className="btn btn-primary">
-              Let&apos;s discuss a similar project <RiArrowRightLine />
-            </Link>
-            {project.caseStudyFile ? (
-              <a className="btn btn-outline" href={project.caseStudyFile}>
-                <RiDownloadLine /> Download case study
-              </a>
-            ) : null}
+
+          <aside className="case-aside">
+            <div className="case-aside-card">
+              {project.organization ? <p className="case-aside-org">{project.organization}</p> : null}
+              {project.quote ? (
+                <blockquote>
+                  <p>“{project.quote}”</p>
+                  {project.quoteBy ? <footer>— {project.quoteBy}</footer> : null}
+                </blockquote>
+              ) : (
+                <p className="case-aside-fallback">
+                  Built as documented work for {project.organization || "this engagement"}. Discuss a similar system when you are ready.
+                </p>
+              )}
+              <Link href="/contact" className="btn btn-primary">
+                Let&apos;s discuss a similar project <RiArrowRightLine size={16} />
+              </Link>
+              {project.caseStudyFile ? (
+                <a className="btn btn-outline" href={project.caseStudyFile}>
+                  <RiDownloadLine size={16} /> Download case study (PDF)
+                </a>
+              ) : null}
+            </div>
             <ShareActions
               title={`${project.title} by Prince Parfait GANZA`}
               excerpt={project.description}
@@ -352,6 +376,35 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
             />
           </aside>
         </div>
+
+        {shots.length > 0 ? (
+          <section className="case-shots" id="case-shots" data-page-section aria-label="Project screenshots">
+            <div className="case-shots-head">
+              <h2>Project screenshots</h2>
+              {shots.length > visibleShots ? (
+                <div className="case-shots-nav">
+                  <button type="button" aria-label="Previous screenshots" onClick={() => shiftGallery(-1)}>
+                    <RiArrowLeftLine size={16} />
+                  </button>
+                  <button type="button" aria-label="Next screenshots" onClick={() => shiftGallery(1)}>
+                    <RiArrowRightLine size={16} />
+                  </button>
+                </div>
+              ) : null}
+            </div>
+            <div className="case-shots-track">
+              {shotWindow.map((src, windowIndex) => {
+                const absolute = shotStart + windowIndex;
+                return (
+                  <figure key={`${src}-${absolute}`}>
+                    <img src={src} alt="" loading="lazy" decoding="async" />
+                    <figcaption>{project.screenshotCaptions?.[absolute] || `View ${absolute + 1}`}</figcaption>
+                  </figure>
+                );
+              })}
+            </div>
+          </section>
+        ) : null}
       </div>
     </article>
   );
