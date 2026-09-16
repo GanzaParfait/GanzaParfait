@@ -39,6 +39,7 @@ export default function BookingSection({
       className={embedded ? "booking-band booking-embedded" : "booking-band"}
       aria-label="Book a conversation"
       id="book"
+      data-page-section={embedded ? undefined : true}
     >
       <div className="container booking-shell">
         <div className="booking-copy">

@@ -24,6 +24,7 @@ import ThemeToggle from "@/components/ui/ThemeToggle";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { socialIcon, socialsFor } from "@/lib/socials";
 import AnnouncementBar from "@/components/layout/AnnouncementBar";
+import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
 
 const navLinks = primaryNav;
 
@@ -42,6 +43,8 @@ export default function Navbar() {
   const primarySocials = headerSocials.slice(0, settings.headerSocialLimit || 3);
   const overflowSocials = headerSocials.slice(settings.headerSocialLimit || 3);
   const isPill = (settings.navbarStyle || "pill") === "pill";
+  useHistoryBackClose(isOpen, () => setIsOpen(false));
+  useHistoryBackClose(shareOpen, () => setShareOpen(false));
 
   const handleScroll = useCallback(() => {
     setIsScrolled(window.scrollY > 20);

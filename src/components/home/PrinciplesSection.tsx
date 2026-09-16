@@ -32,6 +32,7 @@ export default function PrinciplesSection({
       className={embedded ? "principles principles-embedded" : "principles"}
       aria-label="Working principles"
       id="principles"
+      data-page-section={embedded ? undefined : true}
     >
       <div className="container">
         <div className="principles-head">

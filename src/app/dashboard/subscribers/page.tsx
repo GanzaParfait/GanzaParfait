@@ -11,6 +11,7 @@ import {
   RiUserAddLine,
   RiUserHeartLine,
 } from "react-icons/ri";
+import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
 
 type Subscriber = {
   id: string;
@@ -47,6 +48,7 @@ export default function SubscribersPage() {
   const [bulkTitle, setBulkTitle] = useState("");
   const [bulkBody, setBulkBody] = useState("");
   const [bulkNote, setBulkNote] = useState("");
+  useHistoryBackClose(bulkOpen, () => setBulkOpen(false));
 
   const load = async () => {
     setLoading(true);

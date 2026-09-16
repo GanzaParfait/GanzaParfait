@@ -7,6 +7,7 @@ import { BlogPost } from "@/data/site-data";
 import dynamic from "next/dynamic";
 import "@uiw/react-md-editor/markdown-editor.css";
 import "@uiw/react-markdown-preview/markdown.css";
+import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
 
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
 
@@ -39,6 +40,7 @@ export default function BlogEditorModal({
     date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
     readTime: "4 min read",
   });
+  useHistoryBackClose(isOpen, onClose);
 
   useEffect(() => {
     if (post) {

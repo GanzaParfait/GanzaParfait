@@ -17,6 +17,7 @@ import {
 } from "react-icons/ri";
 import type { HomepageContent, JourneyEntry, JourneyType } from "@/lib/homepage";
 import CustomSelect from "@/components/ui/CustomSelect";
+import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
 
 type FilterId = "all" | JourneyType;
 type SortId = "latest" | "oldest";
@@ -49,6 +50,7 @@ export default function JourneySection({
   const [sort, setSort] = useState<SortId>("latest");
   const [activeId, setActiveId] = useState<string | null>(null);
   const [detailTab, setDetailTab] = useState<DetailTab>("overview");
+  useHistoryBackClose(Boolean(activeId), () => setActiveId(null));
   const Tag = embedded ? "div" : "section";
   const entries = journey.entries || [];
 
@@ -123,7 +125,7 @@ export default function JourneySection({
 
   return (
     <>
-      <Tag className={embedded ? "journey journey-embedded" : "journey"} id={embedded ? undefined : "journey"} aria-label="Journey">
+      <Tag className={embedded ? "journey journey-embedded" : "journey"} id={embedded ? undefined : "journey"} aria-label="Journey" data-page-section={embedded ? undefined : true}>
         <div className="container journey-stage">
           <div className="journey-intro">
             <p className="section-label">{journey.label}</p>

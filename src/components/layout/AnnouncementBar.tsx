@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode, type TouchEvent } from "react";
 import Link from "next/link";
 import {
   RiArrowDownSLine,
@@ -8,7 +8,6 @@ import {
   RiCalendarLine,
   RiCloseLine,
   RiFileTextLine,
-  RiGroupLine,
   RiLink,
   RiMapPinLine,
   RiFacebookFill,
@@ -22,12 +21,14 @@ import {
 import type { AnnouncementSharePlatform, SiteSettings } from "@/lib/supabase";
 import {
   announcementMedia,
+  announcementCalendarTargets,
   announcementSharePath,
   announcementSharePlatforms,
   fileName,
   shouldAutoOpenAnnouncement,
 } from "@/lib/announcement";
 import { buildShareUrl, SHARE_PRESETS } from "@/lib/utm";
+import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
 
 export default function AnnouncementBar({ settings }: { settings: SiteSettings }) {
   const [open, setOpen] = useState(false);
@@ -63,6 +64,7 @@ export default function AnnouncementBar({ settings }: { settings: SiteSettings }
 
 export function AnnouncementOverlay({ settings, onClose }: { settings: SiteSettings; onClose: () => void }) {
   const titleId = useId();
+  useHistoryBackClose(true, onClose);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -102,6 +104,10 @@ export function AnnouncementCard({
   const [paused, setPaused] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [progressKey, setProgressKey] = useState(0);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const calendarRef = useRef<HTMLDivElement>(null);
+  const touchStartX = useRef<number | null>(null);
   const layout = settings.announcementLayout === "stack" ? "stack" : "side";
   const headline = settings.announcementHeadline?.trim() || settings.announcementText?.trim() || "Announcement";
   const detail = settings.announcementDetail?.trim() || "";
@@ -114,21 +120,75 @@ export function AnnouncementCard({
   const platforms = settings.announcementShare === false ? [] : announcementSharePlatforms(settings);
   const mediaKicker = settings.announcementMediaKicker?.trim() || "";
   const mediaTitle = settings.announcementMediaTitle?.trim() || "";
-  const audience = settings.announcementAudience?.trim() || "";
   const dateShort = shortDateLabel(settings.announcementDate);
   const placeShort = shortPlaceLabel(settings.announcementPlace);
 
   useEffect(() => {
     setIndex(0);
     setPlaying(false);
+    setProgressKey(0);
   }, [visuals.map((item) => item.url).join("|")]);
 
   useEffect(() => {
     if (visuals.length < 2 || paused || playing) return;
     if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const timer = window.setInterval(() => setIndex((current) => (current + 1) % visuals.length), interval * 1000);
+    const timer = window.setInterval(() => {
+      setIndex((current) => (current + 1) % visuals.length);
+      setProgressKey((key) => key + 1);
+    }, interval * 1000);
     return () => window.clearInterval(timer);
   }, [visuals.length, paused, playing, interval]);
+
+  useEffect(() => {
+    setProgressKey((key) => key + 1);
+  }, [index, paused, playing]);
+
+  useEffect(() => {
+    if (!calendarOpen) return;
+    const onPointer = (event: MouseEvent) => {
+      if (!calendarRef.current?.contains(event.target as Node)) setCalendarOpen(false);
+    };
+    document.addEventListener("mousedown", onPointer);
+    return () => document.removeEventListener("mousedown", onPointer);
+  }, [calendarOpen]);
+
+  useEffect(() => {
+    if (preview || visuals.length < 2) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+      const target = event.target as HTMLElement | null;
+      if (target?.closest("input, textarea, select, [contenteditable='true']")) return;
+      event.preventDefault();
+      const delta = event.key === "ArrowRight" ? 1 : -1;
+      setIndex((current) => (current + delta + visuals.length) % visuals.length);
+      setPlaying(false);
+      setProgressKey((key) => key + 1);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [preview, visuals.length]);
+
+  const goFrame = (delta: number) => {
+    if (visuals.length < 2) return;
+    setIndex((current) => (current + delta + visuals.length) % visuals.length);
+    setPlaying(false);
+    setProgressKey((key) => key + 1);
+  };
+
+  const onMediaTouchStart = (event: TouchEvent) => {
+    if (visuals.length < 2) return;
+    touchStartX.current = event.changedTouches[0]?.clientX ?? null;
+    setPaused(true);
+  };
+
+  const onMediaTouchEnd = (event: TouchEvent) => {
+    if (visuals.length < 2 || touchStartX.current == null) return;
+    const endX = event.changedTouches[0]?.clientX ?? touchStartX.current;
+    const delta = endX - touchStartX.current;
+    touchStartX.current = null;
+    if (Math.abs(delta) < 48) return;
+    goFrame(delta < 0 ? 1 : -1);
+  };
 
   const copyAnnouncementLink = async () => {
     if (typeof window === "undefined") return;
@@ -166,6 +226,21 @@ export function AnnouncementCard({
   const dateFact = splitFact(settings.announcementDate);
   const timeFact = splitFact(settings.announcementTime);
   const placeFact = splitFact(settings.announcementPlace);
+  const calendar = announcementCalendarTargets(settings);
+
+  const downloadIcs = () => {
+    if (!calendar) return;
+    const blob = new Blob([calendar.ics], { type: "text/calendar;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = calendar.fileName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    setCalendarOpen(false);
+  };
 
   return (
     <div
@@ -182,7 +257,12 @@ export function AnnouncementCard({
           <RiCloseLine size={18} />
         </button>
       ) : null}
-      <div className="announcement-media" aria-hidden={visuals.length === 0}>
+      <div
+        className="announcement-media"
+        aria-hidden={visuals.length === 0}
+        onTouchStart={onMediaTouchStart}
+        onTouchEnd={onMediaTouchEnd}
+      >
         {frame ? (
           frame.type === "video" ? (
             playing ? (
@@ -211,14 +291,14 @@ export function AnnouncementCard({
           <div className="announcement-video-fallback" />
         )}
 
-        {(mediaKicker || mediaTitle) && !playing ? (
+        {(mediaTitle) && !playing ? (
           <div className="announcement-media-copy">
             {mediaKicker ? <p className="announcement-media-kicker">{mediaKicker}</p> : null}
-            {mediaTitle ? <p className="announcement-media-title">{accentMediaTitle(mediaTitle)}</p> : null}
+            <p className="announcement-media-title">{accentMediaTitle(mediaTitle)}</p>
           </div>
         ) : null}
 
-        {(dateShort || placeShort || audience) && !playing ? (
+        {(dateShort || placeShort) && !playing ? (
           <div className="announcement-media-meta">
             {dateShort ? (
               <span>
@@ -230,29 +310,33 @@ export function AnnouncementCard({
                 <RiMapPinLine size={13} aria-hidden="true" /> {placeShort}
               </span>
             ) : null}
-            {audience ? (
-              <span>
-                <RiGroupLine size={13} aria-hidden="true" /> {audience}
-              </span>
-            ) : null}
           </div>
         ) : null}
 
         {visuals.length > 1 ? (
           <div className="announcement-dots" role="tablist" aria-label="Announcement media">
-            {visuals.map((item, frameIndex) => (
-              <button
-                key={item.id}
-                type="button"
-                role="tab"
-                aria-selected={frameIndex === index}
-                className={frameIndex === index ? "is-on" : undefined}
-                onClick={() => {
-                  setIndex(frameIndex);
-                  setPlaying(false);
-                }}
-              />
-            ))}
+            {visuals.map((item, frameIndex) => {
+              const state = frameIndex < index ? "is-done" : frameIndex === index ? "is-on" : undefined;
+              return (
+                <button
+                  key={`${item.id}-${frameIndex === index ? progressKey : "idle"}`}
+                  type="button"
+                  role="tab"
+                  aria-selected={frameIndex === index}
+                  className={[state, paused || playing ? "is-paused" : undefined].filter(Boolean).join(" ") || undefined}
+                      style={
+                        frameIndex === index && !paused && !playing
+                          ? ({ "--ann-progress-ms": `${interval * 1000}ms` } as CSSProperties)
+                          : undefined
+                      }
+                  onClick={() => {
+                    setIndex(frameIndex);
+                    setPlaying(false);
+                    setProgressKey((key) => key + 1);
+                  }}
+                />
+              );
+            })}
           </div>
         ) : null}
       </div>
@@ -308,9 +392,40 @@ export function AnnouncementCard({
               <ActionLink href={secondaryHref} className="btn btn-outline" onClick={onClose}>
                 <RiCalendarLine size={15} /> {secondaryLabel} <RiArrowDownSLine size={15} />
               </ActionLink>
+            ) : calendar ? (
+              <div className="announcement-calendar" ref={calendarRef}>
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  aria-expanded={calendarOpen}
+                  aria-haspopup="menu"
+                  onClick={() => setCalendarOpen((open) => !open)}
+                >
+                  <RiCalendarLine size={15} /> {secondaryLabel} <RiArrowDownSLine size={15} />
+                </button>
+                {calendarOpen ? (
+                  <div className="announcement-calendar-menu" role="menu">
+                    <a
+                      role="menuitem"
+                      href={calendar.google}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => {
+                        setCalendarOpen(false);
+                        onClose?.();
+                      }}
+                    >
+                      Google Calendar
+                    </a>
+                    <button type="button" role="menuitem" onClick={downloadIcs}>
+                      Download .ics
+                    </button>
+                  </div>
+                ) : null}
+              </div>
             ) : (
-              <span className="btn btn-outline announcement-secondary-static">
-                <RiCalendarLine size={15} /> {secondaryLabel} <RiArrowDownSLine size={15} />
+              <span className="btn btn-outline announcement-secondary-static" title="Add a date and time to enable calendar">
+                <RiCalendarLine size={15} /> {secondaryLabel}
               </span>
             )
           ) : null}

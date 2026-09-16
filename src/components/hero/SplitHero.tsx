@@ -9,6 +9,7 @@ import {
   RiArrowDownLine,
 } from "react-icons/ri";
 import { useState, useEffect } from "react";
+import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
 import { SiteSettings } from "@/lib/supabase";
 import { heroHighlights, heroImageFor, setting, splitDisplayName } from "@/lib/hero";
 import { socialIcon, heroSocialsFor } from "@/lib/socials";
@@ -21,6 +22,7 @@ export default function SplitHero({
   isPreview?: boolean;
 }) {
   const [isMoreOpen, setIsMoreOpen] = useState(false);
+  useHistoryBackClose(isMoreOpen && !isPreview, () => setIsMoreOpen(false));
   const roles = settings.siteSubtitle
     ? settings.siteSubtitle.split(/\s*[•·]\s*/).filter(Boolean)
     : ["Founder", "Entrepreneur", "Technologist"];
@@ -43,10 +45,12 @@ export default function SplitHero({
 
   useEffect(() => {
     if (roles.length <= 1) return;
-    const interval = setInterval(() => {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) return;
+    const interval = window.setInterval(() => {
       setCurrentRoleIndex((prev) => (prev + 1) % roles.length);
     }, 2800);
-    return () => clearInterval(interval);
+    return () => window.clearInterval(interval);
   }, [roles.length]);
 
   const delay = (ms: number) => ({
@@ -59,15 +63,15 @@ export default function SplitHero({
     <section
       className={isPreview ? "relative overflow-hidden hero-layout-preview hero-split" : "relative overflow-hidden hero-split"}
       aria-label="Hero Section"
-      style={{
-        minHeight: isPreview ? "100%" : "100dvh",
+      style={isPreview ? {
+        minHeight: "100%",
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
         background: "var(--color-bg)",
-        paddingTop: isPreview ? "3rem" : "var(--public-nav-offset, 3.6rem)",
-        paddingBottom: "4rem",
-      }}
+        paddingTop: "3rem",
+        paddingBottom: "2rem",
+      } : undefined}
     >
       {/* Ambient orbs */}
       <div aria-hidden="true" style={{
@@ -162,41 +166,12 @@ export default function SplitHero({
 
             {/* Role ticker */}
             <div style={{ marginBottom: "1.75rem", ...delay(220) }}>
-              <div style={{
-                display: "inline-flex", alignItems: "center", gap: "0.75rem",
-                background: "var(--color-surface)", border: "1px solid var(--color-border)",
-                borderRadius: "0.875rem", padding: "0.6rem 1.25rem",
-                boxShadow: "var(--shadow-sm)",
-              }}>
-                <span style={{
-                  width: "0.375rem", height: "1.75rem",
-                  background: "linear-gradient(180deg, var(--color-primary), #6366f1)",
-                  borderRadius: "9999px", flexShrink: 0,
-                }} />
-                <div style={{
-                  position: "relative", height: "1.6rem", overflow: "hidden",
-                  minWidth: "15rem", display: "flex", alignItems: "center",
-                }}>
-                  {roles.map((role, idx) => (
-                    <span
-                      key={idx}
-                      style={{
-                        position: "absolute", left: 0, width: "100%",
-                        whiteSpace: "nowrap",
-                        fontFamily: "var(--font-heading)",
-                        fontSize: "clamp(0.95rem, 1.5vw, 1.1rem)",
-                        fontWeight: 700,
-                        color: "var(--color-text)",
-                        transform: idx === currentRoleIndex
-                          ? "translateY(0)" : idx < currentRoleIndex
-                            ? "translateY(-110%)" : "translateY(110%)",
-                        opacity: idx === currentRoleIndex ? 1 : 0,
-                        transition: "all 0.55s cubic-bezier(0.4, 0, 0.2, 1)",
-                      }}
-                    >
-                      {role}
-                    </span>
-                  ))}
+              <div className="hero-role-chip">
+                <span className="hero-role-chip-bar" aria-hidden="true" />
+                <div className="hero-role-ticker" aria-live="polite">
+                  <span key={currentRoleIndex} className="hero-role-ticker-item">
+                    {roles[currentRoleIndex]}
+                  </span>
                 </div>
               </div>
             </div>
@@ -294,7 +269,7 @@ export default function SplitHero({
             <div className="hero-split-photo" style={{
               position: "relative",
               width: isPreview ? "32rem" : "min(100%, 32rem)",
-              height: isPreview ? "38rem" : "min(92vw, 38rem)",
+              height: isPreview ? "38rem" : "min(72vw, 34rem)",
               display: "flex",
               alignItems: "flex-end",
               justifyContent: "center",

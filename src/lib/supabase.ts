@@ -64,6 +64,21 @@ export interface SiteSettings {
   footerCompanyMediaType?: "image" | "video" | "carousel";
   footerCompanyMedia?: string[];
   footerCompanyCarouselInterval?: number;
+  /** Optional footer copy toggles / fields (empty text stays hidden). */
+  footerShowBio?: boolean;
+  footerShowEmail?: boolean;
+  footerShowPhone?: boolean;
+  footerShowLocation?: boolean;
+  footerShowQuote?: boolean;
+  footerQuote?: string;
+  footerQuoteAttribution?: string;
+  footerShowFeaturedCopy?: boolean;
+  footerFeaturedEyebrow?: string;
+  footerFeaturedTitle?: string;
+  footerFeaturedDetail?: string;
+  footerFeaturedCtaLabel?: string;
+  footerShowPrivacy?: boolean;
+  footerShowSitemap?: boolean;
   bookingCalendarUrl?: string;
   announcementText?: string;
   announcementLink?: string;
@@ -217,6 +232,20 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   footerCompanyMediaType: "image",
   footerCompanyMedia: [],
   footerCompanyCarouselInterval: 5,
+  footerShowBio: true,
+  footerShowEmail: true,
+  footerShowPhone: true,
+  footerShowLocation: true,
+  footerShowQuote: false,
+  footerQuote: "",
+  footerQuoteAttribution: "",
+  footerShowFeaturedCopy: false,
+  footerFeaturedEyebrow: "Featured",
+  footerFeaturedTitle: "",
+  footerFeaturedDetail: "",
+  footerFeaturedCtaLabel: "Follow the journey",
+  footerShowPrivacy: true,
+  footerShowSitemap: true,
   bookingCalendarUrl: "",
   announcementIsActive: true,
   announcementText: "New Achievement... Event to be held at Kigali Marriott Hotel.!",

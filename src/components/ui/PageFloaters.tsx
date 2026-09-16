@@ -3,13 +3,17 @@
 import { useEffect, useState } from "react";
 import { RiArrowDownLine, RiArrowUpLine } from "react-icons/ri";
 
+function pageSections() {
+  return Array.from(document.querySelectorAll<HTMLElement>("[data-page-section]"));
+}
+
 export default function PageFloaters() {
   const [scrolled, setScrolled] = useState(false);
   const [atEnd, setAtEnd] = useState(false);
 
   useEffect(() => {
     const update = () => {
-      const sections = Array.from(document.querySelectorAll("main section"));
+      const sections = pageSections();
       const last = sections[sections.length - 1];
       const nearBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 48;
       const lastReached = last
@@ -29,12 +33,12 @@ export default function PageFloaters() {
 
   const advance = () => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const sections = Array.from(document.querySelectorAll("main section"));
-    const marker = window.scrollY + 96;
+    const sections = pageSections();
+    const marker = window.scrollY + Math.min(120, Math.round(window.innerHeight * 0.18));
     let current = -1;
     sections.forEach((section, index) => {
       const top = section.getBoundingClientRect().top + window.scrollY;
-      if (top <= marker) current = index;
+      if (top <= marker + 8) current = index;
     });
     const next = sections[current + 1];
     const target = next || document.querySelector("footer");

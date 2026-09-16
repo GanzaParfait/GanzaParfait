@@ -4,19 +4,31 @@ import { createPortal } from "react-dom";
 import { useEffect, useState } from "react";
 import { RiCloseLine } from "react-icons/ri";
 import MediaManagerPage from "@/app/dashboard/media/page";
+import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
 
 interface MediaManagerModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSelect: (url: string) => void;
+  /** Defaults to any so images, video, and documents can be picked. */
+  pickerMode?: "image" | "video" | "any";
+  title?: string;
 }
 
-export default function MediaManagerModal({ isOpen, onClose, onSelect }: MediaManagerModalProps) {
+export default function MediaManagerModal({
+  isOpen,
+  onClose,
+  onSelect,
+  pickerMode = "any",
+  title,
+}: MediaManagerModalProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useHistoryBackClose(Boolean(isOpen && mounted), onClose);
 
   if (!isOpen || !mounted) return null;
 
@@ -26,12 +38,20 @@ export default function MediaManagerModal({ isOpen, onClose, onSelect }: MediaMa
     onClose();
   };
 
+  const heading =
+    title ||
+    (pickerMode === "image"
+      ? "Media Library — Select an image"
+      : pickerMode === "video"
+        ? "Media Library — Select a video"
+        : "Media Library — Select media");
+
   const modal = (
     <div
       style={{
         position: "fixed",
         inset: 0,
-        zIndex: 500, // always on top
+        zIndex: 500,
         background: "rgba(0, 0, 0, 0.70)",
         backdropFilter: "blur(5px)",
         display: "flex",
@@ -57,7 +77,6 @@ export default function MediaManagerModal({ isOpen, onClose, onSelect }: MediaMa
           border: "1px solid #dbe4f0",
         }}
       >
-        {/* Modal top-bar close */}
         <div
           style={{
             padding: "0.75rem 1rem",
@@ -68,20 +87,27 @@ export default function MediaManagerModal({ isOpen, onClose, onSelect }: MediaMa
             flexShrink: 0,
           }}
         >
-          <span style={{ fontSize: "0.8125rem", fontWeight: 700, color: "#ffffff" }}>
-            Media Library — Select an Image
-          </span>
+          <span style={{ fontSize: "0.8125rem", fontWeight: 700, color: "#ffffff" }}>{heading}</span>
           <button
+            type="button"
             onClick={onClose}
-            style={{ border: "none", background: "rgba(255,255,255,0.1)", color: "#ffffff", cursor: "pointer", padding: "0.375rem", borderRadius: "0.25rem", display: "flex", alignItems: "center" }}
+            style={{
+              border: "none",
+              background: "rgba(255,255,255,0.1)",
+              color: "#ffffff",
+              cursor: "pointer",
+              padding: "0.375rem",
+              borderRadius: "0.25rem",
+              display: "flex",
+              alignItems: "center",
+            }}
           >
             <RiCloseLine size={18} />
           </button>
         </div>
 
-        {/* Embed full media manager */}
         <div style={{ flex: 1, overflow: "hidden", minHeight: 0 }}>
-          <MediaManagerPage onSelect={handleSelect} asModal pickerMode="image" />
+          <MediaManagerPage onSelect={handleSelect} asModal pickerMode={pickerMode} />
         </div>
       </div>
     </div>

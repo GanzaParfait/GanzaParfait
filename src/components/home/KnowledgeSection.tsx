@@ -49,7 +49,7 @@ export default function KnowledgeSection({
   const showBar = (display.showStatement && knowledge.statement) || (display.showStats && knowledge.stats.length) || (display.showQuote && knowledge.quote);
 
   return (
-    <Tag className={embedded ? "knowledge knowledge-embedded" : "knowledge"} id={embedded ? undefined : "knowledge"} aria-label="Knowledge system">
+    <Tag className={embedded ? "knowledge knowledge-embedded" : "knowledge"} id={embedded ? undefined : "knowledge"} aria-label="Knowledge system" data-page-section={embedded ? undefined : true}>
       <div className="container">
         <div className="knowledge-head">
           <div className="knowledge-copy">

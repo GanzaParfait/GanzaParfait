@@ -76,14 +76,13 @@ export const footerNav = [
   {
     label: "Explore",
     links: [
-      { label: "Home", href: "/" },
       { label: "About", href: "/about" },
       { label: "Work", href: "/projects" },
       { label: "Experience", href: "/experience" },
     ],
   },
   {
-    label: "Work with me",
+    label: "Connect",
     links: [
       { label: "Speaking", href: "/#speaking" },
       { label: "Contact", href: "/contact" },

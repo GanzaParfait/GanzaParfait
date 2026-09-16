@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import Link from "next/link";
+import { RiArrowRightLine, RiMailLine, RiMapPinLine, RiPhoneLine } from "react-icons/ri";
 import { footerNav } from "@/data/site-data";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { socialByPlatform, socialIcon, socialsFor } from "@/lib/socials";
@@ -10,7 +11,7 @@ import type { SiteSettings } from "@/lib/supabase";
 
 const navGroups = footerNav;
 
-export const FOOTER_IMAGE_HEIGHTS = { compact: "10rem", regular: "14rem", tall: "20rem" } as const;
+export const FOOTER_IMAGE_HEIGHTS = { compact: "12rem", regular: "16rem", tall: "22rem" } as const;
 
 export function footerCompanySrc(settings: { footerCompanyImage?: string; footerCompanyImageDark?: string }, isDark: boolean) {
   const src = isDark
@@ -48,13 +49,18 @@ export function FooterCompanyBand({
   const height = FOOTER_IMAGE_HEIGHTS[settings.footerCompanyHeight || "regular"];
   const posX = Math.min(100, Math.max(0, settings.footerCompanyPositionX ?? 50));
   const posY = Math.min(100, Math.max(0, settings.footerCompanyPositionY ?? 40));
-  // Cover-based zoom: 100% fills the frame; above 100% crops in. Never scale below 1
-  // or the image shrinks inside the band and leaves empty borders.
   const zoom = Math.min(200, Math.max(100, settings.footerCompanyZoom ?? 100));
   const whole = Boolean(settings.footerCompanyWholeImage);
   const mediaType = settings.footerCompanyMediaType || (items.length > 1 ? "carousel" : items[0] && isVideoUrl(items[0]) ? "video" : "image");
   const intervalMs = Math.max(3, settings.footerCompanyCarouselInterval || 5) * 1000;
   const [active, setActive] = useState(0);
+
+  const showCopy = Boolean(settings.footerShowFeaturedCopy);
+  const featuredTitle = settings.footerFeaturedTitle?.trim() || "";
+  const featuredDetail = settings.footerFeaturedDetail?.trim() || "";
+  const featuredEyebrow = settings.footerFeaturedEyebrow?.trim() || "Featured";
+  const featuredCta = settings.footerFeaturedCtaLabel?.trim() || "Follow the journey";
+  const hasOverlay = showCopy && Boolean(featuredTitle);
 
   useEffect(() => {
     if (mediaType !== "carousel" || items.length < 2) return;
@@ -71,7 +77,7 @@ export function FooterCompanyBand({
       overflow: "hidden" as const,
       background: "#0b192c",
       border: emptyHint && !items.length ? "1px dashed #cbd5e1" : "1px solid var(--color-border, #e2e8f0)",
-      borderRadius: flush ? 0 : "1rem",
+      borderRadius: flush ? "1.15rem" : "1.15rem",
       marginBottom: flush ? 0 : "1.25rem",
       position: "relative" as const,
     }),
@@ -92,7 +98,7 @@ export function FooterCompanyBand({
   const frameHeight = whole ? "auto" : height;
 
   const mediaStyle = (index: number): CSSProperties => ({
-    position: mediaType === "carousel" ? "absolute" : "absolute",
+    position: "absolute",
     inset: 0,
     display: "block",
     width: "100%",
@@ -107,6 +113,27 @@ export function FooterCompanyBand({
     pointerEvents: "none",
     userSelect: "none",
   } as CSSProperties);
+
+  const overlay = hasOverlay ? (
+    <div className="footer-band-overlay" aria-hidden={showGrid}>
+      <div className="footer-band-copy">
+        <p className="footer-band-eyebrow">
+          <span />
+          {featuredEyebrow}
+        </p>
+        <p className="footer-band-title">{featuredTitle}</p>
+        {featuredDetail ? <p className="footer-band-detail">{featuredDetail}</p> : null}
+        <span className="footer-band-cta">
+          {featuredCta} <RiArrowRightLine size={15} />
+        </span>
+      </div>
+      {settings.footerShowLocation !== false && settings.location ? (
+        <p className="footer-band-place">
+          <RiMapPinLine size={14} /> {settings.location}
+        </p>
+      ) : null}
+    </div>
+  ) : null;
 
   const inner = (
     <div
@@ -142,6 +169,8 @@ export function FooterCompanyBand({
           />
         ),
       )}
+      {hasOverlay ? <div className="footer-band-shade" aria-hidden="true" /> : null}
+      {overlay}
       {showGrid ? (
         <div
           aria-hidden="true"
@@ -165,7 +194,7 @@ export function FooterCompanyBand({
   }
 
   return (
-    <a href={href} target="_blank" rel="noopener noreferrer" aria-label="Featured media" style={shell}>
+    <a href={href} target="_blank" rel="noopener noreferrer" aria-label={featuredTitle || "Featured media"} style={shell}>
       {inner}
     </a>
   );
@@ -177,6 +206,18 @@ export default function Footer() {
   const [isDark, setIsDark] = useState(false);
   const socialLinks = socialsFor(settings, "footer").filter((link) => link.platform !== "buymeacoffee");
   const coffee = socialByPlatform(settings, "buymeacoffee");
+  const location = setting(settings, "location");
+  const email = setting(settings, "contactEmail");
+  const phone = settings.phoneNumber?.trim() || "";
+  const quote = settings.footerQuote?.trim() || "";
+  const quoteBy = settings.footerQuoteAttribution?.trim() || setting(settings, "siteTitle");
+  const showBio = settings.footerShowBio !== false;
+  const showEmail = settings.footerShowEmail !== false;
+  const showPhone = settings.footerShowPhone !== false && Boolean(phone);
+  const showLocation = settings.footerShowLocation !== false && Boolean(location);
+  const showQuote = Boolean(settings.footerShowQuote && quote);
+  const showPrivacy = settings.footerShowPrivacy !== false;
+  const showSitemap = settings.footerShowSitemap !== false;
 
   useEffect(() => {
     const update = () => setIsDark(document.documentElement.getAttribute("data-theme") === "dark");
@@ -187,127 +228,80 @@ export default function Footer() {
   }, []);
 
   return (
-    <>
-      <footer
-        role="contentinfo"
-        style={{
-          background: "var(--color-bg-2)",
-          borderTop: "1px solid var(--color-border)",
-          position: "relative",
-        }}
-      >
-        <div
-          aria-hidden="true"
-          style={{
-            position: "absolute",
-            top: 0,
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: "20rem",
-            height: "1px",
-            background: "linear-gradient(90deg, transparent, var(--color-primary), transparent)",
-            opacity: 0.5,
-          }}
-        />
-
-        <div className="container" style={{ padding: "3rem 1.5rem 0" }}>
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "2.25rem",
-              justifyContent: "space-between",
-              marginBottom: "1.25rem",
-            }}
-          >
-            <div style={{ flex: "1 1 300px", maxWidth: "28rem" }}>
-              <Link
-                href="/"
-                style={{ display: "inline-flex", alignItems: "center", marginBottom: "1.25rem", textDecoration: "none" }}
-                aria-label="Home"
-              >
-                <div style={{ position: "relative", width: "11rem", height: "2.75rem" }}>
-                  <img
-                    src="/brand/logos/logo-horizontal-blue.png"
-                    alt={setting(settings, "siteTitle")}
-                    className="footer-logo-dark"
-                    style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "left" }}
-                  />
-                  <img
-                    src="/brand/logos/logo-horizontal-light.png"
-                    alt={setting(settings, "siteTitle")}
-                    className="footer-logo-light"
-                    style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "left", display: "none" }}
-                  />
-                </div>
+    <footer role="contentinfo" className="site-footer">
+      <div className="container site-footer-top">
+          <div className={`site-footer-grid${showQuote ? " has-quote" : ""}`}>
+            <div className="site-footer-brand">
+              <Link href="/" className="site-footer-logo" aria-label="Home">
+                <img
+                  src="/brand/logos/logo-horizontal-blue.png"
+                  alt={setting(settings, "siteTitle")}
+                  className="footer-logo-dark"
+                />
+                <img
+                  src="/brand/logos/logo-horizontal-light.png"
+                  alt={setting(settings, "siteTitle")}
+                  className="footer-logo-light"
+                />
               </Link>
 
-              <p
-                style={{
-                  fontSize: "0.875rem",
-                  color: "var(--color-text-2)",
-                  lineHeight: 1.75,
-                  marginBottom: "1rem",
-                }}
-              >
-                {settings.bio || setting(settings, "bio")}
-              </p>
-              <p style={{ fontSize: "0.8rem", color: "var(--color-text-3)", marginBottom: "1.5rem" }}>
-                <a href={`mailto:${setting(settings, "contactEmail")}`} style={{ color: "var(--color-primary)", fontWeight: 600, textDecoration: "none" }}>
-                  {setting(settings, "contactEmail")}
-                </a>
-                {settings.phoneNumber ? <> · {settings.phoneNumber}</> : null}
-              </p>
+              {showBio ? (
+                <p className="site-footer-bio">{settings.bio || setting(settings, "bio")}</p>
+              ) : null}
 
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.65rem" }} aria-label="Social media links">
-                {socialLinks.map((link) => {
-                  const Icon = socialIcon(link.platform);
-                  return (
-                    <a
-                      key={link.id}
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={link.label}
-                      data-tip={link.label}
-                      className="footer-social-icon social-tip"
-                    >
-                      <Icon size={16} />
-                    </a>
-                  );
-                })}
-              </div>
+              {(showEmail || showPhone || showLocation) ? (
+                <ul className="site-footer-contact">
+                  {showEmail ? (
+                    <li>
+                      <RiMailLine size={15} aria-hidden="true" />
+                      <a href={`mailto:${email}`}>{email}</a>
+                    </li>
+                  ) : null}
+                  {showPhone ? (
+                    <li>
+                      <RiPhoneLine size={15} aria-hidden="true" />
+                      <span>{phone}</span>
+                    </li>
+                  ) : null}
+                  {showLocation ? (
+                    <li>
+                      <RiMapPinLine size={15} aria-hidden="true" />
+                      <span>{location}</span>
+                    </li>
+                  ) : null}
+                </ul>
+              ) : null}
+
+              {socialLinks.length ? (
+                <div className="site-footer-socials" aria-label="Social media links">
+                  {socialLinks.map((link) => {
+                    const Icon = socialIcon(link.platform);
+                    return (
+                      <a
+                        key={link.id}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={link.label}
+                        data-tip={link.label}
+                        className="footer-social-icon social-tip"
+                      >
+                        <Icon size={16} />
+                      </a>
+                    );
+                  })}
+                </div>
+              ) : null}
             </div>
 
-            <div className="footer-nav-groups" style={{ display: "flex", gap: "4rem", flexWrap: "wrap", flex: "1 1 auto", justifyContent: "flex-end" }}>
+            <div className="site-footer-nav">
               {navGroups.map((group) => (
-                <div key={group.label} className="footer-nav-group" style={{ minWidth: "8rem" }}>
-                  <h3
-                    style={{
-                      fontFamily: "var(--font-heading)",
-                      fontSize: "0.875rem",
-                      fontWeight: 700,
-                      color: "var(--color-text)",
-                      marginBottom: "1.25rem",
-                      letterSpacing: "-0.01em",
-                    }}
-                  >
-                    {group.label}
-                  </h3>
-                  <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.75rem" }} role="list">
+                <div key={group.label} className="footer-nav-group">
+                  <h3>{group.label}</h3>
+                  <ul role="list">
                     {group.links.map((link) => (
                       <li key={link.href}>
-                        <Link
-                          href={link.href}
-                          className="footer-nav-link"
-                          style={{
-                            fontSize: "0.875rem",
-                            color: "var(--color-text-2)",
-                            textDecoration: "none",
-                            transition: "color 0.15s ease",
-                            display: "inline-block",
-                          }}
-                        >
+                        <Link href={link.href} className="footer-nav-link">
                           {link.label}
                         </Link>
                       </li>
@@ -316,65 +310,54 @@ export default function Footer() {
                 </div>
               ))}
             </div>
+
+            {showQuote ? (
+              <div className="site-footer-quote">
+                <span className="site-footer-quote-rule" aria-hidden="true" />
+                <p>{quote}</p>
+                <cite>— {quoteBy}</cite>
+              </div>
+            ) : null}
           </div>
-        </div>
+      </div>
 
-        <div className="footer-media-band" style={{ width: "100%", padding: "0 0 1rem" }}>
-          <FooterCompanyBand settings={settings} isDark={isDark} flush />
-        </div>
+      <div className="container site-footer-band">
+        <FooterCompanyBand settings={settings} isDark={isDark} flush />
+      </div>
 
-        <div className="container" style={{ padding: "0 1.5rem 1.5rem" }}>
-          <div
-            className="footer-legal"
-            style={{
-              paddingTop: "1.15rem",
-              borderTop: "1px solid var(--color-border)",
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: "1rem",
-              flexWrap: "wrap",
-            }}
-          >
-            <p style={{ fontSize: "0.75rem", color: "var(--color-text-3)", fontWeight: 500 }}>
-              © {year}{" "}
-              <Link href="/" style={{ color: "var(--color-text)", textDecoration: "none", fontWeight: 700 }}>
-                {setting(settings, "siteTitle")}
-              </Link>
-              . All rights reserved.
-            </p>
-            <div className="footer-legal-actions" style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
-              <Link href="/contact" style={{ fontSize: "0.75rem", color: "var(--color-text-3)", textDecoration: "none", fontWeight: 500 }}>
-                Privacy
-              </Link>
-              {coffee ? (
+      <div className="container site-footer-legal-wrap">
+        <div className="footer-legal">
+          <p>
+            © {year}{" "}
+            <Link href="/">{setting(settings, "siteTitle")}</Link>
+            . All rights reserved.
+          </p>
+          <div className="footer-legal-actions">
+            {(showPrivacy || showSitemap) ? (
+              <span className="footer-legal-links">
+                {showPrivacy ? (
+                  <Link href="/contact">Privacy</Link>
+                ) : null}
+                {showPrivacy && showSitemap ? <span aria-hidden="true">·</span> : null}
+                {showSitemap ? <Link href="/sitemap.xml">Sitemap</Link> : null}
+              </span>
+            ) : null}
+            {coffee ? (
+              <>
+                {(showPrivacy || showSitemap) ? <span className="footer-legal-divider" aria-hidden="true" /> : null}
                 <a
                   href={coffee.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="footer-coffee"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.375rem",
-                    fontSize: "0.75rem",
-                    color: "var(--color-text)",
-                    textDecoration: "none",
-                    fontWeight: 600,
-                    padding: "0.375rem 0.75rem",
-                    background: "var(--color-bg)",
-                    border: "1px solid var(--color-border)",
-                    borderRadius: "2rem",
-                  }}
                 >
                   ☕ Buy me a coffee
                 </a>
-              ) : null}
-            </div>
+              </>
+            ) : null}
           </div>
         </div>
-      </footer>
-    </>
+      </div>
+    </footer>
   );
 }

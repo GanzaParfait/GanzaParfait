@@ -8,8 +8,6 @@ import type { HeroLayoutType, SiteSettings } from "@/lib/supabase";
 import { carouselLayouts, settingsForLayout } from "@/lib/hero";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
-const MOBILE_MAX = 900;
-
 export function HeroRenderer({
   settings,
   isPreview = false,
@@ -31,22 +29,13 @@ export default function HeroSection() {
   const [index, setIndex] = useState(0);
   const [fading, setFading] = useState(false);
   const [paused, setPaused] = useState(false);
-  // Start false so SSR + mobile first paint only show the live DB layout (no carousel flash).
-  const [allowCarousel, setAllowCarousel] = useState(false);
 
   const live = (settings.bannerLayout || "split_portrait") as HeroLayoutType;
   const rotating = carouselLayouts(settings);
-  const sequence = allowCarousel && rotating.length > 1 ? rotating : [live];
+  const enabled = Boolean(settings.heroCarouselEnabled) && rotating.length > 1;
+  const sequence = enabled ? rotating : [live];
   const active = sequence[index] && sequence.includes(sequence[index]) ? sequence[index] : sequence[0];
   const intervalSeconds = Math.min(20, Math.max(4, settings.heroCarouselInterval || 8));
-
-  useEffect(() => {
-    const media = window.matchMedia(`(max-width: ${MOBILE_MAX}px)`);
-    const sync = () => setAllowCarousel(!media.matches);
-    sync();
-    media.addEventListener("change", sync);
-    return () => media.removeEventListener("change", sync);
-  }, []);
 
   useEffect(() => {
     const start = sequence.indexOf(live);
@@ -57,20 +46,33 @@ export default function HeroSection() {
     if (sequence.length < 2 || paused) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced) return;
+
+    let fadeTimer = 0;
     const timer = window.setInterval(() => {
       setFading(true);
-      window.setTimeout(() => {
+      fadeTimer = window.setTimeout(() => {
         setIndex((current) => (current + 1) % sequence.length);
         setFading(false);
       }, 280);
     }, intervalSeconds * 1000);
-    return () => window.clearInterval(timer);
+
+    return () => {
+      window.clearInterval(timer);
+      window.clearTimeout(fadeTimer);
+    };
   }, [sequence.length, paused, intervalSeconds, sequence.join("|")]);
+
+  const pauseOnFinePointer = () => {
+    if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+      setPaused(true);
+    }
+  };
 
   return (
     <div
       className="hero-carousel"
-      onMouseEnter={() => setPaused(true)}
+      data-page-section
+      onMouseEnter={pauseOnFinePointer}
       onMouseLeave={() => setPaused(false)}
     >
       <div className={fading ? "hero-carousel-fade is-fading" : "hero-carousel-fade"}>

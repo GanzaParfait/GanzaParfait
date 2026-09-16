@@ -18,12 +18,12 @@ export default function FeaturedOverlayHero({
   return (
     <section
       className={isPreview ? "hero-cinematic hero-layout-preview" : "hero-cinematic"}
-      style={{
-        height: isPreview ? "100%" : "100dvh",
-        minHeight: isPreview ? "100%" : "600px",
-        paddingBottom: "3.25rem",
-        paddingTop: isPreview ? "3rem" : "var(--public-nav-offset, 3.6rem)",
-      }}
+      style={isPreview ? {
+        height: "100%",
+        minHeight: "100%",
+        paddingBottom: "2rem",
+        paddingTop: "3rem",
+      } : undefined}
     >
       <div className="hero-cinematic-media">
         <img src={image} alt={setting(settings, "siteTitle")} />

@@ -245,33 +245,63 @@ export async function listMediaAssets(supabase: SupabaseClient): Promise<MediaAs
   await withRetry(() => ensureMediaBucket(supabase));
 
   const catalog = await readCatalog(supabase);
-  if (catalog.length) return catalog;
-
   const listed = await supabase.storage.from(MEDIA_BUCKET).list("library", {
     limit: 1000,
     sortBy: { column: "created_at", order: "desc" },
   });
-  if (listed.error || !listed.data) return [];
 
-  return listed.data
-    .filter((item) => item.name && item.name !== "index.json" && !item.name.endsWith("/"))
-    .map((item) => {
-      const storagePath = `library/${item.name}`;
-      const { data } = supabase.storage.from(MEDIA_BUCKET).getPublicUrl(storagePath);
-      const mime = item.metadata?.mimetype as string | undefined;
-      return {
-        id: item.id || item.name,
-        name: item.name.replace(/^[0-9a-f-]{36}-/i, ""),
-        url: data.publicUrl,
-        type: classifyMediaType(mime, item.name),
-        size: formatBytes(typeof item.metadata?.size === "number" ? item.metadata.size : undefined),
-        sizeBytes: typeof item.metadata?.size === "number" ? item.metadata.size : undefined,
-        uploadedAt: (item.created_at || "").slice(0, 10),
-        source: "upload" as const,
-        storagePath,
-        mimeType: mime,
-      };
-    });
+  const fromStorage: MediaAsset[] = !(listed.error || !listed.data)
+    ? listed.data
+        .filter((item) => item.name && item.name !== "index.json" && !item.name.endsWith("/"))
+        .map((item) => {
+          const storagePath = `library/${item.name}`;
+          const { data } = supabase.storage.from(MEDIA_BUCKET).getPublicUrl(storagePath);
+          const mime = item.metadata?.mimetype as string | undefined;
+          const idMatch = item.name.match(/^([0-9a-f-]{36})-/i);
+          return {
+            id: idMatch?.[1] || item.id || item.name,
+            name: item.name.replace(/^[0-9a-f-]{36}-/i, ""),
+            url: data.publicUrl,
+            type: classifyMediaType(mime, item.name),
+            size: formatBytes(typeof item.metadata?.size === "number" ? item.metadata.size : undefined),
+            sizeBytes: typeof item.metadata?.size === "number" ? item.metadata.size : undefined,
+            uploadedAt: (item.created_at || "").slice(0, 10),
+            source: "upload" as const,
+            storagePath,
+            mimeType: mime,
+          };
+        })
+    : [];
+
+  const byKey = new Map<string, MediaAsset>();
+  for (const asset of fromStorage) {
+    byKey.set(asset.storagePath || asset.id, asset);
+    byKey.set(asset.id, asset);
+  }
+  for (const asset of catalog) {
+    const key = asset.storagePath || asset.id;
+    const existing = byKey.get(key) || byKey.get(asset.id);
+    byKey.set(key, existing ? { ...existing, ...asset, url: asset.url || existing.url } : asset);
+    byKey.set(asset.id, byKey.get(key)!);
+  }
+
+  const unique = new Map<string, MediaAsset>();
+  for (const asset of byKey.values()) {
+    unique.set(asset.id, asset);
+  }
+
+  const merged = [...unique.values()].sort((a, b) => (b.uploadedAt || "").localeCompare(a.uploadedAt || ""));
+
+  // Heal incomplete catalogs so reopen always sees storage + catalog together.
+  if (fromStorage.length && merged.length !== catalog.length) {
+    try {
+      await writeCatalog(supabase, merged);
+    } catch {
+      // Listing still returns the merge even if heal write fails.
+    }
+  }
+
+  return merged;
 }
 
 async function syncTableDelete(supabase: SupabaseClient, id: string) {

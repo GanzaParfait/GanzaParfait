@@ -45,7 +45,7 @@ import {
 interface MediaManagerPageProps {
   onSelect?: (url: string) => void;
   asModal?: boolean;
-  pickerMode?: "image" | "any";
+  pickerMode?: "image" | "video" | "any";
 }
 
 function fileKindStyle(type: MediaAssetType) {
@@ -214,6 +214,7 @@ export default function MediaManagerPage({ onSelect, asModal, pickerMode = "any"
       setSelectedId(payload.asset.id);
       setPage(1);
       notify(payload.asset.type === "image" ? "Image imported into the library." : "File imported into the library.");
+      void loadAssets();
     } catch (error) {
       setUrlError(error instanceof Error ? error.message : "Could not import that URL.");
     } finally {
@@ -254,10 +255,11 @@ export default function MediaManagerPage({ onSelect, asModal, pickerMode = "any"
     setUploadProgress(8);
     try {
       const uploaded = await uploadWithProgress(files, setUploadProgress);
-      setAssets((current) => [...uploaded, ...current]);
+      setAssets((current) => [...uploaded, ...current.filter((item) => !uploaded.some((file) => file.id === item.id))]);
       setSelectedId(uploaded[0]?.id || null);
       setPage(1);
       notify(uploaded.length === 1 ? `${fileKindLabel(uploaded[0].type)} uploaded.` : `${uploaded.length} files uploaded.`);
+      void loadAssets();
     } catch (error) {
       notify(error instanceof Error ? error.message : "Could not upload that file.", "error");
     } finally {
@@ -271,7 +273,13 @@ export default function MediaManagerPage({ onSelect, asModal, pickerMode = "any"
   const imageCount = assets.filter((asset) => asset.type === "image").length;
   const videoCount = assets.filter((asset) => asset.type === "video").length;
   const documentCount = assets.filter((asset) => isDocumentFilterType(asset.type)).length;
-  const canUseSelected = Boolean(selectedAsset && onSelect && (pickerMode === "any" || selectedAsset.type === "image"));
+  const canUseSelected = Boolean(
+    selectedAsset &&
+      onSelect &&
+      (pickerMode === "any" ||
+        (pickerMode === "image" && selectedAsset.type === "image") ||
+        (pickerMode === "video" && selectedAsset.type === "video")),
+  );
 
   return (
     <div
@@ -606,11 +614,19 @@ export default function MediaManagerPage({ onSelect, asModal, pickerMode = "any"
                     onClick={() => onSelect?.(selectedAsset.url)}
                     style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.375rem", padding: "0.625rem", borderRadius: "0.375rem", border: "none", background: "#0e52a8", color: "#ffffff", cursor: "pointer", fontSize: "0.8125rem", fontWeight: 700 }}
                   >
-                    <RiCheckLine size={16} /> {selectedAsset.type === "image" ? "Use This Image" : "Use This File"}
+                    <RiCheckLine size={16} />{" "}
+                    {selectedAsset.type === "image"
+                      ? "Use This Image"
+                      : selectedAsset.type === "video"
+                        ? "Use This Video"
+                        : "Use This File"}
                   </button>
                 )}
-                {onSelect && selectedAsset.type !== "image" && pickerMode === "image" && (
-                  <p style={{ fontSize: "0.7rem", color: "#64748b", textAlign: "center" }}>Cover and hero pickers need an image. Copy the URL to use this file in a blog post.</p>
+                {onSelect && pickerMode === "image" && selectedAsset.type !== "image" && (
+                  <p style={{ fontSize: "0.7rem", color: "#64748b", textAlign: "center" }}>This picker needs an image. Copy the URL to use this file elsewhere.</p>
+                )}
+                {onSelect && pickerMode === "video" && selectedAsset.type !== "video" && (
+                  <p style={{ fontSize: "0.7rem", color: "#64748b", textAlign: "center" }}>This picker needs a video. Copy the URL to use this file elsewhere.</p>
                 )}
                 <a
                   href={selectedAsset.url}

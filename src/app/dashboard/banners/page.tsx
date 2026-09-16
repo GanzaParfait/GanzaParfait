@@ -112,7 +112,7 @@ export default function BannersPage() {
           <div>
             <h2 style={{ fontSize: "0.95rem", fontWeight: 800, color: "#0b192c" }}>Moving carousel</h2>
             <p style={{ fontSize: "0.78rem", color: "#64748b", marginTop: "0.2rem", maxWidth: "36rem" }}>
-              Rotate the homepage through every visible layout, or only the ones you tick. Each layout keeps its own copy. Hover pauses the motion.
+              Rotate the homepage through every visible layout, or only the ones you tick. Runs on desktop, tablet, and mobile. Hover pauses on desktop.
             </p>
           </div>
           <label style={{ display: "flex", alignItems: "center", gap: "0.45rem", fontSize: "0.82rem", fontWeight: 700, color: "#0f172a" }}>

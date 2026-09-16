@@ -36,6 +36,7 @@ import {
 } from "@/lib/socials";
 import MediaManagerModal from "@/components/dashboard/MediaManagerModal";
 import AnnouncementEditor from "@/components/dashboard/AnnouncementEditor";
+import SocialMultiSelect from "@/components/ui/SocialMultiSelect";
 import EmailEditor from "@/components/dashboard/EmailEditor";
 import FooterFocusDragPreview from "@/components/dashboard/FooterFocusDragPreview";
 import CustomSelect from "@/components/ui/CustomSelect";
@@ -145,9 +146,11 @@ export default function SettingsPage() {
           <h1 style={{ fontSize: "1.2rem", fontWeight: 800, color: "#0b192c" }}>{activeView.label}</h1>
           <p style={{ fontSize: "0.8rem", color: "#64748b" }}>{activeView.hint}</p>
         </div>
-        <button type="button" className="btn btn-primary" onClick={() => persist()} disabled={saving}>
-          <RiSaveLine size={16} /> {saving ? "Saving..." : "Save"}
-        </button>
+        {view !== "announcement" ? (
+          <button type="button" className="btn btn-primary" onClick={() => persist()} disabled={saving}>
+            <RiSaveLine size={16} /> {saving ? "Saving..." : "Save"}
+          </button>
+        ) : null}
       </div>
 
       <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
@@ -282,13 +285,31 @@ export default function SettingsPage() {
                         <RiDeleteBinLine size={16} />
                       </button>
                     </div>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.85rem", marginTop: "0.6rem", fontSize: "0.75rem", color: "#475569" }}>
-                      {(["enabled", "header", "footer", "contact"] as const).map((key) => (
-                        <label key={key} style={{ display: "flex", alignItems: "center", gap: "0.3rem", textTransform: "capitalize" }}>
-                          <input type="checkbox" checked={Boolean(link[key])} onChange={(e) => updateSocial(link.id, { [key]: e.target.checked })} />
-                          {key}
-                        </label>
-                      ))}
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.85rem", marginTop: "0.6rem", fontSize: "0.75rem", color: "#475569", alignItems: "center" }}>
+                      <label style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
+                        <input type="checkbox" checked={Boolean(link.enabled)} onChange={(e) => updateSocial(link.id, { enabled: e.target.checked })} />
+                        Enabled
+                      </label>
+                      <div style={{ flex: 1, minWidth: "14rem" }}>
+                        <SocialMultiSelect
+                          values={(["header", "footer", "contact"] as const).filter((key) => link[key])}
+                          max={3}
+                          placeholder="Show on…"
+                          options={[
+                            { value: "header", label: "Header" },
+                            { value: "footer", label: "Footer" },
+                            { value: "contact", label: "Contact" },
+                          ]}
+                          onChange={(placements) =>
+                            updateSocial(link.id, {
+                              header: placements.includes("header"),
+                              footer: placements.includes("footer"),
+                              contact: placements.includes("contact"),
+                            })
+                          }
+                          aria-label={`${link.label} placements`}
+                        />
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -330,6 +351,102 @@ export default function SettingsPage() {
 
           {view === "footer" && (
             <div style={{ display: "flex", flexDirection: "column", gap: "1.15rem" }}>
+              <div style={{ border: "1px solid #e2e8f0", borderRadius: "0.85rem", padding: "0.9rem 1rem", background: "#fff" }}>
+                <p style={{ margin: "0 0 0.65rem", fontSize: "0.72rem", fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase", color: "#64748b" }}>
+                  Optional footer texts
+                </p>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(11rem, 1fr))", gap: "0.55rem", marginBottom: "0.85rem" }}>
+                  {(
+                    [
+                      ["footerShowBio", "Bio"],
+                      ["footerShowEmail", "Email"],
+                      ["footerShowPhone", "Phone"],
+                      ["footerShowLocation", "Location"],
+                      ["footerShowQuote", "Quote"],
+                      ["footerShowFeaturedCopy", "Featured band copy"],
+                      ["footerShowPrivacy", "Privacy link"],
+                      ["footerShowSitemap", "Sitemap link"],
+                    ] as const
+                  ).map(([key, label]) => (
+                    <label key={key} style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.78rem", fontWeight: 600, color: "#334155" }}>
+                      <input
+                        type="checkbox"
+                        checked={
+                          key === "footerShowQuote" || key === "footerShowFeaturedCopy"
+                            ? Boolean(settings[key])
+                            : settings[key] !== false
+                        }
+                        onChange={(e) => patch({ [key]: e.target.checked })}
+                      />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+                  <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155", gridColumn: "1 / -1" }}>
+                    Quote
+                    <textarea
+                      rows={2}
+                      style={{ ...inputStyle, marginTop: "0.3rem", resize: "vertical" }}
+                      value={settings.footerQuote || ""}
+                      onChange={(e) => patch({ footerQuote: e.target.value, footerShowQuote: Boolean(e.target.value.trim()) || settings.footerShowQuote })}
+                      placeholder="Optional quote shown in the footer"
+                    />
+                  </label>
+                  <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>
+                    Quote attribution
+                    <input
+                      style={{ ...inputStyle, marginTop: "0.3rem" }}
+                      value={settings.footerQuoteAttribution || ""}
+                      onChange={(e) => patch({ footerQuoteAttribution: e.target.value })}
+                      placeholder={setting(settings, "siteTitle")}
+                    />
+                  </label>
+                  <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>
+                    Featured eyebrow
+                    <input
+                      style={{ ...inputStyle, marginTop: "0.3rem" }}
+                      value={settings.footerFeaturedEyebrow || ""}
+                      onChange={(e) => patch({ footerFeaturedEyebrow: e.target.value })}
+                      placeholder="Featured"
+                    />
+                  </label>
+                  <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155", gridColumn: "1 / -1" }}>
+                    Featured title
+                    <input
+                      style={{ ...inputStyle, marginTop: "0.3rem" }}
+                      value={settings.footerFeaturedTitle || ""}
+                      onChange={(e) =>
+                        patch({
+                          footerFeaturedTitle: e.target.value,
+                          footerShowFeaturedCopy: Boolean(e.target.value.trim()) || settings.footerShowFeaturedCopy,
+                        })
+                      }
+                      placeholder="Building technology for real impact."
+                    />
+                  </label>
+                  <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155", gridColumn: "1 / -1" }}>
+                    Featured detail
+                    <textarea
+                      rows={2}
+                      style={{ ...inputStyle, marginTop: "0.3rem", resize: "vertical" }}
+                      value={settings.footerFeaturedDetail || ""}
+                      onChange={(e) => patch({ footerFeaturedDetail: e.target.value })}
+                      placeholder="Optional supporting line on the media band"
+                    />
+                  </label>
+                  <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>
+                    Featured CTA label
+                    <input
+                      style={{ ...inputStyle, marginTop: "0.3rem" }}
+                      value={settings.footerFeaturedCtaLabel || ""}
+                      onChange={(e) => patch({ footerFeaturedCtaLabel: e.target.value })}
+                      placeholder="Follow the journey"
+                    />
+                  </label>
+                </div>
+              </div>
+
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
                 <div>
                   <p style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.35rem" }}>Image URL</p>
@@ -503,7 +620,7 @@ export default function SettingsPage() {
               settings={settings}
               patch={patch}
               saving={saving}
-              onSave={() => persist(undefined, "Announcement saved.")}
+              onSave={(next) => persist(next, "Announcement saved.")}
             />
           )}
           {view === "email" && <EmailEditor settings={settings} patch={patch} />}

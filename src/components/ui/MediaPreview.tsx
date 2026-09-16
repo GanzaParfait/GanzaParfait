@@ -2,6 +2,7 @@
 
 import { useEffect, useEffectEvent, useState } from "react";
 import { RiArrowLeftLine, RiArrowRightLine, RiCloseLine, RiPauseFill, RiPlayFill } from "react-icons/ri";
+import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
 
 export type PreviewItem = {
   src: string;
@@ -30,6 +31,7 @@ export default function MediaPreview({
   const [playing, setPlaying] = useState(true);
   const current = list[index];
   const isVideo = current ? kindOf(current.src, current.kind) === "video" : false;
+  useHistoryBackClose(Boolean(current), onClose);
 
   const step = useEffectEvent((delta: number) => {
     if (!list.length) return;

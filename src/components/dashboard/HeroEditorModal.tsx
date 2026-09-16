@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState, type CSSProperties, type FormEvent, type ReactNode } from "react";
-import { RiCloseLine, RiSaveLine, RiImageAddLine, RiSunLine, RiMoonLine, RiArrowUpSLine, RiArrowDownSLine } from "react-icons/ri";
+import { RiCloseLine, RiSaveLine, RiImageAddLine, RiSunLine, RiMoonLine } from "react-icons/ri";
 import { SiteSettings, HeroLayoutType } from "@/lib/supabase";
 import { HERO_LAYOUTS, heroImageFor, imageKeyFor, layoutCopyFrom, layoutShows, settingsForLayout, visibleHeroLayouts } from "@/lib/hero";
 import { resolvedSocials, heroSocialsFor, socialIcon, syncHeroSocialFlags } from "@/lib/socials";
 import { PORTRAIT_PATH } from "@/lib/schema";
 import HeroPreviewFrame from "@/components/hero/HeroPreviewFrame";
 import { useDashboardFeedback } from "@/components/dashboard/DashboardFeedback";
+import SocialMultiSelect from "@/components/ui/SocialMultiSelect";
+import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
 
 interface HeroEditorModalProps {
   isOpen: boolean;
@@ -65,6 +67,7 @@ export default function HeroEditorModal({
   const layout = formData.bannerLayout || "split_portrait";
   const show = (field: Parameters<typeof layoutShows>[1]) => layoutShows(layout, field);
   const imageValue = heroImageFor(formData, layout);
+  useHistoryBackClose(isOpen, onClose);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -361,65 +364,24 @@ export default function HeroEditorModal({
                   })}
                 </div>
                 <p style={{ fontSize: "0.7rem", color: "#64748b", marginBottom: "0.5rem" }}>
-                  Showing {heroSocialsFor(formData).length} of {(formData.heroSocialIds || []).length} selected
+                  Showing {heroSocialsFor(formData).length} of {(formData.heroSocialIds || []).length} selected · from Site Settings → Socials
                 </p>
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-                  {resolvedSocials(formData).filter((link) => link.enabled).map((link) => {
-                    const selected = (formData.heroSocialIds || []).includes(link.id);
-                    const ids = formData.heroSocialIds || [];
-                    const index = ids.indexOf(link.id);
-                    return (
-                      <div key={link.id} style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
-                        <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.8rem", color: "#334155", flex: 1 }}>
-                          <input
-                            type="checkbox"
-                            checked={selected}
-                            onChange={() => {
-                              setFormData((prev) => {
-                                const current = prev.heroSocialIds || [];
-                                const isOn = current.includes(link.id);
-                                const unique = isOn
-                                  ? current.filter((id) => id !== link.id)
-                                  : [...current, link.id];
-                                const nextLimit = isOn
-                                  ? (prev.heroSocialLimit || 4)
-                                  : Math.min(6, Math.max(prev.heroSocialLimit || 4, unique.length, 2));
-                                return {
-                                  ...prev,
-                                  heroSocialIds: unique,
-                                  heroSocialLimit: nextLimit,
-                                };
-                              });
-                            }}
-                          />
-                          {link.label}
-                        </label>
-                        {selected ? (
-                          <span style={{ display: "flex", gap: "0.15rem" }}>
-                            <button type="button" aria-label={`Move ${link.label} up`} disabled={index <= 0} onClick={() => setFormData((prev) => {
-                              const current = [...(prev.heroSocialIds || [])];
-                              const at = current.indexOf(link.id);
-                              if (at <= 0) return prev;
-                              [current[at - 1], current[at]] = [current[at], current[at - 1]];
-                              return { ...prev, heroSocialIds: current };
-                            })} style={{ border: "1px solid #e2e8f0", background: "#fff", borderRadius: "0.3rem", cursor: index <= 0 ? "default" : "pointer", opacity: index <= 0 ? 0.4 : 1 }}>
-                              <RiArrowUpSLine size={14} />
-                            </button>
-                            <button type="button" aria-label={`Move ${link.label} down`} disabled={index < 0 || index >= ids.length - 1} onClick={() => setFormData((prev) => {
-                              const current = [...(prev.heroSocialIds || [])];
-                              const at = current.indexOf(link.id);
-                              if (at < 0 || at >= current.length - 1) return prev;
-                              [current[at + 1], current[at]] = [current[at], current[at + 1]];
-                              return { ...prev, heroSocialIds: current };
-                            })} style={{ border: "1px solid #e2e8f0", background: "#fff", borderRadius: "0.3rem", cursor: "pointer", opacity: index >= ids.length - 1 ? 0.4 : 1 }}>
-                              <RiArrowDownSLine size={14} />
-                            </button>
-                          </span>
-                        ) : null}
-                      </div>
-                    );
-                  })}
-                </div>
+                <SocialMultiSelect
+                  values={formData.heroSocialIds || []}
+                  max={6}
+                  placeholder="Choose socials from site settings…"
+                  options={resolvedSocials(formData)
+                    .filter((link) => link.enabled && link.url)
+                    .map((link) => ({ value: link.id, label: link.label }))}
+                  onChange={(ids) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      heroSocialIds: ids,
+                      heroSocialLimit: Math.min(6, Math.max(prev.heroSocialLimit || 4, ids.length, 2)),
+                    }));
+                  }}
+                  aria-label="Hero social links"
+                />
               </Field>
             )}
           </div>

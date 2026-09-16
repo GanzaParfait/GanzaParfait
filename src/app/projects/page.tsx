@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import { projects } from "@/data/site-data";
-import ProjectCard from "@/components/ui/ProjectCard";
-import AnimatedSection from "@/components/ui/AnimatedSection";
-import Link from "next/link";
-import { RiArrowRightLine } from "react-icons/ri";
+import ProjectsPageView from "@/components/work/ProjectsPageView";
 import { buildPageMetadata } from "@/lib/seo";
 import {
   buildBreadcrumbListJsonLd,
@@ -29,10 +26,6 @@ const breadcrumbItems = [
 ];
 
 export default function ProjectsPage() {
-  const featuredProjects = projects.filter((p) => p.featured);
-  const otherProjects = projects.filter((p) => !p.featured);
-  const ordered = [...featuredProjects, ...otherProjects];
-
   return (
     <>
       <JsonLd
@@ -47,38 +40,7 @@ export default function ProjectsPage() {
           buildItemListJsonLd(projects, "/projects"),
         ])}
       />
-
-      <section className="section page-compact-hero" aria-label="Work header">
-        <div className="container max-w-3xl">
-          <AnimatedSection>
-            <p className="section-label">Work</p>
-            <h1 className="theme-heading mb-3">Selected systems and products.</h1>
-            <p className="theme-copy leading-relaxed max-w-2xl">
-              Problem, contribution, and technology. Client names appear only where the relationship is already public.
-            </p>
-          </AnimatedSection>
-        </div>
-      </section>
-
-      <section className="section pt-0 pb-12" aria-label="Work list">
-        <div className="container">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {ordered.map((project, i) => (
-              <AnimatedSection key={project.id} delay={i * 60}>
-                <ProjectCard project={project} featured={project.featured} />
-              </AnimatedSection>
-            ))}
-          </div>
-          <div className="page-compact-cta">
-            <Link href="/contact" className="btn btn-primary">
-              Discuss a project <RiArrowRightLine size={16} />
-            </Link>
-            <Link href="/experience" className="btn btn-outline">
-              View experience
-            </Link>
-          </div>
-        </div>
-      </section>
+      <ProjectsPageView />
     </>
   );
 }
