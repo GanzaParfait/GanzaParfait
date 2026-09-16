@@ -23,16 +23,18 @@ import {
   RiFlashlightLine,
 } from "react-icons/ri";
 import { useMemo, useState, type ReactNode } from "react";
-import { Project, projects as defaultProjects } from "@/data/site-data";
+import { type Project } from "@/data/site-data";
 import ShareActions from "@/components/ui/ShareActions";
+import MediaPreview, { type PreviewItem } from "@/components/ui/MediaPreview";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { isVideoUrl, mergeProjectCatalog } from "@/lib/projects";
 
 function PosterVideo({ src, poster, title }: { src: string; poster?: string; title: string }) {
   const [ready, setReady] = useState(false);
   if (!ready) {
     return (
       <button type="button" className="poster-video" onClick={() => setReady(true)} aria-label={`Play ${title}`}>
-        {poster ? <img src={poster} alt="" /> : <span className="announcement-video-fallback" style={{ minHeight: "16rem" }} />}
+        {poster ? <img src={poster} alt="" /> : <span className="announcement-video-fallback" style={{ minHeight: "12rem" }} />}
         <span>
           <RiPlayFill size={26} />
         </span>
@@ -47,7 +49,7 @@ function PosterVideo({ src, poster, title }: { src: string; poster?: string; tit
       autoPlay
       preload="metadata"
       playsInline
-      style={{ width: "100%", borderRadius: "1rem" }}
+      className="case-media-video"
     />
   );
 }
@@ -99,6 +101,8 @@ function MetaItem({
   );
 }
 
+type MediaItem = { type: "image" | "video"; src: string; caption: string };
+
 export default function ProjectCaseStudyClient({ project: seed }: { project: Project }) {
   const settings = useSiteSettings();
   const project = useMemo(() => {
@@ -108,41 +112,77 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
       : seed;
   }, [seed, settings.projectRecords]);
 
-  const list = useMemo(
-    () => defaultProjects.map((item) => settings.projectRecords?.find((savedItem) => savedItem.id === item.id) || item),
-    [settings.projectRecords],
-  );
+  const list = useMemo(() => mergeProjectCatalog(settings.projectRecords), [settings.projectRecords]);
   const index = list.findIndex((item) => item.id === project.id);
   const previous = index > 0 ? list[index - 1] : null;
   const next = index >= 0 && index < list.length - 1 ? list[index + 1] : null;
-  const shots = (project.screenshots?.length ? project.screenshots : project.image ? [project.image] : []).filter(
-    (src) => src && !src.includes("placeholder"),
-  );
-  const cover = project.image && !project.image.includes("placeholder") ? project.image : shots[0];
+
+  const cover = project.image && !project.image.includes("placeholder") ? project.image : undefined;
   const category =
     project.category === "other" && project.categoryNote ? project.categoryNote : CATEGORY[project.category] || project.category;
   const flourish = (project.flourish || "").trim() || "Data People Impact";
+
+  const mediaItems = useMemo<MediaItem[]>(() => {
+    const pinned = (project.pinnedMedia || []).filter((src) => src && !src.includes("placeholder"));
+    const shots = (project.screenshots?.length ? project.screenshots : cover ? [cover] : []).filter(
+      (src) => src && !src.includes("placeholder"),
+    );
+    const orderedImages = [...pinned.filter((src) => !isVideoUrl(src)), ...shots].filter(
+      (src, index, all) => all.indexOf(src) === index,
+    );
+    const images: MediaItem[] = orderedImages.map((src, absolute) => ({
+      type: "image",
+      src,
+      caption: project.screenshotCaptions?.[absolute] || `View ${absolute + 1}`,
+    }));
+    const pinnedVideos = pinned.filter(isVideoUrl);
+    const videos = [
+      ...pinnedVideos,
+      ...(project.videos?.length ? project.videos : project.video ? [project.video] : []),
+    ].filter((src, index, all) => src && all.indexOf(src) === index);
+    const videoItems: MediaItem[] = videos.map((src, videoIndex) => ({
+      type: "video",
+      src,
+      caption: `Video ${videoIndex + 1}`,
+    }));
+    return [...images, ...videoItems];
+  }, [cover, project.pinnedMedia, project.screenshotCaptions, project.screenshots, project.video, project.videos]);
+
   const tabs = [
     { id: "overview", label: "Overview", show: Boolean(project.longDescription || project.description || project.context || project.highlights?.length) },
     { id: "features", label: "Features", show: Boolean(project.features?.length || project.solution) },
     { id: "role", label: "My Role", show: Boolean(project.myRole || project.whatIBuilt) },
     { id: "stack", label: "Tech Stack", show: Boolean(project.technologies?.length) },
     { id: "results", label: "Results", show: Boolean(project.outcome || project.result) },
-    { id: "gallery", label: "Gallery", show: shots.length > 0 },
+    { id: "media", label: "Media", show: mediaItems.length > 0 },
     { id: "challenges", label: "Challenges", show: Boolean(project.challenge || project.problem) },
     { id: "learned", label: "What I Learned", show: Boolean(project.learned) },
   ].filter((tab) => tab.show);
   const [tab, setTab] = useState(tabs[0]?.id || "overview");
   const [shotStart, setShotStart] = useState(0);
-  const visibleShots = Math.min(4, shots.length);
-  const shotWindow = shots.slice(shotStart, shotStart + visibleShots);
+  const [previewStart, setPreviewStart] = useState<number | null>(null);
+  const visibleShots = Math.min(4, mediaItems.length);
+  const shotWindow = mediaItems.slice(shotStart, shotStart + visibleShots);
+  const previewItems = useMemo<PreviewItem[]>(
+    () =>
+      mediaItems.map((item) => ({
+        src: item.src,
+        kind: item.type,
+        caption: item.caption,
+      })),
+    [mediaItems],
+  );
+
+  const openPreview = (absoluteIndex: number) => {
+    setPreviewStart(absoluteIndex);
+  };
 
   const shiftGallery = (delta: number) => {
-    if (shots.length <= visibleShots) return;
+    if (mediaItems.length <= visibleShots) return;
     setShotStart((current) => {
       const nextIndex = current + delta;
-      if (nextIndex < 0) return Math.max(0, shots.length - visibleShots);
-      if (nextIndex > shots.length - visibleShots) return 0;
+      if (nextIndex < 0) return Math.max(0, mediaItems.length - visibleShots);
+      if (nextIndex > mediaItems.length - visibleShots) return 0;
       return nextIndex;
     });
   };
@@ -190,9 +230,15 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
           </div>
           <div className="case-hero-visual">
             <div className="case-hero-glow" aria-hidden="true" />
-            <figure className="case-hero-shot">
+            <button
+              type="button"
+              className="case-hero-shot"
+              onClick={() => openPreview(0)}
+              aria-label={`View ${project.title} media`}
+              disabled={!mediaItems.length && !cover}
+            >
               {cover ? <img src={cover} alt="" /> : <span>{project.title}</span>}
-            </figure>
+            </button>
             <p className="case-flourish" aria-hidden="true">
               {flourish}
             </p>
@@ -237,9 +283,9 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
                   className={tab === item.id ? "is-on" : undefined}
                   onClick={() => {
                     setTab(item.id);
-                    if (item.id === "gallery") {
+                    if (item.id === "media") {
                       window.requestAnimationFrame(() => {
-                        document.getElementById("case-shots")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                        document.getElementById("case-media")?.scrollIntoView({ behavior: "smooth", block: "start" });
                       });
                     }
                   }}
@@ -319,10 +365,10 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
                   <p>{project.outcome || project.result}</p>
                 </>
               )}
-              {tab === "gallery" && shots.length > 0 && (
+              {tab === "media" && mediaItems.length > 0 && (
                 <>
-                  <h2>Project screenshots</h2>
-                  <p className="case-gallery-note">The screenshot gallery is shown below this section.</p>
+                  <h2>Project media</h2>
+                  <p className="case-gallery-note">Screenshots and videos for this case study are shown below.</p>
                 </>
               )}
               {tab === "challenges" && (
@@ -338,17 +384,17 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
                 </>
               )}
             </div>
-
-            {(project.videos?.length ? project.videos : project.video ? [project.video] : []).map((src) => (
-              <div className="case-video" key={src}>
-                <PosterVideo src={src} poster={project.videoPoster || cover} title={project.title} />
-              </div>
-            ))}
           </div>
 
           <aside className="case-aside">
             <div className="case-aside-card">
-              {project.organization ? <p className="case-aside-org">{project.organization}</p> : null}
+              {project.logo ? (
+                <div className="case-aside-logo">
+                  <img src={project.logo} alt={`${project.organization || project.title} logo`} />
+                </div>
+              ) : project.organization ? (
+                <p className="case-aside-org">{project.organization}</p>
+              ) : null}
               {project.quote ? (
                 <blockquote>
                   <p>“{project.quote}”</p>
@@ -367,38 +413,51 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
                   <RiDownloadLine size={16} /> Download case study (PDF)
                 </a>
               ) : null}
+              <ShareActions
+                inline
+                title={`${project.title} by Prince Parfait GANZA`}
+                excerpt={project.description}
+                campaign={`project-${project.id}`}
+                content={project.id}
+              />
             </div>
-            <ShareActions
-              title={`${project.title} by Prince Parfait GANZA`}
-              excerpt={project.description}
-              campaign={`project-${project.id}`}
-              content={project.id}
-            />
           </aside>
         </div>
 
-        {shots.length > 0 ? (
-          <section className="case-shots" id="case-shots" data-page-section aria-label="Project screenshots">
+        {mediaItems.length > 0 ? (
+          <section className="case-shots" id="case-media" data-page-section aria-label="Project media">
             <div className="case-shots-head">
-              <h2>Project screenshots</h2>
-              {shots.length > visibleShots ? (
+              <h2>Project media</h2>
+              {mediaItems.length > visibleShots ? (
                 <div className="case-shots-nav">
-                  <button type="button" aria-label="Previous screenshots" onClick={() => shiftGallery(-1)}>
+                  <button type="button" aria-label="Previous media" onClick={() => shiftGallery(-1)}>
                     <RiArrowLeftLine size={16} />
                   </button>
-                  <button type="button" aria-label="Next screenshots" onClick={() => shiftGallery(1)}>
+                  <button type="button" aria-label="Next media" onClick={() => shiftGallery(1)}>
                     <RiArrowRightLine size={16} />
                   </button>
                 </div>
               ) : null}
             </div>
             <div className="case-shots-track">
-              {shotWindow.map((src, windowIndex) => {
+              {shotWindow.map((item, windowIndex) => {
                 const absolute = shotStart + windowIndex;
+                const video = item.type === "video" || isVideoUrl(item.src);
                 return (
-                  <figure key={`${src}-${absolute}`}>
-                    <img src={src} alt="" loading="lazy" decoding="async" />
-                    <figcaption>{project.screenshotCaptions?.[absolute] || `View ${absolute + 1}`}</figcaption>
+                  <figure key={`${item.src}-${absolute}`} className={video ? "is-video" : undefined}>
+                    {video ? (
+                      <PosterVideo src={item.src} poster={project.videoPoster || cover} title={`${project.title} ${item.caption}`} />
+                    ) : (
+                      <button
+                        type="button"
+                        className="case-media-open"
+                        onClick={() => openPreview(absolute)}
+                        aria-label={`Open ${item.caption}`}
+                      >
+                        <img src={item.src} alt="" loading="lazy" decoding="async" />
+                      </button>
+                    )}
+                    <figcaption>{item.caption}</figcaption>
                   </figure>
                 );
               })}
@@ -406,6 +465,15 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
           </section>
         ) : null}
       </div>
+
+      {previewStart !== null && previewItems.length ? (
+        <MediaPreview
+          title={project.title}
+          items={previewItems}
+          start={previewStart}
+          onClose={() => setPreviewStart(null)}
+        />
+      ) : null}
     </article>
   );
 }

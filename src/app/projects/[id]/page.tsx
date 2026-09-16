@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { projects } from "@/data/site-data";
 import ProjectCaseStudyClient from "@/components/projects/ProjectCaseStudyClient";
+import { getPublicProject, getPublicProjects } from "@/lib/projects";
 import { buildPageMetadata } from "@/lib/seo";
 import {
   buildBreadcrumbListJsonLd,
@@ -15,13 +15,17 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
+export const revalidate = 60;
+export const dynamicParams = true;
+
 export async function generateStaticParams() {
+  const projects = await getPublicProjects();
   return projects.map((project) => ({ id: project.id }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const project = projects.find((item) => item.id === id);
+  const project = await getPublicProject(id);
   if (!project) return { title: "Project Not Found", robots: { index: false, follow: true } };
 
   return buildPageMetadata({
@@ -37,7 +41,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProjectPage({ params }: Props) {
   const { id } = await params;
-  const project = projects.find((item) => item.id === id);
+  const project = await getPublicProject(id);
   if (!project) notFound();
 
   const crumbs = [

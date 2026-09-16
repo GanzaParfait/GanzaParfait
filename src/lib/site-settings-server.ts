@@ -34,8 +34,8 @@ async function loadSiteSettings(): Promise<SiteSettings> {
   }
 }
 
-/** Load public site settings for SSR. Cached briefly so saves appear quickly without flashing defaults. */
+/** Load public site settings for SSR. Short TTL; PUT /api/settings also revalidates the tag. */
 export const getServerSiteSettings = unstable_cache(loadSiteSettings, ["site-settings"], {
-  revalidate: 30,
+  revalidate: 5,
   tags: ["site-settings"],
 });

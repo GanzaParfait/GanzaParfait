@@ -5,14 +5,16 @@ import {
   RiArrowRightLine,
   RiCodeSSlashLine,
   RiExternalLinkLine,
+  RiLoader4Line,
   RiMapPinLine,
   RiSearchLine,
 } from "react-icons/ri";
-import { useMemo, useState } from "react";
-import { projects as seedProjects, type Project } from "@/data/site-data";
+import { useEffect, useMemo, useState } from "react";
+import { type Project } from "@/data/site-data";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { projectCover, workCategoryLabel } from "@/components/work/work-media";
+import { mergeProjectCatalog } from "@/lib/projects";
 
 const FILTERS = [
   { id: "all", label: "All" },
@@ -27,19 +29,13 @@ const FILTERS = [
 type FilterId = (typeof FILTERS)[number]["id"];
 
 const TOOL_CATEGORIES = new Set(["mobile", "ai", "open-source"]);
+const FILTER_DELAY_MS = 500;
 
 const APPROACH = [
   { step: "01", title: "Understand", body: "Explore the real problem." },
   { step: "02", title: "Build", body: "Turn ideas into working systems." },
   { step: "03", title: "Improve", body: "Keep iterating with people who use the work." },
 ];
-
-function mergeProjects(records?: Project[]) {
-  return seedProjects.map((item) => {
-    const saved = records?.find((entry) => entry.id === item.id);
-    return saved ? { ...item, ...saved, title: saved.title || item.title } : item;
-  });
-}
 
 function matchesFilter(project: Project, filter: FilterId) {
   if (filter === "all") return true;
@@ -55,11 +51,17 @@ function tagTone(category: Project["category"]) {
   return "is-other";
 }
 
+function isFullSpan(project: Project) {
+  return project.cardSpan === "full" || project.wide === true;
+}
+
 export default function ProjectsPageView() {
   const settings = useSiteSettings();
-  const list = useMemo(() => mergeProjects(settings.projectRecords), [settings.projectRecords]);
+  const list = useMemo(() => mergeProjectCatalog(settings.projectRecords), [settings.projectRecords]);
   const [filter, setFilter] = useState<FilterId>("all");
   const [query, setQuery] = useState("");
+  const [pending, setPending] = useState(false);
+  const [visible, setVisible] = useState<Project[]>([]);
   const location = settings.location || "Kigali, Rwanda";
   const company = list.find((item) => item.id === "lerony");
 
@@ -76,7 +78,19 @@ export default function ProjectsPageView() {
     });
   }, [filter, list, query]);
 
-  const gridProjects = filtered.filter((item) => item.id !== "lerony" || filter !== "all");
+  const gridProjects = useMemo(
+    () => filtered.filter((item) => item.id !== "lerony" || filter !== "all"),
+    [filtered, filter],
+  );
+
+  useEffect(() => {
+    setPending(true);
+    const timer = window.setTimeout(() => {
+      setVisible(gridProjects);
+      setPending(false);
+    }, FILTER_DELAY_MS);
+    return () => window.clearTimeout(timer);
+  }, [gridProjects]);
 
   return (
     <div className="projects-page">
@@ -128,11 +142,20 @@ export default function ProjectsPageView() {
 
       <section className="projects-grid-section" data-page-section aria-label="Project list">
         <div className="container">
-          {gridProjects.length ? (
-            <div className="projects-grid">
-              {gridProjects.map((project, index) => (
-                <AnimatedSection key={project.id} delay={Math.min(index, 8) * 40}>
-                  <ProjectIndexCard project={project} location={location} />
+          {pending ? (
+            <div className="projects-loading" role="status" aria-live="polite">
+              <RiLoader4Line size={22} className="animate-spin" aria-hidden="true" />
+              <span>Updating projects…</span>
+            </div>
+          ) : visible.length ? (
+            <div className="projects-grid is-two">
+              {visible.map((project, index) => (
+                <AnimatedSection
+                  key={project.id}
+                  delay={Math.min(index, 8) * 40}
+                  className={isFullSpan(project) ? "is-full" : undefined}
+                >
+                  <ProjectIndexCard project={project} location={location} banner={isFullSpan(project)} />
                 </AnimatedSection>
               ))}
             </div>
@@ -142,7 +165,7 @@ export default function ProjectsPageView() {
         </div>
       </section>
 
-      {company && filter === "all" && !query.trim() ? (
+      {company && filter === "all" && !query.trim() && !pending ? (
         <section className="projects-company" data-page-section aria-label="Featured company">
           <div className="container projects-company-grid">
             <AnimatedSection>
@@ -205,35 +228,63 @@ export default function ProjectsPageView() {
   );
 }
 
-function ProjectIndexCard({ project, location }: { project: Project; location: string }) {
+function ProjectIndexCard({
+  project,
+  location,
+  banner,
+}: {
+  project: Project;
+  location: string;
+  banner?: boolean;
+}) {
   const cover = projectCover(project);
   const category = workCategoryLabel(project);
   const metaLeft = project.myRole || project.organization || location;
+  const href = `/projects/${project.id}`;
 
   return (
-    <article className="projects-card">
-      <Link href={`/projects/${project.id}`} className="projects-card-media" aria-label={`Open ${project.title}`}>
-        {cover ? <img src={cover} alt="" loading="lazy" decoding="async" /> : <span>{project.title}</span>}
-      </Link>
-      <div className="projects-card-body">
-        <em className={`projects-card-tag ${tagTone(project.category)}`}>{category}</em>
-        <h3>
-          <Link href={`/projects/${project.id}`}>{project.title}</Link>
-          {project.links?.live ? (
-            <a href={project.links.live} target="_blank" rel="noopener noreferrer" aria-label={`${project.title} live site`}>
-              <RiExternalLinkLine size={15} />
-            </a>
-          ) : null}
-        </h3>
-        <p>{project.description}</p>
-        <div className="projects-card-meta">
-          <span>
-            {project.organization ? <RiCodeSSlashLine size={13} /> : <RiMapPinLine size={13} />}
-            {metaLeft}
-          </span>
-          {project.period || project.year ? <span>{project.period || project.year}</span> : null}
+    <article className={`projects-card${banner ? " is-banner" : ""}`}>
+      <Link href={href} className="projects-card-hit" aria-label={`Open ${project.title} case study`}>
+        <div className="projects-card-copy">
+          <em className={`projects-card-tag ${tagTone(project.category)}`}>{category}</em>
+          <h3>
+            <span>{project.title}</span>
+            {project.links?.live ? (
+              <span
+                className="projects-card-live"
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  window.open(project.links.live, "_blank", "noopener,noreferrer");
+                }}
+                role="link"
+                tabIndex={0}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    window.open(project.links.live, "_blank", "noopener,noreferrer");
+                  }
+                }}
+                aria-label={`${project.title} live site`}
+              >
+                <RiExternalLinkLine size={15} />
+              </span>
+            ) : null}
+          </h3>
+          <p>{project.description}</p>
+          <div className="projects-card-meta">
+            <span>
+              {project.organization ? <RiCodeSSlashLine size={13} /> : <RiMapPinLine size={13} />}
+              {metaLeft}
+            </span>
+            {project.period || project.year ? <span>{project.period || project.year}</span> : null}
+          </div>
         </div>
-      </div>
+        <div className="projects-card-media">
+          {cover ? <img src={cover} alt="" loading="lazy" decoding="async" /> : <span>{project.title}</span>}
+        </div>
+      </Link>
     </article>
   );
 }

@@ -117,6 +117,9 @@ export type Project = {
     case_study?: string;
   };
   image?: string;
+  logo?: string;
+  /** Prefer these media URLs (images and/or videos) for homepage + card previews. Aim for ≥3. */
+  pinnedMedia?: string[];
   video?: string;
   videos?: string[];
   videoPoster?: string;
@@ -133,6 +136,10 @@ export type Project = {
   year?: number;
   period?: string;
   contribution?: "creator" | "contributor";
+  /** When true on /projects, the card spans the full row (details left, media right). */
+  wide?: boolean;
+  /** full = 100% width banner card; half = one cell in a 2-column grid. */
+  cardSpan?: "full" | "half";
 };
 
 export const projects: Project[] = [
@@ -189,6 +196,8 @@ export const projects: Project[] = [
     category: "systems",
     status: "live",
     featured: true,
+    wide: true,
+    cardSpan: "full",
     flourish: "Data People Impact",
     highlights: [
       "Role-based access control",
@@ -198,9 +207,36 @@ export const projects: Project[] = [
       "Export to Excel/PDF",
       "Administrative workflows",
     ],
+    features: [
+      "Role-based access for staff and administrators",
+      "Indicator tracking and organizational reporting",
+      "Dashboards for programme and operations overview",
+      "Data collection and validation workflows",
+      "Excel and PDF exports",
+      "Administrative configuration and user management",
+    ],
+    learned:
+      "Operational systems succeed when access control, reporting, and day-to-day data entry are designed as one workflow—not as separate tools.",
+    period: "Engagement work for Caritas Rwanda",
+    logo: "/images/projects/logos/caritas-rwanda.png",
     image: "/images/projects/caritas-systems.webp",
-    screenshots: ["/images/projects/caritas-systems.webp"],
-    screenshotCaptions: ["Dashboard overview"],
+    pinnedMedia: [
+      "/images/projects/caritas-systems.webp",
+      "/images/projects/caritas-systems.webp",
+      "/images/projects/caritas-systems.webp",
+    ],
+    screenshots: [
+      "/images/projects/caritas-systems.webp",
+      "/images/projects/caritas-systems.webp",
+      "/images/projects/caritas-systems.webp",
+      "/images/projects/caritas-systems.webp",
+    ],
+    screenshotCaptions: [
+      "Dashboard overview",
+      "Reports & analytics",
+      "Indicators workspace",
+      "Administration",
+    ],
     links: {},
   },
   {
@@ -224,7 +260,9 @@ export const projects: Project[] = [
     technologies: ["Web application", "MySQL", "Business workflows", "Reporting"],
     category: "product",
     status: "live",
-    featured: false,
+    featured: true,
+    wide: true,
+    cardSpan: "full",
     flourish: "Data People Impact",
     highlights: [
       "Stock and inventory movement",
@@ -234,9 +272,35 @@ export const projects: Project[] = [
       "Serial tracking",
       "Operational reports",
     ],
+    features: [
+      "Product and stock movement (in/out)",
+      "Invoices and proformas",
+      "Transfers and adjustments",
+      "Suppliers, clients, debts, and payments",
+      "Serial tracking",
+      "Operational reports",
+    ],
+    learned:
+      "Inventory products succeed when stock, documents, and party records stay in one operational loop.",
+    logo: "/images/projects/logos/stockpro.png",
     image: "/images/projects/stockpro.webp",
-    screenshots: ["/images/projects/stockpro.webp"],
-    screenshotCaptions: ["Dashboard overview"],
+    pinnedMedia: [
+      "/images/projects/stockpro.webp",
+      "/images/projects/stockpro.webp",
+      "/images/projects/stockpro.webp",
+    ],
+    screenshots: [
+      "/images/projects/stockpro.webp",
+      "/images/projects/stockpro.webp",
+      "/images/projects/stockpro.webp",
+      "/images/projects/stockpro.webp",
+    ],
+    screenshotCaptions: [
+      "Dashboard overview",
+      "Sales analytics",
+      "Stock by brand",
+      "Operations workspace",
+    ],
     links: {},
   },
   {
@@ -263,7 +327,12 @@ export const projects: Project[] = [
     featured: true,
     period: "Associated with 2023–2024 PSTA work",
     image: "/images/projects/psta.webp",
-    screenshots: ["/images/projects/psta.webp"],
+    screenshots: [
+      "/images/projects/psta.webp",
+      "/images/projects/psta.webp",
+      "/images/projects/psta.webp",
+    ],
+    screenshotCaptions: ["Ticket records", "Invoicing", "Commission reporting"],
     links: {},
   },
   {
@@ -312,8 +381,14 @@ export const projects: Project[] = [
     status: "live",
     featured: false,
     contribution: "contributor",
+    logo: "/images/projects/logos/askfield.png",
     image: "/images/projects/askfield.webp",
-    screenshots: ["/images/projects/askfield.webp"],
+    screenshots: [
+      "/images/projects/askfield.webp",
+      "/images/projects/askfield.webp",
+      "/images/projects/askfield.webp",
+    ],
+    screenshotCaptions: ["Survey workspace", "Data collection", "API-backed UI"],
     links: {},
   },
   {
@@ -339,8 +414,14 @@ export const projects: Project[] = [
     status: "in-progress",
     featured: false,
     independent: true,
+    logo: "/images/projects/logos/gotallnews.png",
     image: "/images/projects/gotallnews.webp",
-    screenshots: ["/images/projects/gotallnews.webp"],
+    screenshots: [
+      "/images/projects/gotallnews.webp",
+      "/images/projects/gotallnews.webp",
+      "/images/projects/gotallnews.webp",
+    ],
+    screenshotCaptions: ["Publishing workspace", "Articles", "Media engagement"],
     links: {},
   },
 ];
@@ -491,8 +572,13 @@ export type ExperienceItem = {
   location?: string;
   summary: string;
   highlights: string[];
-  type: "work" | "training";
+  type: "work" | "training" | "education";
+  category: "leadership" | "work" | "education" | "other";
+  skills?: string[];
   website?: string;
+  relatedHref?: string;
+  relatedLabel?: string;
+  sortYear: number;
 };
 
 export const experience: ExperienceItem[] = [
@@ -510,14 +596,20 @@ export const experience: ExperienceItem[] = [
       "Digital transformation and technology consulting",
       "AI-enabled product integration",
     ],
+    skills: ["Strategy", "Product development", "Systems", "AI-enabled software"],
     type: "work",
+    category: "leadership",
     website: "https://lerony.com",
+    relatedHref: "https://lerony.com",
+    relatedLabel: "Visit lerony.com",
+    sortYear: 2025,
   },
   {
     id: "askfield",
     organization: "Ethical Research Solutions / AskField",
     role: "Frontend development & API integration",
     period: "Selected engagement",
+    location: "Rwanda",
     summary:
       "Frontend development and API integration for the AskField survey and data-collection platform, using React and Redux. Contribution as part of a team — not sole product ownership.",
     highlights: [
@@ -525,13 +617,19 @@ export const experience: ExperienceItem[] = [
       "Redux state management",
       "REST API integration",
     ],
+    skills: ["React", "Redux", "API integration"],
     type: "work",
+    category: "work",
+    relatedHref: "/projects/askfield",
+    relatedLabel: "View related work",
+    sortYear: 2024,
   },
   {
     id: "psta",
     organization: "PSTA",
     role: "Reservation Agent",
     period: "2023–2024",
+    location: "Rwanda",
     summary:
       "Airline reservation and ticketing operations and client support. This operational role is separate from the ticket accounting software later associated with PSTA workflows.",
     highlights: [
@@ -539,20 +637,29 @@ export const experience: ExperienceItem[] = [
       "Client support",
       "Related later software: ticket records, invoicing, and commission reporting",
     ],
+    skills: ["Operations", "Client support", "Ticketing"],
     type: "work",
+    category: "work",
+    relatedHref: "/projects/psta-accounting",
+    relatedLabel: "Related software work",
+    sortYear: 2023,
   },
   {
     id: "eshuri",
     organization: "Eshuri Learning",
     role: "Data Systems trainer",
     period: "Training engagement",
+    location: "Rwanda",
     summary:
       "Technical training in data systems. One engagement included approximately 85 trainees. Exact session dates are not listed here pending verification.",
     highlights: [
       "Data systems training",
       "Knowledge sharing with a cohort of approximately 85 trainees",
     ],
+    skills: ["Training", "Data systems"],
     type: "training",
+    category: "other",
+    sortYear: 2023,
   },
 ];
 
@@ -563,6 +670,7 @@ export type EducationItem = {
   period: string;
   status: string;
   note?: string;
+  sortYear: number;
 };
 
 export const education: EducationItem[] = [
@@ -573,6 +681,7 @@ export const education: EducationItem[] = [
     period: "2025–Present",
     status: "Ongoing",
     note: "Degree not yet completed.",
+    sortYear: 2025,
   },
   {
     id: "sjitc",
@@ -580,6 +689,7 @@ export const education: EducationItem[] = [
     program: "Software Engineering",
     period: "2021–2024",
     status: "Graduated with distinction",
+    sortYear: 2021,
   },
 ];
 

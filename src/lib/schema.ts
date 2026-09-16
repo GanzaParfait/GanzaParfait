@@ -237,18 +237,65 @@ export function buildItemListJsonLd(
 export function buildCreativeWorkJsonLd(project: Project) {
   const url = canonicalUrl(`/projects/${project.id}`);
   const roleProperty = project.contribution === "contributor" ? "contributor" : "creator";
+  const imageSources = [
+    ...(project.logo ? [project.logo] : []),
+    ...(project.screenshots?.length ? project.screenshots : [project.image || OG_IMAGE_PATH]),
+  ].filter((src): src is string => Boolean(src) && !src.includes("placeholder"));
+  const uniqueImages = [...new Set(imageSources)].map((src) => absoluteAssetUrl(src));
+  const videoSources = project.videos?.length ? project.videos : project.video ? [project.video] : [];
+  const softwareCategories = new Set(["systems", "product", "saas", "web", "mobile", "ai"]);
+  const isSoftware = softwareCategories.has(project.category);
+  const type = isSoftware ? (["SoftwareApplication", "CreativeWork"] as const) : "CreativeWork";
+
   return {
-    "@type": "CreativeWork",
+    "@type": type,
     "@id": `${url}#work`,
     name: project.title,
     description: project.description,
     url,
     inLanguage: "en",
     ...(project.year ? { dateCreated: String(project.year) } : {}),
+    dateModified: SITE_CONTENT_REVISED,
     [roleProperty]: personRef(),
     isPartOf: websiteRef(),
     keywords: project.technologies.join(", "),
-    image: (project.screenshots?.length ? project.screenshots : [project.image || OG_IMAGE_PATH]).map((src) => absoluteAssetUrl(src)),
+    image: uniqueImages,
+    ...(project.logo ? { logo: absoluteAssetUrl(project.logo) } : {}),
+    ...(project.organization
+      ? {
+          about: {
+            "@type": "Organization",
+            name: project.organization,
+          },
+        }
+      : {}),
+    ...(isSoftware
+      ? {
+          applicationCategory: "BusinessApplication",
+          operatingSystem: "Web",
+          ...(project.links.live
+            ? {
+                offers: {
+                  "@type": "Offer",
+                  url: project.links.live,
+                  availability: "https://schema.org/OnlineOnly",
+                },
+              }
+            : {}),
+        }
+      : {}),
+    ...(videoSources.length
+      ? {
+          video: videoSources.map((src) => ({
+            "@type": "VideoObject",
+            name: `${project.title} walkthrough`,
+            description: project.description,
+            contentUrl: absoluteAssetUrl(src),
+            thumbnailUrl: absoluteAssetUrl(project.videoPoster || project.image || OG_IMAGE_PATH),
+            uploadDate: project.year ? `${project.year}-01-01` : SITE_CONTENT_REVISED,
+          })),
+        }
+      : {}),
     ...(project.links.live ? { sameAs: project.links.live } : {}),
   };
 }

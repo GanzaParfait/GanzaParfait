@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { projects } from "@/data/site-data";
 import ProjectsPageView from "@/components/work/ProjectsPageView";
+import { getPublicProjects } from "@/lib/projects";
 import { buildPageMetadata } from "@/lib/seo";
 import {
   buildBreadcrumbListJsonLd,
@@ -20,12 +20,16 @@ export const metadata: Metadata = buildPageMetadata({
   absoluteTitle: true,
 });
 
+export const revalidate = 60;
+
 const breadcrumbItems = [
   { name: "Home", path: "/" },
   { name: "Work", path: "/projects" },
 ];
 
-export default function ProjectsPage() {
+export default async function ProjectsPage() {
+  const projects = await getPublicProjects();
+
   return (
     <>
       <JsonLd

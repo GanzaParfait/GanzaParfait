@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import {
+  cacheLocalSettings,
   fetchRemoteSettings,
   type SiteSettings,
 } from "@/lib/supabase";
@@ -19,6 +20,7 @@ export function SiteSettingsProvider({
 
   useEffect(() => {
     setSettings(initial);
+    cacheLocalSettings(initial);
   }, [initial]);
 
   useEffect(() => {
@@ -28,15 +30,10 @@ export function SiteSettingsProvider({
     };
     window.addEventListener("site-settings-changed", onUpdate);
 
+    // Remote is source of truth — always overwrite local drafts after load.
     void fetchRemoteSettings().then((remote) => {
       if (!remote) return;
       setSettings(remote);
-      try {
-        // Seed cache only when empty so unsaved dashboard drafts are not wiped.
-        if (!localStorage.getItem("ppg_site_settings")) {
-          localStorage.setItem("ppg_site_settings", JSON.stringify(remote));
-        }
-      } catch {}
     });
 
     return () => window.removeEventListener("site-settings-changed", onUpdate);

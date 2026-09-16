@@ -19,9 +19,10 @@ import {
   type ContactPageContent,
   type ContactTopicIcon,
 } from "@/lib/contact-page";
-import { getLocalSettings, saveLocalSettings } from "@/lib/supabase";
+import { getLocalSettings, saveLocalSettings, fetchRemoteSettings } from "@/lib/supabase";
 import { resolvedSocials, socialIcon } from "@/lib/socials";
 import CustomSelect from "@/components/ui/CustomSelect";
+import { useSectionHash } from "@/hooks/useSectionHash";
 
 type SectionId = "hero" | "cards" | "form" | "media" | "faq";
 type PreviewDevice = "desktop" | "tablet" | "mobile";
@@ -50,6 +51,7 @@ export default function ContactEditorPage() {
   const [mediaOpen, setMediaOpen] = useState(false);
   const [mediaTarget, setMediaTarget] = useState<MediaTarget>("portrait");
   const { runSave, saving } = useDashboardFeedback();
+  const selectSection = useSectionHash(SECTIONS, setSection);
   const active = SECTIONS.find((item) => item.id === section) || SECTIONS[0];
   const previewWidth = DEVICES.find((item) => item.id === device)?.width || "100%";
   const availableSocials = resolvedSocials(getLocalSettings()).filter((link) => link.enabled && link.url);
@@ -58,11 +60,14 @@ export default function ContactEditorPage() {
 
   useEffect(() => {
     setContent(contactPageFrom(getLocalSettings()));
+    void fetchRemoteSettings().then((remote) => {
+      if (remote) setContent(contactPageFrom(remote));
+    });
   }, []);
 
   const save = () => {
-    void runSave(() => {
-      saveLocalSettings({ contactPage: content });
+    void runSave(async () => {
+      await saveLocalSettings({ contactPage: content });
     }, "Contact page saved.");
   };
 
@@ -103,19 +108,24 @@ export default function ContactEditorPage() {
           <h1>Contact page</h1>
           <p>Edit the public contact story section by section. The preview updates as you type.</p>
         </div>
-        <div className="hp-section-pills" role="tablist" aria-label="Contact sections">
-          {SECTIONS.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              role="tab"
-              aria-selected={section === item.id}
-              className={section === item.id ? "is-on" : undefined}
-              onClick={() => setSection(item.id)}
-            >
-              {item.label}
-            </button>
-          ))}
+        <div className="hp-board-actions">
+          <div className="hp-section-pills" role="tablist" aria-label="Contact sections">
+            {SECTIONS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                role="tab"
+                aria-selected={section === item.id}
+                className={section === item.id ? "is-on" : undefined}
+                onClick={() => selectSection(item.id)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+          <button type="button" className="btn btn-primary hp-top-save" onClick={save} disabled={saving}>
+            <RiSaveLine size={16} /> {saving ? "Saving…" : "Save"}
+          </button>
         </div>
       </div>
 
@@ -362,7 +372,7 @@ export default function ContactEditorPage() {
 
           <div className="hp-editor-foot">
             <button type="button" className="btn btn-primary hp-save" onClick={save} disabled={saving}>
-              <RiSaveLine size={16} /> Save Changes
+              <RiSaveLine size={16} /> {saving ? "Saving…" : "Save Changes"}
             </button>
           </div>
         </aside>

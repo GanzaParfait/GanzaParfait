@@ -8,7 +8,7 @@ import {
   RiAddLine,
   RiExternalLinkLine,
 } from "react-icons/ri";
-import { getLocalSettings, saveLocalSettings, SiteSettings, DEFAULT_SETTINGS, HeroLayoutType } from "@/lib/supabase";
+import { getLocalSettings, saveLocalSettings, fetchRemoteSettings, SiteSettings, DEFAULT_SETTINGS, HeroLayoutType } from "@/lib/supabase";
 import {
   HERO_LAYOUTS,
   carouselLayouts,
@@ -44,10 +44,14 @@ export default function BannersPage() {
 
   useEffect(() => {
     setSettings(getLocalSettings());
+    void fetchRemoteSettings().then((remote) => {
+      if (remote) setSettings(remote);
+    });
   }, []);
 
-  const handleSaveSettings = (updated: Partial<SiteSettings>) => {
-    setSettings(saveLocalSettings(updated));
+  const handleSaveSettings = async (updated: Partial<SiteSettings>) => {
+    const next = await saveLocalSettings(updated);
+    setSettings(next);
   };
 
   const visible = visibleHeroLayouts(settings);
@@ -63,16 +67,16 @@ export default function BannersPage() {
 
   const activate = async (id: HeroLayoutType) => {
     setMenuOpen(null);
-    await runSave(() => {
-      setSettings(saveLocalSettings({ bannerLayout: id }));
+    await runSave(async () => {
+      setSettings(await saveLocalSettings({ bannerLayout: id }));
     }, `${HERO_LAYOUTS.find((layout) => layout.id === id)?.name || "Layout"} is now live.`);
   };
 
   const deactivate = async (id: HeroLayoutType) => {
     setMenuOpen(null);
     const fallback = visible.find((layout) => layout.id !== id)?.id || "split_portrait";
-    await runSave(() => {
-      setSettings(saveLocalSettings({ bannerLayout: fallback }));
+    await runSave(async () => {
+      setSettings(await saveLocalSettings({ bannerLayout: fallback }));
     }, "Live homepage now uses another layout.");
   };
 
@@ -83,14 +87,14 @@ export default function BannersPage() {
     const nextLive = liveId === id
       ? visible.find((layout) => layout.id !== id)?.id || "split_portrait"
       : liveId;
-    await runSave(() => {
-      setSettings(saveLocalSettings({ hiddenHeroLayouts: nextHidden, bannerLayout: nextLive }));
+    await runSave(async () => {
+      setSettings(await saveLocalSettings({ hiddenHeroLayouts: nextHidden, bannerLayout: nextLive }));
     }, "Layout removed from this dashboard list.");
   };
 
   const addLayout = async (id: HeroLayoutType) => {
-    await runSave(() => {
-      setSettings(saveLocalSettings({
+    await runSave(async () => {
+      setSettings(await saveLocalSettings({
         hiddenHeroLayouts: (settings.hiddenHeroLayouts || []).filter((item) => item !== id),
       }));
     }, "Layout added back.");

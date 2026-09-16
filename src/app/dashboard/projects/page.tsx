@@ -5,19 +5,13 @@ import { RiAddLine, RiEditLine, RiDeleteBinLine, RiSearchLine } from "react-icon
 import { projects as initialProjects, type Project } from "@/data/site-data";
 import ProjectEditorModal from "@/components/dashboard/ProjectEditorModal";
 import MediaManagerModal from "@/components/dashboard/MediaManagerModal";
-import { getLocalSettings, saveLocalSettings } from "@/lib/supabase";
+import { fetchRemoteSettings, getLocalSettings, saveLocalSettings } from "@/lib/supabase";
+import { useDashboardFeedback } from "@/components/dashboard/DashboardFeedback";
 import CustomSelect from "@/components/ui/CustomSelect";
 
 const PAGE_SIZE = 5;
-const STORAGE_KEY = "ppg_dashboard_projects";
 
-function storedProjects(): Project[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw) as Project[];
-  } catch {
-    /* keep the verified list */
-  }
+function projectsFromSettings(): Project[] {
   const remote = getLocalSettings().projectRecords;
   return remote?.length ? remote : initialProjects;
 }
@@ -32,20 +26,26 @@ export default function ProjectsPage() {
   const [category, setCategory] = useState("all");
   const [status, setStatus] = useState("all");
   const [page, setPage] = useState(1);
+  const { runSave } = useDashboardFeedback();
 
   useEffect(() => {
-    setProjectsList(storedProjects());
+    setProjectsList(projectsFromSettings());
+    void fetchRemoteSettings().then((remote) => {
+      if (remote?.projectRecords?.length) setProjectsList(remote.projectRecords);
+    });
   }, []);
 
-  const persist = (next: Project[]) => {
+  const persist = async (next: Project[]) => {
     setProjectsList(next);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    saveLocalSettings({ projectRecords: next });
+    await saveLocalSettings({ projectRecords: next });
   };
 
   const handleSaveProject = (proj: Project) => {
     const exists = projectsList.some((item) => item.id === proj.id);
-    persist(exists ? projectsList.map((item) => (item.id === proj.id ? proj : item)) : [proj, ...projectsList]);
+    const next = exists
+      ? projectsList.map((item) => (item.id === proj.id ? proj : item))
+      : [proj, ...projectsList];
+    void runSave(() => persist(next), "Project saved.");
   };
 
   const filtered = useMemo(() => {
@@ -144,7 +144,7 @@ export default function ProjectsPage() {
                 <td style={td}>{project.status}</td>
                 <td style={{ ...td, textAlign: "right", whiteSpace: "nowrap" }}>
                   <button className="btn btn-outline btn-sm" onClick={() => { setEditingProject(project); setIsProjectModalOpen(true); }}><RiEditLine size={13} /> Edit</button>
-                  <button className="btn btn-ghost btn-sm" style={{ color: "#ef4444" }} onClick={() => persist(projectsList.filter((item) => item.id !== project.id))} aria-label={`Delete ${project.title}`}><RiDeleteBinLine size={15} /></button>
+                  <button className="btn btn-ghost btn-sm" style={{ color: "#ef4444" }} onClick={() => void runSave(() => persist(projectsList.filter((item) => item.id !== project.id)), "Project deleted.")} aria-label={`Delete ${project.title}`}><RiDeleteBinLine size={15} /></button>
                 </td>
               </tr>
             ))}

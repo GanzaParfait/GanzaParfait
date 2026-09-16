@@ -31,9 +31,6 @@ export function useSiteSettings() {
 
     void fetchRemoteSettings().then((remote) => {
       if (!remote) return;
-      try {
-        if (localStorage.getItem("ppg_site_settings")) return;
-      } catch {}
       setFallback(remote);
     });
 

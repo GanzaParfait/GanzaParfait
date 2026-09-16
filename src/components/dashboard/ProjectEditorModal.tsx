@@ -10,6 +10,15 @@ function projectVideos(project: Partial<Project>) {
   return project.videos?.length ? project.videos : project.video ? [project.video] : [];
 }
 
+function linesFromTextarea(value: string) {
+  // Keep empty trailing lines so Enter creates a new line while editing.
+  return value.split("\n");
+}
+
+function cleanLines(lines: string[] | undefined) {
+  return (lines || []).map((line) => line.trim()).filter(Boolean);
+}
+
 const TABS = [
   { id: "basics", label: "Basics" },
   { id: "overview", label: "Overview" },
@@ -17,7 +26,7 @@ const TABS = [
   { id: "role", label: "My Role" },
   { id: "stack", label: "Tech Stack" },
   { id: "results", label: "Results" },
-  { id: "gallery", label: "Gallery" },
+  { id: "gallery", label: "Media" },
   { id: "challenges", label: "Challenges" },
   { id: "learned", label: "What I Learned" },
 ] as const;
@@ -97,7 +106,15 @@ export default function ProjectEditorModal({
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!formData.title) return;
-    onSave(formData as Project);
+    const pinned = cleanLines(formData.pinnedMedia);
+    onSave({
+      ...(formData as Project),
+      highlights: cleanLines(formData.highlights),
+      features: cleanLines(formData.features),
+      screenshotCaptions: cleanLines(formData.screenshotCaptions),
+      pinnedMedia: pinned.length ? pinned : undefined,
+      technologies: (formData.technologies || []).map((item) => item.trim()).filter(Boolean),
+    });
     onClose();
   };
 
@@ -151,7 +168,7 @@ export default function ProjectEditorModal({
           </button>
         </div>
 
-        <div className="case-tabs dash-project-tabs" role="tablist" aria-label="Project editor sections" style={{ padding: "0.75rem 1.25rem 0", flexWrap: "wrap" }}>
+        <nav className="project-editor-tabs" role="tablist" aria-label="Project editor sections">
           {TABS.map((item) => (
             <button
               key={item.id}
@@ -164,7 +181,7 @@ export default function ProjectEditorModal({
               {item.label}
             </button>
           ))}
-        </div>
+        </nav>
 
         <form onSubmit={handleSubmit} style={{ flex: 1, padding: "1.25rem", overflowY: "auto", display: "grid", gap: "1rem" }}>
           {tab === "basics" && (
@@ -247,10 +264,54 @@ export default function ProjectEditorModal({
                 <label style={labelStyle}>Hero flourish text</label>
                 <input type="text" value={formData.flourish || ""} onChange={(e) => set("flourish", e.target.value)} style={fieldStyle} />
               </div>
-              <label style={{ display: "flex", alignItems: "center", gap: "0.45rem", fontSize: "0.8rem", fontWeight: 600 }}>
-                <input type="checkbox" checked={Boolean(formData.featured)} onChange={(e) => set("featured", e.target.checked)} />
-                Featured case
-              </label>
+              <div>
+                <label style={labelStyle}>Project logo</label>
+                <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                  <div
+                    style={{
+                      width: "7.5rem",
+                      height: "3.75rem",
+                      borderRadius: "0.55rem",
+                      background: "#ffffff",
+                      border: "1px solid var(--color-border)",
+                      display: "grid",
+                      placeItems: "center",
+                      overflow: "hidden",
+                      flex: "0 0 auto",
+                    }}
+                  >
+                    {formData.logo ? (
+                      <img src={formData.logo} alt="" style={{ maxWidth: "90%", maxHeight: "80%", objectFit: "contain" }} />
+                    ) : (
+                      <span style={{ color: "#64748b", fontSize: "0.7rem" }}>No logo</span>
+                    )}
+                  </div>
+                  <input type="text" value={formData.logo || ""} onChange={(e) => set("logo", e.target.value)} style={fieldStyle} placeholder="/images/projects/logos/…" />
+                  <button type="button" className="btn btn-outline btn-sm" onClick={() => onPickMedia((url) => set("logo", url))}>
+                    Choose
+                  </button>
+                </div>
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
+                <label style={{ display: "flex", alignItems: "center", gap: "0.45rem", fontSize: "0.8rem", fontWeight: 600 }}>
+                  <input type="checkbox" checked={Boolean(formData.featured)} onChange={(e) => set("featured", e.target.checked)} />
+                  Featured case
+                </label>
+                <label style={{ display: "flex", alignItems: "center", gap: "0.45rem", fontSize: "0.8rem", fontWeight: 600 }}>
+                  <input
+                    type="checkbox"
+                    checked={Boolean(formData.wide || formData.cardSpan === "full")}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        wide: e.target.checked,
+                        cardSpan: e.target.checked ? "full" : "half",
+                      }))
+                    }
+                  />
+                  Full-width banner card (details left, media right)
+                </label>
+              </div>
             </>
           )}
 
@@ -269,7 +330,7 @@ export default function ProjectEditorModal({
                 <textarea
                   rows={4}
                   value={(formData.highlights || []).join("\n")}
-                  onChange={(e) => set("highlights", e.target.value.split("\n").map((item) => item.trim()).filter(Boolean))}
+                  onChange={(e) => set("highlights", linesFromTextarea(e.target.value))}
                   style={fieldStyle}
                 />
               </div>
@@ -283,7 +344,7 @@ export default function ProjectEditorModal({
                 <textarea
                   rows={6}
                   value={(formData.features || []).join("\n")}
-                  onChange={(e) => set("features", e.target.value.split("\n").map((item) => item.trim()).filter(Boolean))}
+                  onChange={(e) => set("features", linesFromTextarea(e.target.value))}
                   style={fieldStyle}
                 />
               </div>
@@ -354,7 +415,62 @@ export default function ProjectEditorModal({
           {tab === "gallery" && (
             <>
               <div>
-                <label style={{ ...labelStyle, marginBottom: "0.45rem" }}>Images</label>
+                <label style={{ ...labelStyle, marginBottom: "0.35rem" }}>Pinned preview media (homepage + cards)</label>
+                <p style={{ margin: "0 0 0.55rem", fontSize: "0.75rem", color: "var(--color-text-3)" }}>
+                  Pin at least three images or videos. These drive the tilted homepage preview and project card cover.
+                </p>
+                <div className="project-pin-grid">
+                  {Array.from({ length: Math.max(3, (formData.pinnedMedia || []).length + 1) }, (_, index) => {
+                    const src = formData.pinnedMedia?.[index];
+                    return (
+                      <div key={`pin-${index}`} className="project-pin-slot">
+                        {src ? (
+                          <>
+                            {/\.(mp4|webm|ogg|mov)(\?|$)/i.test(src) ? (
+                              <video src={src} muted playsInline preload="metadata" />
+                            ) : (
+                              <img src={src} alt="" />
+                            )}
+                            <button
+                              type="button"
+                              className="btn btn-ghost btn-sm"
+                              onClick={() =>
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  pinnedMedia: (prev.pinnedMedia || []).filter((_, pin) => pin !== index),
+                                }))
+                              }
+                            >
+                              Unpin
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            type="button"
+                            className="media-add-card"
+                            aria-label={`Pin media slot ${index + 1}`}
+                            onClick={() =>
+                              onPickMedia((url) =>
+                                setFormData((prev) => {
+                                  const next = [...(prev.pinnedMedia || [])];
+                                  while (next.length < index) next.push("");
+                                  next[index] = url;
+                                  return { ...prev, pinnedMedia: next.filter(Boolean) };
+                                }),
+                              )
+                            }
+                          >
+                            <RiImageAddLine size={24} />
+                            <span>Pin {index + 1}</span>
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              <div>
+                <label style={{ ...labelStyle, marginBottom: "0.45rem" }}>Cover &amp; stills</label>
                 <div style={{ display: "flex", gap: "0.7rem", alignItems: "stretch", flexWrap: "wrap" }}>
                   <div style={{ flex: "1 1 18rem", minHeight: "14rem", borderRadius: "0.85rem", overflow: "hidden", border: "1px solid var(--color-border)", background: "#0b192c" }}>
                     {formData.image && !formData.image.includes("placeholder") ? (
@@ -400,22 +516,30 @@ export default function ProjectEditorModal({
                 </div>
               </div>
               <div>
-                <label style={labelStyle}>Screenshot captions, one per line</label>
+                <label style={labelStyle}>Media captions, one per line (aligned with stills)</label>
                 <textarea
                   rows={3}
                   value={(formData.screenshotCaptions || []).join("\n")}
-                  onChange={(e) => set("screenshotCaptions", e.target.value.split("\n"))}
+                  onChange={(e) => set("screenshotCaptions", linesFromTextarea(e.target.value))}
                   style={fieldStyle}
                 />
               </div>
               <div>
                 <label style={{ ...labelStyle, marginBottom: "0.45rem" }}>Videos</label>
+                <p style={{ margin: "0 0 0.55rem", fontSize: "0.75rem", color: "var(--color-text-3)" }}>
+                  Upload MP4/WebM from Media Manager. Videos render with a poster play control on the case study.
+                </p>
                 <div style={{ display: "flex", gap: "0.7rem", flexWrap: "wrap" }}>
                   {projectVideos(formData).map((src, index) => (
-                    <div key={`${src}-${index}`} style={{ width: "11rem" }}>
-                      <div style={{ height: "8.5rem", borderRadius: "0.85rem", background: "#07111f", color: "#fff", display: "grid", placeItems: "center", fontSize: "0.75rem" }}>
-                        Video {index + 1}
-                      </div>
+                    <div key={`${src}-${index}`} style={{ width: "14rem" }}>
+                      <video
+                        src={src}
+                        poster={formData.videoPoster || formData.image}
+                        controls
+                        preload="metadata"
+                        playsInline
+                        style={{ width: "14rem", height: "8.5rem", objectFit: "cover", borderRadius: "0.85rem", background: "#07111f" }}
+                      />
                       <button
                         type="button"
                         className="btn btn-ghost btn-sm"
@@ -441,12 +565,21 @@ export default function ProjectEditorModal({
                           ...prev,
                           videos: [...projectVideos(prev), url],
                           video: prev.video || url,
-                          videoPoster: prev.image,
+                          videoPoster: prev.videoPoster || prev.image,
                         })),
                       )
                     }
                   >
                     <RiImageAddLine size={28} />
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label style={labelStyle}>Video poster image URL</label>
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <input type="text" value={formData.videoPoster || ""} onChange={(e) => set("videoPoster", e.target.value)} style={fieldStyle} />
+                  <button type="button" className="btn btn-outline btn-sm" onClick={() => onPickMedia((url) => set("videoPoster", url))}>
+                    Choose
                   </button>
                 </div>
               </div>

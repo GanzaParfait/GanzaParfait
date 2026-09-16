@@ -418,9 +418,10 @@ export const DEFAULT_HOMEPAGE: HomepageContent = {
   },
 };
 
-export function imagesForStory(story: WorkStory, records?: { id: string; image?: string; screenshots?: string[] }[]) {
+export function imagesForStory(story: WorkStory, records?: { id: string; image?: string; screenshots?: string[]; pinnedMedia?: string[] }[]) {
   const match = records?.find((item) => item.id === story.id) || projects.find((item) => item.id === story.id);
   const fromProject = [
+    ...(match?.pinnedMedia || []),
     ...(match?.screenshots || []),
     ...(match?.image ? [match.image] : []),
   ].filter((src, index, list) => src && !src.includes("placeholder") && list.indexOf(src) === index);

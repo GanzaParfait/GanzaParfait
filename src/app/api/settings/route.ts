@@ -1,9 +1,11 @@
-import { revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSiteSettings } from "@/lib/site-settings-server";
 import { createServerSupabase, hasServiceRoleKey } from "@/lib/supabase-server";
 import { DEFAULT_SOCIAL_LINKS } from "@/lib/socials";
 import type { SiteSettings } from "@/lib/supabase";
+
+const PUBLIC_PATHS = ["/", "/projects", "/about", "/contact", "/experience", "/services"] as const;
 
 function isAuthorized(request: NextRequest): boolean {
   return request.cookies.get("ppg_admin_auth")?.value === "true";
@@ -26,7 +28,8 @@ export async function GET() {
   const settings = await getServerSiteSettings();
   return NextResponse.json(settings, {
     headers: {
-      "Cache-Control": "public, s-maxage=30, stale-while-revalidate=120",
+      // Clients and CDNs must not serve stale dashboard content as “live”.
+      "Cache-Control": "private, no-store, max-age=0, must-revalidate",
     },
   });
 }
@@ -97,11 +100,18 @@ export async function PUT(request: NextRequest) {
 
     try {
       revalidateTag("site-settings", "max");
+      revalidatePath("/", "layout");
+      for (const path of PUBLIC_PATHS) {
+        revalidatePath(path);
+      }
+      revalidatePath("/projects", "layout");
+      revalidatePath("/sitemap.xml");
+      revalidatePath("/image-sitemap.xml");
     } catch (revalidateError) {
       console.error("Settings revalidate failed:", revalidateError);
     }
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, syncedAt: payload.updated_at });
   } catch (error) {
     console.error("Settings save failed:", error);
     const message = error instanceof Error ? error.message : "Failed to save settings.";

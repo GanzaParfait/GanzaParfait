@@ -19,6 +19,7 @@ import {
 import {
   getLocalSettings,
   saveLocalSettings,
+  fetchRemoteSettings,
   SiteSettings,
   DEFAULT_SETTINGS,
   NavbarStyle,
@@ -80,6 +81,9 @@ export default function SettingsPage() {
   useEffect(() => {
     const loaded = getLocalSettings();
     setSettings(loaded);
+    void fetchRemoteSettings().then((remote) => {
+      if (remote) setSettings(remote);
+    });
     const applyHash = () => {
       const hash = window.location.hash.replace("#", "") as SettingsView;
       if (VIEWS.some((item) => item.id === hash)) setView(hash);
@@ -91,11 +95,11 @@ export default function SettingsPage() {
 
   const patch = (next: Partial<SiteSettings>) => setSettings((prev) => ({ ...prev, ...next }));
   const persist = (next?: Partial<SiteSettings>, message = "Settings saved.") =>
-    runSave(() => {
+    runSave(async () => {
       const payload = { ...settings, ...(next || {}) };
       if (isBlobUrl(payload.footerCompanyImage || "")) payload.footerCompanyImage = "";
       if (isBlobUrl(payload.footerCompanyImageDark || "")) payload.footerCompanyImageDark = "";
-      const updated = saveLocalSettings(payload);
+      const updated = await saveLocalSettings(payload);
       setSettings(updated);
     }, message);
 

@@ -462,7 +462,30 @@ export function getLocalSettings(): SiteSettings {
   return DEFAULT_SETTINGS;
 }
 
-export function saveLocalSettings(settings: Partial<SiteSettings>): SiteSettings {
+/** Mirror server settings into localStorage so dashboard/public stay aligned. */
+export function cacheLocalSettings(settings: SiteSettings) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(stripSettingsBlobs(settings)));
+  } catch (e) {
+    console.error("Error caching site settings:", e);
+  }
+}
+
+/** Drop the browser settings draft (does not delete Supabase). */
+export function clearLocalSettingsCache() {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(SETTINGS_STORAGE_KEY);
+    localStorage.removeItem("ppg_dashboard_projects");
+  } catch {}
+}
+
+/**
+ * Save settings locally and sync to Supabase. Throws if the remote write fails
+ * so the dashboard can surface the error instead of looking “saved” only locally.
+ */
+export async function saveLocalSettings(settings: Partial<SiteSettings>): Promise<SiteSettings> {
   const current = getLocalSettings();
   const updated = stripSettingsBlobs({ ...current, ...settings });
   if (typeof window !== "undefined") {
@@ -472,33 +495,35 @@ export function saveLocalSettings(settings: Partial<SiteSettings>): SiteSettings
     } catch (e) {
       console.error("Error saving site settings:", e);
     }
-    void persistSettingsRemote(updated);
+    await persistSettingsRemote(updated);
   }
   return updated;
 }
 
 export async function persistSettingsRemote(settings: SiteSettings) {
-  try {
-    const res = await fetch("/api/settings", {
-      method: "PUT",
-      credentials: "same-origin",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(settings),
-    });
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      console.error("Could not persist site settings remotely:", body.error || res.statusText);
-    }
-  } catch (error) {
-    console.error("Could not persist site settings remotely:", error);
+  const res = await fetch("/api/settings", {
+    method: "PUT",
+    credentials: "same-origin",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(settings),
+  });
+  if (!res.ok) {
+    const body = (await res.json().catch(() => ({}))) as { error?: string };
+    throw new Error(body.error || res.statusText || "Could not sync settings to the server.");
   }
 }
 
 export async function fetchRemoteSettings(): Promise<SiteSettings | null> {
   try {
-    const res = await fetch("/api/settings", { cache: "no-store", credentials: "same-origin" });
+    const res = await fetch("/api/settings", {
+      cache: "no-store",
+      credentials: "same-origin",
+      headers: { "Cache-Control": "no-cache" },
+    });
     if (!res.ok) return null;
-    return (await res.json()) as SiteSettings;
+    const remote = (await res.json()) as SiteSettings;
+    cacheLocalSettings({ ...DEFAULT_SETTINGS, ...remote });
+    return { ...DEFAULT_SETTINGS, ...remote };
   } catch {
     return null;
   }

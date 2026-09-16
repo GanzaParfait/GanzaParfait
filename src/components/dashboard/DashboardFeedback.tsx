@@ -50,8 +50,11 @@ export function DashboardFeedbackProvider({ children }: { children: ReactNode })
         await work();
         notify(successMessage, "success");
         return true;
-      } catch {
-        notify("Could not save. Try again.", "error");
+      } catch (error) {
+        const message = error instanceof Error && error.message
+          ? error.message
+          : "Could not save. Try again.";
+        notify(message, "error");
         return false;
       } finally {
         setSaving(false);

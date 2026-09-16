@@ -22,8 +22,9 @@ import {
   type AboutPageContent,
   type AboutValueIcon,
 } from "@/lib/about-page";
-import { getLocalSettings, saveLocalSettings } from "@/lib/supabase";
+import { getLocalSettings, saveLocalSettings, fetchRemoteSettings } from "@/lib/supabase";
 import CustomSelect from "@/components/ui/CustomSelect";
+import { useSectionHash } from "@/hooks/useSectionHash";
 
 type SectionId = "hero" | "focus" | "story" | "facts" | "values" | "strengths" | "cta";
 type PreviewDevice = "desktop" | "tablet" | "mobile";
@@ -80,16 +81,20 @@ export default function AboutEditorPage() {
   const [device, setDevice] = useState<PreviewDevice>("desktop");
   const [mediaOpen, setMediaOpen] = useState(false);
   const { runSave, saving } = useDashboardFeedback();
+  const selectSection = useSectionHash(SECTIONS, setSection);
   const active = SECTIONS.find((item) => item.id === section) || SECTIONS[0];
   const previewWidth = DEVICES.find((item) => item.id === device)?.width || "100%";
 
   useEffect(() => {
     setContent(aboutPageFrom(getLocalSettings()));
+    void fetchRemoteSettings().then((remote) => {
+      if (remote) setContent(aboutPageFrom(remote));
+    });
   }, []);
 
   const save = () => {
-    void runSave(() => {
-      saveLocalSettings({ aboutPage: content });
+    void runSave(async () => {
+      await saveLocalSettings({ aboutPage: content });
     }, "About page saved.");
   };
 
@@ -130,19 +135,24 @@ export default function AboutEditorPage() {
           <h1>About page</h1>
           <p>Compact person page. Keep copy verified — do not invent biography here.</p>
         </div>
-        <div className="hp-section-pills" role="tablist" aria-label="About sections">
-          {SECTIONS.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              role="tab"
-              aria-selected={section === item.id}
-              className={section === item.id ? "is-on" : undefined}
-              onClick={() => setSection(item.id)}
-            >
-              {item.label}
-            </button>
-          ))}
+        <div className="hp-board-actions">
+          <div className="hp-section-pills" role="tablist" aria-label="About sections">
+            {SECTIONS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                role="tab"
+                aria-selected={section === item.id}
+                className={section === item.id ? "is-on" : undefined}
+                onClick={() => selectSection(item.id)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+          <button type="button" className="btn btn-primary hp-top-save" onClick={save} disabled={saving}>
+            <RiSaveLine size={16} /> {saving ? "Saving…" : "Save"}
+          </button>
         </div>
       </div>
 
@@ -513,7 +523,7 @@ export default function AboutEditorPage() {
             )}
           </div>
           <div className="hp-editor-foot">
-            <button type="button" className="btn btn-primary" onClick={save} disabled={saving}>
+            <button type="button" className="btn btn-primary hp-save" onClick={save} disabled={saving}>
               <RiSaveLine size={16} /> {saving ? "Saving…" : "Save about page"}
             </button>
           </div>

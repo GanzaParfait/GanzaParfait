@@ -33,8 +33,9 @@ import {
   type PrincipleIcon,
   type WorkStory,
 } from "@/lib/homepage";
-import { getLocalSettings, saveLocalSettings } from "@/lib/supabase";
+import { getLocalSettings, saveLocalSettings, fetchRemoteSettings } from "@/lib/supabase";
 import CustomSelect from "@/components/ui/CustomSelect";
+import { useSectionHash } from "@/hooks/useSectionHash";
 
 type SectionId = "manifesto" | "work" | "knowledge" | "journey" | "principles" | "speaking" | "booking";
 type EditorTab = "content" | "style" | "display";
@@ -73,12 +74,16 @@ export default function HomepageEditorPage() {
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [mediaOpen, setMediaOpen] = useState(false);
   const { runSave, saving } = useDashboardFeedback();
+  const selectSection = useSectionHash(SECTIONS, setSection);
   const settings = getLocalSettings();
   const active = SECTIONS.find((item) => item.id === section) || SECTIONS[0];
   const previewWidth = DEVICES.find((item) => item.id === device)?.width || "100%";
 
   useEffect(() => {
     setContent(homepageFrom(getLocalSettings()));
+    void fetchRemoteSettings().then((remote) => {
+      if (remote) setContent(homepageFrom(remote));
+    });
   }, []);
 
   useEffect(() => {
@@ -87,8 +92,8 @@ export default function HomepageEditorPage() {
   }, [section]);
 
   const save = () => {
-    void runSave(() => {
-      saveLocalSettings({ homepage: content });
+    void runSave(async () => {
+      await saveLocalSettings({ homepage: content });
     }, "Homepage saved.");
   };
 
@@ -155,20 +160,25 @@ export default function HomepageEditorPage() {
           <h1>Homepage</h1>
           <p>Edit the public story section by section. The preview updates as you type.</p>
         </div>
-        <div className="hp-section-pills" role="tablist" aria-label="Homepage sections">
-        {SECTIONS.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-              role="tab"
-              aria-selected={section === item.id}
-              className={section === item.id ? "is-on" : undefined}
-            onClick={() => setSection(item.id)}
-          >
-            {item.label}
+        <div className="hp-board-actions">
+          <div className="hp-section-pills" role="tablist" aria-label="Homepage sections">
+            {SECTIONS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                role="tab"
+                aria-selected={section === item.id}
+                className={section === item.id ? "is-on" : undefined}
+                onClick={() => selectSection(item.id)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+          <button type="button" className="btn btn-primary hp-top-save" onClick={save} disabled={saving}>
+            <RiSaveLine size={16} /> {saving ? "Saving…" : "Save"}
           </button>
-        ))}
-      </div>
+        </div>
       </div>
 
       <div className="hp-workspace">
@@ -487,7 +497,7 @@ export default function HomepageEditorPage() {
 
           <div className="hp-editor-foot">
             <button type="button" className="btn btn-primary hp-save" onClick={save} disabled={saving}>
-              <RiSaveLine size={16} /> Save Changes
+              <RiSaveLine size={16} /> {saving ? "Saving…" : "Save Changes"}
             </button>
           </div>
         </aside>

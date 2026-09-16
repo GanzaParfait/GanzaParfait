@@ -93,14 +93,16 @@ export default function HeroEditorModal({
     const synced = syncHeroSocialFlags(formData);
     const active = synced.bannerLayout || "split_portrait";
     const imageKey = imageKeyFor(active);
-    const ok = await runSave(() => onSave({
+    const ok = await runSave(async () => {
+      await onSave({
       bannerLayout: active,
       [imageKey]: synced[imageKey],
       heroLayoutCopy: {
         ...settings.heroLayoutCopy,
         [active]: layoutCopyFrom(synced),
       },
-    }), "This layout’s details were saved. Other layouts are unchanged.");
+      });
+    }, "This layout’s details were saved. Other layouts are unchanged.");
     if (ok) onClose();
   };
 
