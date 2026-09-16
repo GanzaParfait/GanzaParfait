@@ -4,7 +4,6 @@ import BlogCard from "@/components/ui/BlogCard";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import NewsletterForm from "@/components/ui/NewsletterForm";
 import { buildPageMetadata } from "@/lib/seo";
-import Breadcrumbs from "@/components/seo/Breadcrumbs";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Insights",
@@ -14,20 +13,13 @@ export const metadata: Metadata = buildPageMetadata({
   noIndex: true,
 });
 
-const breadcrumbItems = [
-  { name: "Home", path: "/" },
-  { name: "Insights", path: "/blog" },
-];
-
 export default function BlogPage() {
   const featuredPosts = blogPosts.filter((p) => p.featured);
   const otherPosts = blogPosts.filter((p) => !p.featured);
 
   return (
     <>
-      <Breadcrumbs items={breadcrumbItems} />
-
-      <section className="section pt-8 pb-10" aria-label="Insights header">
+      <section className="section page-compact-hero" aria-label="Insights header">
         <div className="container max-w-4xl">
           <AnimatedSection>
             <p className="section-label">Insights</p>

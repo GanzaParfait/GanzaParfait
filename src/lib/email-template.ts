@@ -110,7 +110,6 @@ function parseNavLinks(raw: string | undefined, origin: string) {
     { label: "About", href: "/about" },
     { label: "Work", href: "/projects" },
     { label: "Experience", href: "/experience" },
-    { label: "Ventures", href: "/ventures" },
     { label: "Contact", href: "/contact" },
   ];
   const lines = String(raw || "")

@@ -10,7 +10,6 @@ import {
   buildWebPageJsonLd,
 } from "@/lib/schema";
 import { JsonLd } from "@/components/seo/JsonLd";
-import Breadcrumbs from "@/components/seo/Breadcrumbs";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -61,7 +60,6 @@ export default async function ProjectPage({ params }: Props) {
           buildBreadcrumbListJsonLd(crumbs, `/projects/${project.id}`),
         ])}
       />
-      <Breadcrumbs items={crumbs} />
       <ProjectCaseStudyClient project={project} />
     </>
   );

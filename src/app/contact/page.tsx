@@ -3,7 +3,6 @@ import ContactForm from "./ContactForm";
 import { buildPageMetadata } from "@/lib/seo";
 import { buildBreadcrumbListJsonLd, buildGraph, buildWebPageJsonLd } from "@/lib/schema";
 import { JsonLd } from "@/components/seo/JsonLd";
-import Breadcrumbs from "@/components/seo/Breadcrumbs";
 
 const PAGE_DESCRIPTION =
   "Contact Prince Parfait GANZA about a venture, a product, or a system that needs to exist. Based in Kigali. Email hello@princeparfait.com.";
@@ -34,7 +33,6 @@ export default function ContactPage() {
           buildBreadcrumbListJsonLd(breadcrumbItems, "/contact"),
         ])}
       />
-      <Breadcrumbs items={breadcrumbItems} />
       <ContactForm />
     </>
   );

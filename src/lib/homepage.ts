@@ -1,4 +1,4 @@
-import { projects, siteConfig, speakingEngagements, timeline } from "@/data/site-data";
+import { projects, siteConfig, timeline } from "@/data/site-data";
 import type { SiteSettings } from "@/lib/supabase";
 
 export type HomePoint = { title: string; body: string; tag?: string };
@@ -10,6 +10,10 @@ export type KnowledgeItem = {
   icon?: KnowledgeIcon;
 };
 export type KnowledgeStat = { value: string; label: string };
+export type PrincipleIcon = "search" | "cube" | "trend";
+export type SpeakingStatIcon = "people" | "book" | "pin";
+export type SpeakingTopicIcon = "data" | "tools" | "hands" | "teams";
+export type BookingItemIcon = "chat" | "doc" | "people";
 export type JourneyType = "education" | "work" | "leadership" | "milestone";
 export type JourneyEntry = {
   id: string;
@@ -109,11 +113,46 @@ export type HomepageContent = {
       showSort: boolean;
     };
   };
-  ventures: { label: string; title: string; body: string };
-  principles: { label: string; title: string; items: { n: string; title: string; body: string }[] };
-  speaking: { label: string; title: string; body: string; image: string; cta: string };
-  booking: { label: string; title: string; body: string; items: { title: string; time: string; body: string }[] };
-  closing: { title: string; roles: string };
+  principles: {
+    label: string;
+    title: string;
+    subtitle: string;
+    quote: string;
+    quoteAttribution: string;
+    rails: string[];
+    footNote: string;
+    ctaLabel: string;
+    ctaHref: string;
+    items: { n: string; title: string; body: string; icon: PrincipleIcon }[];
+  };
+  speaking: {
+    label: string;
+    title: string;
+    body: string;
+    image: string;
+    brandName: string;
+    brandTagline: string;
+    brandNote: string;
+    brandLogo: string;
+    quote: string;
+    visualCaption: string;
+    coverTitle: string;
+    coverSubtitle: string;
+    footQuote: string;
+    stats: { icon: SpeakingStatIcon; label: string }[];
+    topics: { icon: SpeakingTopicIcon; title: string; body: string }[];
+  };
+  booking: {
+    label: string;
+    title: string;
+    body: string;
+    primaryCta: string;
+    primaryHref: string;
+    emailLabel: string;
+    whatsappLabel: string;
+    rails: string[];
+    items: { title: string; time: string; body: string; icon: BookingItemIcon; href?: string }[];
+  };
 };
 
 function project(id: string) {
@@ -136,8 +175,6 @@ function story(id: string, extra: { line: string; support: string; tags: string[
     images: extra.images,
   };
 }
-
-const training = speakingEngagements[0];
 
 export const DEFAULT_HOMEPAGE: HomepageContent = {
   manifesto: {
@@ -288,42 +325,96 @@ export const DEFAULT_HOMEPAGE: HomepageContent = {
       showSort: true,
     },
   },
-  ventures: {
-    label: "Ventures",
-    title: "Building beyond individual projects.",
-    body: `Through ${siteConfig.company.name}, organizational challenges and ambitious ideas are turned into digital solutions. This site remains the person. The company lives at lerony.com.`,
-  },
   principles: {
     label: "Principles",
     title: "How the work is actually done.",
+    subtitle: "Three principles guide how I choose problems, build solutions, and measure success.",
+    quote: "Ideas are common. Useful work takes discipline.",
+    quoteAttribution: "Prince Parfait GANZA",
+    rails: ["People", "Systems", "Progress"],
+    footNote:
+      "These principles show up in the projects I build, the teams I work with, and the way I approach new opportunities.",
+    ctaLabel: "See the work",
+    ctaHref: "/projects",
     items: [
-      { n: "01", title: "Understand before building", body: "The strongest solution begins with the right problem." },
-      { n: "02", title: "Make complexity useful", body: "Technology matters when people can depend on it." },
-      { n: "03", title: "Build for progress", body: "Every product should create a meaningful next step." },
+      {
+        n: "01",
+        icon: "search",
+        title: "Understand before building",
+        body: "The strongest solution begins with the right problem.",
+      },
+      {
+        n: "02",
+        icon: "cube",
+        title: "Make complexity useful",
+        body: "Technology matters when people can depend on it.",
+      },
+      {
+        n: "03",
+        icon: "trend",
+        title: "Build for progress",
+        body: "Every product should create a meaningful next step.",
+      },
     ],
   },
   speaking: {
     label: "Speaking and training",
-    title: "Knowledge becomes more valuable when it moves.",
-    body: training
-      ? `${training.topic} The engagement is ${training.event}. Exact session dates are not published until they are verified. No conference or keynote is claimed.`
-      : "",
+    title: "Practical knowledge for real-world impact.",
+    body: "I deliver hands-on training and speaking sessions through Eshuri Learning, focused on data systems, practical tools, and skills that help students and teams solve real problems.",
     image: "/images/profile/prince-parfait-ganza-kigali-casual.webp",
-    cta: "Explore speaking and training",
+    brandName: "Eshuri Learning",
+    brandTagline: "Learn. Practice. Apply.",
+    brandNote: "Practical training for students, professionals and organizations.",
+    brandLogo: "/brand/partners/eshuri-learning.png",
+    quote: "Technology is more powerful when people can use it.",
+    visualCaption: "Skills today. Opportunities tomorrow.",
+    coverTitle: "What I cover",
+    coverSubtitle: "Hands-on, practical, and focused on what people can apply.",
+    footQuote: "Good training doesn't just transfer information — it builds confidence to solve real problems.",
+    stats: [
+      { icon: "people", label: "~85 Trainees" },
+      { icon: "book", label: "Data Systems Training Focus" },
+      { icon: "pin", label: "Kigali, Rwanda" },
+    ],
+    topics: [
+      { icon: "data", title: "Data Systems", body: "Working with data, databases, and useful reporting." },
+      { icon: "tools", title: "Practical Tools", body: "From spreadsheets to modern data tools." },
+      { icon: "hands", title: "Hands-on Learning", body: "Real examples, guided practice and support." },
+      { icon: "teams", title: "For Students & Teams", body: "Helping individuals and organizations build capacity." },
+    ],
   },
   booking: {
     label: "A conversation",
     title: "Have an ambitious idea worth discussing?",
-    body: "A focused introduction about a product, partnership, venture, or digital challenge.",
+    body: "Let's explore how we can turn it into a meaningful product, partnership, or solution.",
+    primaryCta: "Start a conversation",
+    primaryHref: "/contact",
+    emailLabel: "Email",
+    whatsappLabel: "WhatsApp",
+    rails: ["Ideas", "People", "Impact"],
     items: [
-      { title: "Introductory conversation", time: "20 minutes", body: "An idea, or a first introduction." },
-      { title: "Project discovery", time: "30 minutes", body: "Requirements and whether a collaboration fits." },
-      { title: "Partnership discussion", time: "45 minutes", body: "Lerony, a venture, or an institutional brief." },
+      {
+        icon: "chat",
+        title: "Introduction",
+        time: "20 min",
+        body: "An idea, or a first introduction.",
+        href: "/contact",
+      },
+      {
+        icon: "doc",
+        title: "Project discovery",
+        time: "30 min",
+        body: "Requirements and whether a collaboration fits.",
+        href: "/contact",
+      },
+      {
+        icon: "people",
+        title: "Partnership discussion",
+        time: "45 min",
+        body: "Lerony, a venture, or an institutional brief.",
+        href: "/contact",
+      },
     ],
-  },
-  closing: {
-    title: "The next meaningful product starts with a clear conversation.",
-    roles: "Founder · Entrepreneur · Technologist",
   },
 };
 
@@ -401,10 +492,52 @@ export function homepageFrom(settings: SiteSettings): HomepageContent {
         };
       }),
     },
-    ventures: { ...DEFAULT_HOMEPAGE.ventures, ...saved.ventures },
-    principles: { ...DEFAULT_HOMEPAGE.principles, ...saved.principles, items: saved.principles?.items?.length ? saved.principles.items : DEFAULT_HOMEPAGE.principles.items },
-    speaking: { ...DEFAULT_HOMEPAGE.speaking, ...saved.speaking },
-    booking: { ...DEFAULT_HOMEPAGE.booking, ...saved.booking, items: saved.booking?.items?.length ? saved.booking.items : DEFAULT_HOMEPAGE.booking.items },
-    closing: { ...DEFAULT_HOMEPAGE.closing, ...saved.closing },
+    principles: {
+      ...DEFAULT_HOMEPAGE.principles,
+      ...saved.principles,
+      rails: saved.principles?.rails?.length ? saved.principles.rails : DEFAULT_HOMEPAGE.principles.rails,
+      items: (saved.principles?.items?.length ? saved.principles.items : DEFAULT_HOMEPAGE.principles.items).map(
+        (item, index) => {
+          const fallback = DEFAULT_HOMEPAGE.principles.items[index];
+          return {
+            n: item.n || fallback?.n || String(index + 1).padStart(2, "0"),
+            title: item.title || fallback?.title || "",
+            body: item.body || fallback?.body || "",
+            icon: item.icon || fallback?.icon || "search",
+          };
+        },
+      ),
+    },
+    speaking: (() => {
+      const savedSpeaking = saved.speaking || {};
+      const staleTitle = "Knowledge becomes more valuable when it moves.";
+      return {
+        ...DEFAULT_HOMEPAGE.speaking,
+        ...savedSpeaking,
+        title:
+          !savedSpeaking.title || savedSpeaking.title === staleTitle
+            ? DEFAULT_HOMEPAGE.speaking.title
+            : savedSpeaking.title,
+        quote: savedSpeaking.quote?.trim() || DEFAULT_HOMEPAGE.speaking.quote,
+        visualCaption: savedSpeaking.visualCaption || DEFAULT_HOMEPAGE.speaking.visualCaption,
+        stats: savedSpeaking.stats?.length ? savedSpeaking.stats : DEFAULT_HOMEPAGE.speaking.stats,
+        topics: savedSpeaking.topics?.length ? savedSpeaking.topics : DEFAULT_HOMEPAGE.speaking.topics,
+      };
+    })(),
+    booking: {
+      ...DEFAULT_HOMEPAGE.booking,
+      ...saved.booking,
+      rails: saved.booking?.rails?.length ? saved.booking.rails : DEFAULT_HOMEPAGE.booking.rails,
+      items: (saved.booking?.items?.length ? saved.booking.items : DEFAULT_HOMEPAGE.booking.items).map((item, index) => {
+        const fallback = DEFAULT_HOMEPAGE.booking.items[index];
+        return {
+          title: item.title || fallback?.title || "",
+          time: item.time || fallback?.time || "",
+          body: item.body || fallback?.body || "",
+          icon: item.icon || fallback?.icon || "chat",
+          href: item.href || fallback?.href || "/contact",
+        };
+      }),
+    },
   };
 }

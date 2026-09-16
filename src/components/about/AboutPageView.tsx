@@ -176,16 +176,37 @@ export default function AboutPageView({
             <h2>{page.facts.title}</h2>
           </div>
           <div className="about-key-grid">
-            {page.facts.items.map((item) => (
-              <Link key={item.title} href={item.href} className="about-key-card">
-                <strong>{item.title}</strong>
-                <span>{item.subtitle}</span>
-                <em>{item.meta}</em>
-                <i aria-hidden>
-                  <RiArrowRightLine size={14} />
-                </i>
-              </Link>
-            ))}
+            {page.facts.items.map((item) => {
+              const external = /^https?:\/\//i.test(item.href);
+              if (external) {
+                return (
+                  <a
+                    key={item.title}
+                    href={item.href}
+                    className="about-key-card"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <strong>{item.title}</strong>
+                    <span>{item.subtitle}</span>
+                    <em>{item.meta}</em>
+                    <i aria-hidden>
+                      <RiArrowRightLine size={14} />
+                    </i>
+                  </a>
+                );
+              }
+              return (
+                <Link key={item.title} href={item.href} className="about-key-card">
+                  <strong>{item.title}</strong>
+                  <span>{item.subtitle}</span>
+                  <em>{item.meta}</em>
+                  <i aria-hidden>
+                    <RiArrowRightLine size={14} />
+                  </i>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>

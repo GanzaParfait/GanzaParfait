@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { RiAddLine } from "react-icons/ri";
+import { useState, type ReactNode } from "react";
+import { RiAddLine, RiArrowDownSLine, RiLockLine, RiLockUnlockLine, RiSaveLine } from "react-icons/ri";
 import MediaManagerModal from "@/components/dashboard/MediaManagerModal";
 import { AnnouncementCard, AnnouncementOverlay } from "@/components/layout/AnnouncementBar";
 import {
@@ -15,28 +15,37 @@ import CustomSelect from "@/components/ui/CustomSelect";
 
 const inputStyle = {
   width: "100%",
-  padding: "0.5rem 0.75rem",
+  padding: "0.45rem 0.65rem",
   borderRadius: "0.375rem",
   background: "#f8fafc",
   border: "1px solid #cbd5e1",
-  fontSize: "0.8125rem",
+  fontSize: "0.8rem",
   color: "#0f172a",
   outline: "none",
 } as const;
 
+type AccordionId = "banner" | "copy" | "event" | "media" | "share";
+
 export default function AnnouncementEditor({
   settings,
   patch,
+  onSave,
+  saving = false,
 }: {
   settings: SiteSettings;
   patch: (next: Partial<SiteSettings>) => void;
+  onSave?: () => void;
+  saving?: boolean;
 }) {
   const [mediaOpen, setMediaOpen] = useState(false);
   const [kind, setKind] = useState<AnnouncementMedia["type"]>("image");
   const [fullPreview, setFullPreview] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [editUnlocked, setEditUnlocked] = useState(Boolean(settings.announcementIsActive));
+  const [openPanels, setOpenPanels] = useState<AccordionId[]>(["banner", "copy"]);
   const media = settings.announcementMedia || [];
   const sharePlatforms = announcementSharePlatforms(settings);
+  const canEdit = editUnlocked;
 
   const addMedia = (url: string) => {
     if (!url || url.startsWith("blob:")) return;
@@ -60,164 +69,260 @@ export default function AnnouncementEditor({
     patch({ announcementSharePlatforms: [...current, id] });
   };
 
+  const togglePanel = (id: AccordionId) => {
+    setOpenPanels((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]));
+  };
+
   return (
-    <div style={{ display: "grid", gap: "0.85rem", maxWidth: "52rem" }}>
+    <div className="ann-editor-root">
       <AnnouncementCard settings={settings} preview />
-      <button type="button" className="btn btn-primary" style={{ width: "100%", justifyContent: "center" }} onClick={() => setEditing(true)}>
-        Edit announcement
-      </button>
+
+      <div className="ann-editor-gate">
+        <label className="ann-editor-unlock">
+          <input
+            type="checkbox"
+            checked={editUnlocked}
+            onChange={(event) => {
+              const on = event.target.checked;
+              setEditUnlocked(on);
+              if (!on) setEditing(false);
+            }}
+          />
+          {editUnlocked ? <RiLockUnlockLine size={15} /> : <RiLockLine size={15} />}
+          Unlock announcement editing
+        </label>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={!canEdit}
+          title={canEdit ? "Edit announcement" : "Turn on unlock to edit"}
+          onClick={() => canEdit && setEditing(true)}
+        >
+          Edit announcement
+        </button>
+      </div>
+      {!canEdit ? (
+        <p className="ann-editor-hint">Turn on “Unlock announcement editing” before opening the editor.</p>
+      ) : null}
+
       {editing ? (
-        <div className="announcement-layer" role="presentation" onClick={() => setEditing(false)} style={{ zIndex: 220 }}>
-          <div className="dash-edit-modal" onClick={(event) => event.stopPropagation()}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem" }}>
-              <h2 style={{ margin: 0, fontSize: "1.15rem" }}>Edit announcement</h2>
-              <button type="button" className="btn btn-outline btn-sm" onClick={() => setEditing(false)}>
-                Close
-              </button>
-            </div>
-            <div className="announcement-editor" style={{ display: "grid", gridTemplateColumns: "minmax(0, 22rem) minmax(0, 1fr)", gap: "1.25rem", alignItems: "start" }}>
-              <div style={{ display: "grid", gap: "0.7rem" }}>
-                <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", fontWeight: 600, color: "#334155" }}>
-                  <input
-                    type="checkbox"
-                    checked={settings.announcementIsActive || false}
-                    onChange={(event) => patch({ announcementIsActive: event.target.checked })}
+        <div className="announcement-layer ann-editor-layer" role="presentation" onClick={() => setEditing(false)}>
+          <div className="dash-edit-modal ann-edit-modal" onClick={(event) => event.stopPropagation()}>
+            <header className="ann-edit-head">
+              <div>
+                <p className="section-label" style={{ margin: 0 }}>
+                  Control center
+                </p>
+                <h2>Edit announcement</h2>
+              </div>
+              <div className="ann-edit-head-actions">
+                {onSave ? (
+                  <button type="button" className="btn btn-primary btn-sm" onClick={() => onSave()} disabled={saving}>
+                    <RiSaveLine size={15} /> {saving ? "Saving…" : "Save"}
+                  </button>
+                ) : null}
+                <button type="button" className="btn btn-outline btn-sm" onClick={() => setEditing(false)}>
+                  Close
+                </button>
+              </div>
+            </header>
+
+            <div className="ann-edit-grid">
+              <div className="ann-edit-form">
+                <Accordion
+                  id="banner"
+                  title="Banner"
+                  open={openPanels.includes("banner")}
+                  onToggle={() => togglePanel("banner")}
+                >
+                  <label className="ann-check">
+                    <input
+                      type="checkbox"
+                      checked={settings.announcementIsActive || false}
+                      onChange={(event) => patch({ announcementIsActive: event.target.checked })}
+                    />
+                    Show announcement banner
+                  </label>
+                  <label className="ann-field">
+                    Banner position
+                    <CustomSelect
+                      value={settings.announcementBarPosition || "top"}
+                      options={[
+                        { value: "top", label: "Top of site" },
+                        { value: "bottom", label: "Bottom of site" },
+                      ]}
+                      onChange={(value) => patch({ announcementBarPosition: value as AnnouncementBarPosition })}
+                    />
+                  </label>
+                  <Field label="Bar text" value={settings.announcementText || ""} onChange={(announcementText) => patch({ announcementText })} />
+                </Accordion>
+
+                <Accordion id="copy" title="Copy" open={openPanels.includes("copy")} onToggle={() => togglePanel("copy")}>
+                  <Field
+                    label="Eyebrow"
+                    value={settings.announcementEyebrow || ""}
+                    onChange={(announcementEyebrow) => patch({ announcementEyebrow })}
+                    placeholder="Announcement"
                   />
-                  Show announcement banner
-                </label>
-                <label style={{ display: "grid", gap: "0.3rem", fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>
-                  Banner position
-                  <CustomSelect
-                    value={settings.announcementBarPosition || "top"}
-                    options={[
-                      { value: "top", label: "Top of site" },
-                      { value: "bottom", label: "Bottom of site" },
-                    ]}
-                    onChange={(value) => patch({ announcementBarPosition: value as AnnouncementBarPosition })}
+                  <Field
+                    label="Sheet title"
+                    value={settings.announcementHeadline || ""}
+                    onChange={(announcementHeadline) => patch({ announcementHeadline })}
+                    placeholder="Uses the bar text if empty"
                   />
-                </label>
-                <Field label="Bar text" value={settings.announcementText || ""} onChange={(announcementText) => patch({ announcementText })} />
-                <Field
-                  label="Eyebrow"
-                  value={settings.announcementEyebrow || ""}
-                  onChange={(announcementEyebrow) => patch({ announcementEyebrow })}
-                  placeholder="Announcement"
-                />
-                <Field
-                  label="Sheet title"
-                  value={settings.announcementHeadline || ""}
-                  onChange={(announcementHeadline) => patch({ announcementHeadline })}
-                  placeholder="Uses the bar text if empty"
-                />
-                <Field label="Detail" value={settings.announcementDetail || ""} area onChange={(announcementDetail) => patch({ announcementDetail })} />
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
-                  <Field label="Date" value={settings.announcementDate || ""} onChange={(announcementDate) => patch({ announcementDate })} />
-                  <Field label="Time" value={settings.announcementTime || ""} onChange={(announcementTime) => patch({ announcementTime })} />
-                </div>
-                <Field label="Place" value={settings.announcementPlace || ""} onChange={(announcementPlace) => patch({ announcementPlace })} />
-                <Field
-                  label="Media kicker"
-                  value={settings.announcementMediaKicker || ""}
-                  onChange={(announcementMediaKicker) => patch({ announcementMediaKicker })}
-                  placeholder="Speak · Learn · Connect"
-                />
-                <Field
-                  label="Media title"
-                  value={settings.announcementMediaTitle || ""}
-                  onChange={(announcementMediaTitle) => patch({ announcementMediaTitle })}
-                  placeholder="Building Impact Together"
-                />
-                <Field
-                  label="Audience line"
-                  value={settings.announcementAudience || ""}
-                  onChange={(announcementAudience) => patch({ announcementAudience })}
-                  placeholder="Leaders · Innovators · Change-makers"
-                />
-                <Field
-                  label="Button label"
-                  value={settings.announcementCtaLabel || ""}
-                  onChange={(announcementCtaLabel) => patch({ announcementCtaLabel })}
-                  placeholder="View Event Details"
-                />
-                <Field
-                  label="Button link"
-                  value={settings.announcementLink || ""}
-                  onChange={(announcementLink) => patch({ announcementLink })}
-                  placeholder="/contact or https://"
-                />
-                <Field
-                  label="Second button"
-                  value={settings.announcementSecondaryLabel || ""}
-                  onChange={(announcementSecondaryLabel) => patch({ announcementSecondaryLabel })}
-                  placeholder="Add to Calendar"
-                />
-                <Field
-                  label="Second link"
-                  value={settings.announcementSecondaryHref || ""}
-                  onChange={(announcementSecondaryHref) => patch({ announcementSecondaryHref })}
-                />
-                <Field
-                  label="Closing line"
-                  value={settings.announcementClosing || ""}
-                  onChange={(announcementClosing) => patch({ announcementClosing })}
-                  placeholder="See you there!"
-                />
-                <label style={{ display: "grid", gap: "0.3rem", fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>
-                  Layout
-                  <CustomSelect
-                    value={settings.announcementLayout || "side"}
-                    options={[
-                      { value: "side", label: "Details on the right" },
-                      { value: "stack", label: "Details underneath" },
-                    ]}
-                    onChange={(value) => patch({ announcementLayout: value as "side" | "stack" })}
+                  <Field
+                    label="Detail"
+                    value={settings.announcementDetail || ""}
+                    area
+                    onChange={(announcementDetail) => patch({ announcementDetail })}
                   />
-                </label>
-                <label style={{ display: "grid", gap: "0.3rem", fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>
-                  Auto-scroll seconds
-                  <input
-                    style={inputStyle}
-                    type="number"
-                    min={3}
-                    max={20}
-                    value={settings.announcementInterval || 5}
-                    onChange={(event) => patch({ announcementInterval: Number(event.target.value) })}
+                  <Field
+                    label="Closing line"
+                    value={settings.announcementClosing || ""}
+                    onChange={(announcementClosing) => patch({ announcementClosing })}
+                    placeholder="See you there!"
                   />
-                </label>
-                <label style={{ display: "flex", alignItems: "center", gap: "0.45rem", fontSize: "0.8rem", fontWeight: 600, color: "#334155" }}>
-                  <input
-                    type="checkbox"
-                    checked={settings.announcementShare !== false}
-                    onChange={(event) => patch({ announcementShare: event.target.checked })}
+                </Accordion>
+
+                <Accordion
+                  id="event"
+                  title="Event details"
+                  open={openPanels.includes("event")}
+                  onToggle={() => togglePanel("event")}
+                >
+                  <div className="ann-field-row">
+                    <Field label="Date" value={settings.announcementDate || ""} onChange={(announcementDate) => patch({ announcementDate })} />
+                    <Field label="Time" value={settings.announcementTime || ""} onChange={(announcementTime) => patch({ announcementTime })} />
+                  </div>
+                  <Field label="Place" value={settings.announcementPlace || ""} onChange={(announcementPlace) => patch({ announcementPlace })} />
+                  <Field
+                    label="Audience line"
+                    value={settings.announcementAudience || ""}
+                    onChange={(announcementAudience) => patch({ announcementAudience })}
+                    placeholder="Leaders · Innovators · Change-makers"
                   />
-                  Show share row
-                </label>
-                {settings.announcementShare !== false ? (
-                  <div style={{ display: "grid", gap: "0.35rem" }}>
-                    <p style={{ margin: 0, fontSize: "0.72rem", fontWeight: 700, color: "#334155" }}>
-                      Share icons (up to 5 networks + copy link)
-                    </p>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.45rem" }}>
+                </Accordion>
+
+                <Accordion
+                  id="media"
+                  title="Media & CTAs"
+                  open={openPanels.includes("media")}
+                  onToggle={() => togglePanel("media")}
+                >
+                  <Field
+                    label="Media kicker"
+                    value={settings.announcementMediaKicker || ""}
+                    onChange={(announcementMediaKicker) => patch({ announcementMediaKicker })}
+                    placeholder="Speak · Learn · Connect"
+                  />
+                  <Field
+                    label="Media title"
+                    value={settings.announcementMediaTitle || ""}
+                    onChange={(announcementMediaTitle) => patch({ announcementMediaTitle })}
+                    placeholder="Building Impact Together"
+                  />
+                  <Field
+                    label="Button label"
+                    value={settings.announcementCtaLabel || ""}
+                    onChange={(announcementCtaLabel) => patch({ announcementCtaLabel })}
+                    placeholder="View Event Details"
+                  />
+                  <Field
+                    label="Button link"
+                    value={settings.announcementLink || ""}
+                    onChange={(announcementLink) => patch({ announcementLink })}
+                    placeholder="/contact or https://"
+                  />
+                  <Field
+                    label="Second button"
+                    value={settings.announcementSecondaryLabel || ""}
+                    onChange={(announcementSecondaryLabel) => patch({ announcementSecondaryLabel })}
+                    placeholder="Add to Calendar"
+                  />
+                  <Field
+                    label="Second link"
+                    value={settings.announcementSecondaryHref || ""}
+                    onChange={(announcementSecondaryHref) => patch({ announcementSecondaryHref })}
+                  />
+                  <div className="ann-media-tools">
+                    <CustomSelect
+                      value={kind}
+                      options={[
+                        { value: "image", label: "Image" },
+                        { value: "video", label: "Video" },
+                        { value: "document", label: "Document" },
+                      ]}
+                      onChange={(value) => setKind(value as AnnouncementMedia["type"])}
+                      className="dash-cselect-sm"
+                    />
+                    <button type="button" className="btn btn-outline btn-sm" onClick={() => setMediaOpen(true)}>
+                      <RiAddLine size={15} /> Add
+                    </button>
+                  </div>
+                  <div className="ann-media-list">
+                    {media.map((item) => (
+                      <div key={item.id} className="ann-media-row">
+                        {item.type === "image" ? (
+                          <img src={item.url} alt="" />
+                        ) : (
+                          <span>{item.type}</span>
+                        )}
+                        <em>{item.name || item.url}</em>
+                        <button
+                          type="button"
+                          className="btn btn-ghost btn-sm"
+                          onClick={() => patch({ announcementMedia: media.filter((entry) => entry.id !== item.id) })}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </Accordion>
+
+                <Accordion
+                  id="share"
+                  title="Share & layout"
+                  open={openPanels.includes("share")}
+                  onToggle={() => togglePanel("share")}
+                >
+                  <label className="ann-field">
+                    Layout
+                    <CustomSelect
+                      value={settings.announcementLayout || "side"}
+                      options={[
+                        { value: "side", label: "Details on the right" },
+                        { value: "stack", label: "Details underneath" },
+                      ]}
+                      onChange={(value) => patch({ announcementLayout: value as "side" | "stack" })}
+                    />
+                  </label>
+                  <label className="ann-field">
+                    Auto-scroll seconds
+                    <input
+                      style={inputStyle}
+                      type="number"
+                      min={3}
+                      max={20}
+                      value={settings.announcementInterval || 5}
+                      onChange={(event) => patch({ announcementInterval: Number(event.target.value) })}
+                    />
+                  </label>
+                  <label className="ann-check">
+                    <input
+                      type="checkbox"
+                      checked={settings.announcementShare !== false}
+                      onChange={(event) => patch({ announcementShare: event.target.checked })}
+                    />
+                    Show share row
+                  </label>
+                  {settings.announcementShare !== false ? (
+                    <div className="ann-share-picks">
                       {ANNOUNCEMENT_SHARE_OPTIONS.map((option) => {
                         const on = sharePlatforms.includes(option.id);
                         const disabled = !on && sharePlatforms.length >= 6;
                         return (
-                          <label
-                            key={option.id}
-                            style={{
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: "0.3rem",
-                              padding: "0.35rem 0.55rem",
-                              borderRadius: "999px",
-                              border: `1px solid ${on ? "#0e52a8" : "#cbd5e1"}`,
-                              background: on ? "rgba(14,82,168,0.08)" : "#fff",
-                              fontSize: "0.72rem",
-                              fontWeight: 700,
-                              color: "#334155",
-                              opacity: disabled ? 0.5 : 1,
-                            }}
-                          >
+                          <label key={option.id} className={on ? "is-on" : ""} style={{ opacity: disabled ? 0.5 : 1 }}>
                             <input
                               type="checkbox"
                               checked={on}
@@ -229,56 +334,18 @@ export default function AnnouncementEditor({
                         );
                       })}
                     </div>
-                    <p style={{ margin: 0, fontSize: "0.7rem", color: "#64748b" }}>
-                      Copied links include UTM tags and reopen this announcement sheet.
-                    </p>
-                  </div>
-                ) : null}
-                <div style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
-                  <CustomSelect
-                    value={kind}
-                    options={[
-                      { value: "image", label: "Image" },
-                      { value: "video", label: "Video" },
-                      { value: "document", label: "Document" },
-                    ]}
-                    onChange={(value) => setKind(value as AnnouncementMedia["type"])}
-                    className="dash-cselect-sm"
-                  />
-                  <button type="button" className="btn btn-outline btn-sm" onClick={() => setMediaOpen(true)}>
-                    <RiAddLine size={15} /> Add from library
-                  </button>
-                </div>
-                <div style={{ display: "grid", gap: "0.4rem" }}>
-                  {media.map((item) => (
-                    <div key={item.id} style={{ display: "flex", gap: "0.45rem", alignItems: "center" }}>
-                      {item.type === "image" ? (
-                        <img src={item.url} alt="" style={{ width: "4.2rem", height: "2.6rem", objectFit: "cover", borderRadius: "0.35rem" }} />
-                      ) : (
-                        <span style={{ fontSize: "0.68rem", fontWeight: 800, color: "#0e52a8" }}>{item.type}</span>
-                      )}
-                      <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", fontSize: "0.72rem", color: "#64748b" }}>
-                        {item.name || item.url}
-                      </span>
-                      <button
-                        type="button"
-                        className="btn btn-ghost btn-sm"
-                        onClick={() => patch({ announcementMedia: media.filter((entry) => entry.id !== item.id) })}
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  ))}
-                </div>
-                <p style={{ margin: 0, fontSize: "0.75rem", color: "#64748b" }}>
-                  Only publish details you can stand behind. A video stays unloaded until someone presses play.
-                </p>
+                  ) : null}
+                </Accordion>
               </div>
-              <AnnouncementCard settings={settings} preview />
+
+              <div className="ann-edit-preview">
+                <AnnouncementCard settings={settings} preview />
+              </div>
             </div>
           </div>
         </div>
       ) : null}
+
       {fullPreview ? <AnnouncementOverlay settings={settings} onClose={() => setFullPreview(false)} /> : null}
       <MediaManagerModal
         isOpen={mediaOpen}
@@ -288,6 +355,34 @@ export default function AnnouncementEditor({
           setMediaOpen(false);
         }}
       />
+    </div>
+  );
+}
+
+function Accordion({
+  id,
+  title,
+  open,
+  onToggle,
+  children,
+}: {
+  id: string;
+  title: string;
+  open: boolean;
+  onToggle: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <div className={open ? "ann-acc is-open" : "ann-acc"}>
+      <button type="button" className="ann-acc-trigger" aria-expanded={open} aria-controls={`ann-acc-${id}`} onClick={onToggle}>
+        <span>{title}</span>
+        <RiArrowDownSLine size={18} />
+      </button>
+      {open ? (
+        <div className="ann-acc-body" id={`ann-acc-${id}`}>
+          {children}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -306,10 +401,15 @@ function Field({
   area?: boolean;
 }) {
   return (
-    <label style={{ display: "grid", gap: "0.3rem", fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>
+    <label className="ann-field">
       {label}
       {area ? (
-        <textarea style={{ ...inputStyle, minHeight: "4.5rem" }} value={value} placeholder={placeholder} onChange={(event) => onChange(event.target.value)} />
+        <textarea
+          style={{ ...inputStyle, minHeight: "3.4rem", resize: "vertical" }}
+          value={value}
+          placeholder={placeholder}
+          onChange={(event) => onChange(event.target.value)}
+        />
       ) : (
         <input style={inputStyle} value={value} placeholder={placeholder} onChange={(event) => onChange(event.target.value)} />
       )}

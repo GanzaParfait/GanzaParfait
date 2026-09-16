@@ -51,7 +51,6 @@ Unique, natural, not a role list:
 | About | About Prince Parfait GANZA \| Founder, Entrepreneur & Technologist |
 | Work | Projects & Case Studies \| Prince Parfait GANZA |
 | Experience | Experience \| Prince Parfait GANZA |
-| Ventures | Ventures \| Prince Parfait GANZA |
 | Capabilities | Capabilities \| Prince Parfait GANZA |
 | Contact | Contact Prince Parfait GANZA |
 
@@ -80,7 +79,7 @@ FAQ schema is allowed only when the questions are visible on the page.
 
 | Route | Index |
 |-------|--------|
-| `/`, `/about`, `/projects`, `/experience`, `/services`, `/contact`, `/speaking`, `/projects/*` | index |
+| `/`, `/about`, `/projects`, `/experience`, `/services`, `/contact`, `/projects/*` | index |
 | `/blog` empty state | **noindex** |
 | `/dashboard/*`, `/api/*` | **noindex** |
 | Removed fabricated URLs | **404** (not homepage redirects) |

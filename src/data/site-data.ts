@@ -69,7 +69,6 @@ export const primaryNav = [
   { href: "/about", label: "About" },
   { href: "/projects", label: "Work" },
   { href: "/experience", label: "Experience" },
-  { href: "/ventures", label: "Ventures" },
   { href: "/contact", label: "Contact" },
 ] as const;
 
@@ -86,8 +85,7 @@ export const footerNav = [
   {
     label: "Work with me",
     links: [
-      { label: "Ventures", href: "/ventures" },
-      { label: "Speaking", href: "/speaking" },
+      { label: "Speaking", href: "/#speaking" },
       { label: "Contact", href: "/contact" },
     ],
   },
@@ -415,7 +413,7 @@ export const timeline: TimelineItem[] = [
     industry: "Technology & Innovation",
     team: "Solo / partners / contractors as needed",
     status: "Ongoing",
-    relatedHref: "/ventures",
+    relatedHref: "https://lerony.com",
   },
   {
     id: "ulk",
@@ -475,6 +473,7 @@ export type ExperienceItem = {
   summary: string;
   highlights: string[];
   type: "work" | "training";
+  website?: string;
 };
 
 export const experience: ExperienceItem[] = [
@@ -493,6 +492,7 @@ export const experience: ExperienceItem[] = [
       "AI-enabled product integration",
     ],
     type: "work",
+    website: "https://lerony.com",
   },
   {
     id: "askfield",

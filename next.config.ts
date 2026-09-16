@@ -24,6 +24,26 @@ const nextConfig: NextConfig = {
         destination: "/projects/caritas-systems",
         statusCode: 301,
       },
+      {
+        source: "/ventures",
+        destination: "/about",
+        statusCode: 301,
+      },
+      {
+        source: "/ventures/:path*",
+        destination: "/about",
+        statusCode: 301,
+      },
+      {
+        source: "/speaking",
+        destination: "/#speaking",
+        statusCode: 301,
+      },
+      {
+        source: "/speaking/:path*",
+        destination: "/#speaking",
+        statusCode: 301,
+      },
     ];
   },
   async headers() {

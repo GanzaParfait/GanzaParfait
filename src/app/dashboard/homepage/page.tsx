@@ -21,19 +21,22 @@ import ManifestoSection from "@/components/home/ManifestoSection";
 import SelectedWork from "@/components/home/SelectedWork";
 import KnowledgeSection from "@/components/home/KnowledgeSection";
 import JourneySection from "@/components/home/JourneySection";
+import PrinciplesSection from "@/components/home/PrinciplesSection";
+import SpeakingSection from "@/components/home/SpeakingSection";
+import BookingSection from "@/components/home/BookingSection";
 import {
   DEFAULT_HOMEPAGE,
   homepageFrom,
   type HomepageContent,
   type KnowledgeIcon,
   type KnowledgeItem,
+  type PrincipleIcon,
   type WorkStory,
 } from "@/lib/homepage";
 import { getLocalSettings, saveLocalSettings } from "@/lib/supabase";
-import { siteConfig } from "@/data/site-data";
 import CustomSelect from "@/components/ui/CustomSelect";
 
-type SectionId = "manifesto" | "work" | "knowledge" | "journey" | "ventures" | "principles" | "speaking" | "booking" | "closing";
+type SectionId = "manifesto" | "work" | "knowledge" | "journey" | "principles" | "speaking" | "booking";
 type EditorTab = "content" | "style" | "display";
 type PreviewDevice = "desktop" | "tablet" | "mobile";
 
@@ -42,11 +45,9 @@ const SECTIONS: { id: SectionId; label: string }[] = [
   { id: "work", label: "Evidence" },
   { id: "knowledge", label: "Knowledge" },
   { id: "journey", label: "Journey" },
-  { id: "ventures", label: "Ventures" },
   { id: "principles", label: "Principles" },
   { id: "speaking", label: "Speaking" },
-  { id: "booking", label: "Booking" },
-  { id: "closing", label: "Closing" },
+  { id: "booking", label: "Conversation" },
 ];
 
 const ICON_OPTIONS: { value: KnowledgeIcon; label: string; Icon: typeof RiCompass3Line }[] = [
@@ -517,54 +518,13 @@ export default function HomepageEditorPage() {
               {section === "work" && <SelectedWork work={content.work} records={settings.projectRecords} embedded />}
               {section === "knowledge" && <KnowledgeSection knowledge={content.knowledge} embedded />}
               {section === "journey" && <JourneySection journey={content.journey} embedded />}
-              {section === "ventures" && (
-                <PreviewBlock label={content.ventures.label} title={content.ventures.title}>
-                  <p>{content.ventures.body}</p>
-                  <small>{siteConfig.company.name} · {siteConfig.company.role}</small>
-                </PreviewBlock>
-              )}
               {section === "principles" && (
-                <PreviewBlock label={content.principles.label} title={content.principles.title}>
-                  <div className="hp-preview-stack">
-                    {content.principles.items.map((item) => (
-                      <article key={item.n}>
-                        <span>{item.n}</span>
-                        <strong>{item.title}</strong>
-                        <p>{item.body}</p>
-                      </article>
-                    ))}
-                  </div>
-                </PreviewBlock>
+                <PrinciplesSection principles={content.principles} attribution="Prince Parfait GANZA" embedded />
               )}
               {section === "speaking" && (
-                <PreviewBlock label={content.speaking.label} title={content.speaking.title}>
-                  {content.speaking.image ? <img src={content.speaking.image} alt="" /> : null}
-                  <p>{content.speaking.body}</p>
-                  <strong className="hp-linkish">{content.speaking.cta}</strong>
-                </PreviewBlock>
+                <SpeakingSection speaking={content.speaking} attribution="Prince Parfait GANZA" embedded />
               )}
-              {section === "booking" && (
-                <PreviewBlock label={content.booking.label} title={content.booking.title}>
-                  <p>{content.booking.body}</p>
-                  <div className="hp-preview-stack">
-                    {content.booking.items.map((item) => (
-                      <article key={item.title}>
-                        <div className="hp-preview-row">
-                          <strong>{item.title}</strong>
-                          <span>{item.time}</span>
-                        </div>
-                        <p>{item.body}</p>
-                      </article>
-                    ))}
-                  </div>
-                </PreviewBlock>
-              )}
-              {section === "closing" && (
-                <PreviewBlock label="Closing" title={content.closing.title}>
-                  <p>{content.closing.roles}</p>
-                  <small>{settings.siteTitle || siteConfig.name} · {settings.location || "Kigali, Rwanda"}</small>
-                </PreviewBlock>
-          )}
+              {section === "booking" && <BookingSection booking={content.booking} embedded />}
         </div>
           </div>
         </section>
@@ -672,83 +632,278 @@ function OtherSectionFields({
     return null;
   }
 
-  if (section === "ventures") {
-    return (
-            <>
-              <Field label="Label" value={content.ventures.label} onChange={(label) => setContent({ ...content, ventures: { ...content.ventures, label } })} />
-              <Field label="Title" value={content.ventures.title} onChange={(title) => setContent({ ...content, ventures: { ...content.ventures, title } })} />
-              <Field label="Body" value={content.ventures.body} area onChange={(body) => setContent({ ...content, ventures: { ...content.ventures, body } })} />
-            </>
-    );
-  }
-
   if (section === "principles") {
     return (
-            <>
-              <Field label="Label" value={content.principles.label} onChange={(label) => setContent({ ...content, principles: { ...content.principles, label } })} />
-              <Field label="Title" value={content.principles.title} onChange={(title) => setContent({ ...content, principles: { ...content.principles, title } })} />
-              {content.principles.items.map((item, index) => (
+      <>
+        <Field
+          label="Label"
+          value={content.principles.label}
+          onChange={(label) => setContent({ ...content, principles: { ...content.principles, label } })}
+        />
+        <Field
+          label="Title"
+          value={content.principles.title}
+          onChange={(title) => setContent({ ...content, principles: { ...content.principles, title } })}
+        />
+        <Field
+          label="Subtitle"
+          value={content.principles.subtitle}
+          area
+          onChange={(subtitle) => setContent({ ...content, principles: { ...content.principles, subtitle } })}
+        />
+        <Field
+          label="Quote"
+          value={content.principles.quote}
+          area
+          onChange={(quote) => setContent({ ...content, principles: { ...content.principles, quote } })}
+        />
+        <Field
+          label="Quote attribution"
+          value={content.principles.quoteAttribution}
+          onChange={(quoteAttribution) =>
+            setContent({ ...content, principles: { ...content.principles, quoteAttribution } })
+          }
+        />
+        <Field
+          label="Orbit labels (one per line)"
+          value={content.principles.rails.join("\n")}
+          area
+          onChange={(value) =>
+            setContent({
+              ...content,
+              principles: {
+                ...content.principles,
+                rails: value
+                  .split("\n")
+                  .map((line) => line.trim())
+                  .filter(Boolean),
+              },
+            })
+          }
+        />
+        <Field
+          label="Footer note"
+          value={content.principles.footNote}
+          area
+          onChange={(footNote) => setContent({ ...content, principles: { ...content.principles, footNote } })}
+        />
+        <Field
+          label="CTA label"
+          value={content.principles.ctaLabel}
+          onChange={(ctaLabel) => setContent({ ...content, principles: { ...content.principles, ctaLabel } })}
+        />
+        <Field
+          label="CTA href"
+          value={content.principles.ctaHref}
+          onChange={(ctaHref) => setContent({ ...content, principles: { ...content.principles, ctaHref } })}
+        />
+        {content.principles.items.map((item, index) => (
           <div key={item.n} className="hp-mini-card">
-                  <Field label={item.n} value={item.title} onChange={(title) => {
-              const items = content.principles.items.map((entry, entryIndex) => (entryIndex === index ? { ...entry, title } : entry));
-                    setContent({ ...content, principles: { ...content.principles, items } });
-                  }} />
-                  <Field label="Body" value={item.body} onChange={(body) => {
-              const items = content.principles.items.map((entry, entryIndex) => (entryIndex === index ? { ...entry, body } : entry));
-                    setContent({ ...content, principles: { ...content.principles, items } });
-                  }} />
-                </div>
-              ))}
-            </>
+            <label className="hp-field">
+              <span>Icon</span>
+              <CustomSelect
+                value={item.icon || "search"}
+                onChange={(icon) => {
+                  const items = content.principles.items.map((entry, entryIndex) =>
+                    entryIndex === index ? { ...entry, icon: icon as PrincipleIcon } : entry,
+                  );
+                  setContent({ ...content, principles: { ...content.principles, items } });
+                }}
+                options={[
+                  { value: "search", label: "Search" },
+                  { value: "cube", label: "Cube" },
+                  { value: "trend", label: "Trend" },
+                ]}
+              />
+            </label>
+            <Field
+              label={item.n}
+              value={item.title}
+              onChange={(title) => {
+                const items = content.principles.items.map((entry, entryIndex) =>
+                  entryIndex === index ? { ...entry, title } : entry,
+                );
+                setContent({ ...content, principles: { ...content.principles, items } });
+              }}
+            />
+            <Field
+              label="Body"
+              value={item.body}
+              onChange={(body) => {
+                const items = content.principles.items.map((entry, entryIndex) =>
+                  entryIndex === index ? { ...entry, body } : entry,
+                );
+                setContent({ ...content, principles: { ...content.principles, items } });
+              }}
+            />
+          </div>
+        ))}
+      </>
     );
   }
 
   if (section === "speaking") {
     return (
-            <>
-              <Field label="Label" value={content.speaking.label} onChange={(label) => setContent({ ...content, speaking: { ...content.speaking, label } })} />
-              <Field label="Title" value={content.speaking.title} onChange={(title) => setContent({ ...content, speaking: { ...content.speaking, title } })} />
-              <Field label="Body" value={content.speaking.body} area onChange={(body) => setContent({ ...content, speaking: { ...content.speaking, body } })} />
-              <Field label="Button" value={content.speaking.cta} onChange={(cta) => setContent({ ...content, speaking: { ...content.speaking, cta } })} />
+      <>
+        <Field label="Label" value={content.speaking.label} onChange={(label) => setContent({ ...content, speaking: { ...content.speaking, label } })} />
+        <Field label="Title" value={content.speaking.title} onChange={(title) => setContent({ ...content, speaking: { ...content.speaking, title } })} />
+        <Field label="Body" value={content.speaking.body} area onChange={(body) => setContent({ ...content, speaking: { ...content.speaking, body } })} />
+        <Field
+          label="Photo quote"
+          value={content.speaking.quote}
+          area
+          onChange={(quote) => setContent({ ...content, speaking: { ...content.speaking, quote } })}
+        />
+        <Field
+          label="Photo caption"
+          value={content.speaking.visualCaption}
+          onChange={(visualCaption) => setContent({ ...content, speaking: { ...content.speaking, visualCaption } })}
+        />
+        <Field label="Brand name" value={content.speaking.brandName} onChange={(brandName) => setContent({ ...content, speaking: { ...content.speaking, brandName } })} />
+        <Field label="Brand tagline" value={content.speaking.brandTagline} onChange={(brandTagline) => setContent({ ...content, speaking: { ...content.speaking, brandTagline } })} />
+        <Field label="Brand note" value={content.speaking.brandNote} onChange={(brandNote) => setContent({ ...content, speaking: { ...content.speaking, brandNote } })} />
+        <Field label="Cover title" value={content.speaking.coverTitle} onChange={(coverTitle) => setContent({ ...content, speaking: { ...content.speaking, coverTitle } })} />
+        <Field label="Cover subtitle" value={content.speaking.coverSubtitle} onChange={(coverSubtitle) => setContent({ ...content, speaking: { ...content.speaking, coverSubtitle } })} />
+        <Field label="Footer quote" value={content.speaking.footQuote} area onChange={(footQuote) => setContent({ ...content, speaking: { ...content.speaking, footQuote } })} />
         <button type="button" className="btn btn-outline btn-sm" onClick={onMedia}><RiImageAddLine size={15} /> Change image</button>
+        {content.speaking.stats.map((stat, index) => (
+          <div key={`${stat.label}-${index}`} className="hp-mini-card">
+            <Field
+              label={`Stat ${index + 1}`}
+              value={stat.label}
+              onChange={(label) => {
+                const stats = content.speaking.stats.map((entry, entryIndex) =>
+                  entryIndex === index ? { ...entry, label } : entry,
+                );
+                setContent({ ...content, speaking: { ...content.speaking, stats } });
+              }}
+            />
+          </div>
+        ))}
+        {content.speaking.topics.map((topic, index) => (
+          <div key={`${topic.title}-${index}`} className="hp-mini-card">
+            <Field
+              label={`Topic ${index + 1}`}
+              value={topic.title}
+              onChange={(title) => {
+                const topics = content.speaking.topics.map((entry, entryIndex) =>
+                  entryIndex === index ? { ...entry, title } : entry,
+                );
+                setContent({ ...content, speaking: { ...content.speaking, topics } });
+              }}
+            />
+            <Field
+              label="Body"
+              value={topic.body}
+              onChange={(body) => {
+                const topics = content.speaking.topics.map((entry, entryIndex) =>
+                  entryIndex === index ? { ...entry, body } : entry,
+                );
+                setContent({ ...content, speaking: { ...content.speaking, topics } });
+              }}
+            />
+          </div>
+        ))}
       </>
     );
   }
 
   if (section === "booking") {
     return (
-            <>
-              <Field label="Label" value={content.booking.label} onChange={(label) => setContent({ ...content, booking: { ...content.booking, label } })} />
-              <Field label="Title" value={content.booking.title} onChange={(title) => setContent({ ...content, booking: { ...content.booking, title } })} />
-              <Field label="Body" value={content.booking.body} area onChange={(body) => setContent({ ...content, booking: { ...content.booking, body } })} />
-              {content.booking.items.map((item, index) => (
-          <div key={index} className="hp-mini-card">
-                  <Field label="Title" value={item.title} onChange={(title) => {
-              const items = content.booking.items.map((entry, entryIndex) => (entryIndex === index ? { ...entry, title } : entry));
-                    setContent({ ...content, booking: { ...content.booking, items } });
-                  }} />
-                  <Field label="Time" value={item.time} onChange={(time) => {
-              const items = content.booking.items.map((entry, entryIndex) => (entryIndex === index ? { ...entry, time } : entry));
-                    setContent({ ...content, booking: { ...content.booking, items } });
-                  }} />
-                  <Field label="Body" value={item.body} onChange={(body) => {
-              const items = content.booking.items.map((entry, entryIndex) => (entryIndex === index ? { ...entry, body } : entry));
-                    setContent({ ...content, booking: { ...content.booking, items } });
-                  }} />
-                </div>
-              ))}
-        <p className="hp-note">The calendar address stays in Site Settings → Public contact.</p>
+      <>
+        <Field
+          label="Label"
+          value={content.booking.label}
+          onChange={(label) => setContent({ ...content, booking: { ...content.booking, label } })}
+        />
+        <Field
+          label="Title"
+          value={content.booking.title}
+          onChange={(title) => setContent({ ...content, booking: { ...content.booking, title } })}
+        />
+        <Field
+          label="Body"
+          value={content.booking.body}
+          area
+          onChange={(body) => setContent({ ...content, booking: { ...content.booking, body } })}
+        />
+        <Field
+          label="Primary CTA"
+          value={content.booking.primaryCta}
+          onChange={(primaryCta) => setContent({ ...content, booking: { ...content.booking, primaryCta } })}
+        />
+        <Field
+          label="Primary href"
+          value={content.booking.primaryHref}
+          onChange={(primaryHref) => setContent({ ...content, booking: { ...content.booking, primaryHref } })}
+        />
+        <Field
+          label="Email label"
+          value={content.booking.emailLabel}
+          onChange={(emailLabel) => setContent({ ...content, booking: { ...content.booking, emailLabel } })}
+        />
+        <Field
+          label="WhatsApp label"
+          value={content.booking.whatsappLabel}
+          onChange={(whatsappLabel) => setContent({ ...content, booking: { ...content.booking, whatsappLabel } })}
+        />
+        <Field
+          label="Orbit labels (one per line)"
+          value={content.booking.rails.join("\n")}
+          area
+          onChange={(value) =>
+            setContent({
+              ...content,
+              booking: {
+                ...content.booking,
+                rails: value
+                  .split("\n")
+                  .map((line) => line.trim())
+                  .filter(Boolean),
+              },
+            })
+          }
+        />
+        {content.booking.items.map((item, index) => (
+          <div key={`${item.title}-${index}`} className="hp-mini-card">
+            <Field
+              label="Title"
+              value={item.title}
+              onChange={(title) => {
+                const items = content.booking.items.map((entry, entryIndex) =>
+                  entryIndex === index ? { ...entry, title } : entry,
+                );
+                setContent({ ...content, booking: { ...content.booking, items } });
+              }}
+            />
+            <Field
+              label="Time"
+              value={item.time}
+              onChange={(time) => {
+                const items = content.booking.items.map((entry, entryIndex) =>
+                  entryIndex === index ? { ...entry, time } : entry,
+                );
+                setContent({ ...content, booking: { ...content.booking, items } });
+              }}
+            />
+            <Field
+              label="Body"
+              value={item.body}
+              onChange={(body) => {
+                const items = content.booking.items.map((entry, entryIndex) =>
+                  entryIndex === index ? { ...entry, body } : entry,
+                );
+                setContent({ ...content, booking: { ...content.booking, items } });
+              }}
+            />
+          </div>
+        ))}
+        <p className="hp-note">Calendar URL stays in Site Settings → Public contact. CTAs fall back to Contact.</p>
       </>
     );
   }
 
-  return (
-            <>
-              <Field label="Title" value={content.closing.title} onChange={(title) => setContent({ ...content, closing: { ...content.closing, title } })} />
-              <Field label="Roles" value={content.closing.roles} onChange={(roles) => setContent({ ...content, closing: { ...content.closing, roles } })} />
-      <p className="hp-note">Name, location, and email follow Site Settings → Identity and Public contact.</p>
-    </>
-  );
+  return null;
 }
 
 function PreviewBlock({ label, title, children }: { label: string; title: string; children: ReactNode }) {

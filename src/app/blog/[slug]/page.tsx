@@ -8,7 +8,6 @@ import BlogContentClient from "@/components/blog/BlogContentClient";
 import { buildPageMetadata } from "@/lib/seo";
 import { PERSON_ID, buildBreadcrumbListJsonLd, buildGraph, canonicalUrl } from "@/lib/schema";
 import { JsonLd } from "@/components/seo/JsonLd";
-import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import {
   RiArrowLeftLine,
   RiCalendarLine,
@@ -78,10 +77,9 @@ export default async function BlogPostPage({ params }: Props) {
   return (
     <>
       <JsonLd data={articleSchema} />
-      <Breadcrumbs items={crumbs} />
 
       {/* Header */}
-      <section className="section pt-8 pb-8" aria-label="Blog post header">
+      <section className="section page-compact-hero pb-8" aria-label="Blog post header">
         <div aria-hidden="true" className="absolute inset-0 bg-gradient-radial pointer-events-none" />
         <div className="container max-w-3xl relative z-10">
           <AnimatedSection>

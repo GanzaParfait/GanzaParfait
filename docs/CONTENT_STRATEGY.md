@@ -35,11 +35,10 @@ Prefer:
 
 | Label | Route | Job |
 |-------|-------|-----|
-| Home | `/` | Guided story: who, proof, knowledge, venture, and how to start |
+| Home | `/` | Guided story: who, proof, knowledge, principles, and how to start |
 | About | `/about` | Person, education, positioning |
 | Work | `/projects` | Evidence of shipped systems |
 | Experience | `/experience` | Roles, timeline, training |
-| Ventures | `/ventures` | Lerony, his role, and a link to the company site |
 | Capabilities | `/services` | How engagements work. Not the public identity. |
 | Contact | `/contact` | Clear next step |
 
@@ -48,7 +47,7 @@ Prefer:
 | Label | Route | Rule |
 |-------|-------|------|
 | Insights | `/blog` | Keep the route. Do not put it in primary nav until verified articles exist. |
-| Speaking / Training | `/speaking` | Honest training record only. No invented keynotes. |
+| Speaking / Training | `/#speaking` | Homepage section only. No separate `/speaking` page. |
 | Case studies | `/projects/[id]` | One project, one evidence-led story. |
 
 Do not add Education, Certifications, Media, or Uses as top-level items until each has enough verified content to stand alone.

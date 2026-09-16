@@ -163,6 +163,10 @@ export function AnnouncementCard({
     return `https://wa.me/?text=${text}%20${encoded}`;
   };
 
+  const dateFact = splitFact(settings.announcementDate);
+  const timeFact = splitFact(settings.announcementTime);
+  const placeFact = splitFact(settings.announcementPlace);
+
   return (
     <div
       className={`announcement-sheet is-${layout}${preview ? " is-preview" : ""}`}
@@ -196,7 +200,7 @@ export function AnnouncementCard({
               <button type="button" className="announcement-play" onClick={() => setPlaying(true)}>
                 {frame.poster ? <img src={frame.poster} alt="" /> : <span className="announcement-video-fallback" />}
                 <span className="announcement-play-button" aria-hidden="true">
-                  <RiPlayFill size={28} />
+                  <RiPlayFill size={32} />
                 </span>
               </button>
             )
@@ -210,7 +214,7 @@ export function AnnouncementCard({
         {(mediaKicker || mediaTitle) && !playing ? (
           <div className="announcement-media-copy">
             {mediaKicker ? <p className="announcement-media-kicker">{mediaKicker}</p> : null}
-            {mediaTitle ? <p className="announcement-media-title">{mediaTitle}</p> : null}
+            {mediaTitle ? <p className="announcement-media-title">{accentMediaTitle(mediaTitle)}</p> : null}
           </div>
         ) : null}
 
@@ -218,17 +222,17 @@ export function AnnouncementCard({
           <div className="announcement-media-meta">
             {dateShort ? (
               <span>
-                <RiCalendarLine size={13} /> {dateShort}
+                <RiCalendarLine size={13} aria-hidden="true" /> {dateShort}
               </span>
             ) : null}
             {placeShort ? (
               <span>
-                <RiMapPinLine size={13} /> {placeShort}
+                <RiMapPinLine size={13} aria-hidden="true" /> {placeShort}
               </span>
             ) : null}
             {audience ? (
               <span>
-                <RiGroupLine size={13} /> {audience}
+                <RiGroupLine size={13} aria-hidden="true" /> {audience}
               </span>
             ) : null}
           </div>
@@ -256,24 +260,39 @@ export function AnnouncementCard({
         <p className="announcement-kicker">{settings.announcementEyebrow?.trim() || "Announcement"}</p>
         <h2 id={titleId}>{headline}</h2>
         {detail ? <p className="announcement-detail">{detail}</p> : null}
-        {settings.announcementDate || settings.announcementTime || settings.announcementPlace ? (
+        {dateFact.primary || timeFact.primary || placeFact.primary ? (
           <ul className="announcement-facts">
-            {settings.announcementDate ? (
+            {dateFact.primary ? (
               <li>
-                <RiCalendarLine size={15} />
-                <span>{settings.announcementDate}</span>
+                <span className="announcement-fact-icon" aria-hidden="true">
+                  <RiCalendarLine size={15} />
+                </span>
+                <span>
+                  <strong>{dateFact.primary}</strong>
+                  {dateFact.secondary ? <em>{dateFact.secondary}</em> : null}
+                </span>
               </li>
             ) : null}
-            {settings.announcementTime ? (
+            {timeFact.primary ? (
               <li>
-                <RiTimeLine size={15} />
-                <span>{settings.announcementTime}</span>
+                <span className="announcement-fact-icon" aria-hidden="true">
+                  <RiTimeLine size={15} />
+                </span>
+                <span>
+                  <strong>{timeFact.primary}</strong>
+                  {timeFact.secondary ? <em>{timeFact.secondary}</em> : null}
+                </span>
               </li>
             ) : null}
-            {settings.announcementPlace ? (
+            {placeFact.primary ? (
               <li>
-                <RiMapPinLine size={15} />
-                <span>{settings.announcementPlace}</span>
+                <span className="announcement-fact-icon" aria-hidden="true">
+                  <RiMapPinLine size={15} />
+                </span>
+                <span>
+                  <strong>{placeFact.primary}</strong>
+                  {placeFact.secondary ? <em>{placeFact.secondary}</em> : null}
+                </span>
               </li>
             ) : null}
           </ul>
@@ -344,6 +363,36 @@ export function AnnouncementCard({
       </div>
     </div>
   );
+}
+
+function accentMediaTitle(title: string) {
+  const match = title.match(/^(.*?)(\bImpact\b)(.*)$/i);
+  if (!match) return title;
+  return (
+    <>
+      {match[1]}
+      <span className="announcement-media-accent">{match[2]}</span>
+      {match[3]}
+    </>
+  );
+}
+
+function splitFact(value?: string) {
+  const text = value?.trim() || "";
+  if (!text) return { primary: "", secondary: "" };
+
+  const dateMatch = text.match(/^([A-Za-z]+),\s+(.+)$/);
+  if (dateMatch) return { primary: dateMatch[1], secondary: dateMatch[2] };
+
+  const timeMatch = text.match(/^(.+?)\s+(\([^)]+\))$/);
+  if (timeMatch) return { primary: timeMatch[1], secondary: timeMatch[2] };
+
+  const comma = text.indexOf(",");
+  if (comma > 0) {
+    return { primary: text.slice(0, comma).trim(), secondary: text.slice(comma + 1).trim() };
+  }
+
+  return { primary: text, secondary: "" };
 }
 
 function shortDateLabel(value?: string) {

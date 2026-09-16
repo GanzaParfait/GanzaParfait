@@ -236,7 +236,7 @@ export default function Navbar() {
             className="hidden md:flex"
             style={{ flex: 1, justifyContent: "center" }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "0.2rem" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.85rem" }}>
               {navLinks.map((link) => {
                 const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
                 return (
@@ -246,9 +246,9 @@ export default function Navbar() {
                   aria-current={isActive ? "page" : undefined}
                   className={isActive ? "nav-link is-active" : "nav-link"}
                   style={{
-                    padding: "0.4rem 0.65rem",
+                    padding: "0.45rem 0.35rem",
                     borderRadius: 0,
-                    fontSize: "0.85rem",
+                    fontSize: "0.875rem",
                     fontWeight: isActive ? 700 : 600,
                     textDecoration: "none",
                     transition: "color 0.2s ease",

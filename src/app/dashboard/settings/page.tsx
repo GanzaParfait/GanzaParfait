@@ -498,7 +498,14 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {view === "announcement" && <AnnouncementEditor settings={settings} patch={patch} />}
+          {view === "announcement" && (
+            <AnnouncementEditor
+              settings={settings}
+              patch={patch}
+              saving={saving}
+              onSave={() => persist(undefined, "Announcement saved.")}
+            />
+          )}
           {view === "email" && <EmailEditor settings={settings} patch={patch} />}
         </div>
       </div>

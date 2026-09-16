@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { RiArrowRightLine, RiMapPinLine } from "react-icons/ri";
-import { education, experience, siteConfig } from "@/data/site-data";
+import { education, experience } from "@/data/site-data";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import { buildPageMetadata } from "@/lib/seo";
 import { buildBreadcrumbListJsonLd, buildGraph, buildWebPageJsonLd } from "@/lib/schema";
 import { JsonLd } from "@/components/seo/JsonLd";
-import Breadcrumbs from "@/components/seo/Breadcrumbs";
 
 const PAGE_DESCRIPTION =
   "Professional record for Prince Parfait GANZA: Founder and CEO of LERONY Ltd, with software engineering, client systems, and training kept as evidence.";
@@ -36,61 +35,73 @@ export default function ExperiencePage() {
           buildBreadcrumbListJsonLd(breadcrumbItems, "/experience"),
         ])}
       />
-      <Breadcrumbs items={breadcrumbItems} />
 
-      <section className="section pt-8 pb-10" aria-label="Experience header">
-        <div className="container max-w-4xl">
+      <section className="section page-compact-hero" aria-label="Experience header">
+        <div className="container max-w-3xl">
           <AnimatedSection>
             <p className="section-label">Experience</p>
-            <h1 className="theme-heading mb-4">The record behind the identity.</h1>
-            <p className="theme-copy text-lg leading-relaxed max-w-2xl">
-              Founder and CEO of LERONY Ltd is the lead role. Software engineering, training, and client systems stay here as evidence. Compensation and unverified titles are omitted.
+            <h1 className="theme-heading mb-3">The record behind the identity.</h1>
+            <p className="theme-copy leading-relaxed max-w-2xl">
+              Founder and CEO of LERONY Ltd leads. Software engineering, training, and client systems stay as evidence.
             </p>
           </AnimatedSection>
         </div>
       </section>
 
       <section className="section pt-0" aria-label="Professional experience">
-        <div className="container max-w-4xl">
-          <div className="space-y-6">
+        <div className="container max-w-3xl">
+          <div className="experience-list">
             {experience.map((item, i) => (
-              <AnimatedSection key={item.id} delay={i * 80}>
-                <article className="card p-7">
-                  <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: "var(--color-primary)" }}>
-                        {item.type === "training" ? "Training" : "Work"}
-                      </p>
-                      <h2 className="theme-heading text-xl">{item.role}</h2>
-                      <p className="font-medium mt-1" style={{ color: "var(--color-primary)" }}>{item.organization}</p>
-                    </div>
-                    <div className="text-sm theme-muted text-right">
-                      <p>{item.period}</p>
-                      {item.location && (
-                        <p className="inline-flex items-center gap-1 mt-1">
-                          <RiMapPinLine size={14} />
-                          {item.location}
-                        </p>
-                      )}
-                    </div>
+              <AnimatedSection key={item.id} delay={i * 60}>
+                <article className="experience-row">
+                  <div className="experience-row-top">
+                    <p className="experience-type">{item.type === "training" ? "Training" : "Work"}</p>
+                    <p className="experience-meta">
+                      {item.period}
+                      {item.location ? (
+                        <span>
+                          <RiMapPinLine size={13} /> {item.location}
+                        </span>
+                      ) : null}
+                    </p>
                   </div>
-                  <p className="theme-copy mb-4 leading-relaxed">{item.summary}</p>
-                  <ul className="space-y-1.5">
-                    {item.highlights.map((highlight) => (
-                      <li key={highlight} className="text-sm theme-copy pl-4 relative">
-                        <span className="absolute left-0 top-2 w-1.5 h-1.5 rounded-full bg-[#0E52A8]" />
-                        {highlight}
-                      </li>
-                    ))}
-                  </ul>
-                  {(item.id === "lerony" || item.id === "askfield" || item.id === "psta") && (
+                  <h2>{item.role}</h2>
+                  {item.website ? (
+                    <a
+                      href={item.website}
+                      className="experience-org"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {item.organization}
+                    </a>
+                  ) : (
+                    <p className="experience-org">{item.organization}</p>
+                  )}
+                  <p className="theme-copy experience-summary">{item.summary}</p>
+                  {item.highlights.length ? (
+                    <ul className="experience-highlights">
+                      {item.highlights.slice(0, 4).map((highlight) => (
+                        <li key={highlight}>{highlight}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  {item.id === "lerony" ? (
+                    <a
+                      href={item.website || "https://lerony.com"}
+                      className="experience-link"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Visit lerony.com <RiArrowRightLine size={14} />
+                    </a>
+                  ) : null}
+                  {(item.id === "askfield" || item.id === "psta") && (
                     <Link
                       href={item.id === "psta" ? "/projects/psta-accounting" : `/projects/${item.id}`}
-                      className="inline-flex items-center gap-1 text-sm font-semibold mt-4"
-                      style={{ color: "var(--color-primary)" }}
+                      className="experience-link"
                     >
-                      Related case study
-                      <RiArrowRightLine size={14} />
+                      Related work <RiArrowRightLine size={14} />
                     </Link>
                   )}
                 </article>
@@ -100,44 +111,32 @@ export default function ExperiencePage() {
         </div>
       </section>
 
-      <section className="section" aria-label="Education" style={{ background: "var(--color-bg-2)" }}>
-        <div className="container max-w-4xl">
-          <AnimatedSection className="mb-8">
+      <section className="section experience-edu" aria-label="Education">
+        <div className="container max-w-3xl">
+          <AnimatedSection className="mb-6">
             <p className="section-label">Education</p>
             <h2 className="theme-heading">Academic record.</h2>
           </AnimatedSection>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="experience-edu-grid">
             {education.map((item, i) => (
-              <AnimatedSection key={item.id} delay={i * 80}>
-                <article className="card p-6 h-full">
-                  <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "var(--color-primary)" }}>
-                    {item.period}
-                  </p>
-                  <h3 className="theme-heading text-lg mt-2">{item.program}</h3>
-                  <p className="theme-copy mt-1">{item.institution}</p>
-                  <p className="text-sm theme-muted mt-2">{item.status}</p>
+              <AnimatedSection key={item.id} delay={i * 60}>
+                <article className="experience-edu-card">
+                  <p>{item.period}</p>
+                  <h3>{item.program}</h3>
+                  <span>{item.institution}</span>
+                  <em>{item.status}</em>
                 </article>
               </AnimatedSection>
             ))}
           </div>
-        </div>
-      </section>
-
-      <section className="section" aria-label="Work call to action">
-        <div className="container text-center">
-          <AnimatedSection>
-            <h2 className="theme-heading mb-4">The systems behind these roles.</h2>
-            <p className="theme-copy mb-8 max-w-md mx-auto">
-              Selected work is documented as case studies — problem, contribution, technology — without invented metrics.
-            </p>
-            <Link href="/projects" className="btn btn-primary btn-lg">
-              View work
-              <RiArrowRightLine size={18} />
+          <div className="page-compact-cta">
+            <Link href="/projects" className="btn btn-primary">
+              View work <RiArrowRightLine size={16} />
             </Link>
-            <p className="theme-muted text-sm mt-6">
-              {siteConfig.company.name} · {siteConfig.contact.location}
-            </p>
-          </AnimatedSection>
+            <Link href="/contact" className="btn btn-outline">
+              Contact
+            </Link>
+          </div>
         </div>
       </section>
     </>

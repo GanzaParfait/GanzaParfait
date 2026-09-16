@@ -8,7 +8,6 @@ import type { ElementType } from "react";
 import { buildPageMetadata } from "@/lib/seo";
 import { buildBreadcrumbListJsonLd, buildGraph, buildWebPageJsonLd } from "@/lib/schema";
 import { JsonLd } from "@/components/seo/JsonLd";
-import Breadcrumbs from "@/components/seo/Breadcrumbs";
 
 const SERVICE_ICONS: Record<string, ElementType> = {
   globe: Globe,
@@ -46,9 +45,8 @@ export default function ServicesPage() {
           buildBreadcrumbListJsonLd(breadcrumbItems, "/services"),
         ])}
       />
-      <Breadcrumbs items={breadcrumbItems} />
 
-      <section className="section pt-8 pb-10" aria-label="Services header">
+      <section className="section page-compact-hero" aria-label="Services header">
         <div className="container max-w-4xl">
           <AnimatedSection>
             <p className="section-label">Capabilities</p>

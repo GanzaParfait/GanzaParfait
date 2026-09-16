@@ -140,7 +140,7 @@ export const DEFAULT_ABOUT_PAGE: AboutPageContent = {
         title: "LERONY Ltd",
         subtitle: "Founder & CEO",
         meta: "2025–Present · Kigali",
-        href: "/ventures",
+        href: "https://lerony.com",
       },
       {
         title: "Kigali Independent University (ULK)",

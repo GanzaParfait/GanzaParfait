@@ -559,10 +559,9 @@ Recommended primary navigation:
 - About
 - Work
 - Experience
-- Ventures
 - Contact
 
-Services remains a secondary page at `/services`.
+Services remains a secondary page at `/services`. LERONY Ltd is covered in About and Experience with a link to lerony.com — there is no separate Ventures page.
 
 Potential secondary content:
 
@@ -590,11 +589,10 @@ Order:
 3. Selected work — Caritas information systems, StockPro, AskField, and the PSTA ticket accounting system. No invented outcomes.
 4. Knowledge system — strategy, product, technology, and data. No skill percentages.
 5. Journey — the verified public path. Exact employers stay on Experience.
-6. Ventures — LERONY Ltd, kept distinct from this personal site.
-7. Principles — how the work is done.
-8. Speaking and training — the documented data-systems engagement of about 85 trainees. No invented event name.
-9. Booking — a configured public Google Calendar appointment URL, plus email and WhatsApp. Do not hardcode a private calendar.
-10. Closing statement.
+6. Principles — how the work is done.
+7. Speaking and training — the documented data-systems engagement of about 85 trainees. No invented event name.
+8. Booking — a configured public Google Calendar appointment URL, plus email and WhatsApp. Do not hardcode a private calendar.
+9. Closing statement.
 
 A visitor should still understand within about 10 seconds: Prince Parfait GANZA, founder and technologist in Kigali, with real work and a way to start a conversation.
 
