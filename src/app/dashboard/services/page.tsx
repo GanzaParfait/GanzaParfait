@@ -19,12 +19,13 @@ import {
 } from "@/lib/services-page";
 import { useSectionHash } from "@/hooks/useSectionHash";
 
-type SectionId = "hero" | "families" | "items" | "audiences" | "process" | "cta" | "seo";
+type SectionId = "hero" | "families" | "items" | "work" | "audiences" | "process" | "cta" | "seo";
 
 const SECTIONS: { id: SectionId; label: string }[] = [
   { id: "hero", label: "Hero" },
   { id: "families", label: "Families" },
   { id: "items", label: "Services" },
+  { id: "work", label: "Selected work" },
   { id: "audiences", label: "Audiences" },
   { id: "process", label: "Process" },
   { id: "cta", label: "CTA" },
@@ -178,6 +179,18 @@ export default function ServicesEditorPage() {
                 <Field label="Eyebrow" value={content.hero.label} onChange={(label) => patch({ hero: { ...content.hero, label } })} />
                 <Field label="Title" value={content.hero.title} area onChange={(title) => patch({ hero: { ...content.hero, title } })} />
                 <Field label="Body" value={content.hero.body} area onChange={(body) => patch({ hero: { ...content.hero, body } })} />
+                <Field
+                  label="Rail words (one per line)"
+                  value={listToLines(content.hero.rail)}
+                  area
+                  onChange={(value) => patch({ hero: { ...content.hero, rail: linesToList(value) } })}
+                />
+                <Field
+                  label="Rail note"
+                  value={content.hero.railNote}
+                  area
+                  onChange={(railNote) => patch({ hero: { ...content.hero, railNote } })}
+                />
               </>
             ) : null}
 
@@ -320,11 +333,57 @@ export default function ServicesEditorPage() {
               </>
             ) : null}
 
+            {section === "work" ? (
+              <>
+                <Field
+                  label="Label"
+                  value={content.selectedWork.label}
+                  onChange={(label) => patch({ selectedWork: { ...content.selectedWork, label } })}
+                />
+                <Field
+                  label="Title"
+                  value={content.selectedWork.title}
+                  onChange={(title) => patch({ selectedWork: { ...content.selectedWork, title } })}
+                />
+                <Field
+                  label="Subtitle"
+                  value={content.selectedWork.body || ""}
+                  area
+                  onChange={(body) => patch({ selectedWork: { ...content.selectedWork, body } })}
+                />
+                <Field
+                  label="CTA label"
+                  value={content.selectedWork.ctaLabel}
+                  onChange={(ctaLabel) => patch({ selectedWork: { ...content.selectedWork, ctaLabel } })}
+                />
+                <Field
+                  label="CTA href"
+                  value={content.selectedWork.ctaHref}
+                  onChange={(ctaHref) => patch({ selectedWork: { ...content.selectedWork, ctaHref } })}
+                />
+                <Field
+                  label="Project ids (one per line)"
+                  value={listToLines(content.selectedWork.projectIds)}
+                  area
+                  onChange={(value) =>
+                    patch({ selectedWork: { ...content.selectedWork, projectIds: linesToList(value) } })
+                  }
+                  hint="Use published project ids from the Projects catalog."
+                />
+              </>
+            ) : null}
+
             {section === "audiences" ? (
               <>
                 <Field label="Label" value={content.audiences.label} onChange={(label) => patch({ audiences: { ...content.audiences, label } })} />
                 <Field label="Title" value={content.audiences.title} onChange={(title) => patch({ audiences: { ...content.audiences, title } })} />
                 <Field label="Body" value={content.audiences.body} area onChange={(body) => patch({ audiences: { ...content.audiences, body } })} />
+                <Field
+                  label="Side note"
+                  value={content.audiences.sideNote || ""}
+                  area
+                  onChange={(sideNote) => patch({ audiences: { ...content.audiences, sideNote } })}
+                />
                 {content.audiences.items.map((item, index) => (
                   <div key={`${item.title}-${index}`} className="hp-mini-card">
                     <Field
@@ -357,6 +416,12 @@ export default function ServicesEditorPage() {
               <>
                 <Field label="Label" value={content.process.label} onChange={(label) => patch({ process: { ...content.process, label } })} />
                 <Field label="Title" value={content.process.title} onChange={(title) => patch({ process: { ...content.process, title } })} />
+                <Field
+                  label="Side note"
+                  value={content.process.note || ""}
+                  area
+                  onChange={(note) => patch({ process: { ...content.process, note } })}
+                />
                 {content.process.steps.map((step, index) => (
                   <div key={step.n} className="hp-mini-card">
                     <Field
@@ -388,6 +453,11 @@ export default function ServicesEditorPage() {
 
             {section === "cta" ? (
               <>
+                <Field
+                  label="Eyebrow"
+                  value={content.cta.label || ""}
+                  onChange={(label) => patch({ cta: { ...content.cta, label } })}
+                />
                 <Field label="Title" value={content.cta.title} onChange={(title) => patch({ cta: { ...content.cta, title } })} />
                 <Field label="Body" value={content.cta.body} area onChange={(body) => patch({ cta: { ...content.cta, body } })} />
                 <Field label="Primary label" value={content.cta.primaryLabel} onChange={(primaryLabel) => patch({ cta: { ...content.cta, primaryLabel } })} />
@@ -395,6 +465,12 @@ export default function ServicesEditorPage() {
                 <Field label="Email label" value={content.cta.secondaryLabel} onChange={(secondaryLabel) => patch({ cta: { ...content.cta, secondaryLabel } })} />
                 <Field label="Email href" value={content.cta.secondaryHref} onChange={(secondaryHref) => patch({ cta: { ...content.cta, secondaryHref } })} />
                 <Field label="WhatsApp label" value={content.cta.whatsappLabel} onChange={(whatsappLabel) => patch({ cta: { ...content.cta, whatsappLabel } })} />
+                <Field
+                  label="Trust points (one per line)"
+                  value={listToLines(content.cta.trust || [])}
+                  area
+                  onChange={(value) => patch({ cta: { ...content.cta, trust: linesToList(value) } })}
+                />
               </>
             ) : null}
 

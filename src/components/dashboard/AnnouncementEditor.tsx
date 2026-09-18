@@ -249,6 +249,18 @@ export default function AnnouncementEditor({
                   open={openPanels.includes("media")}
                   onToggle={() => togglePanel("media")}
                 >
+                  <label className="ann-check" style={{ marginBottom: "0.75rem" }}>
+                    <input
+                      type="checkbox"
+                      checked={settings.announcementShowMedia !== false}
+                      onChange={(event) => patch({ announcementShowMedia: event.target.checked })}
+                    />
+                    Show media panel (image / video)
+                  </label>
+                  <p style={{ margin: "0 0 0.75rem", fontSize: "0.72rem", color: "#64748b", lineHeight: 1.45 }}>
+                    When off — or when no image/video is uploaded — the modal uses a content-only layout
+                    instead of an empty blue panel.
+                  </p>
                   <Field
                     label="Media kicker"
                     value={settings.announcementMediaKicker || ""}

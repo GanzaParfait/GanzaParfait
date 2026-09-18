@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { buildPageMetadata } from "@/lib/seo";
 import { buildBreadcrumbListJsonLd, buildGraph, buildWebPageJsonLd } from "@/lib/schema";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -39,7 +40,9 @@ export default async function CvPage() {
           ),
         ])}
       />
-      <CvPageClient settings={settings} />
+      <Suspense fallback={<div className="cv-landing" style={{ minHeight: "40vh" }} />}>
+        <CvPageClient settings={settings} />
+      </Suspense>
     </>
   );
 }

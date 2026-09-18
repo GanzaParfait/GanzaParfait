@@ -32,6 +32,7 @@ export default function SelectedWork({
       id={embedded ? undefined : "work"}
       aria-label="Selected work"
       data-page-section={embedded ? undefined : true}
+      data-section-label={embedded ? undefined : "Selected work"}
     >
       <div className="container">
         <header className="selected-head">

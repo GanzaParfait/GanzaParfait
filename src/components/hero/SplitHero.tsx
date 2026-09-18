@@ -223,11 +223,11 @@ export default function SplitHero({
                   {secondaryCtaLabel}
                 </Link>
                 <Link
-                  href="/experience"
+                  href="/cv?source=homepage"
                   className="btn btn-ghost"
                   style={{ color: "var(--color-text-3)", fontWeight: 500 }}
                 >
-                  Experience
+                  View CV
                 </Link>
               </div>
 
@@ -424,6 +424,14 @@ export default function SplitHero({
             style={{ justifyContent: "center", width: "100%", height: "3.25rem", fontWeight: 600 }}
           >
             Contact
+          </Link>
+          <Link
+            href="/cv?source=homepage"
+            className="btn btn-outline"
+            onClick={() => setIsMoreOpen(false)}
+            style={{ justifyContent: "center", width: "100%", height: "3.25rem", fontWeight: 600 }}
+          >
+            View CV
           </Link>
           <Link
             href="/experience"

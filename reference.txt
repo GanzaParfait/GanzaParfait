@@ -1,369 +1,93 @@
-Redesign ONLY the existing CV/Resume system. Do not redesign unrelated website pages, navigation, dashboard modules, database architecture, or global visual identity.
-
-The current CV feature works, including PDF generation, but its information architecture and document design are weak. It currently feels like website content exported into PDF. Improve it into a genuinely professional CV/resume generator.
-
-IMPORTANT:
-Preserve existing verified portfolio data and existing CV functionality. Do not invent experience, dates, qualifications, language proficiency, certifications, metrics, employers, or achievements.
-
-==================================================
-1. THREE PURPOSE-BUILT CV FORMATS
-==================================================
-
-Keep these three formats, but make them genuinely different:
-
-1. PROFESSIONAL CV
-Detailed professional document, normally 2–3 pages.
-
-Recommended structure:
-- Header/contact
-- Professional Profile
-- Core Expertise
-- Professional Experience
-- Selected Projects / Systems
-- Leadership & Entrepreneurship
-- Education
-- Technical Skills
-- Languages
-- Training / Certifications / Achievements when verified
-- Selected professional links
-
-2. COMPACT RESUME
-Maximum 1–2 pages.
-Prioritize:
-- Header
-- Short profile
-- Core expertise
-- Most relevant experience
-- 2–3 selected projects
-- Education
-- Skills
-- Languages
-
-Remove long descriptions and unnecessary links.
-
-3. EXECUTIVE / PROFILE CV
-Leadership-oriented profile.
-Prioritize:
-- Executive identity
-- Executive profile
-- Leadership
-- Entrepreneurship
-- Major engagements
-- Selected impact/work
-- Capabilities
-- Education
-- Languages
-- Essential professional links
-
-Do NOT simply reuse identical content/order for all three formats.
-
-==================================================
-2. REDESIGN THE GENERATED PDF
-==================================================
-
-Create a premium, restrained professional document.
-
-Visual direction:
-- A4
-- clean white background
-- Prince Parfait brand navy/deep blue accents
-- strong typography
-- excellent spacing
-- subtle dividers
-- compact header
-- small section labels
-- clear hierarchy
-- no oversized website-style headings
-- no unnecessary cards
-- no decorative clutter
-- ATS-conscious/selectable text
-- print friendly
-- clickable links
-- proper page breaking
-- never split an experience awkwardly across pages where avoidable
-
-The PDF must look intentionally typeset as a CV, NOT like the website printed to PDF.
-
-Use a restrained 1-column layout for major narrative sections. A small 2-column area may be used intelligently for compact metadata such as skills/languages, but maintain readability and ATS compatibility.
-
-Do not waste a whole page on social links.
-
-Header should roughly contain:
-
-Prince Parfait GANZA
-Professional title/headline
-Kigali, Rwanda
-Email | Phone | Website
-LinkedIn | GitHub
-
-Only essential links should appear by default.
-
-==================================================
-3. REMOVE CONTENT DUPLICATION
-==================================================
+Yes. That can work very well for your personal-brand site, especially because the rest of the site is already becoming information-rich. I’d treat it as a very short multilingual opening sequence, not a traditional loading screen.
 
-The current generated CV duplicates LERONY Ltd under Leadership, Selected Work and Experience.
+Your reference is extremely minimal: dark full-screen background, one greeting at a time, then the actual site appears. For yours, I’d keep that simplicity but make it recognizable as Prince Parfait GANZA.
 
-Introduce deduplication/content-role logic.
+Recommended experience
 
-A record may be referenced in different sections only when the information serves a genuinely different purpose.
+When someone enters princeparfait.com for the first time:
 
-Do not repeat identical:
-- organization descriptions
-- role descriptions
-- dates
-- bullet points
-- project descriptions
+Full screen
+────────────────────────────
 
-For example:
-Founder & CEO at LERONY can be the professional/leadership record.
-Selected projects should then show actual selected systems/projects rather than another duplicate LERONY company entry.
+              Hello.
 
-==================================================
-4. LANGUAGES
-==================================================
+────────────────────────────
 
-Add Languages as a first-class CV data type.
+Then the same position transitions through configured greetings:
 
-Dashboard fields:
-- Language
-- Proficiency
-- Optional note
-- Public on CV
-- Sort order
+Hello.
+→ Bonjour.
+→ Muraho.
+→ مرحباً.
+→ Hallo.
+→ Hola.
 
-Do NOT infer proficiency.
+Then the last greeting fades/moves away and the homepage reveals underneath.
 
-Allow the administrator to enter/edit the actual proficiency.
+I wouldn't put your logo, name, loading percentage, social icons, or “Welcome to my portfolio” on this screen. The simplicity is what makes this type of opening feel premium.
 
-Languages must be individually selectable per CV format.
+Also keep the whole thing short—around 1.8–2.5 seconds total, rather than showing every configured language for several seconds. If you eventually configure 15 languages, the system shouldn't force visitors to watch all 15; the dashboard should let you control how many greetings participate in one opening sequence.
 
-==================================================
-5. FORMAT-SPECIFIC SECTION MANAGER
-==================================================
+Make it completely dashboard-controlled
 
-Each of the 3 CV formats needs independent configuration.
+This is the important part. Don't hard-code Hello → Bonjour → Muraho.
 
-For each format allow:
+Your dashboard could have an Intro Experience manager:
 
-- section visibility
-- drag/drop section ordering
-- record selection
-- record ordering
-- maximum number of records where relevant
-- CV-specific section title
-- optional CV-specific content override
+INTRO EXPERIENCE
+────────────────────────────────────────
 
-Possible sections:
+Status                         [ Enabled ● ]
 
-Profile
-Core Expertise
-Experience
-Leadership
-Projects
-Education
-Skills
-Languages
-Training
-Certifications
-Achievements
-Professional Links
-References
+Show
+○ First visit only
+○ Once per session
+○ Every visit
 
-Changing CV-specific copy MUST NOT overwrite the main website copy.
+Background                     [ #07111F ]
+Text                           [ #FFFFFF ]
 
-==================================================
-6. RECORD SELECTION
-==================================================
+Total duration                 [ 2.2 sec ]
 
-Experience and projects should not automatically dump every portfolio record into every CV.
+Transition
+[ Fade + vertical slide ▾ ]
 
-Provide selectors such as:
+Maximum greetings per visit    [ 6 ]
 
-Experience
-[✓] Founder & CEO — LERONY
-[✓] Frontend Development / API Integration — AskField
-[✓] Reservation Agent — PSTA
-[✓] Data Systems Trainer — Eshuri
+────────────────────────────────────────
+GREETINGS
 
-Projects
-[✓] Caritas Rwanda Information Systems
-[✓] AskField
-[✓] StockPro
-[ ] GotAllNews
-[ ] PSTA Ticket Accounting System
+☰  01   Hello.       English       ●
+☰  02   Muraho.      Kinyarwanda   ●
+☰  03   Bonjour.     French        ●
+☰  04   مرحباً.      Arabic        ●
+☰  05   Hallo.       German        ●
+☰  06   Hola.        Spanish       ○
 
-The exact available records must come from existing portfolio/database data.
+                         + Add greeting
+────────────────────────────────────────
 
-Do not hard-code these examples if equivalent records already exist.
+                [ Preview Intro ]
+                [ Save Changes ]
 
-==================================================
-7. SKILLS ARCHITECTURE
-==================================================
+Drag-and-drop should control order. Each greeting needs only text, language/locale, enabled, and position/order. You can add "Ciao", "Olá", "Jambo", or anything else later without touching code.
 
-Do not render skills as one giant comma-separated list.
+For Arabic and other RTL languages, the intro should automatically support the correct text direction.
 
-Support grouped skills such as:
+One improvement over the reference
 
-Engineering
-Frontend
-Backend
-Data & Reporting
-Databases
-Infrastructure / Deployment
-Product & Systems
-Business / Operations
+Don't make it an actual dependency for loading the application. Your homepage should already be loading behind it.
 
-Use only verified skills already stored or explicitly entered in the dashboard.
+Conceptually:
 
-Allow each skill group to be enabled/disabled per CV format.
+site loads → intro overlay appears → greetings animate → overlay reveals already-rendered homepage
 
-==================================================
-8. DASHBOARD UX
-==================================================
+rather than:
 
-Keep the existing split editor/preview concept because it is useful, but improve it.
+intro loads → wait → fetch website → render homepage
 
-Left:
-configuration/editor
+That distinction will make it feel much faster.
 
-Right:
-live document preview
+I would also configure first visit only as the default. Seeing it once feels like a brand moment; seeing it every time someone clicks Home can quickly become annoying. You can remember dismissal locally, while still having a dashboard option for once-per-session or every visit.
 
-Add clear tabs:
-
-Content | Sections | Records | Appearance | Download
-
-At the top retain:
-Professional CV
-Compact Resume
-Executive / Profile CV
-
-Preview must update immediately when settings change.
-
-Add:
-Save
-Preview PDF
-Download PDF
-
-If safe within the existing architecture, also support:
-Print
-DOCX export
-
-But PDF remains the canonical visual version.
-
-Do not implement DOCX by sacrificing PDF quality.
-
-==================================================
-9. PUBLIC /CV PAGE
-==================================================
-
-Redesign /cv so it does not display an enormous raw CV inside a generic website card.
-
-Create a compact professional landing page:
-
-CV / Resume
-Prince Parfait GANZA
-
-Short description.
-
-Three format options:
-Professional CV
-Compact Resume
-Executive / Profile CV
-
-Each can have:
-View
-Download PDF
-
-Clearly indicate the administrator-selected default.
-
-The embedded preview should resemble an A4 document and not simply become another long webpage.
-
-==================================================
-10. PDF DATA QUALITY
-==================================================
-
-Before rendering, normalize:
-
-- duplicated records
-- blank fields
-- invalid URLs
-- empty bullet arrays
-- missing dates
-- page-breaking issues
-- unnecessary social links
-- excessively long descriptions
-
-Never invent missing information.
-
-If information is missing, omit it or allow the dashboard administrator to add it.
-
-==================================================
-11. SEO / STRUCTURED DATA
-==================================================
-
-The public /cv page should have appropriate metadata:
-- title
-- description
-- canonical
-- Open Graph
-- Twitter metadata
-
-Connect it consistently to the existing Prince Parfait GANZA Person structured data where appropriate.
-
-Do not create conflicting Person entities.
-
-The downloadable PDF should have meaningful document metadata:
-Title
-Author
-Subject
-Keywords
-
-Use Prince Parfait GANZA as document author.
-
-==================================================
-12. RESPONSIVENESS + QUALITY
-==================================================
-
-Dashboard:
-desktop-first split preview, responsive on tablets/mobile.
-
-Public CV page:
-fully responsive.
-
-PDF:
-must remain A4 regardless of screen size.
-
-Test:
-- long experience descriptions
-- multiple pages
-- page breaks
-- hidden sections
-- reordered sections
-- different format configurations
-- empty optional sections
-- URLs
-- selectable PDF text
-- printing
-
-==================================================
-FINAL REQUIREMENT
-==================================================
-
-Do not rebuild unrelated parts of the project.
-
-First inspect the existing CV implementation, database/schema, reusable portfolio records and PDF generation approach.
-
-Then refactor the smallest necessary surface area.
-
-Preserve current functionality while significantly improving:
-1. CV information architecture
-2. visual quality
-3. format-specific configuration
-4. languages
-5. content selection
-6. deduplication
-7. generated PDF quality
-
-The final result should look like a professionally designed CV system belonging to a serious personal brand, not a website-to-PDF exporter.
+And respect prefers-reduced-motion: those visitors should get either a simple short fade or no intro.

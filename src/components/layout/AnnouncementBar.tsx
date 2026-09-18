@@ -113,6 +113,8 @@ export function AnnouncementCard({
   const calendarRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number | null>(null);
   const layout = settings.announcementLayout === "stack" ? "stack" : "side";
+  const showMediaPanel = settings.announcementShowMedia !== false && visuals.length > 0;
+  const sheetLayout = showMediaPanel ? layout : "stack";
   const headline = settings.announcementHeadline?.trim() || settings.announcementText?.trim() || "Announcement";
   const detail = settings.announcementDetail?.trim() || "";
   const label = settings.announcementCtaLabel?.trim() || "Continue";
@@ -248,7 +250,7 @@ export function AnnouncementCard({
 
   return (
     <div
-      className={`announcement-sheet is-${layout}${preview ? " is-preview" : ""}`}
+      className={`announcement-sheet is-${sheetLayout}${showMediaPanel ? "" : " is-content-only"}${preview ? " is-preview" : ""}`}
       role={preview ? undefined : "dialog"}
       aria-modal={preview ? undefined : true}
       aria-labelledby={titleId}
@@ -261,9 +263,9 @@ export function AnnouncementCard({
           <RiCloseLine size={18} />
         </button>
       ) : null}
+      {showMediaPanel ? (
       <div
         className="announcement-media"
-        aria-hidden={visuals.length === 0}
         onTouchStart={onMediaTouchStart}
         onTouchEnd={onMediaTouchEnd}
       >
@@ -291,9 +293,7 @@ export function AnnouncementCard({
           ) : (
             <img src={frame.url} alt="" className="announcement-frame" />
           )
-        ) : (
-          <div className="announcement-video-fallback" />
-        )}
+        ) : null}
 
         {(mediaTitle) && !playing ? (
           <div className="announcement-media-copy">
@@ -344,6 +344,7 @@ export function AnnouncementCard({
           </div>
         ) : null}
       </div>
+      ) : null}
       <div className="announcement-copy">
         <p className="announcement-kicker">{settings.announcementEyebrow?.trim() || "Announcement"}</p>
         <h2 id={titleId}>{headline}</h2>

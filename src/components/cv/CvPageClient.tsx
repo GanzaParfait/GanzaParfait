@@ -1,78 +1,264 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { RiDownloadLine, RiEyeLine, RiLoader4Line } from "react-icons/ri";
+import { useSearchParams } from "next/navigation";
+import {
+  RiDownloadLine,
+  RiEyeLine,
+  RiFileTextLine,
+  RiLoader4Line,
+  RiMailLine,
+  RiShieldCheckLine,
+  RiSmartphoneLine,
+  RiCloseLine,
+} from "react-icons/ri";
+import CvAccessDialog from "@/components/cv/CvAccessDialog";
+import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
 import type { SiteSettings } from "@/lib/supabase";
 import {
   CV_TEMPLATE_OPTIONS,
   cvPdfFilename,
   getCvConfig,
   resolveCvDocument,
+  type CvResolvedDocument,
   type CvTemplateId,
 } from "@/lib/cv";
+import {
+  cvAccessFormatLabel,
+  isCvActionGated,
+  parseCvAccessSource,
+  readCvUnlockedFromDocument,
+  type CvAccessAction,
+  type CvAccessSource,
+} from "@/lib/cv-access";
 
-function A4Preview({ settings, template }: { settings: SiteSettings; template: CvTemplateId }) {
-  const doc = useMemo(() => resolveCvDocument(settings, template), [settings, template]);
+function SkeletonLines({ widths }: { widths: string[] }) {
   return (
-    <article className="cv-sheet is-public" data-template={doc.template}>
-      <header className="cv-sheet-head">
-        <h1>{doc.name}</h1>
-        <p className="cv-sheet-headline">{doc.headline}</p>
-        <p className="cv-sheet-meta">
-          {[doc.contact.location, doc.contact.email, doc.contact.phone]
-            .filter(Boolean)
-            .join(" · ")}
-        </p>
-      </header>
-      {doc.sections.slice(0, 6).map((section) => (
-        <section key={section.id} className="cv-sheet-section">
-          <h2>{section.title}</h2>
-          {section.body ? <p>{section.body}</p> : null}
-          {section.chips?.length ? (
-            <p className="cv-sheet-chips">{section.chips.join(" · ")}</p>
-          ) : null}
-          {section.skillsByCategory?.slice(0, 3).map((group) => (
-            <p key={group.category} className="cv-sheet-skill">
-              <strong>{group.category}:</strong> {group.names.join(", ")}
-            </p>
-          ))}
-          {section.languages?.map((lang) => (
-            <p key={lang.name} className="cv-sheet-skill">
-              <strong>{lang.name}</strong>
-              {lang.proficiency ? ` — ${lang.proficiency}` : ""}
-            </p>
-          ))}
-          {section.items.slice(0, 3).map((item) => (
-            <div key={item.key} className="cv-sheet-item">
-              <div className="cv-sheet-item-head">
-                <h3>{item.title}</h3>
-                {item.period ? <span>{item.period}</span> : null}
-              </div>
-              {item.subtitle ? <p className="cv-sheet-sub">{item.subtitle}</p> : null}
-              {item.summary ? <p>{item.summary}</p> : null}
-            </div>
-          ))}
-        </section>
+    <div className="cv-skel-lines" aria-hidden="true">
+      {widths.map((width, index) => (
+        <span key={`${width}-${index}`} className="cv-skel-line" style={{ width }} />
       ))}
-      <p className="cv-sheet-more">Preview excerpt — download the PDF for the full document.</p>
+    </div>
+  );
+}
+
+function MiniDoc({
+  doc,
+  layer,
+  detailed,
+}: {
+  doc: CvResolvedDocument;
+  layer: "back" | "mid" | "front";
+  detailed: boolean;
+}) {
+  const contactLine = [doc.contact.location, doc.contact.email, doc.contact.phone]
+    .filter(Boolean)
+    .join(" | ");
+
+  return (
+    <article className={`cv-mini-doc is-${layer}`} aria-hidden={layer !== "front"}>
+      <p className="cv-mini-doc-format">{doc.label}</p>
+      <header className="cv-mini-doc-head">
+        <p className="cv-mini-doc-name">{doc.name}</p>
+        <p className="cv-mini-doc-headline">{doc.headline}</p>
+        {detailed ? <p className="cv-mini-doc-meta">{contactLine}</p> : null}
+      </header>
+
+      {detailed ? (
+        <>
+          <section className="cv-mini-doc-block">
+            <h3>Professional Profile</h3>
+            <SkeletonLines widths={["94%", "82%", "68%"]} />
+          </section>
+
+          <section className="cv-mini-doc-block">
+            <h3>Core Expertise</h3>
+            <ul className="cv-mini-expertise" aria-hidden="true">
+              {["70%", "62%", "66%", "58%"].map((width, index) => (
+                <li key={index}>
+                  <span className="cv-mini-bullet" />
+                  <span className="cv-skel-line" style={{ width }} />
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="cv-mini-doc-block">
+            <h3>Experience</h3>
+            <SkeletonLines widths={["88%", "74%", "60%"]} />
+          </section>
+        </>
+      ) : (
+        <SkeletonLines widths={["90%", "76%", "82%", "64%", "70%"]} />
+      )}
     </article>
   );
 }
 
+function FullPreview({
+  settings,
+  template,
+  onClose,
+  onDownload,
+  downloading,
+}: {
+  settings: SiteSettings;
+  template: CvTemplateId;
+  onClose: () => void;
+  onDownload: () => void;
+  downloading: boolean;
+}) {
+  useHistoryBackClose(true, onClose);
+  const doc = useMemo(() => resolveCvDocument(settings, template), [settings, template]);
+  const label = getCvConfig(settings).formats[template].label;
+
+  useEffect(() => {
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, []);
+
+  return (
+    <div className="cv-preview-layer" role="dialog" aria-modal="true" aria-label={`${label} preview`}>
+      <div className="cv-preview-dialog">
+        <div className="cv-preview-dialog-bar">
+          <div>
+            <p className="cv-preview-dialog-kicker">Preview</p>
+            <h2>{label}</h2>
+          </div>
+          <div className="cv-preview-dialog-actions">
+            <button type="button" className="btn btn-primary" onClick={onDownload} disabled={downloading}>
+              {downloading ? <RiLoader4Line size={16} className="cv-spin" /> : <RiDownloadLine size={16} />}
+              Download PDF
+            </button>
+            <button type="button" className="cv-preview-close" onClick={onClose} aria-label="Close preview">
+              <RiCloseLine size={20} />
+            </button>
+          </div>
+        </div>
+        <div className="cv-a4-frame">
+          <article className="cv-sheet is-public" data-template={doc.template}>
+            <header className="cv-sheet-head">
+              <h1>{doc.name}</h1>
+              <p className="cv-sheet-headline">{doc.headline}</p>
+              <p className="cv-sheet-meta">
+                {[doc.contact.location, doc.contact.email, doc.contact.phone]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+            </header>
+            {doc.sections.map((section) => (
+              <section key={section.id} className="cv-sheet-section">
+                <h2>{section.title}</h2>
+                {section.body ? <p>{section.body}</p> : null}
+                {section.chips?.length ? (
+                  <p className="cv-sheet-chips">{section.chips.join(" · ")}</p>
+                ) : null}
+                {section.skillsByCategory?.map((group) => (
+                  <p key={group.category} className="cv-sheet-skill">
+                    <strong>{group.category}:</strong> {group.names.join(", ")}
+                  </p>
+                ))}
+                {section.languages?.map((lang) => (
+                  <p key={lang.name} className="cv-sheet-skill">
+                    <strong>{lang.name}</strong>
+                    {lang.proficiency ? ` — ${lang.proficiency}` : ""}
+                  </p>
+                ))}
+                {section.items.map((item) => (
+                  <div key={item.key} className="cv-sheet-item">
+                    <div className="cv-sheet-item-head">
+                      <h3>{item.title}</h3>
+                      {item.period ? <span>{item.period}</span> : null}
+                    </div>
+                    {item.subtitle ? <p className="cv-sheet-sub">{item.subtitle}</p> : null}
+                    {section.id !== "links" && item.summary ? <p>{item.summary}</p> : null}
+                    {section.id === "links" && item.href ? (
+                      <p className="cv-sheet-sub">{item.href.replace(/^https?:\/\//, "")}</p>
+                    ) : null}
+                  </div>
+                ))}
+              </section>
+            ))}
+          </article>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function CvPageClient({ settings }: { settings: SiteSettings }) {
+  const searchParams = useSearchParams();
   const config = getCvConfig(settings);
-  const publicFormats = (Object.keys(config.formats) as CvTemplateId[]).filter(
-    (id) => id === config.defaultTemplate || config.formats[id].isPublic
+  const access = config.access;
+  const publicFormats = useMemo(
+    () =>
+      CV_TEMPLATE_OPTIONS.filter(
+        (opt) => opt.id === config.defaultTemplate || config.formats[opt.id].isPublic
+      ),
+    [config]
   );
   const [active, setActive] = useState<CvTemplateId>(config.defaultTemplate);
   const [viewing, setViewing] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState("");
+  const [unlocked, setUnlocked] = useState(false);
+  const [gateOpen, setGateOpen] = useState(false);
+  const [pending, setPending] = useState<{ template: CvTemplateId; action: CvAccessAction } | null>(
+    null
+  );
+  const [toast, setToast] = useState("");
+  const pendingRef = useRef<{ template: CvTemplateId; action: CvAccessAction } | null>(null);
 
-  const download = async (template: CvTemplateId) => {
+  const source: CvAccessSource = useMemo(() => {
+    const raw = searchParams.get("source");
+    if (raw) return parseCvAccessSource(raw);
+    if (typeof document !== "undefined" && !document.referrer) return "direct";
+    return "cv_page";
+  }, [searchParams]);
+
+  useEffect(() => {
+    setUnlocked(readCvUnlockedFromDocument());
+  }, []);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = window.setTimeout(() => setToast(""), 2800);
+    return () => window.clearTimeout(t);
+  }, [toast]);
+
+  const stackOrder = useMemo(() => {
+    const preferred = [
+      config.defaultTemplate,
+      ...(["professional", "compact", "executive"] as CvTemplateId[]).filter(
+        (id) => id !== config.defaultTemplate
+      ),
+    ];
+    return preferred
+      .filter((id) => {
+        const format = config.formats[id];
+        if (!format) return false;
+        // Hero papers: showInHero (default true). Still keep format in dashboard when off.
+        if (format.showInHero === false) return false;
+        return true;
+      })
+      .slice(0, 3) as CvTemplateId[];
+  }, [config]);
+
+  const stackDocs = useMemo(
+    () => stackOrder.map((id) => resolveCvDocument(settings, id)),
+    [settings, stackOrder]
+  );
+
+  const frontDoc = stackDocs[0] || resolveCvDocument(settings, config.defaultTemplate);
+
+  const runDownload = async (template: CvTemplateId) => {
     setError("");
     setDownloading(true);
+    setActive(template);
     try {
       const res = await fetch(`/api/cv/pdf?template=${template}&download=1`);
       if (!res.ok) {
@@ -95,90 +281,221 @@ export default function CvPageClient({ settings }: { settings: SiteSettings }) {
     }
   };
 
+  const runView = (template: CvTemplateId) => {
+    setActive(template);
+    setViewing(true);
+  };
+
+  const requestAccess = (template: CvTemplateId, action: CvAccessAction) => {
+    setActive(template);
+    if (!isCvActionGated(access, action) || unlocked) {
+      if (action === "view") runView(template);
+      else void runDownload(template);
+      return;
+    }
+    const next = { template, action };
+    pendingRef.current = next;
+    setPending(next);
+    setGateOpen(true);
+  };
+
+  const handleUnlocked = ({ skipped }: { skipped: boolean }) => {
+    const next = pendingRef.current || pending;
+    setGateOpen(false);
+    setUnlocked(true);
+    setPending(null);
+    pendingRef.current = null;
+    if (!next) return;
+    if (!skipped) {
+      setToast(`You're in. ${cvAccessFormatLabel(next.template, config.formats[next.template].label)} unlocked.`);
+    }
+    if (next.action === "view") runView(next.template);
+    else void runDownload(next.template);
+  };
+
   return (
     <div className="cv-landing">
-      <div className="container cv-landing-inner">
-        <header className="cv-landing-hero">
-          <p className="cv-landing-kicker">Curriculum Vitae</p>
-          <h1>CV / Resume</h1>
-          <p className="cv-landing-name">Prince Parfait GANZA</p>
-          <p className="cv-landing-lead">
-            Professionally typeset A4 documents — selectable text, print-ready, grounded in verified
-            portfolio records. Choose a format, preview, or download PDF.
-          </p>
-          {error ? (
-            <p className="cv-page-error" role="alert">
-              {error}
+      <section className="cv-hero">
+        <div className="container cv-hero-grid">
+          <div className="cv-hero-copy">
+            <p className="cv-landing-kicker">— CV / Resume</p>
+            <h1>My professional profile in one place.</h1>
+            <p className="cv-landing-lead">
+              Download a professionally designed CV tailored to different contexts. All content is
+              based on verified portfolio, experience and education data.
             </p>
-          ) : null}
-        </header>
+            <p className="cv-hero-script" aria-hidden="true">
+              Ideas to impact
+            </p>
+            {error ? (
+              <p className="cv-page-error" role="alert">
+                {error}
+              </p>
+            ) : null}
+          </div>
 
-        <div className="cv-format-cards">
-          {publicFormats.map((id) => {
-            const opt = CV_TEMPLATE_OPTIONS.find((o) => o.id === id)!;
-            const isDefault = id === config.defaultTemplate;
-            return (
-              <article key={id} className={active === id ? "cv-format-card is-active" : "cv-format-card"}>
-                <div className="cv-format-card-top">
-                  <h2>{opt.label}</h2>
-                  {isDefault ? <span className="cv-format-badge">Default</span> : null}
-                </div>
-                <p>{opt.hint}</p>
-                <p className="cv-format-headline">{config.formats[id].headline}</p>
-                <div className="cv-format-card-actions">
-                  <button
-                    type="button"
-                    className="btn btn-outline"
-                    onClick={() => {
-                      setActive(id);
-                      setViewing(true);
-                    }}
-                  >
-                    <RiEyeLine size={16} /> View
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    disabled={downloading}
-                    onClick={() => void download(id)}
-                  >
-                    {downloading && active === id ? (
-                      <RiLoader4Line size={16} className="cv-spin" />
-                    ) : (
-                      <RiDownloadLine size={16} />
-                    )}
-                    Download PDF
-                  </button>
-                </div>
-              </article>
-            );
-          })}
-        </div>
-
-        <p className="cv-landing-note">
-          Prefer a conversation? <Link href="/contact">Contact</Link> ·{" "}
-          <Link href="/experience">Experience</Link>
-        </p>
-
-        {viewing ? (
-          <div className="cv-a4-stage">
-            <div className="cv-a4-toolbar">
-              <span>{config.formats[active].label}</span>
-              <div className="cv-a4-toolbar-actions">
-                <button type="button" onClick={() => void download(active)} disabled={downloading}>
-                  <RiDownloadLine size={16} /> {cvPdfFilename(active)}
-                </button>
-                <button type="button" onClick={() => setViewing(false)}>
-                  Close
-                </button>
-              </div>
+          <div className="cv-hero-stage" aria-hidden="true">
+            <div className="cv-doc-stack">
+              <div className="cv-doc-glow" />
+              {stackDocs[2] ? (
+                <MiniDoc doc={stackDocs[2]} layer="back" detailed={false} />
+              ) : stackDocs.length === 1 ? (
+                <MiniDoc doc={frontDoc} layer="back" detailed={false} />
+              ) : null}
+              {stackDocs[1] ? (
+                <MiniDoc doc={stackDocs[1]} layer="mid" detailed={false} />
+              ) : stackDocs.length === 1 ? (
+                <MiniDoc doc={frontDoc} layer="mid" detailed={false} />
+              ) : null}
+              <MiniDoc doc={frontDoc} layer="front" detailed />
             </div>
-            <div className="cv-a4-frame">
-              <A4Preview settings={settings} template={active} />
+            <aside className="cv-hero-aside">
+              <div className="cv-hero-pillars">
+                <span>Build</span>
+                <span>Solve</span>
+                <span>Collaborate</span>
+                <span className="is-accent">Impact</span>
+              </div>
+              <p>A professional summary of my journey, skills and experience.</p>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section className="cv-formats-section">
+        <div className="container">
+          <div className="cv-format-cards">
+            {publicFormats.map((opt) => {
+              const isDefault = opt.id === config.defaultTemplate;
+              const headline = config.formats[opt.id].headline;
+              return (
+                <article
+                  key={opt.id}
+                  className={isDefault ? "cv-format-card is-recommended" : "cv-format-card"}
+                >
+                  {isDefault ? <span className="cv-format-badge">Recommended</span> : null}
+                  <div className="cv-format-icon" aria-hidden="true">
+                    <RiFileTextLine size={22} />
+                  </div>
+                  <h2>{opt.label}</h2>
+                  <p className="cv-format-desc">{opt.description}</p>
+                  <p className="cv-format-headline">{headline}</p>
+                  <div className="cv-format-tags">
+                    {opt.tags.map((tag) => (
+                      <span key={tag}>{tag}</span>
+                    ))}
+                  </div>
+                  <div className="cv-format-card-actions">
+                    <button
+                      type="button"
+                      className={isDefault ? "btn btn-primary" : "btn btn-outline"}
+                      onClick={() => requestAccess(opt.id, "view")}
+                    >
+                      <RiEyeLine size={16} /> {opt.viewLabel}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-outline"
+                      disabled={downloading}
+                      onClick={() => requestAccess(opt.id, "download")}
+                    >
+                      {downloading && active === opt.id ? (
+                        <RiLoader4Line size={16} className="cv-spin" />
+                      ) : (
+                        <RiDownloadLine size={16} />
+                      )}
+                      Download PDF
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="cv-trust-bar" aria-label="CV qualities">
+        <div className="container cv-trust-grid">
+          <div className="cv-trust-item">
+            <span className="cv-trust-icon" aria-hidden="true">
+              <RiShieldCheckLine size={20} />
+            </span>
+            <div>
+              <strong>Verified information</strong>
+              <p>Based on portfolio and experience data</p>
             </div>
           </div>
-        ) : null}
-      </div>
+          <div className="cv-trust-item">
+            <span className="cv-trust-icon" aria-hidden="true">
+              <RiFileTextLine size={20} />
+            </span>
+            <div>
+              <strong>Professionally designed</strong>
+              <p>Clean, modern and print-ready</p>
+            </div>
+          </div>
+          <div className="cv-trust-item">
+            <span className="cv-trust-icon" aria-hidden="true">
+              <RiSmartphoneLine size={20} />
+            </span>
+            <div>
+              <strong>Always up to date</strong>
+              <p>Managed from the control center</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="cv-contact-cta">
+        <div className="container">
+          <div className="cv-contact-card">
+            <div className="cv-contact-copy">
+              <span className="cv-contact-icon" aria-hidden="true">
+                <RiMailLine size={22} />
+              </span>
+              <p>
+                Prefer a conversation instead? I&apos;m open to new opportunities, collaborations and
+                interesting ideas.
+              </p>
+            </div>
+            <Link href="/contact" className="btn btn-primary">
+              Contact me →
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {viewing ? (
+        <FullPreview
+          settings={settings}
+          template={active}
+          onClose={() => setViewing(false)}
+          onDownload={() => requestAccess(active, "download")}
+          downloading={downloading}
+        />
+      ) : null}
+
+      {pending ? (
+        <CvAccessDialog
+          open={gateOpen}
+          access={access}
+          template={pending.template}
+          formatLabel={config.formats[pending.template].label}
+          action={pending.action}
+          source={source}
+          onClose={() => {
+            setGateOpen(false);
+            setPending(null);
+          }}
+          onUnlocked={handleUnlocked}
+        />
+      ) : null}
+
+      {toast ? (
+        <div className="cv-access-toast" role="status" aria-live="polite">
+          {toast}
+        </div>
+      ) : null}
     </div>
   );
 }

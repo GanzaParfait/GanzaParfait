@@ -110,6 +110,11 @@ export default function ExperiencePageView() {
               Roles, systems work, training, and education that shaped the founder, entrepreneur, and technologist
               path — kept as a record of progress, not just positions.
             </p>
+            <div className="experience-hero-actions" style={{ marginTop: "1.1rem" }}>
+              <Link href="/cv?source=experience" className="btn btn-outline">
+                Download CV <RiArrowRightLine size={16} />
+              </Link>
+            </div>
           </AnimatedSection>
           <AnimatedSection delay={80} className="experience-hero-rail" aria-hidden="true">
             <p>People Systems Ideas Impact</p>
@@ -212,9 +217,14 @@ export default function ExperiencePageView() {
             </Link>
           </AnimatedSection>
           <AnimatedSection delay={70}>
-            <Link href="/projects" className="btn btn-outline btn-lg">
-              View selected work <RiArrowRightLine size={16} />
-            </Link>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", alignItems: "flex-start" }}>
+              <Link href="/projects" className="btn btn-outline btn-lg">
+                View selected work <RiArrowRightLine size={16} />
+              </Link>
+              <Link href="/cv?source=experience" className="btn btn-ghost">
+                Download CV <RiArrowRightLine size={16} />
+              </Link>
+            </div>
           </AnimatedSection>
         </div>
       </section>

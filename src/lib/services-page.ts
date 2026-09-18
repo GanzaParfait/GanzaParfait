@@ -41,22 +41,35 @@ export type ServicesPageContent = {
     label: string;
     title: string;
     body: string;
+    rail: string[];
+    railNote: string;
   };
   families: ServiceFamily[];
   items: ServiceItem[];
+  selectedWork: {
+    label: string;
+    title: string;
+    body?: string;
+    ctaLabel: string;
+    ctaHref: string;
+    projectIds: string[];
+  };
   audiences: {
     label: string;
     title: string;
     body: string;
+    sideNote?: string;
     items: { title: string; body: string }[];
   };
   process: {
     label: string;
     title: string;
+    note?: string;
     steps: { n: string; title: string; body: string }[];
   };
   leronyNote: string;
   cta: {
+    label?: string;
     title: string;
     body: string;
     primaryLabel: string;
@@ -64,6 +77,7 @@ export type ServicesPageContent = {
     secondaryLabel: string;
     secondaryHref: string;
     whatsappLabel: string;
+    trust?: string[];
   };
   seo: {
     title: string;
@@ -87,9 +101,11 @@ export function serviceFocusHref(focus: ServiceFocus | null | "all") {
 
 export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
   hero: {
-    label: "Capabilities",
-    title: "Different challenges. The right way to move them forward.",
-    body: "From digital products and business systems to online growth, operational improvement and hands-on technical support.",
+    label: "Services",
+    title: "From ideas to real impact.",
+    body: "Digital products, presence, systems and hands-on support.",
+    rail: ["Ideas", "People", "Systems", "Impact"],
+    railNote: "Practical technology for a more connected Rwanda and beyond.",
   },
   families: [
     {
@@ -97,7 +113,7 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
       label: "Build",
       title: "Build digital products",
       summary:
-        "Create useful digital products, websites, platforms and software around real operational or business needs.",
+        "Websites, web applications, business systems and e-commerce experiences.",
       layout: "modules",
       sortOrder: 1,
     },
@@ -106,7 +122,7 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
       label: "Grow",
       title: "Grow a digital presence",
       summary:
-        "Help businesses, organizations, products and brands become more visible and operational online.",
+        "Social media, marketplace support, content publishing and brand presence.",
       layout: "feature",
       sortOrder: 2,
     },
@@ -114,7 +130,7 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
       id: "transform",
       label: "Transform",
       title: "Improve how work gets done",
-      summary: "Use technology, data and automation to improve how organizations operate.",
+      summary: "Business systems, data, automation and practical AI for everyday operations.",
       layout: "workflow",
       sortOrder: 3,
     },
@@ -123,7 +139,7 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
       label: "Support",
       title: "Support ideas and operations",
       summary:
-        "Practical technical and operational support that helps people and organizations navigate digital work.",
+        "Technical guidance, international client support, training and ongoing assistance.",
       layout: "assist",
       sortOrder: 4,
     },
@@ -186,7 +202,7 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
     {
       id: "business-systems",
       slug: "business-systems",
-      title: "Business & Enterprise Systems",
+      title: "Business Systems",
       shortTitle: "Business systems",
       category: "build",
       summary: "Operational software for workflows, records, inventory, reporting and administration.",
@@ -212,7 +228,7 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
     {
       id: "api-integration",
       slug: "api-integration",
-      title: "API & Platform Integration",
+      title: "Integrations & APIs",
       shortTitle: "Integrations",
       category: "build",
       summary: "Connect products to APIs, services and existing platforms without fragile glue.",
@@ -342,7 +358,7 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
     {
       id: "marketplace-support",
       slug: "marketplace-support",
-      title: "Marketplace & E-commerce Support",
+      title: "Marketplace & E-commerce",
       shortTitle: "Marketplaces",
       category: "grow",
       summary: "Onboarding, catalog organization and product publishing for digital commerce surfaces.",
@@ -394,7 +410,7 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
     {
       id: "seo-discoverability",
       slug: "seo-discoverability",
-      title: "SEO & Discoverability Implementation",
+      title: "SEO & Discoverability",
       shortTitle: "SEO",
       category: "grow",
       summary: "Technical SEO, metadata and structured data that make pages machine-readable.",
@@ -547,7 +563,7 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
     {
       id: "tech-consulting",
       slug: "technology-consulting",
-      title: "Technology Consulting & Discovery",
+      title: "Technology Consulting",
       shortTitle: "Consulting",
       category: "transform",
       summary: "Clarify requirements, architecture and the right digital approach before building.",
@@ -599,7 +615,7 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
     {
       id: "international-support",
       slug: "international-client-support",
-      title: "International Client Digital Support",
+      title: "International Client Support",
       shortTitle: "International support",
       category: "support",
       summary: "Remote digital and process assistance for clients collaborating beyond Rwanda.",
@@ -653,7 +669,7 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
     {
       id: "training",
       slug: "training",
-      title: "Training",
+      title: "Training & Knowledge Transfer",
       shortTitle: "Training",
       category: "support",
       summary: "Practical technical and data-systems instruction grounded in real delivery work.",
@@ -702,70 +718,91 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
       sortOrder: 5,
     },
   ],
+  selectedWork: {
+    label: "Selected work",
+    title: "Proven in practice.",
+    body: "Real projects. Practical results.",
+    ctaLabel: "View all projects",
+    ctaHref: "/projects",
+    projectIds: ["caritas-systems", "askfield", "stockpro", "gotallnews"],
+  },
   audiences: {
     label: "Who this is for",
-    title: "Who I work with",
+    title: "Who I work with.",
     body: "Based in Kigali, working with clients and collaborators locally and internationally.",
+    sideNote: "Local solutions. Global opportunities.",
     items: [
-      { title: "Organizations", body: "Teams that need reliable systems, websites or operational digitization." },
-      { title: "Businesses", body: "Operators who need products, storefronts or clearer digital workflows." },
-      { title: "Founders", body: "Builders who need product, architecture or go-to-market digital support." },
-      { title: "Teams", body: "Groups that need implementation help, training or ongoing technical assistance." },
-      { title: "International clients", body: "Collaborators who need remote digital and process support from Kigali." },
+      { title: "Businesses", body: "Small and growing." },
+      { title: "Organizations", body: "NGOs, institutions." },
+      { title: "Founders", body: "From idea to product." },
+      { title: "International clients", body: "Remote support & coordination." },
     ],
   },
   process: {
     label: "Process",
-    title: "How an engagement works",
+    title: "A simple, practical process.",
+    note: "You'll always know what's next. Transparent process, practical updates, and support throughout.",
     steps: [
       {
         n: "01",
         title: "Understand",
-        body: "Clarify the problem, context and desired outcome before choosing a stack or scope.",
+        body: "Your goals and context.",
       },
       {
         n: "02",
-        title: "Define",
-        body: "Agree the right approach, sequence and technology for the work.",
+        title: "Plan",
+        body: "Scope and approach.",
       },
       {
         n: "03",
-        title: "Build / Execute",
-        body: "Implement the agreed solution or support with visible progress.",
+        title: "Execute",
+        body: "Build, implement or support.",
       },
       {
         n: "04",
-        title: "Deliver & Improve",
-        body: "Launch, hand over, support and improve where the engagement requires it.",
+        title: "Improve",
+        body: "Launch and grow.",
       },
     ],
   },
   leronyNote:
     "Larger commercial and organizational engagements may be delivered through LERONY Ltd. This personal site remains the place to understand the person, capabilities and evidence.",
   cta: {
-    title: "Not sure which service fits?",
-    body: "Start with the problem. We can determine the right approach from there.",
+    label: "Let's work together",
+    title: "Have a project or challenge in mind?",
+    body: "Start with the problem. We can figure out the right approach from there.",
     primaryLabel: "Start a conversation",
     primaryHref: "/contact",
     secondaryLabel: "Email",
     secondaryHref: "mailto:hello@princeparfait.com",
     whatsappLabel: "WhatsApp",
+    trust: ["Practical discussion", "No obligation", "Response within 24 hours"],
   },
   seo: {
     title: "Services & Capabilities | Prince Parfait GANZA",
     description:
-      "Services from Prince Parfait GANZA in Kigali: digital products, websites, business systems, digital presence, integrations, data, practical AI, consulting, training and technical support.",
+      "Services from Prince Parfait GANZA in Kigali, Rwanda: digital products, websites, business systems, digital presence, data, practical AI, consulting, training and technical support.",
   },
 };
 
 function mergeItem(fallback: ServiceItem | undefined, item: Partial<ServiceItem>, index: number): ServiceItem {
   const base = fallback || DEFAULT_SERVICES_PAGE.items[index] || DEFAULT_SERVICES_PAGE.items[0];
+  const staleTitles: Record<string, string> = {
+    "Business & Enterprise Systems": "Business Systems",
+    "API & Platform Integration": "Integrations & APIs",
+    "Marketplace & E-commerce Support": "Marketplace & E-commerce",
+    "SEO & Discoverability Implementation": "SEO & Discoverability",
+    "Technology Consulting & Discovery": "Technology Consulting",
+    "International Client Digital Support": "International Client Support",
+    Training: "Training & Knowledge Transfer",
+  };
+  const nextTitle = item.title || base.title;
   return {
     ...base,
     ...item,
     id: item.id || base.id,
     slug: item.slug || base.slug,
-    title: item.title || base.title,
+    title: staleTitles[nextTitle] || nextTitle || base.title,
     shortTitle: item.shortTitle || base.shortTitle,
     category: item.category || base.category,
     summary: item.summary || base.summary,
@@ -790,6 +827,35 @@ export function servicesPageFrom(
   const saved = settings.servicesPage;
   if (!saved) return DEFAULT_SERVICES_PAGE;
 
+  const staleHero =
+    !saved.hero?.title ||
+    saved.hero.title === "Different challenges. The right way to move them forward." ||
+    saved.hero.body?.includes("Practical technology services for businesses, organizations and ambitious ideas") ||
+    saved.hero.body?.includes("Digital products, online presence, smarter operations and hands-on support");
+
+  const staleFamilies =
+    saved.families?.some((family) =>
+      /Software, websites, platforms|Help brands, products and organizations become more visible|Use data, systems, automation and practical AI to improve|Guidance, training and practical digital support|Create useful digital products|Help businesses, organizations, products and brands become more visible|Use technology, data and automation to improve how organizations operate|Practical technical and operational support that helps people/.test(
+        family.summary || "",
+      ),
+    ) ?? false;
+
+  const staleAudiences =
+    saved.audiences?.items?.some((item) =>
+      item.title === "Teams" ||
+      /Operators who need|Teams that need reliable systems|Builders who need product|Collaborators who need remote digital|Groups that need implementation/.test(
+        item.body || "",
+      ),
+    ) ?? false;
+
+  const staleProcess =
+    saved.process?.title === "How an engagement works" ||
+    (saved.process?.steps?.some((step) =>
+      /Clarify the problem, context and desired outcome|Agree the right approach|Implement the agreed solution|Launch, hand over, support and improve/.test(
+        step.body || "",
+      ),
+    ) ?? false);
+
   const families = (saved.families?.length ? saved.families : DEFAULT_SERVICES_PAGE.families)
     .map((family, index) => {
       const fallback = DEFAULT_SERVICES_PAGE.families.find((item) => item.id === family.id) || DEFAULT_SERVICES_PAGE.families[index];
@@ -798,8 +864,8 @@ export function servicesPageFrom(
         ...family,
         id: family.id || fallback.id,
         label: family.label || fallback.label,
-        title: family.title || fallback.title,
-        summary: family.summary || fallback.summary,
+        title: staleFamilies ? fallback.title : family.title || fallback.title,
+        summary: staleFamilies ? fallback.summary : family.summary || fallback.summary,
         layout: family.layout || fallback.layout,
         sortOrder: family.sortOrder ?? fallback.sortOrder ?? index + 1,
       } satisfies ServiceFamily;
@@ -820,21 +886,63 @@ export function servicesPageFrom(
   return {
     ...DEFAULT_SERVICES_PAGE,
     ...saved,
-    hero: { ...DEFAULT_SERVICES_PAGE.hero, ...saved.hero },
+    hero: {
+      ...DEFAULT_SERVICES_PAGE.hero,
+      ...saved.hero,
+      ...(staleHero
+        ? {
+            label: DEFAULT_SERVICES_PAGE.hero.label,
+            title: DEFAULT_SERVICES_PAGE.hero.title,
+            body: DEFAULT_SERVICES_PAGE.hero.body,
+            rail: DEFAULT_SERVICES_PAGE.hero.rail,
+            railNote: DEFAULT_SERVICES_PAGE.hero.railNote,
+          }
+        : {}),
+      rail: saved.hero?.rail?.length && !staleHero ? saved.hero.rail : DEFAULT_SERVICES_PAGE.hero.rail,
+      railNote:
+        saved.hero?.railNote?.trim() && !staleHero
+          ? saved.hero.railNote
+          : DEFAULT_SERVICES_PAGE.hero.railNote,
+    },
     families,
     items: items.length ? items : DEFAULT_SERVICES_PAGE.items.filter((item) => item.published || options?.includeUnpublished),
-    audiences: {
-      ...DEFAULT_SERVICES_PAGE.audiences,
-      ...saved.audiences,
-      items: saved.audiences?.items?.length ? saved.audiences.items : DEFAULT_SERVICES_PAGE.audiences.items,
+    selectedWork: {
+      ...DEFAULT_SERVICES_PAGE.selectedWork,
+      ...saved.selectedWork,
+      body: saved.selectedWork?.body?.trim() || DEFAULT_SERVICES_PAGE.selectedWork.body,
+      projectIds: saved.selectedWork?.projectIds?.length
+        ? saved.selectedWork.projectIds
+        : DEFAULT_SERVICES_PAGE.selectedWork.projectIds,
     },
-    process: {
-      ...DEFAULT_SERVICES_PAGE.process,
-      ...saved.process,
-      steps: saved.process?.steps?.length ? saved.process.steps : DEFAULT_SERVICES_PAGE.process.steps,
-    },
+    audiences: staleAudiences
+      ? DEFAULT_SERVICES_PAGE.audiences
+      : {
+          ...DEFAULT_SERVICES_PAGE.audiences,
+          ...saved.audiences,
+          sideNote: saved.audiences?.sideNote?.trim() || DEFAULT_SERVICES_PAGE.audiences.sideNote,
+          items: saved.audiences?.items?.length ? saved.audiences.items : DEFAULT_SERVICES_PAGE.audiences.items,
+        },
+    process: staleProcess
+      ? DEFAULT_SERVICES_PAGE.process
+      : {
+          ...DEFAULT_SERVICES_PAGE.process,
+          ...saved.process,
+          note: saved.process?.note?.trim() || DEFAULT_SERVICES_PAGE.process.note,
+          steps: saved.process?.steps?.length ? saved.process.steps : DEFAULT_SERVICES_PAGE.process.steps,
+        },
     leronyNote: saved.leronyNote?.trim() || DEFAULT_SERVICES_PAGE.leronyNote,
-    cta: { ...DEFAULT_SERVICES_PAGE.cta, ...saved.cta },
+    cta: {
+      ...DEFAULT_SERVICES_PAGE.cta,
+      ...saved.cta,
+      label: saved.cta?.label?.trim() || DEFAULT_SERVICES_PAGE.cta.label,
+      trust: saved.cta?.trust?.length ? saved.cta.trust : DEFAULT_SERVICES_PAGE.cta.trust,
+      ...(saved.cta?.title === "Not sure which service fits?"
+        ? {
+            title: DEFAULT_SERVICES_PAGE.cta.title,
+            body: DEFAULT_SERVICES_PAGE.cta.body,
+          }
+        : {}),
+    },
     seo: { ...DEFAULT_SERVICES_PAGE.seo, ...saved.seo },
   };
 }

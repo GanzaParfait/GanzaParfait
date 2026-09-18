@@ -27,6 +27,10 @@ import {
   type CvTemplateId,
 } from "@/lib/cv";
 import {
+  CV_ACCESS_REMEMBER_OPTIONS,
+  type CvAccessRememberDays,
+} from "@/lib/cv-access";
+import {
   DEFAULT_SETTINGS,
   fetchRemoteSettings,
   getLocalSettings,
@@ -34,7 +38,22 @@ import {
   type SiteSettings,
 } from "@/lib/supabase";
 
-type DashTab = "content" | "sections" | "records" | "appearance" | "download";
+type LeadRow = {
+  id: string;
+  email: string;
+  name: string | null;
+  cv_format: string;
+  action: string;
+  marketing_consent: boolean;
+  source: string | null;
+  referrer: string | null;
+  utm_source: string | null;
+  utm_medium: string | null;
+  utm_campaign: string | null;
+  created_at: string;
+};
+
+type DashTab = "content" | "sections" | "records" | "appearance" | "access" | "leads" | "download";
 
 const inputStyle = {
   width: "100%",
@@ -59,6 +78,8 @@ const TABS: { id: DashTab; label: string }[] = [
   { id: "sections", label: "Sections" },
   { id: "records", label: "Records" },
   { id: "appearance", label: "Appearance" },
+  { id: "access", label: "Access" },
+  { id: "leads", label: "Leads" },
   { id: "download", label: "Download" },
 ];
 
@@ -123,6 +144,18 @@ export default function DashboardCvPage() {
   const [tab, setTab] = useState<DashTab>("content");
   const [downloading, setDownloading] = useState(false);
   const [pdfError, setPdfError] = useState("");
+  const [leads, setLeads] = useState<LeadRow[]>([]);
+  const [leadMetrics, setLeadMetrics] = useState({
+    total: 0,
+    uniqueEmails: 0,
+    downloads: 0,
+    views: 0,
+    marketingOptIns: 0,
+  });
+  const [leadFilterFormat, setLeadFilterFormat] = useState("all");
+  const [leadFilterAction, setLeadFilterAction] = useState("all");
+  const [leadsLoading, setLeadsLoading] = useState(false);
+  const [selectedLead, setSelectedLead] = useState<LeadRow | null>(null);
   const { runSave, saving } = useDashboardFeedback();
 
   useEffect(() => {
@@ -139,12 +172,54 @@ export default function DashboardCvPage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (tab !== "leads") return;
+    let cancelled = false;
+    setLeadsLoading(true);
+    (async () => {
+      try {
+        const params = new URLSearchParams();
+        if (leadFilterFormat !== "all") params.set("format", leadFilterFormat);
+        if (leadFilterAction !== "all") params.set("action", leadFilterAction);
+        const res = await fetch(`/api/cv/leads?${params.toString()}`);
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || "Failed to load leads");
+        if (cancelled) return;
+        setLeads(data.leads || []);
+        setLeadMetrics(
+          data.metrics || {
+            total: 0,
+            uniqueEmails: 0,
+            downloads: 0,
+            views: 0,
+            marketingOptIns: 0,
+          }
+        );
+      } catch {
+        if (!cancelled) setLeads([]);
+      } finally {
+        if (!cancelled) setLeadsLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [tab, leadFilterFormat, leadFilterAction]);
+
   const config = getCvConfig(settings);
+  const access = config.access;
   const format = config.formats[template];
   const catalog = useMemo(() => cvCatalogItems(), []);
   const skillGroups = useMemo(() => skillGroupOptions(), []);
 
   const patchConfig = (next: CvConfig) => setSettings((prev) => ({ ...prev, cvConfig: next }));
+
+  const patchAccess = (partial: Partial<typeof access>) => {
+    patchConfig({
+      ...config,
+      access: { ...access, ...partial },
+    });
+  };
 
   const patchFormat = (partial: Partial<CvFormatConfig>) => {
     patchConfig({
@@ -586,8 +661,11 @@ export default function DashboardCvPage() {
 
           {tab === "appearance" ? (
             <section style={panelStyle}>
-              <h2 style={{ fontSize: "0.85rem", fontWeight: 800, margin: "0 0 0.65rem" }}>Public visibility</h2>
-              <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.65rem" }}>
+              <h2 style={{ fontSize: "0.85rem", fontWeight: 800, margin: "0 0 0.35rem" }}>Formats on /cv</h2>
+              <p style={{ fontSize: "0.72rem", color: "#64748b", margin: "0 0 0.75rem" }}>
+                Toggle formats off to hide them on the website without deleting configuration. Default always stays available for cards.
+              </p>
+              <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.75rem" }}>
                 Default public format
                 <select
                   style={{ ...inputStyle, marginTop: "0.35rem" }}
@@ -603,17 +681,77 @@ export default function DashboardCvPage() {
                   ))}
                 </select>
               </label>
-              <label className="ann-check">
-                <input
-                  type="checkbox"
-                  checked={format.isPublic || template === config.defaultTemplate}
-                  disabled={template === config.defaultTemplate}
-                  onChange={(e) => patchFormat({ isPublic: e.target.checked })}
-                />
-                Show this format on /cv (default is always public)
-              </label>
+
+              <div style={{ display: "grid", gap: "0.55rem" }}>
+                {CV_TEMPLATE_OPTIONS.map((opt) => {
+                  const fmt = config.formats[opt.id];
+                  const isDefault = opt.id === config.defaultTemplate;
+                  return (
+                    <div
+                      key={opt.id}
+                      style={{
+                        border: "1px solid #e2e8f0",
+                        borderRadius: "0.75rem",
+                        padding: "0.7rem 0.8rem",
+                        background: isDefault ? "#eff6ff" : "#fff",
+                      }}
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", gap: "0.5rem", marginBottom: "0.45rem" }}>
+                        <strong style={{ fontSize: "0.82rem" }}>
+                          {opt.label}
+                          {isDefault ? " · Default" : ""}
+                        </strong>
+                        {!isDefault ? (
+                          <button
+                            type="button"
+                            className="btn btn-outline"
+                            style={{ padding: "0.2rem 0.55rem", fontSize: "0.68rem" }}
+                            onClick={() => patchConfig({ ...config, defaultTemplate: opt.id })}
+                          >
+                            Make default
+                          </button>
+                        ) : null}
+                      </div>
+                      <label className="ann-check" style={{ marginBottom: "0.3rem" }}>
+                        <input
+                          type="checkbox"
+                          checked={fmt.isPublic || isDefault}
+                          disabled={isDefault}
+                          onChange={(e) =>
+                            patchConfig({
+                              ...config,
+                              formats: {
+                                ...config.formats,
+                                [opt.id]: { ...fmt, isPublic: e.target.checked },
+                              },
+                            })
+                          }
+                        />
+                        Show card on /cv
+                      </label>
+                      <label className="ann-check">
+                        <input
+                          type="checkbox"
+                          checked={fmt.showInHero !== false}
+                          onChange={(e) =>
+                            patchConfig({
+                              ...config,
+                              formats: {
+                                ...config.formats,
+                                [opt.id]: { ...fmt, showInHero: e.target.checked },
+                              },
+                            })
+                          }
+                        />
+                        Show paper in hero stack
+                      </label>
+                    </div>
+                  );
+                })}
+              </div>
+
               <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginTop: "0.85rem" }}>
-                References text (if section enabled)
+                References text (current format, if section enabled)
                 <textarea
                   style={{ ...inputStyle, marginTop: "0.35rem", minHeight: "3rem", resize: "vertical" }}
                   value={format.referencesText || ""}
@@ -621,6 +759,288 @@ export default function DashboardCvPage() {
                   onChange={(e) => patchFormat({ referencesText: e.target.value })}
                 />
               </label>
+            </section>
+          ) : null}
+
+          {tab === "access" ? (
+            <section style={panelStyle}>
+              <h2 style={{ fontSize: "0.85rem", fontWeight: 800, margin: "0 0 0.35rem" }}>CV access</h2>
+              <p style={{ fontSize: "0.72rem", color: "#64748b", margin: "0 0 0.85rem" }}>
+                Gate View / Download behind a lightweight email prompt. The /cv landing page stays public.
+              </p>
+
+              <fieldset style={{ border: 0, margin: 0, padding: 0 }}>
+                <legend style={{ fontSize: "0.75rem", fontWeight: 800, color: "#334155", marginBottom: "0.45rem" }}>
+                  CV access mode
+                </legend>
+                <label style={{ display: "flex", gap: "0.5rem", alignItems: "center", fontSize: "0.8rem", fontWeight: 600, marginBottom: "0.35rem" }}>
+                  <input
+                    type="radio"
+                    name="cv-access-mode"
+                    checked={access.mode === "open"}
+                    onChange={() => patchAccess({ mode: "open" })}
+                  />
+                  Open access
+                </label>
+                <label style={{ display: "flex", gap: "0.5rem", alignItems: "center", fontSize: "0.8rem", fontWeight: 600, marginBottom: "0.75rem" }}>
+                  <input
+                    type="radio"
+                    name="cv-access-mode"
+                    checked={access.mode === "email"}
+                    onChange={() => patchAccess({ mode: "email" })}
+                  />
+                  Email before access
+                </label>
+              </fieldset>
+
+              <p style={{ fontSize: "0.75rem", fontWeight: 800, color: "#334155", margin: "0 0 0.4rem" }}>Gate actions</p>
+              <label className="ann-check" style={{ marginBottom: "0.35rem" }}>
+                <input
+                  type="checkbox"
+                  checked={access.gateView}
+                  onChange={(e) => patchAccess({ gateView: e.target.checked })}
+                />
+                View
+              </label>
+              <label className="ann-check" style={{ marginBottom: "0.75rem" }}>
+                <input
+                  type="checkbox"
+                  checked={access.gateDownload}
+                  onChange={(e) => patchAccess({ gateDownload: e.target.checked })}
+                />
+                Download
+              </label>
+
+              <label className="ann-check" style={{ marginBottom: "0.35rem" }}>
+                <input
+                  type="checkbox"
+                  checked={access.allowSkip}
+                  onChange={(e) => patchAccess({ allowSkip: e.target.checked })}
+                />
+                Allow visitor to skip
+              </label>
+              <label className="ann-check" style={{ marginBottom: "0.35rem" }}>
+                <input
+                  type="checkbox"
+                  checked={access.collectName}
+                  onChange={(e) => patchAccess({ collectName: e.target.checked })}
+                />
+                Collect name (optional)
+              </label>
+              <label className="ann-check" style={{ marginBottom: "0.75rem" }}>
+                <input
+                  type="checkbox"
+                  checked={access.marketingOptInAvailable}
+                  onChange={(e) => patchAccess({ marketingOptInAvailable: e.target.checked })}
+                />
+                Show marketing opt-in (unchecked by default)
+              </label>
+
+              <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.75rem" }}>
+                Remember unlocked access
+                <select
+                  style={{ ...inputStyle, marginTop: "0.35rem" }}
+                  value={access.rememberDays}
+                  onChange={(e) =>
+                    patchAccess({ rememberDays: Number(e.target.value) as CvAccessRememberDays })
+                  }
+                >
+                  {CV_ACCESS_REMEMBER_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.65rem" }}>
+                Modal heading (use {"{format}"})
+                <input
+                  style={{ ...inputStyle, marginTop: "0.35rem" }}
+                  value={access.modalHeadingTemplate}
+                  onChange={(e) => patchAccess({ modalHeadingTemplate: e.target.value })}
+                />
+              </label>
+              <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.65rem" }}>
+                Supporting text
+                <textarea
+                  style={{ ...inputStyle, marginTop: "0.35rem", minHeight: "3rem", resize: "vertical" }}
+                  value={access.modalBody}
+                  onChange={(e) => patchAccess({ modalBody: e.target.value })}
+                />
+              </label>
+              <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.65rem" }}>
+                Privacy / helper text
+                <input
+                  style={{ ...inputStyle, marginTop: "0.35rem" }}
+                  value={access.privacyHelper}
+                  onChange={(e) => patchAccess({ privacyHelper: e.target.value })}
+                />
+              </label>
+              <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.65rem" }}>
+                Marketing consent label
+                <input
+                  style={{ ...inputStyle, marginTop: "0.35rem" }}
+                  value={access.marketingLabel}
+                  onChange={(e) => patchAccess({ marketingLabel: e.target.value })}
+                />
+              </label>
+              <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.65rem" }}>
+                Skip label
+                <input
+                  style={{ ...inputStyle, marginTop: "0.35rem" }}
+                  value={access.skipLabel}
+                  onChange={(e) => patchAccess({ skipLabel: e.target.value })}
+                />
+              </label>
+              <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>
+                Submit button label
+                <input
+                  style={{ ...inputStyle, marginTop: "0.35rem" }}
+                  value={access.submitLabel}
+                  onChange={(e) => patchAccess({ submitLabel: e.target.value })}
+                />
+              </label>
+            </section>
+          ) : null}
+
+          {tab === "leads" ? (
+            <section style={panelStyle}>
+              <h2 style={{ fontSize: "0.85rem", fontWeight: 800, margin: "0 0 0.65rem" }}>CV leads</h2>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(7.5rem, 1fr))",
+                  gap: "0.5rem",
+                  marginBottom: "0.85rem",
+                }}
+              >
+                {[
+                  ["Total", leadMetrics.total],
+                  ["Unique", leadMetrics.uniqueEmails],
+                  ["Views", leadMetrics.views],
+                  ["Downloads", leadMetrics.downloads],
+                  ["Marketing", leadMetrics.marketingOptIns],
+                ].map(([label, value]) => (
+                  <div
+                    key={String(label)}
+                    style={{
+                      background: "#f8fafc",
+                      border: "1px solid #e2e8f0",
+                      borderRadius: "0.65rem",
+                      padding: "0.55rem 0.65rem",
+                    }}
+                  >
+                    <p style={{ margin: 0, fontSize: "0.65rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>
+                      {label}
+                    </p>
+                    <p style={{ margin: "0.15rem 0 0", fontSize: "1.1rem", fontWeight: 800, color: "#0b192c" }}>{value}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "0.75rem" }}>
+                <select
+                  style={{ ...inputStyle, width: "auto", minWidth: "9rem" }}
+                  value={leadFilterFormat}
+                  onChange={(e) => setLeadFilterFormat(e.target.value)}
+                >
+                  <option value="all">All formats</option>
+                  <option value="professional">Professional</option>
+                  <option value="compact">Compact</option>
+                  <option value="executive">Executive</option>
+                </select>
+                <select
+                  style={{ ...inputStyle, width: "auto", minWidth: "8rem" }}
+                  value={leadFilterAction}
+                  onChange={(e) => setLeadFilterAction(e.target.value)}
+                >
+                  <option value="all">All actions</option>
+                  <option value="view">View</option>
+                  <option value="download">Download</option>
+                </select>
+              </div>
+
+              {leadsLoading ? (
+                <p style={{ fontSize: "0.8rem", color: "#64748b" }}>Loading leads…</p>
+              ) : leads.length === 0 ? (
+                <p style={{ fontSize: "0.8rem", color: "#64748b" }}>No CV access leads yet.</p>
+              ) : (
+                <div style={{ overflowX: "auto" }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.78rem" }}>
+                    <thead>
+                      <tr style={{ textAlign: "left", color: "#64748b" }}>
+                        <th style={{ padding: "0.4rem 0.35rem", borderBottom: "1px solid #e2e8f0" }}>Email</th>
+                        <th style={{ padding: "0.4rem 0.35rem", borderBottom: "1px solid #e2e8f0" }}>Format</th>
+                        <th style={{ padding: "0.4rem 0.35rem", borderBottom: "1px solid #e2e8f0" }}>Action</th>
+                        <th style={{ padding: "0.4rem 0.35rem", borderBottom: "1px solid #e2e8f0" }}>Source</th>
+                        <th style={{ padding: "0.4rem 0.35rem", borderBottom: "1px solid #e2e8f0" }}>Marketing</th>
+                        <th style={{ padding: "0.4rem 0.35rem", borderBottom: "1px solid #e2e8f0" }}>Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {leads.map((lead) => (
+                        <tr
+                          key={lead.id}
+                          onClick={() => setSelectedLead(lead)}
+                          style={{ cursor: "pointer" }}
+                        >
+                          <td style={{ padding: "0.45rem 0.35rem", borderBottom: "1px solid #f1f5f9", fontWeight: 600 }}>
+                            {lead.email}
+                          </td>
+                          <td style={{ padding: "0.45rem 0.35rem", borderBottom: "1px solid #f1f5f9" }}>{lead.cv_format}</td>
+                          <td style={{ padding: "0.45rem 0.35rem", borderBottom: "1px solid #f1f5f9" }}>{lead.action}</td>
+                          <td style={{ padding: "0.45rem 0.35rem", borderBottom: "1px solid #f1f5f9" }}>{lead.source || "—"}</td>
+                          <td style={{ padding: "0.45rem 0.35rem", borderBottom: "1px solid #f1f5f9" }}>
+                            {lead.marketing_consent ? "Yes" : "No"}
+                          </td>
+                          <td style={{ padding: "0.45rem 0.35rem", borderBottom: "1px solid #f1f5f9" }}>
+                            {new Date(lead.created_at).toLocaleDateString()}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {selectedLead ? (
+                <div
+                  role="dialog"
+                  aria-label="Lead detail"
+                  style={{
+                    marginTop: "0.85rem",
+                    border: "1px solid #cbd5e1",
+                    borderRadius: "0.75rem",
+                    padding: "0.85rem",
+                    background: "#f8fafc",
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: "0.5rem", marginBottom: "0.55rem" }}>
+                    <strong style={{ fontSize: "0.85rem" }}>Lead detail</strong>
+                    <button type="button" className="btn btn-outline" style={{ padding: "0.25rem 0.55rem", fontSize: "0.72rem" }} onClick={() => setSelectedLead(null)}>
+                      Close
+                    </button>
+                  </div>
+                  <dl style={{ margin: 0, display: "grid", gap: "0.35rem", fontSize: "0.78rem" }}>
+                    <div><dt style={{ color: "#64748b", display: "inline" }}>Email: </dt><dd style={{ display: "inline", margin: 0, fontWeight: 700 }}>{selectedLead.email}</dd></div>
+                    {selectedLead.name ? <div><dt style={{ color: "#64748b", display: "inline" }}>Name: </dt><dd style={{ display: "inline", margin: 0 }}>{selectedLead.name}</dd></div> : null}
+                    <div><dt style={{ color: "#64748b", display: "inline" }}>CV: </dt><dd style={{ display: "inline", margin: 0 }}>{selectedLead.cv_format}</dd></div>
+                    <div><dt style={{ color: "#64748b", display: "inline" }}>Action: </dt><dd style={{ display: "inline", margin: 0 }}>{selectedLead.action}</dd></div>
+                    <div><dt style={{ color: "#64748b", display: "inline" }}>Source: </dt><dd style={{ display: "inline", margin: 0 }}>{selectedLead.source || "—"}</dd></div>
+                    <div><dt style={{ color: "#64748b", display: "inline" }}>Marketing: </dt><dd style={{ display: "inline", margin: 0 }}>{selectedLead.marketing_consent ? "Yes" : "No"}</dd></div>
+                    <div><dt style={{ color: "#64748b", display: "inline" }}>Date: </dt><dd style={{ display: "inline", margin: 0 }}>{new Date(selectedLead.created_at).toLocaleString()}</dd></div>
+                    {(selectedLead.utm_source || selectedLead.utm_medium || selectedLead.utm_campaign) ? (
+                      <div>
+                        <dt style={{ color: "#64748b", display: "inline" }}>UTM: </dt>
+                        <dd style={{ display: "inline", margin: 0 }}>
+                          {[selectedLead.utm_source, selectedLead.utm_medium, selectedLead.utm_campaign].filter(Boolean).join(" / ")}
+                        </dd>
+                      </div>
+                    ) : null}
+                  </dl>
+                </div>
+              ) : null}
             </section>
           ) : null}
 

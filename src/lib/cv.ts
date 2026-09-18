@@ -6,6 +6,7 @@ import {
   speakingEngagements,
   timeline,
 } from "@/data/site-data";
+import { DEFAULT_CV_ACCESS, normalizeCvAccess, type CvAccessConfig } from "@/lib/cv-access";
 import { resolvedSocials } from "@/lib/socials";
 import type { SiteSettings } from "@/lib/supabase";
 
@@ -61,6 +62,8 @@ export type CvFormatConfig = {
   template: CvTemplateId;
   label: string;
   isPublic: boolean;
+  /** Include this format in the /cv hero paper stack (independent of isPublic cards). */
+  showInHero: boolean;
   /** Per-format positioning line under the name */
   headline: string;
   profileOverride?: string;
@@ -81,6 +84,7 @@ export type CvConfig = {
   languages: CvLanguage[];
   expertise: CvExpertiseItem[];
   formats: Record<CvTemplateId, CvFormatConfig>;
+  access: CvAccessConfig;
   /** Bump when defaults change so stale local configs can be refreshed carefully */
   revision: number;
 };
@@ -223,6 +227,7 @@ function defaultFormat(template: CvTemplateId): CvFormatConfig {
       template,
       label: TEMPLATE_LABELS.compact,
       isPublic: true,
+      showInHero: true,
       headline: "Founder · Software Engineer · Technologist",
       sections: sectionsFor([
         { id: "profile" },
@@ -258,6 +263,7 @@ function defaultFormat(template: CvTemplateId): CvFormatConfig {
       template,
       label: TEMPLATE_LABELS.executive,
       isPublic: true,
+      showInHero: true,
       headline: "Founder & CEO · Technology & Innovation",
       sections: sectionsFor([
         { id: "profile" },
@@ -301,6 +307,7 @@ function defaultFormat(template: CvTemplateId): CvFormatConfig {
     template: "professional",
     label: TEMPLATE_LABELS.professional,
     isPublic: true,
+    showInHero: true,
     headline: "Founder · Software Engineer · Technologist",
     sections: sectionsFor([
       { id: "profile" },
@@ -351,6 +358,7 @@ export const DEFAULT_CV_CONFIG: CvConfig = {
   revision: CV_CONFIG_REVISION,
   languages: DEFAULT_LANGUAGES,
   expertise: DEFAULT_EXPERTISE,
+  access: DEFAULT_CV_ACCESS,
   formats: {
     professional: defaultFormat("professional"),
     compact: defaultFormat("compact"),
@@ -408,6 +416,7 @@ function mergeFormat(base: CvFormatConfig, saved?: Partial<CvFormatConfig> & { o
     template: base.template,
     label: saved.label || base.label,
     isPublic: saved.isPublic ?? base.isPublic,
+    showInHero: saved.showInHero ?? base.showInHero,
     headline:
       saved.headline?.trim() ||
       legacy.overrides?.headline?.trim() ||
@@ -472,6 +481,7 @@ export function getCvConfig(settings: SiteSettings | null | undefined): CvConfig
           profileOverride: prev?.profileOverride,
           referencesText: prev?.referencesText,
           isPublic: prev?.isPublic ?? base.isPublic,
+          showInHero: prev?.showInHero ?? base.showInHero,
           itemIncludes: { ...base.itemIncludes, ...(prev?.itemIncludes || {}) },
           itemOrder: { ...base.itemOrder, ...(prev?.itemOrder || {}) },
           itemOverrides: { ...base.itemOverrides, ...(prev?.itemOverrides || {}) },
@@ -494,6 +504,7 @@ export function getCvConfig(settings: SiteSettings | null | undefined): CvConfig
     languages,
     expertise,
     formats,
+    access: normalizeCvAccess(saved?.access),
   };
 }
 
@@ -1136,21 +1147,37 @@ export const CV_SECTION_OPTIONS: { id: CvSectionId; label: string }[] = (
   Object.keys(SECTION_TITLES) as CvSectionId[]
 ).map((id) => ({ id, label: SECTION_TITLES[id] }));
 
-export const CV_TEMPLATE_OPTIONS: { id: CvTemplateId; label: string; hint: string }[] = [
+export const CV_TEMPLATE_OPTIONS: {
+  id: CvTemplateId;
+  label: string;
+  hint: string;
+  description: string;
+  tags: [string, string];
+  viewLabel: string;
+}[] = [
   {
     id: "professional",
     label: TEMPLATE_LABELS.professional,
     hint: "Detailed professional document, typically 2–3 pages",
+    description: "Detailed document with full experience, projects, skills and education.",
+    tags: ["2–3 pages", "Complete profile"],
+    viewLabel: "View CV",
   },
   {
     id: "compact",
     label: TEMPLATE_LABELS.compact,
     hint: "Concise resume, ideally 1 page",
+    description: "Concise and focused. Ideal for quick sharing and applications.",
+    tags: ["1–2 pages", "Key highlights"],
+    viewLabel: "View Resume",
   },
   {
     id: "executive",
     label: TEMPLATE_LABELS.executive,
     hint: "Leadership, ventures, major engagements, selected impact",
+    description: "Leadership-focused profile, highlighting entrepreneurship and key engagements.",
+    tags: ["1–2 pages", "Leadership & impact"],
+    viewLabel: "View Profile",
   },
 ];
 

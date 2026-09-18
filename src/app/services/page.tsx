@@ -7,6 +7,7 @@ import {
   buildBreadcrumbListJsonLd,
   buildGraph,
   buildNamedPathItemListJsonLd,
+  buildPersonJsonLd,
   buildWebPageJsonLd,
 } from "@/lib/schema";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -27,10 +28,12 @@ export async function generateMetadata(): Promise<Metadata> {
     path: "/services",
     absoluteTitle: true,
     keywords: [
+      "Prince Parfait GANZA",
       "Prince Parfait GANZA services",
+      "Prince Parfait GANZA Kigali",
       "software engineering Rwanda",
-      "business systems",
-      "digital presence",
+      "business systems Kigali",
+      "digital presence Rwanda",
       "technology consulting Kigali",
     ],
   });
@@ -46,14 +49,20 @@ export default async function ServicesPage({ searchParams }: PageProps) {
   const focus = parseServiceFocus(params.focus);
   const settings = await getServerSiteSettings();
   const content = servicesPageFrom(settings);
-  const projects = mergeProjectCatalog(settings.projectRecords);
-  const projectTitles = Object.fromEntries(projects.map((project) => [project.id, project.title]));
+  const catalog = mergeProjectCatalog(settings.projectRecords);
+  const projects = catalog.map((project) => ({
+    id: project.id,
+    title: project.title,
+    description: project.description,
+    image: project.image || project.logo || "/images/projects/project-placeholder.png",
+    organization: project.organization,
+  }));
   const whatsapp = settings.whatsappNumber
     ? `https://wa.me/${settings.whatsappNumber.replace(/\D/g, "")}`
     : siteConfig.social.whatsapp;
 
   const listItems = content.families.map((family, index) => ({
-    name: family.title,
+    name: `${family.title} — Prince Parfait GANZA`,
     path: `/services?focus=${family.id}`,
     position: index + 1,
   }));
@@ -62,6 +71,7 @@ export default async function ServicesPage({ searchParams }: PageProps) {
     <>
       <JsonLd
         data={buildGraph([
+          buildPersonJsonLd(),
           buildWebPageJsonLd({
             path: "/services",
             name: content.seo.title,
@@ -69,7 +79,7 @@ export default async function ServicesPage({ searchParams }: PageProps) {
           }),
           buildBreadcrumbListJsonLd(breadcrumbItems, "/services"),
           buildNamedPathItemListJsonLd({
-            name: "Capability families",
+            name: "Services by Prince Parfait GANZA",
             path: "/services",
             items: listItems,
           }),
@@ -79,7 +89,7 @@ export default async function ServicesPage({ searchParams }: PageProps) {
         <ServicesPageView
           content={content}
           initialFocus={focus}
-          projectTitles={projectTitles}
+          projects={projects}
           whatsappUrl={whatsapp}
         />
       </Suspense>

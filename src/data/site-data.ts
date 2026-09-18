@@ -81,6 +81,7 @@ export const footerNav = [
       { label: "Work", href: "/projects" },
       { label: "Experience", href: "/experience" },
       { label: "Services", href: "/services" },
+      { label: "CV / Resume", href: "/cv?source=footer" },
     ],
   },
   {

@@ -43,7 +43,11 @@ export default function WorkProjectCard({
   const live = project?.links?.live;
 
   return (
-    <article className={wide ? "selected-card is-wide" : "selected-card"}>
+    <article
+      className={wide ? "selected-card is-wide" : "selected-card"}
+      data-advance-item
+      data-advance-label={title}
+    >
       <div className="selected-copy">
         <div className="selected-kicker">
           <span>{String(number).padStart(2, "0")}</span>

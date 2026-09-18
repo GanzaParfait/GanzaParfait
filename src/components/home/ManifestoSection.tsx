@@ -7,7 +7,7 @@ const ICONS = [RiLightbulbFlashLine, RiSettings3Line, RiBarChartBoxLine];
 export default function ManifestoSection({ manifesto, embedded = false }: { manifesto: HomepageContent["manifesto"]; embedded?: boolean }) {
   const Tag = embedded ? "div" : "section";
   return (
-    <Tag className={embedded ? "manifesto manifesto-embedded" : "manifesto"} id={embedded ? undefined : "manifesto"} aria-label="Opening statement" data-page-section={embedded ? undefined : true}>
+    <Tag className={embedded ? "manifesto manifesto-embedded" : "manifesto"} id={embedded ? undefined : "manifesto"} aria-label="Opening statement" data-page-section={embedded ? undefined : true} data-section-label={embedded ? undefined : "Manifesto"}>
       <div className="container manifesto-stage">
         <div className="manifesto-intro">
           <p className="section-label">{manifesto.label}</p>

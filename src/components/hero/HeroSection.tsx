@@ -73,6 +73,7 @@ export default function HeroSection() {
       className="hero-carousel"
       data-home-page
       data-page-section
+      data-section-label="Home"
       onMouseEnter={pauseOnFinePointer}
       onMouseLeave={() => setPaused(false)}
     >

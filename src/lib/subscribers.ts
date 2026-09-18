@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-export type SubscriberSource = "widget" | "contact" | "import" | "dashboard";
+export type SubscriberSource = "widget" | "contact" | "import" | "dashboard" | "cv";
 
 export type SubscriberRow = {
   id: string;

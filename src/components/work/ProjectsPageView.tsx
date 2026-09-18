@@ -243,7 +243,11 @@ function ProjectIndexCard({
   const href = `/projects/${project.id}`;
 
   return (
-    <article className={`projects-card${banner ? " is-banner" : ""}`}>
+    <article
+      className={`projects-card${banner ? " is-banner" : ""}`}
+      data-advance-item
+      data-advance-label={project.title}
+    >
       <Link href={href} className="projects-card-hit" aria-label={`Open ${project.title} case study`}>
         <div className="projects-card-copy">
           <em className={`projects-card-tag ${tagTone(project.category)}`}>{category}</em>

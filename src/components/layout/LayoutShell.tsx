@@ -8,6 +8,7 @@ import SubscribeWidget from "@/components/ui/SubscribeWidget";
 import PageFloaters from "@/components/ui/PageFloaters";
 import PageViewTracker from "@/components/analytics/PageViewTracker";
 import UtmCapture from "@/components/analytics/UtmCapture";
+import SiteIntroOverlay from "@/components/intro/SiteIntroOverlay";
 
 export default function LayoutShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -24,6 +25,7 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
+      {isHome ? <SiteIntroOverlay /> : null}
       <Navbar />
       <main
         id="main-content"

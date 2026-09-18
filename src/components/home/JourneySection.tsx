@@ -125,7 +125,7 @@ export default function JourneySection({
 
   return (
     <>
-      <Tag className={embedded ? "journey journey-embedded" : "journey"} id={embedded ? undefined : "journey"} aria-label="Journey" data-page-section={embedded ? undefined : true}>
+      <Tag className={embedded ? "journey journey-embedded" : "journey"} id={embedded ? undefined : "journey"} aria-label="Journey" data-page-section={embedded ? undefined : true} data-section-label={embedded ? undefined : "Journey"}>
         <div className="container journey-stage">
           <div className="journey-intro">
             <p className="section-label">{journey.label}</p>

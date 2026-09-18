@@ -41,6 +41,7 @@ export default function SpeakingSection({
       aria-label="Speaking and training"
       id="speaking"
       data-page-section={embedded ? undefined : true}
+      data-section-label={embedded ? undefined : "Speaking"}
     >
       <div className="container speaking-shell">
         <div className="speaking-hero">

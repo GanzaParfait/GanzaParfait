@@ -94,6 +94,8 @@ export interface SiteSettings {
   announcementPlace?: string;
   announcementLayout?: "side" | "stack";
   announcementMedia?: AnnouncementMedia[];
+  /** When false, hide the left media panel even if media exists. */
+  announcementShowMedia?: boolean;
   announcementSecondaryLabel?: string;
   announcementSecondaryHref?: string;
   announcementShare?: boolean;
@@ -167,6 +169,8 @@ export interface SiteSettings {
   identityRevision?: number;
   /** CV / Resume formats, public default, and CV-only overrides (stored in settings_json). */
   cvConfig?: import("@/lib/cv").CvConfig;
+  /** Homepage multilingual opening sequence (stored in settings_json). */
+  introExperience?: import("@/lib/intro-experience").IntroExperience;
 }
 
 export type HeroLayoutCopy = {
@@ -263,6 +267,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   announcementTime: "2:00 PM (GMT+2)",
   announcementPlace: "Kigali Marriott Hotel, Kigali, Rwanda",
   announcementLayout: "side",
+  announcementShowMedia: true,
   announcementSecondaryLabel: "Add to Calendar",
   announcementSecondaryHref: "",
   announcementShare: true,

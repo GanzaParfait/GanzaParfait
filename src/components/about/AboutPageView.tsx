@@ -92,6 +92,9 @@ export default function AboutPageView({
               <Link href={page.hero.secondaryCtaHref} className="btn btn-outline">
                 {page.hero.secondaryCtaLabel}
               </Link>
+              <Link href="/cv?source=about" className="btn btn-ghost">
+                View CV
+              </Link>
             </div>
           </AnimatedSection>
 
