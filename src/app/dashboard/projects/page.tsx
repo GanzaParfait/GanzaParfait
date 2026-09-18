@@ -63,18 +63,23 @@ export default function ProjectsPage() {
   const rows = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
+    <div className="projects-page" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+      <div className="projects-page-head dash-page-head" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
         <div>
           <h2 style={{ fontSize: "1.375rem", fontWeight: 800, color: "#0f172a" }}>Portfolio Projects ({projectsList.length})</h2>
           <p style={{ fontSize: "0.8125rem", color: "#64748b", marginTop: "0.15rem" }}>Search, filter, and keep case images from loading until a visitor opens them.</p>
         </div>
-        <button onClick={() => { setEditingProject(null); setIsProjectModalOpen(true); }} className="btn btn-primary btn-sm" style={{ gap: "0.375rem" }}>
+        <button
+          type="button"
+          onClick={() => { setEditingProject(null); setIsProjectModalOpen(true); }}
+          className="btn btn-primary btn-sm projects-new-btn"
+          style={{ gap: "0.375rem" }}
+        >
           <RiAddLine size={16} /> New Project
         </button>
       </div>
 
-      <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+      <div className="projects-page-filters" style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
         <label style={{ display: "flex", alignItems: "center", gap: "0.35rem", flex: "1 1 14rem", background: "#fff", border: "1px solid #e2e8f0", borderRadius: "0.5rem", padding: "0.4rem 0.65rem" }}>
           <RiSearchLine size={15} color="#64748b" />
           <input value={query} onChange={(event) => { setQuery(event.target.value); setPage(1); }} placeholder="Search title, organization, technology" style={{ border: 0, outline: "none", width: "100%", fontSize: "0.82rem" }} />
@@ -162,6 +167,16 @@ export default function ProjectsPage() {
           <span>{currentPage} of {pages}</span>
           <button type="button" disabled={currentPage >= pages} onClick={() => setPage((value) => value + 1)}>Next</button>
         </nav>
+      </div>
+
+      <div className="projects-page-foot" aria-hidden={false}>
+        <button
+          type="button"
+          onClick={() => { setEditingProject(null); setIsProjectModalOpen(true); }}
+          className="btn btn-primary projects-new-btn-mobile"
+        >
+          <RiAddLine size={16} /> New Project
+        </button>
       </div>
 
       <ProjectEditorModal

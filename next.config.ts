@@ -1,6 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // Middleware clones request bodies; default ~10MB truncates uploads and breaks FormData parsing.
+    proxyClientMaxBodySize: "110mb",
+    serverActions: {
+      bodySizeLimit: "110mb",
+    },
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],

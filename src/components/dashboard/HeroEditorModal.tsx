@@ -63,6 +63,7 @@ export default function HeroEditorModal({
 }: HeroEditorModalProps) {
   const [formData, setFormData] = useState<SiteSettings>(settings);
   const [previewTheme, setPreviewTheme] = useState<"light" | "dark">("light");
+  const [mobilePreviewOpen, setMobilePreviewOpen] = useState(false);
   const { runSave, saving } = useDashboardFeedback();
   const layout = formData.bannerLayout || "split_portrait";
   const show = (field: Parameters<typeof layoutShows>[1]) => layoutShows(layout, field);
@@ -74,6 +75,7 @@ export default function HeroEditorModal({
     const layout = initialLayout || settings.bannerLayout || "split_portrait";
     setFormData(settingsForLayout(settings, layout));
     setPreviewTheme("light");
+    setMobilePreviewOpen(false);
   }, [isOpen, settings, initialLayout]);
 
   useEffect(() => {
@@ -97,6 +99,8 @@ export default function HeroEditorModal({
       await onSave({
       bannerLayout: active,
       [imageKey]: synced[imageKey],
+      heroOverlayMobilePositionX: synced.heroOverlayMobilePositionX,
+      heroOverlayMobilePositionY: synced.heroOverlayMobilePositionY,
       heroLayoutCopy: {
         ...settings.heroLayoutCopy,
         [active]: layoutCopyFrom(synced),
@@ -107,43 +111,33 @@ export default function HeroEditorModal({
   };
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 200,
-        background: "rgba(11, 25, 44, 0.72)",
-        backdropFilter: "blur(8px)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "1rem",
-      }}
-    >
+    <div className="dash-modal-layer" role="dialog" aria-modal="true" aria-label="Live layout editor">
       <form
         onSubmit={handleSubmit}
-        style={{
-          width: "100%",
-          maxWidth: "1480px",
-          height: "94vh",
-          background: "#ffffff",
-          borderRadius: "1.25rem",
-          boxShadow: "0 25px 50px -12px rgba(0,0,0,0.35)",
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-        }}
+        className="dash-modal-sheet is-hero"
       >
-        <div style={{ padding: "1rem 1.5rem", borderBottom: "1px solid #e2e8f0", display: "flex", alignItems: "center", justifyContent: "space-between", background: "#f8fafc", gap: "1rem" }}>
-          <div>
-            <p style={{ fontSize: "0.7rem", fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "#0e52a8" }}>
-              Live layout editor
-            </p>
-            <h3 style={{ fontSize: "1.2rem", fontWeight: 800, color: "#0b192c" }}>
-              {HERO_LAYOUTS.find((item) => item.id === layout)?.name || "Hero"}
-            </h3>
+        <div className="dash-modal-head">
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "0.75rem", width: "100%" }}>
+            <div>
+              <p style={{ fontSize: "0.7rem", fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "#0e52a8" }}>
+                Live layout editor
+              </p>
+              <h3 style={{ fontSize: "1.2rem", fontWeight: 800, color: "#0b192c" }}>
+                {HERO_LAYOUTS.find((item) => item.id === layout)?.name || "Hero"}
+              </h3>
+            </div>
+            <button type="button" onClick={onClose} className="btn btn-ghost btn-sm dash-modal-close-icon" style={{ padding: "0.4rem" }} disabled={saving} aria-label="Cancel">
+              <RiCloseLine size={20} />
+            </button>
           </div>
-          <div style={{ display: "flex", gap: "0.75rem" }}>
+          <div className="dash-modal-head-actions dash-modal-head-actions-desktop">
+            <button
+              type="button"
+              className="btn btn-outline hp-mobile-preview-btn"
+              onClick={() => setMobilePreviewOpen((open) => !open)}
+            >
+              {mobilePreviewOpen ? "Edit fields" : "Open preview"}
+            </button>
             <button type="button" onClick={onClose} className="btn btn-ghost" style={{ padding: "0.55rem 1rem" }} disabled={saving}>
               <RiCloseLine size={18} /> Cancel
             </button>
@@ -153,10 +147,10 @@ export default function HeroEditorModal({
           </div>
         </div>
 
-        <div style={{ flex: 1, display: "flex", overflow: "hidden", minHeight: 0 }}>
-          <div style={{ width: "24rem", minWidth: "22rem", overflowY: "auto", borderRight: "1px solid #e2e8f0", padding: "1.25rem", display: "flex", flexDirection: "column", gap: "1.15rem" }}>
+        <div className={mobilePreviewOpen ? "dash-hero-body is-preview-open" : "dash-hero-body"}>
+          <div className="dash-hero-form">
             <Field label="Layout">
-              <div style={{ display: "flex", background: "#f1f5f9", borderRadius: "0.7rem", padding: "0.22rem", gap: "0.2rem" }}>
+              <div className="dash-hero-layout-tabs">
                 {visibleHeroLayouts(formData).map((item) => {
                   const active = layout === item.id;
                   return (
@@ -202,6 +196,59 @@ export default function HeroEditorModal({
                 </div>
               </Field>
             )}
+
+            {layout === "featured_overlay" ? (
+              <Field
+                label="Mobile image focus"
+                hint="Only affects phones. Drag the sliders until the person sits in frame, then open Mobile preview to check."
+              >
+                <div style={{ display: "grid", gap: "0.55rem" }}>
+                  <label style={{ fontSize: "0.72rem", fontWeight: 700, color: "#475569" }}>
+                    Horizontal {formData.heroOverlayMobilePositionX ?? 78}%
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      value={formData.heroOverlayMobilePositionX ?? 78}
+                      onChange={(event) => update({ heroOverlayMobilePositionX: Number(event.target.value) })}
+                      style={{ width: "100%", accentColor: "#0e52a8", marginTop: "0.25rem" }}
+                    />
+                  </label>
+                  <label style={{ fontSize: "0.72rem", fontWeight: 700, color: "#475569" }}>
+                    Vertical {formData.heroOverlayMobilePositionY ?? 12}%
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      value={formData.heroOverlayMobilePositionY ?? 12}
+                      onChange={(event) => update({ heroOverlayMobilePositionY: Number(event.target.value) })}
+                      style={{ width: "100%", accentColor: "#0e52a8", marginTop: "0.25rem" }}
+                    />
+                  </label>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem" }}>
+                    {[
+                      { label: "Face right", x: 78, y: 12 },
+                      { label: "Face center", x: 55, y: 15 },
+                      { label: "Upper body", x: 70, y: 25 },
+                    ].map((preset) => (
+                      <button
+                        key={preset.label}
+                        type="button"
+                        className="btn btn-outline btn-sm"
+                        onClick={() =>
+                          update({
+                            heroOverlayMobilePositionX: preset.x,
+                            heroOverlayMobilePositionY: preset.y,
+                          })
+                        }
+                      >
+                        {preset.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </Field>
+            ) : null}
 
             {show("name") && (
               <Field label="Display name">
@@ -388,8 +435,8 @@ export default function HeroEditorModal({
             )}
           </div>
 
-          <div style={{ flex: 1, minWidth: 0, position: "relative", background: previewTheme === "dark" ? "#050816" : "#ffffff" }}>
-            <div style={{ position: "absolute", top: "1rem", left: "1rem", zIndex: 5, display: "flex", gap: "0.5rem", alignItems: "center" }}>
+          <div className="dash-hero-preview" style={{ background: previewTheme === "dark" ? "#050816" : "#ffffff" }}>
+            <div style={{ position: "absolute", top: "1rem", left: "1rem", zIndex: 5, display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
               <span style={{
                 background: previewTheme === "dark" ? "rgba(0,0,0,0.55)" : "#0f172a",
                 color: "#fff",
@@ -422,9 +469,29 @@ export default function HeroEditorModal({
                 {previewTheme === "dark" ? <RiSunLine size={14} /> : <RiMoonLine size={14} />}
                 {previewTheme === "dark" ? "Light" : "Dark"}
               </button>
+              <button
+                type="button"
+                className="btn btn-outline btn-sm hp-mobile-preview-btn"
+                onClick={() => setMobilePreviewOpen(false)}
+              >
+                Back to edit
+              </button>
             </div>
             <HeroPreviewFrame key={`${layout}-${previewTheme}`} settings={formData} previewTheme={previewTheme} fit="contain" />
           </div>
+        </div>
+
+        <div className="dash-modal-footer">
+          <button
+            type="button"
+            className="btn btn-outline"
+            onClick={() => setMobilePreviewOpen((open) => !open)}
+          >
+            {mobilePreviewOpen ? "Edit fields" : "Open preview"}
+          </button>
+          <button type="submit" className="btn btn-primary" disabled={saving}>
+            <RiSaveLine size={16} /> {saving ? "Saving…" : "Save and activate"}
+          </button>
         </div>
       </form>
     </div>

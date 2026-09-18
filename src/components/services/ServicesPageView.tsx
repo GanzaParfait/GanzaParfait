@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   RiAddLine,
   RiArrowLeftLine,
@@ -180,9 +180,7 @@ export default function ServicesPageView({
   whatsappUrl: string;
 }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const focusFromUrl = parseServiceFocus(searchParams.get("focus"));
-  const [focus, setFocus] = useState<ServiceFocus | null>(initialFocus ?? focusFromUrl);
+  const [focus, setFocus] = useState<ServiceFocus | null>(initialFocus);
   const [search, setSearch] = useState("");
   const [draftSearch, setDraftSearch] = useState("");
   const [filtering, setFiltering] = useState(false);
@@ -231,8 +229,17 @@ export default function ServicesPageView({
   }, [content, families, focus, search]);
 
   useEffect(() => {
-    setFocus(focusFromUrl);
-  }, [focusFromUrl]);
+    setFocus(initialFocus);
+  }, [initialFocus]);
+
+  useEffect(() => {
+    const onPopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      setFocus(parseServiceFocus(params.get("focus")));
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
 
   useEffect(() => {
     if (!focus) return;
@@ -602,18 +609,30 @@ export default function ServicesPageView({
 
       <section className="svc-cta" aria-labelledby="svc-cta-heading" data-page-section data-section-label="Let's work together">
         <div className="container svc-cta-banner">
-          <div className="svc-cta-top">
-            <div className="svc-cta-copy">
-              {content.cta.label ? <p className="svc-cta-label">{content.cta.label}</p> : null}
-              <h2 id="svc-cta-heading">{content.cta.title}</h2>
-              <p>
-                {content.cta.body} Talk with{" "}
-                <Link href="/about" className="svc-seo-name">
-                  {siteConfig.name}
-                </Link>{" "}
-                in Kigali, Rwanda.
-              </p>
-            </div>
+          <div className="svc-cta-copy">
+            {content.cta.label ? <p className="svc-cta-label">{content.cta.label}</p> : null}
+            <h2 id="svc-cta-heading">{content.cta.title}</h2>
+            <p>
+              {content.cta.body.includes(siteConfig.name) ? (
+                <>
+                  {content.cta.body.split(siteConfig.name)[0]}
+                  <Link href="/about" className="svc-seo-name">
+                    {siteConfig.name}
+                  </Link>
+                  {content.cta.body.split(siteConfig.name).slice(1).join(siteConfig.name)}
+                </>
+              ) : (
+                <>
+                  {content.cta.body} Talk with{" "}
+                  <Link href="/about" className="svc-seo-name">
+                    {siteConfig.name}
+                  </Link>{" "}
+                  in Kigali, Rwanda, or remotely.
+                </>
+              )}
+            </p>
+          </div>
+          <div className="svc-cta-aside">
             <div className="svc-cta-actions">
               <Link href={content.cta.primaryHref} className="btn btn-primary">
                 <RiCalendarLine size={15} /> {content.cta.primaryLabel} <RiArrowRightLine size={15} />
@@ -627,16 +646,16 @@ export default function ServicesPageView({
                 </a>
               ) : null}
             </div>
+            {content.cta.trust?.length ? (
+              <ul className="svc-cta-trust">
+                {content.cta.trust.map((item) => (
+                  <li key={item}>
+                    <RiCheckboxCircleLine size={15} aria-hidden="true" /> {item}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
           </div>
-          {content.cta.trust?.length ? (
-            <ul className="svc-cta-trust">
-              {content.cta.trust.map((item) => (
-                <li key={item}>
-                  <RiCheckboxCircleLine size={15} aria-hidden="true" /> {item}
-                </li>
-              ))}
-            </ul>
-          ) : null}
         </div>
       </section>
 

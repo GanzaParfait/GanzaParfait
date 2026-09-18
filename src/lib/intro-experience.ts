@@ -31,11 +31,22 @@ export type IntroExperience = {
 export const INTRO_STORAGE_KEY = "ppg_intro_seen";
 export const INTRO_SESSION_KEY = "ppg_intro_session";
 
+/** Normalize to #rrggbb for <input type="color"> and reliable CSS. */
+export function normalizeIntroHex(value: string | undefined, fallback: string): string {
+  const raw = String(value || "").trim();
+  if (/^#[0-9a-fA-F]{6}$/.test(raw)) return `#${raw.slice(1).toLowerCase()}`;
+  if (/^#[0-9a-fA-F]{3}$/.test(raw)) {
+    const [, r, g, b] = raw;
+    return `#${r}${r}${g}${g}${b}${b}`.toLowerCase();
+  }
+  return fallback;
+}
+
 export const DEFAULT_INTRO_EXPERIENCE: IntroExperience = {
   enabled: true,
   frequency: "first_visit",
-  background: "#07111F",
-  textColor: "#FFFFFF",
+  background: "#000000",
+  textColor: "#ffffff",
   totalDurationMs: 2200,
   transition: "fade_slide",
   maxGreetings: 5,
@@ -88,8 +99,8 @@ export function introExperienceFrom(settings: SiteSettings | null | undefined): 
       raw.frequency === "session" || raw.frequency === "every_visit" || raw.frequency === "first_visit"
         ? raw.frequency
         : DEFAULT_INTRO_EXPERIENCE.frequency,
-    background: String(raw.background || DEFAULT_INTRO_EXPERIENCE.background),
-    textColor: String(raw.textColor || DEFAULT_INTRO_EXPERIENCE.textColor),
+    background: normalizeIntroHex(raw.background, DEFAULT_INTRO_EXPERIENCE.background),
+    textColor: normalizeIntroHex(raw.textColor, DEFAULT_INTRO_EXPERIENCE.textColor),
     totalDurationMs:
       Number.isFinite(duration) && duration >= 800 && duration <= 8000
         ? Math.round(duration)

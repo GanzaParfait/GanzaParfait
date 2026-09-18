@@ -48,44 +48,18 @@ export default function MediaManagerModal({
 
   const modal = (
     <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 500,
-        background: "rgba(0, 0, 0, 0.70)",
-        backdropFilter: "blur(5px)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "1rem",
-      }}
+      className="dash-modal-layer is-media"
+      role="dialog"
+      aria-modal="true"
+      aria-label={heading}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "62rem",
-          height: "min(88vh, 700px)",
-          background: "#eef2f7",
-          borderRadius: "0.5rem",
-          boxShadow: "0 25px 60px rgba(0,0,0,0.35)",
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-          border: "1px solid #dbe4f0",
-        }}
-      >
+      <div className="dash-modal-sheet is-media">
         <div
-          style={{
-            padding: "0.75rem 1rem",
-            background: "#0b1329",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexShrink: 0,
-          }}
+          className="dash-modal-head"
+          style={{ background: "#0b1329", borderBottom: "none" }}
         >
           <span style={{ fontSize: "0.8125rem", fontWeight: 700, color: "#ffffff" }}>{heading}</span>
           <button

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isDashboardAuthorized } from "@/lib/admin-auth";
-import { MEDIA_MAX_FILE_BYTES, isAllowedLibraryFile, looksLikeMediaUrl, mimeFromName } from "@/lib/media";
+import { isAllowedLibraryFile, looksLikeMediaUrl, mediaMaxBytesFor, mediaMaxLabel, mimeFromName } from "@/lib/media";
 import { assertSafeRemoteUrl, mediaAdminClient, uploadMediaBuffer } from "@/lib/media-server";
 
 export const runtime = "nodejs";
@@ -62,13 +62,14 @@ export async function POST(request: NextRequest) {
     }
 
     const length = Number(remote.headers.get("content-length") || 0);
-    if (length > MEDIA_MAX_FILE_BYTES) {
-      return NextResponse.json({ error: "That file is larger than 10 MB." }, { status: 400 });
+    const maxBytes = mediaMaxBytesFor(mime || parsed.pathname);
+    if (length > maxBytes) {
+      return NextResponse.json({ error: `That file is larger than ${mediaMaxLabel(maxBytes)}.` }, { status: 400 });
     }
 
     const buffer = Buffer.from(await remote.arrayBuffer());
-    if (buffer.byteLength > MEDIA_MAX_FILE_BYTES) {
-      return NextResponse.json({ error: "That file is larger than 10 MB." }, { status: 400 });
+    if (buffer.byteLength > maxBytes) {
+      return NextResponse.json({ error: `That file is larger than ${mediaMaxLabel(maxBytes)}.` }, { status: 400 });
     }
 
     const name = body.name?.trim() || fileNameFromUrl(parsed, mime);

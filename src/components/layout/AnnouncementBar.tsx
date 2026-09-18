@@ -112,9 +112,13 @@ export function AnnouncementCard({
   const [calendarOpen, setCalendarOpen] = useState(false);
   const calendarRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number | null>(null);
+  const sheetTouchY = useRef<number | null>(null);
+  const sheetDragY = useRef(0);
+  const sheetRef = useRef<HTMLDivElement>(null);
   const layout = settings.announcementLayout === "stack" ? "stack" : "side";
   const showMediaPanel = settings.announcementShowMedia !== false && visuals.length > 0;
   const sheetLayout = showMediaPanel ? layout : "stack";
+  const isBottomSheet = !showMediaPanel && !preview && Boolean(onClose);
   const headline = settings.announcementHeadline?.trim() || settings.announcementText?.trim() || "Announcement";
   const detail = settings.announcementDetail?.trim() || "";
   const label = settings.announcementCtaLabel?.trim() || "Continue";
@@ -196,6 +200,38 @@ export function AnnouncementCard({
     goFrame(delta < 0 ? 1 : -1);
   };
 
+  const onSheetTouchStart = (event: TouchEvent) => {
+    if (!isBottomSheet) return;
+    sheetTouchY.current = event.changedTouches[0]?.clientY ?? null;
+    sheetDragY.current = 0;
+  };
+
+  const onSheetTouchMove = (event: TouchEvent) => {
+    if (!isBottomSheet || sheetTouchY.current == null || !sheetRef.current) return;
+    const y = event.changedTouches[0]?.clientY ?? sheetTouchY.current;
+    const delta = Math.max(0, y - sheetTouchY.current);
+    sheetDragY.current = delta;
+    if (delta > 0) {
+      sheetRef.current.style.transform = `translateY(${delta}px)`;
+      sheetRef.current.style.transition = "none";
+    }
+  };
+
+  const onSheetTouchEnd = () => {
+    if (!isBottomSheet || !sheetRef.current) return;
+    const delta = sheetDragY.current;
+    sheetTouchY.current = null;
+    sheetDragY.current = 0;
+    if (delta > 90) {
+      sheetRef.current.style.transition = "transform 0.2s ease-out";
+      sheetRef.current.style.transform = "translateY(110%)";
+      window.setTimeout(() => onClose?.(), 180);
+      return;
+    }
+    sheetRef.current.style.transition = "transform 0.22s ease-out";
+    sheetRef.current.style.transform = "";
+  };
+
   const copyAnnouncementLink = async () => {
     if (typeof window === "undefined") return;
     const base = `${window.location.origin}${announcementSharePath(window.location.pathname)}`;
@@ -250,6 +286,7 @@ export function AnnouncementCard({
 
   return (
     <div
+      ref={sheetRef}
       className={`announcement-sheet is-${sheetLayout}${showMediaPanel ? "" : " is-content-only"}${preview ? " is-preview" : ""}`}
       role={preview ? undefined : "dialog"}
       aria-modal={preview ? undefined : true}
@@ -257,6 +294,9 @@ export function AnnouncementCard({
       onClick={(event) => event.stopPropagation()}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
+      onTouchStart={isBottomSheet ? onSheetTouchStart : undefined}
+      onTouchMove={isBottomSheet ? onSheetTouchMove : undefined}
+      onTouchEnd={isBottomSheet ? onSheetTouchEnd : undefined}
     >
       {onClose ? (
         <button type="button" className="announcement-close" onClick={onClose} aria-label="Close announcement">

@@ -3,6 +3,7 @@ import { PORTRAIT_PATH } from "@/lib/schema";
 import { socialsFor, type SocialLink } from "@/lib/socials";
 import type { EmailHeaderLayout, SiteSettings } from "@/lib/supabase";
 import { DEFAULT_SETTINGS } from "@/lib/supabase";
+import { sanitizeWelcomeBody } from "@/lib/welcome-copy";
 
 const FONT = 'Outfit, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
 
@@ -172,9 +173,7 @@ export function emailBrandFromSettings(settings?: Partial<SiteSettings> | null):
     welcome: {
       eyebrow: s.emailWelcomeEyebrow || "Welcome aboard",
       title: s.emailWelcomeTitle || "Thanks for joining!",
-      body:
-        s.emailWelcomeBody ||
-        "You are on the list for notes from a founder, entrepreneur and technologist — published only when there is something worth saying.",
+      body: sanitizeWelcomeBody(s.emailWelcomeBody),
       features,
       ctaLabel: s.emailWelcomeCtaLabel || "Explore princeparfait.com →",
     },

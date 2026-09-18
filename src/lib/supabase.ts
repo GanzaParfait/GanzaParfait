@@ -5,6 +5,7 @@ import type { ContactPageContent } from "@/lib/contact-page";
 import type { AboutPageContent } from "@/lib/about-page";
 import type { ServicesPageContent } from "@/lib/services-page";
 import type { Project } from "@/data/site-data";
+import { sanitizeWelcomeBody } from "@/lib/welcome-copy";
 
 export type AnnouncementSharePlatform = "linkedin" | "twitter" | "facebook" | "whatsapp" | "link";
 export type AnnouncementBarPosition = "top" | "bottom";
@@ -64,7 +65,12 @@ export interface SiteSettings {
   footerCompanyZoom?: number;
   footerCompanyMediaType?: "image" | "video" | "carousel";
   footerCompanyMedia?: string[];
+  /** Per-slide focus for carousel/image slots (falls back to global X/Y/zoom). */
+  footerCompanyMediaFocus?: { x: number; y: number; zoom: number }[];
   footerCompanyCarouselInterval?: number;
+  /** Mobile-only focal point for cinematic / featured overlay hero (0–100). */
+  heroOverlayMobilePositionX?: number;
+  heroOverlayMobilePositionY?: number;
   /** Optional footer copy toggles / fields (empty text stays hidden). */
   footerShowBio?: boolean;
   footerShowEmail?: boolean;
@@ -239,14 +245,17 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   footerCompanyZoom: 100,
   footerCompanyMediaType: "image",
   footerCompanyMedia: [],
+  footerCompanyMediaFocus: [],
   footerCompanyCarouselInterval: 5,
+  heroOverlayMobilePositionX: 78,
+  heroOverlayMobilePositionY: 12,
   footerShowBio: true,
   footerShowEmail: true,
   footerShowPhone: true,
   footerShowLocation: true,
-  footerShowQuote: false,
-  footerQuote: "",
-  footerQuoteAttribution: "",
+  footerShowQuote: true,
+  footerQuote: "Build things people can actually use.",
+  footerQuoteAttribution: "Prince Parfait GANZA",
   footerShowFeaturedCopy: false,
   footerFeaturedEyebrow: "Featured",
   footerFeaturedTitle: "",
@@ -292,7 +301,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   emailFooterNote: "",
   emailWelcomeEyebrow: "Welcome aboard",
   emailWelcomeTitle: "Thanks for joining!",
-  emailWelcomeBody: "You are on the list for notes from a founder, entrepreneur and technologist — published only when there is something worth saying.",
+  emailWelcomeBody: "You are on the list for occasional notes on projects, systems, and work from Kigali.",
   emailWelcomeFeatures: "Ideas & perspectives\nSelected projects & case studies\nImportant announcements\nOpportunities and collaborations",
   emailWelcomeCtaLabel: "Explore princeparfait.com →",
   emailNewsletterEyebrow: "From the desk",
@@ -356,7 +365,16 @@ export interface AnalyticsMetrics {
     duration: string;
     utmSource?: string;
     utmCampaign?: string;
-    pages: { path: string; name: string; time: string }[];
+    pages: {
+      path: string;
+      name: string;
+      time: string;
+      at?: string;
+      arrivedFrom?: string | null;
+      arrivedFromName?: string | null;
+      isLanding?: boolean;
+      summary?: string;
+    }[];
   }[];
   utmBreakdown: {
     source: string;
@@ -460,6 +478,11 @@ export function getLocalSettings(): SiteSettings {
       const hadBlob = SETTINGS_IMAGE_KEYS.some((key) => typeof parsed[key] === "string" && parsed[key].startsWith("blob:"));
       const cleaned = stripSettingsBlobs(parsed);
       const merged = { ...DEFAULT_SETTINGS, ...cleaned };
+      merged.emailWelcomeBody = sanitizeWelcomeBody(merged.emailWelcomeBody);
+      if (!merged.footerQuote?.trim()) merged.footerQuote = DEFAULT_SETTINGS.footerQuote;
+      if (!merged.footerQuoteAttribution?.trim()) {
+        merged.footerQuoteAttribution = DEFAULT_SETTINGS.footerQuoteAttribution;
+      }
       if (hadBlob) {
         localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(merged));
       }

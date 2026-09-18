@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useState, type CSSProperties, type FormEvent } from "react";
 import Link from "next/link";
 import { RiArrowRightLine, RiMailLine, RiMapPinLine, RiPhoneLine } from "react-icons/ri";
-import { footerNav } from "@/data/site-data";
+import { defaultFooterQuote, footerNav } from "@/data/site-data";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { socialByPlatform, socialIcon, socialsFor } from "@/lib/socials";
 import { setting } from "@/lib/hero";
+import { submitSubscribe } from "@/lib/subscribe-client";
 import type { SiteSettings } from "@/lib/supabase";
 
 const navGroups = footerNav;
@@ -38,18 +39,20 @@ export function FooterCompanyBand({
   emptyHint = false,
   flush = false,
   showGrid = false,
+  /** When set, lock carousel to this slide (dashboard focus editing). */
+  forceIndex,
 }: {
   settings: Partial<SiteSettings>;
   isDark?: boolean;
   emptyHint?: boolean;
   flush?: boolean;
   showGrid?: boolean;
+  forceIndex?: number | null;
 }) {
   const items = mediaList(settings, isDark);
   const height = FOOTER_IMAGE_HEIGHTS[settings.footerCompanyHeight || "regular"];
-  const posX = Math.min(100, Math.max(0, settings.footerCompanyPositionX ?? 50));
-  const posY = Math.min(100, Math.max(0, settings.footerCompanyPositionY ?? 40));
-  const zoom = Math.min(200, Math.max(100, settings.footerCompanyZoom ?? 100));
+  const focusList = settings.footerCompanyMediaFocus || [];
+  const zoomGlobal = Math.min(200, Math.max(100, settings.footerCompanyZoom ?? 100));
   const whole = Boolean(settings.footerCompanyWholeImage);
   const mediaType = settings.footerCompanyMediaType || (items.length > 1 ? "carousel" : items[0] && isVideoUrl(items[0]) ? "video" : "image");
   const intervalMs = Math.max(3, settings.footerCompanyCarouselInterval || 5) * 1000;
@@ -63,12 +66,16 @@ export function FooterCompanyBand({
   const hasOverlay = showCopy && Boolean(featuredTitle);
 
   useEffect(() => {
+    if (typeof forceIndex === "number" && forceIndex >= 0) {
+      setActive(Math.min(forceIndex, Math.max(0, items.length - 1)));
+      return;
+    }
     if (mediaType !== "carousel" || items.length < 2) return;
     const timer = window.setInterval(() => {
       setActive((prev) => (prev + 1) % items.length);
     }, intervalMs);
     return () => window.clearInterval(timer);
-  }, [mediaType, items.length, intervalMs]);
+  }, [mediaType, items.length, intervalMs, forceIndex]);
 
   const shell = useMemo(
     () => ({
@@ -97,22 +104,34 @@ export function FooterCompanyBand({
   const fit = whole ? "contain" : settings.footerCompanyFit || "cover";
   const frameHeight = whole ? "auto" : height;
 
-  const mediaStyle = (index: number): CSSProperties => ({
-    position: "absolute",
-    inset: 0,
-    display: "block",
-    width: "100%",
-    height: "100%",
-    maxHeight: whole ? "28rem" : undefined,
-    objectFit: fit,
-    objectPosition: `${posX}% ${posY}%`,
-    transform: whole ? undefined : `scale(${zoom / 100})`,
-    transformOrigin: `${posX}% ${posY}%`,
-    opacity: mediaType === "carousel" ? (index === active ? 1 : 0) : 1,
-    transition: mediaType === "carousel" ? "opacity 0.7s ease" : undefined,
-    pointerEvents: "none",
-    userSelect: "none",
-  } as CSSProperties);
+  const focusFor = (index: number) => {
+    const slot = focusList[index];
+    return {
+      x: Math.min(100, Math.max(0, slot?.x ?? settings.footerCompanyPositionX ?? 50)),
+      y: Math.min(100, Math.max(0, slot?.y ?? settings.footerCompanyPositionY ?? 40)),
+      zoom: Math.min(200, Math.max(100, slot?.zoom ?? zoomGlobal)),
+    };
+  };
+
+  const mediaStyle = (index: number): CSSProperties => {
+    const focus = focusFor(index);
+    return {
+      position: "absolute",
+      inset: 0,
+      display: "block",
+      width: "100%",
+      height: "100%",
+      maxHeight: whole ? "28rem" : undefined,
+      objectFit: fit,
+      objectPosition: `${focus.x}% ${focus.y}%`,
+      transform: whole ? undefined : `scale(${focus.zoom / 100})`,
+      transformOrigin: `${focus.x}% ${focus.y}%`,
+      opacity: mediaType === "carousel" ? (index === active ? 1 : 0) : 1,
+      transition: mediaType === "carousel" ? "opacity 0.7s ease" : undefined,
+      pointerEvents: "none",
+      userSelect: "none",
+    } as CSSProperties;
+  };
 
   const overlay = hasOverlay ? (
     <div className="footer-band-overlay" aria-hidden={showGrid}>
@@ -200,6 +219,65 @@ export function FooterCompanyBand({
   );
 }
 
+function FooterSubscribe() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+
+  async function handleSubmit(event: FormEvent) {
+    event.preventDefault();
+    if (!email || status === "loading") return;
+    setStatus("loading");
+    try {
+      await submitSubscribe(email, "footer");
+      setStatus("success");
+      setEmail("");
+    } catch {
+      setStatus("error");
+    }
+  }
+
+  return (
+    <form className="footer-subscribe" onSubmit={handleSubmit} noValidate>
+      <p className="footer-subscribe-label">Stay updated</p>
+      {status === "success" ? (
+        <p className="footer-subscribe-ok" role="status">
+          You&apos;re on the list. Watch for a note at this address.
+        </p>
+      ) : (
+        <>
+          <div className="footer-subscribe-row">
+            <label className="sr-only" htmlFor="footer-subscribe-email">
+              Email address
+            </label>
+            <input
+              id="footer-subscribe-email"
+              type="email"
+              name="email"
+              autoComplete="email"
+              placeholder="Your email"
+              value={email}
+              onChange={(event) => {
+                setEmail(event.target.value);
+                if (status === "error") setStatus("idle");
+              }}
+              required
+              disabled={status === "loading"}
+            />
+            <button type="submit" className="btn btn-primary" disabled={status === "loading"}>
+              {status === "loading" ? "…" : "Join"}
+            </button>
+          </div>
+          {status === "error" ? (
+            <p className="footer-subscribe-error" role="alert">
+              Could not subscribe. Try again.
+            </p>
+          ) : null}
+        </>
+      )}
+    </form>
+  );
+}
+
 export default function Footer() {
   const year = new Date().getFullYear();
   const settings = useSiteSettings();
@@ -209,13 +287,14 @@ export default function Footer() {
   const location = setting(settings, "location");
   const email = setting(settings, "contactEmail");
   const phone = settings.phoneNumber?.trim() || "";
-  const quote = settings.footerQuote?.trim() || "";
-  const quoteBy = settings.footerQuoteAttribution?.trim() || setting(settings, "siteTitle");
+  const quote = settings.footerQuote?.trim() || defaultFooterQuote.text;
+  const quoteBy =
+    settings.footerQuoteAttribution?.trim() || defaultFooterQuote.attribution || setting(settings, "siteTitle");
   const showBio = settings.footerShowBio !== false;
   const showEmail = settings.footerShowEmail !== false;
   const showPhone = settings.footerShowPhone !== false && Boolean(phone);
   const showLocation = settings.footerShowLocation !== false && Boolean(location);
-  const showQuote = Boolean(settings.footerShowQuote && quote);
+  const showQuote = settings.footerShowQuote !== false && Boolean(quote);
   const showPrivacy = settings.footerShowPrivacy !== false;
   const showSitemap = settings.footerShowSitemap !== false;
 
@@ -307,6 +386,7 @@ export default function Footer() {
                       </li>
                     ))}
                   </ul>
+                  <FooterSubscribe />
                 </div>
               ))}
             </div>

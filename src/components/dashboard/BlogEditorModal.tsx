@@ -86,34 +86,9 @@ export default function BlogEditorModal({
   };
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 200,
-        background: "rgba(0, 0, 0, 0.65)",
-        backdropFilter: "blur(4px)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "1rem",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "44rem",
-          maxHeight: "90vh",
-          background: "var(--color-surface)",
-          border: "1px solid var(--color-border)",
-          borderRadius: "0.5rem", // Small radius
-          boxShadow: "var(--shadow-xl)",
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-        }}
-      >
-        <div style={{ padding: "1rem 1.25rem", borderBottom: "1px solid var(--color-border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+    <div className="dash-modal-layer" role="dialog" aria-modal="true" aria-label={post ? "Edit blog article" : "Create blog article"}>
+      <div className="dash-modal-sheet is-blog">
+        <div className="dash-modal-head">
           <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "var(--color-text)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <RiBookOpenLine style={{ color: "var(--color-primary)" }} /> {post ? "Edit Blog Article" : "Create New Blog Article"}
           </h3>
@@ -124,7 +99,7 @@ export default function BlogEditorModal({
 
         <form onSubmit={handleSubmit} style={{ flex: 1, padding: "1.25rem", overflowY: "auto", display: "grid", gap: "1rem" }}>
           
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.875rem" }}>
+          <div className="dash-form-grid" style={{ gap: "0.875rem" }}>
             <div>
               <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--color-text-2)", marginBottom: "0.25rem" }}>
                 Article Title <span style={{ color: "#ef4444" }}>*</span>

@@ -84,39 +84,36 @@ async function sendWithResend(mail: OutboundMail) {
   return true;
 }
 
+/** Next.js interpolates `$VARS` in .env files; a literal `$` is written as `\$`. */
+function smtpSecret(value: string) {
+  return value.replaceAll("$$", "$").replaceAll("\\$", "$");
+}
+
 function smtpAuthForFrom(from: string) {
   const thanks = mailboxes.thanks();
   const contact = mailboxes.contact();
   const hello = mailboxes.hello();
   let user = process.env.SMTP_USER || "";
-  let pass = process.env.SMTP_PASS || "";
+  let pass = smtpSecret(process.env.SMTP_PASS || "");
   if (from === thanks && process.env.SMTP_THANKS_USER && process.env.SMTP_THANKS_PASS) {
     user = process.env.SMTP_THANKS_USER;
-    pass = process.env.SMTP_THANKS_PASS;
+    pass = smtpSecret(process.env.SMTP_THANKS_PASS);
   } else if (from === contact && process.env.SMTP_CONTACT_USER && process.env.SMTP_CONTACT_PASS) {
     user = process.env.SMTP_CONTACT_USER;
-    pass = process.env.SMTP_CONTACT_PASS;
+    pass = smtpSecret(process.env.SMTP_CONTACT_PASS);
   } else if (from === hello && process.env.SMTP_HELLO_USER && process.env.SMTP_HELLO_PASS) {
     user = process.env.SMTP_HELLO_USER;
-    pass = process.env.SMTP_HELLO_PASS;
+    pass = smtpSecret(process.env.SMTP_HELLO_PASS);
   }
   return { user, pass };
 }
 
-async function sendWithSmtp(mail: OutboundMail) {
-  const host = process.env.SMTP_HOST;
-  if (!host) return false;
-  const from = mail.from || mailboxes.noreply();
-  const { user, pass } = smtpAuthForFrom(from);
-  if (!user || !pass) {
-    throw new Error(`SMTP auth missing for From ${from}`);
-  }
-
+function smtpTransport(user: string, pass: string) {
+  const host = process.env.SMTP_HOST || "";
   const port = Number(process.env.SMTP_PORT || 465);
   const secure = process.env.SMTP_SECURE !== "false" && port === 465;
   const servername = process.env.SMTP_TLS_SERVERNAME || "princeparfait.com";
-
-  const transporter = nodemailer.createTransport({
+  return nodemailer.createTransport({
     host,
     port,
     secure,
@@ -125,20 +122,57 @@ async function sendWithSmtp(mail: OutboundMail) {
     greetingTimeout: 20_000,
     tls: {
       servername,
-      // When SMTP_HOST is an IP, the cert CN is the domain — allow that mismatch if configured.
       rejectUnauthorized: process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== "false",
     },
   });
+}
 
-  await transporter.sendMail({
-    from,
-    to: mail.to,
-    subject: mail.subject,
-    html: mail.html,
-    text: mail.text,
-    replyTo: mail.replyTo || mailboxes.replyTo(),
-  });
-  return true;
+async function sendWithSmtp(mail: OutboundMail) {
+  const host = process.env.SMTP_HOST;
+  if (!host) return false;
+
+  const preferredFrom = mail.from || mailboxes.noreply();
+  const primary = smtpAuthForFrom(preferredFrom);
+  const attempts: { from: string; user: string; pass: string }[] = [];
+  if (primary.user && primary.pass) {
+    attempts.push({ from: preferredFrom, user: primary.user, pass: primary.pass });
+  }
+
+  const fallbackUser = process.env.SMTP_USER || "";
+  const fallbackPass = smtpSecret(process.env.SMTP_PASS || "");
+  const helloUser = process.env.SMTP_HELLO_USER || mailboxes.hello();
+  const helloPass = smtpSecret(process.env.SMTP_HELLO_PASS || "");
+  if (helloUser && helloPass && helloUser !== primary.user) {
+    attempts.push({ from: helloUser, user: helloUser, pass: helloPass });
+  }
+  if (fallbackUser && fallbackPass && fallbackUser !== primary.user && fallbackUser !== helloUser) {
+    attempts.push({ from: fallbackUser, user: fallbackUser, pass: fallbackPass });
+  }
+
+  if (!attempts.length) {
+    throw new Error(`SMTP auth missing for From ${preferredFrom}`);
+  }
+
+  let lastError: unknown = null;
+  for (const attempt of attempts) {
+    try {
+      const transporter = smtpTransport(attempt.user, attempt.pass);
+      await transporter.sendMail({
+        from: attempt.from,
+        to: mail.to,
+        subject: mail.subject,
+        html: mail.html,
+        text: mail.text,
+        replyTo: mail.replyTo || mailboxes.replyTo(),
+      });
+      mail.from = attempt.from;
+      return true;
+    } catch (error) {
+      lastError = error;
+      console.error(`SMTP send failed as ${attempt.user}`, error);
+    }
+  }
+  throw lastError;
 }
 
 /**
@@ -215,7 +249,7 @@ export async function subscriberThanksMail(to: string, settings?: SiteSettings) 
   const content = welcomeEmailContent(emailBrandFromSettings(site));
   return {
     to,
-    from: mailboxes.thanks(),
+    from: mailboxes.hello() || mailboxes.thanks(),
     replyTo: mailboxes.replyTo(),
     subject: `${content.title.replace(/!$/, "")} — ${site.siteTitle || "Prince Parfait GANZA"}`,
     text: brandEmailText(content, site),

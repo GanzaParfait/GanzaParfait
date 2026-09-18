@@ -7,6 +7,8 @@ import {
   RiMoreLine,
   RiAddLine,
   RiExternalLinkLine,
+  RiSettings3Line,
+  RiCloseLine,
 } from "react-icons/ri";
 import { getLocalSettings, saveLocalSettings, fetchRemoteSettings, SiteSettings, DEFAULT_SETTINGS, HeroLayoutType } from "@/lib/supabase";
 import {
@@ -40,6 +42,7 @@ export default function BannersPage() {
   const [isMediaOpen, setIsMediaOpen] = useState(false);
   const [selectedMediaUrl, setSelectedMediaUrl] = useState<string | undefined>();
   const [menuOpen, setMenuOpen] = useState<HeroLayoutType | null>(null);
+  const [carouselSheetOpen, setCarouselSheetOpen] = useState(false);
   const { runSave } = useDashboardFeedback();
 
   useEffect(() => {
@@ -111,25 +114,34 @@ export default function BannersPage() {
         </h1>
       </div>
 
-      <section style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "1rem", padding: "1rem 1.1rem" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap", alignItems: "center" }}>
+      <section className="banners-carousel-card" style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "1rem", padding: "1rem 1.1rem" }}>
+        <div className="banners-carousel-head">
           <div>
             <h2 style={{ fontSize: "0.95rem", fontWeight: 800, color: "#0b192c" }}>Moving carousel</h2>
             <p style={{ fontSize: "0.78rem", color: "#64748b", marginTop: "0.2rem", maxWidth: "36rem" }}>
               Rotate the homepage through every visible layout, or only the ones you tick. Runs on desktop, tablet, and mobile. Hover pauses on desktop.
             </p>
           </div>
-          <label style={{ display: "flex", alignItems: "center", gap: "0.45rem", fontSize: "0.82rem", fontWeight: 700, color: "#0f172a" }}>
-            <input
-              type="checkbox"
-              checked={Boolean(settings.heroCarouselEnabled)}
-              onChange={(event) => handleSaveSettings({ heroCarouselEnabled: event.target.checked })}
-            />
-            Rotate layouts
-          </label>
+          <div className="banners-carousel-actions">
+            <label style={{ display: "flex", alignItems: "center", gap: "0.45rem", fontSize: "0.82rem", fontWeight: 700, color: "#0f172a" }}>
+              <input
+                type="checkbox"
+                checked={Boolean(settings.heroCarouselEnabled)}
+                onChange={(event) => handleSaveSettings({ heroCarouselEnabled: event.target.checked })}
+              />
+              Rotate layouts
+            </label>
+            <button
+              type="button"
+              className="btn btn-outline btn-sm banners-carousel-sheet-btn"
+              onClick={() => setCarouselSheetOpen(true)}
+            >
+              <RiSettings3Line size={15} /> Layout options
+            </button>
+          </div>
         </div>
         {settings.heroCarouselEnabled ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "0.9rem" }}>
+          <div className="banners-carousel-desktop" style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "0.9rem" }}>
             <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
               {(["all", "selected"] as const).map((mode) => (
                 <button
@@ -191,8 +203,95 @@ export default function BannersPage() {
         ) : null}
       </section>
 
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem", flexWrap: "wrap" }}>
-        <div style={{ display: "inline-flex", background: "#f1f5f9", borderRadius: "0.7rem", padding: "0.22rem" }}>
+      {carouselSheetOpen ? (
+        <div className="dash-sheet-layer" role="presentation">
+          <button type="button" className="dash-sheet-backdrop" aria-label="Close carousel options" onClick={() => setCarouselSheetOpen(false)} />
+          <div className="dash-sheet" role="dialog" aria-modal="true" aria-labelledby="carousel-sheet-title">
+            <div className="dash-sheet-handle" aria-hidden="true" />
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.75rem" }}>
+              <div>
+                <h2 id="carousel-sheet-title">Carousel layout</h2>
+                <p>Choose which layouts rotate and how often.</p>
+              </div>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setCarouselSheetOpen(false)} aria-label="Close">
+                <RiCloseLine size={18} />
+              </button>
+            </div>
+            <label style={{ display: "flex", alignItems: "center", gap: "0.45rem", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.85rem" }}>
+              <input
+                type="checkbox"
+                checked={Boolean(settings.heroCarouselEnabled)}
+                onChange={(event) => handleSaveSettings({ heroCarouselEnabled: event.target.checked })}
+              />
+              Rotate layouts
+            </label>
+            <div style={{ display: "flex", gap: "0.45rem", flexWrap: "wrap", marginBottom: "0.85rem" }}>
+              {(["all", "selected"] as const).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => handleSaveSettings({ heroCarouselMode: mode })}
+                  style={{
+                    border: "1px solid #cbd5e1",
+                    borderRadius: "999px",
+                    padding: "0.4rem 0.8rem",
+                    background: (settings.heroCarouselMode || "all") === mode ? "#0e52a8" : "#fff",
+                    color: (settings.heroCarouselMode || "all") === mode ? "#fff" : "#0f172a",
+                    fontWeight: 700,
+                    fontSize: "0.78rem",
+                    cursor: "pointer",
+                  }}
+                >
+                  {mode === "all" ? "All visible" : "Only selected"}
+                </button>
+              ))}
+            </div>
+            <label style={{ display: "grid", gap: "0.3rem", fontSize: "0.72rem", fontWeight: 750, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "0.85rem" }}>
+              Interval (seconds)
+              <input
+                type="number"
+                min={4}
+                max={20}
+                value={settings.heroCarouselInterval || 8}
+                onChange={(event) => handleSaveSettings({ heroCarouselInterval: Number(event.target.value) || 8 })}
+                style={{ height: "2.5rem", padding: "0 0.75rem", borderRadius: "0.55rem", border: "1px solid #cbd5e1", fontSize: "0.9rem", color: "#0f172a" }}
+              />
+            </label>
+            {settings.heroCarouselMode === "selected" ? (
+              <div style={{ display: "grid", gap: "0.55rem", marginBottom: "0.85rem" }}>
+                {HERO_LAYOUTS.map((layout) => {
+                  const selected = (settings.heroCarouselLayouts || []).includes(layout.id);
+                  return (
+                    <label key={layout.id} style={{ display: "flex", alignItems: "center", gap: "0.45rem", fontSize: "0.84rem", color: "#334155" }}>
+                      <input
+                        type="checkbox"
+                        checked={selected}
+                        onChange={() => {
+                          const current = settings.heroCarouselLayouts || [];
+                          handleSaveSettings({
+                            heroCarouselLayouts: selected
+                              ? current.filter((id) => id !== layout.id)
+                              : [...current, layout.id],
+                          });
+                        }}
+                      />
+                      {layout.name}
+                    </label>
+                  );
+                })}
+              </div>
+            ) : null}
+            <div className="dash-sheet-actions">
+              <button type="button" className="btn btn-primary" onClick={() => setCarouselSheetOpen(false)} style={{ gridColumn: "1 / -1" }}>
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      <div className="dash-page-head" style={{ alignItems: "center" }}>
+        <div style={{ display: "inline-flex", background: "#f1f5f9", borderRadius: "0.7rem", padding: "0.22rem" }} className="dash-hscroll">
           <span style={{
             padding: "0.4rem 0.9rem",
             borderRadius: "0.55rem",
@@ -201,12 +300,13 @@ export default function BannersPage() {
             fontSize: "0.8rem",
             fontWeight: 800,
             boxShadow: "0 1px 2px rgba(15,23,42,0.08)",
+            whiteSpace: "nowrap",
           }}>
             Layout
           </span>
         </div>
         {hidden.length > 0 && (
-          <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
+          <div className="dash-hscroll" style={{ gap: "0.4rem" }}>
             {hidden.map((layout) => (
               <button
                 key={layout.id}

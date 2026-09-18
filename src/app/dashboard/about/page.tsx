@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import {
   RiAddLine,
+  RiCloseLine,
   RiComputerLine,
   RiDeleteBin6Line,
+  RiEyeLine,
   RiImageAddLine,
   RiSaveLine,
   RiSmartphoneLine,
@@ -80,6 +82,7 @@ export default function AboutEditorPage() {
   const [section, setSection] = useState<SectionId>("hero");
   const [device, setDevice] = useState<PreviewDevice>("desktop");
   const [mediaOpen, setMediaOpen] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const { runSave, saving } = useDashboardFeedback();
   const selectSection = useSectionHash(SECTIONS, setSection);
   const active = SECTIONS.find((item) => item.id === section) || SECTIONS[0];
@@ -124,7 +127,7 @@ export default function AboutEditorPage() {
   };
 
   return (
-    <div className="hp-board">
+    <div className={previewOpen ? "hp-board is-preview-open" : "hp-board"}>
       <div className="hp-board-top">
         <div>
           <nav className="hp-crumb" aria-label="Breadcrumb">
@@ -150,6 +153,9 @@ export default function AboutEditorPage() {
               </button>
             ))}
           </div>
+          <button type="button" className="btn btn-outline hp-mobile-preview-btn" onClick={() => setPreviewOpen(true)}>
+            <RiEyeLine size={16} /> Preview
+          </button>
           <button type="button" className="btn btn-primary hp-top-save" onClick={save} disabled={saving}>
             <RiSaveLine size={16} /> {saving ? "Saving…" : "Save"}
           </button>
@@ -547,6 +553,9 @@ export default function AboutEditorPage() {
                 );
               })}
             </div>
+            <button type="button" className="btn btn-ghost btn-sm hp-preview-close" onClick={() => setPreviewOpen(false)}>
+              <RiCloseLine size={16} /> Close
+            </button>
           </div>
           <div className="hp-preview-stage">
             <div className="hp-preview-frame" data-device={device} style={{ width: previewWidth }}>

@@ -126,7 +126,7 @@ export default function MessagesPage() {
         </button>
       </div>
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
+      <div className="dash-hscroll" style={{ gap: "0.4rem" }}>
         {(
           [
             ["all", "All", counts.all],

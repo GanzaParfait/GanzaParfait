@@ -770,7 +770,7 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
   cta: {
     label: "Let's work together",
     title: "Have a project or challenge in mind?",
-    body: "Start with the problem. We can figure out the right approach from there.",
+    body: "Start with the problem. We can figure out the right approach from there. Talk with Prince Parfait GANZA in Kigali, Rwanda, or remotely.",
     primaryLabel: "Start a conversation",
     primaryHref: "/contact",
     secondaryLabel: "Email",
@@ -936,9 +936,16 @@ export function servicesPageFrom(
       ...saved.cta,
       label: saved.cta?.label?.trim() || DEFAULT_SERVICES_PAGE.cta.label,
       trust: saved.cta?.trust?.length ? saved.cta.trust : DEFAULT_SERVICES_PAGE.cta.trust,
-      ...(saved.cta?.title === "Not sure which service fits?"
+      ...(saved.cta?.title === "Not sure which service fits?" ||
+      saved.cta?.body ===
+        "Start with the problem. We can figure out the right approach from there." ||
+      saved.cta?.body ===
+        "Start with the problem. We can figure out the right approach from there. Talk with Prince Parfait GANZA in Kigali, Rwanda."
         ? {
-            title: DEFAULT_SERVICES_PAGE.cta.title,
+            title:
+              saved.cta?.title === "Not sure which service fits?"
+                ? DEFAULT_SERVICES_PAGE.cta.title
+                : saved.cta?.title?.trim() || DEFAULT_SERVICES_PAGE.cta.title,
             body: DEFAULT_SERVICES_PAGE.cta.body,
           }
         : {}),

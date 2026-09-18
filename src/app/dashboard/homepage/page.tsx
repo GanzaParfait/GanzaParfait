@@ -4,11 +4,13 @@ import { useEffect, useState, type ReactNode } from "react";
 import {
   RiAddLine,
   RiBarChartBoxLine,
+  RiCloseLine,
   RiCompass3Line,
   RiComputerLine,
   RiDatabase2Line,
   RiDeleteBin6Line,
   RiDragMove2Line,
+  RiEyeLine,
   RiImageAddLine,
   RiLayoutGridLine,
   RiSaveLine,
@@ -73,6 +75,7 @@ export default function HomepageEditorPage() {
   const [focusIndex, setFocusIndex] = useState(0);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [mediaOpen, setMediaOpen] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const { runSave, saving } = useDashboardFeedback();
   const selectSection = useSectionHash(SECTIONS, setSection);
   const settings = getLocalSettings();
@@ -149,7 +152,7 @@ export default function HomepageEditorPage() {
   };
 
   return (
-    <div className="hp-board">
+    <div className={previewOpen ? "hp-board is-preview-open" : "hp-board"}>
       <div className="hp-board-top">
         <div>
           <nav className="hp-crumb" aria-label="Breadcrumb">
@@ -175,6 +178,9 @@ export default function HomepageEditorPage() {
               </button>
             ))}
           </div>
+          <button type="button" className="btn btn-outline hp-mobile-preview-btn" onClick={() => setPreviewOpen(true)}>
+            <RiEyeLine size={16} /> Preview
+          </button>
           <button type="button" className="btn btn-primary hp-top-save" onClick={save} disabled={saving}>
             <RiSaveLine size={16} /> {saving ? "Saving…" : "Save"}
           </button>
@@ -521,6 +527,9 @@ export default function HomepageEditorPage() {
                 );
               })}
             </div>
+            <button type="button" className="btn btn-ghost btn-sm hp-preview-close" onClick={() => setPreviewOpen(false)}>
+              <RiCloseLine size={16} /> Close
+            </button>
           </div>
           <div className="hp-preview-stage">
             <div className="hp-preview-frame" data-device={device} style={{ width: previewWidth, maxWidth: "100%" }}>

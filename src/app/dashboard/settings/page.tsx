@@ -32,8 +32,6 @@ import {
   SOCIAL_PLATFORM_OPTIONS,
   SocialLink,
   resolvedSocials,
-  socialIcon,
-  socialsFor,
 } from "@/lib/socials";
 import MediaManagerModal from "@/components/dashboard/MediaManagerModal";
 import AnnouncementEditor from "@/components/dashboard/AnnouncementEditor";
@@ -41,9 +39,9 @@ import SocialMultiSelect from "@/components/ui/SocialMultiSelect";
 import EmailEditor from "@/components/dashboard/EmailEditor";
 import FooterFocusDragPreview from "@/components/dashboard/FooterFocusDragPreview";
 import CustomSelect from "@/components/ui/CustomSelect";
-import { FooterCompanyBand } from "@/components/layout/Footer";
-import { footerNav } from "@/data/site-data";
 import { setting } from "@/lib/hero";
+import { defaultFooterQuote } from "@/data/site-data";
+import { defaultFooterQuote } from "@/data/site-data";
 
 const inputStyle = {
   width: "100%",
@@ -72,17 +70,26 @@ function isBlobUrl(url: string) {
   return url.startsWith("blob:");
 }
 
+function withDefaultFooterQuote(settings: SiteSettings): SiteSettings {
+  return {
+    ...settings,
+    footerQuote: settings.footerQuote?.trim() || defaultFooterQuote.text,
+    footerQuoteAttribution: settings.footerQuoteAttribution?.trim() || defaultFooterQuote.attribution,
+    footerShowQuote: settings.footerShowQuote !== false,
+  };
+}
+
 export default function SettingsPage() {
   const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
   const [view, setView] = useState<SettingsView>("identity");
-  const [mediaTarget, setMediaTarget] = useState<"light" | "dark" | null>(null);
+  const [mediaTarget, setMediaTarget] = useState<"light" | "dark" | number | null>(null);
   const { runSave, saving } = useDashboardFeedback();
 
   useEffect(() => {
     const loaded = getLocalSettings();
-    setSettings(loaded);
+    setSettings(withDefaultFooterQuote(loaded));
     void fetchRemoteSettings().then((remote) => {
-      if (remote) setSettings(remote);
+      if (remote) setSettings(withDefaultFooterQuote(remote));
     });
     const applyHash = () => {
       const hash = window.location.hash.replace("#", "") as SettingsView;
@@ -104,7 +111,6 @@ export default function SettingsPage() {
     }, message);
 
   const socials = resolvedSocials(settings);
-  const footerSocials = socialsFor(settings, "footer");
   const activeView = VIEWS.find((item) => item.id === view) || VIEWS[0];
 
   const updateSocial = (id: string, next: Partial<SocialLink>) => {
@@ -143,22 +149,24 @@ export default function SettingsPage() {
   const imageFieldValue = (value?: string) => (value && isBlobUrl(value) ? "" : value || "");
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, height: "100%", gap: "0.85rem" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem", flexShrink: 0 }}>
+    <div className="dash-settings">
+      <div className="dash-page-head">
         <div>
           <p style={{ fontSize: "0.7rem", fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "#0e52a8" }}>Control center</p>
           <h1 style={{ fontSize: "1.2rem", fontWeight: 800, color: "#0b192c" }}>{activeView.label}</h1>
           <p style={{ fontSize: "0.8rem", color: "#64748b" }}>{activeView.hint}</p>
         </div>
         {view !== "announcement" ? (
-          <button type="button" className="btn btn-primary" onClick={() => persist()} disabled={saving}>
-            <RiSaveLine size={16} /> {saving ? "Saving..." : "Save"}
-          </button>
+          <div className="dash-page-head-actions">
+            <button type="button" className="btn btn-primary" onClick={() => persist()} disabled={saving}>
+              <RiSaveLine size={16} /> {saving ? "Saving..." : "Save"}
+            </button>
+          </div>
         ) : null}
       </div>
 
-      <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
-        <nav style={{ width: "13.5rem", flexShrink: 0, padding: "0.15rem 0.75rem 0.15rem 0", overflowY: "auto" }}>
+      <div className="dash-settings-body">
+        <nav className="dash-settings-nav" aria-label="Settings sections">
           {VIEWS.map((item) => {
             const Icon = item.icon;
             const active = view === item.id;
@@ -170,22 +178,7 @@ export default function SettingsPage() {
                   setView(item.id);
                   window.history.replaceState(null, "", `#${item.id}`);
                 }}
-                style={{
-                  width: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.65rem",
-                  textAlign: "left",
-                  padding: "0.7rem 0.75rem",
-                  marginBottom: "0.25rem",
-                  border: "none",
-                  borderRadius: "0.55rem",
-                  background: active ? "#0e52a8" : "transparent",
-                  color: active ? "#ffffff" : "#334155",
-                  fontWeight: 700,
-                  fontSize: "0.82rem",
-                  cursor: "pointer",
-                }}
+                className={active ? "dash-settings-nav-btn is-on" : "dash-settings-nav-btn"}
               >
                 <Icon size={16} />
                 {item.label}
@@ -194,9 +187,9 @@ export default function SettingsPage() {
           })}
         </nav>
 
-        <div style={{ flex: 1, overflowY: "auto", padding: "0 0 1rem 0.15rem" }}>
+        <div className="dash-settings-panel">
           {view === "identity" && (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", maxWidth: "44rem" }}>
+            <div className="dash-form-grid" style={{ maxWidth: "44rem" }}>
               <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>Display name
                 <input style={{ ...inputStyle, marginTop: "0.3rem" }} value={settings.siteTitle} onChange={(e) => patch({ siteTitle: e.target.value })} />
               </label>
@@ -214,7 +207,7 @@ export default function SettingsPage() {
           )}
 
           {view === "contact" && (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", maxWidth: "44rem" }}>
+            <div className="dash-form-grid" style={{ maxWidth: "44rem" }}>
               <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>Email
                 <input type="email" style={{ ...inputStyle, marginTop: "0.3rem" }} value={settings.contactEmail} onChange={(e) => patch({ contactEmail: e.target.value })} />
               </label>
@@ -269,7 +262,7 @@ export default function SettingsPage() {
               <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem" }}>
                 {socials.map((link, index) => (
                   <div key={link.id} style={{ border: "1px solid #e2e8f0", borderRadius: "0.65rem", padding: "0.75rem", background: link.enabled ? "#fff" : "#f8fafc" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "auto 8rem 1fr 1.6fr auto", gap: "0.5rem", alignItems: "center" }}>
+                    <div className="dash-social-row">
                       <span style={{ display: "flex", flexDirection: "column" }}>
                         <button type="button" aria-label={`Move ${link.label} up`} disabled={index === 0} onClick={() => moveSocial(link.id, -1)} style={{ border: "none", background: "none", cursor: index === 0 ? "default" : "pointer", color: "#64748b", opacity: index === 0 ? 0.35 : 1 }}>
                           <RiArrowUpSLine size={16} />
@@ -325,7 +318,7 @@ export default function SettingsPage() {
           )}
 
           {view === "navbar" && (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", maxWidth: "40rem" }}>
+            <div className="dash-form-grid" style={{ gap: "0.75rem", maxWidth: "40rem" }}>
               {([
                 { id: "pill" as NavbarStyle, title: "Radiused pill", body: "Inset rounded bar with tighter side padding." },
                 { id: "full" as NavbarStyle, title: "Full width", body: "Edge-to-edge bar across the top." },
@@ -386,24 +379,24 @@ export default function SettingsPage() {
                     </label>
                   ))}
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+                <div className="dash-form-grid" style={{ gap: "0.75rem" }}>
                   <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155", gridColumn: "1 / -1" }}>
                     Quote
                     <textarea
                       rows={2}
                       style={{ ...inputStyle, marginTop: "0.3rem", resize: "vertical" }}
-                      value={settings.footerQuote || ""}
-                      onChange={(e) => patch({ footerQuote: e.target.value, footerShowQuote: Boolean(e.target.value.trim()) || settings.footerShowQuote })}
-                      placeholder="Optional quote shown in the footer"
+                      value={settings.footerQuote || defaultFooterQuote.text}
+                      onChange={(e) => patch({ footerQuote: e.target.value, footerShowQuote: Boolean(e.target.value.trim()) || settings.footerShowQuote !== false })}
+                      placeholder={defaultFooterQuote.text}
                     />
                   </label>
                   <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>
                     Quote attribution
                     <input
                       style={{ ...inputStyle, marginTop: "0.3rem" }}
-                      value={settings.footerQuoteAttribution || ""}
+                      value={settings.footerQuoteAttribution || defaultFooterQuote.attribution}
                       onChange={(e) => patch({ footerQuoteAttribution: e.target.value })}
-                      placeholder={setting(settings, "siteTitle")}
+                      placeholder={defaultFooterQuote.attribution}
                     />
                   </label>
                   <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>
@@ -451,32 +444,7 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-                <div>
-                  <p style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.35rem" }}>Image URL</p>
-                  <div style={{ display: "flex", gap: "0.4rem" }}>
-                    <input
-                      style={inputStyle}
-                      value={imageFieldValue(settings.footerCompanyImage).startsWith("data:") ? "" : imageFieldValue(settings.footerCompanyImage)}
-                      onChange={(e) => patch({ footerCompanyImage: isBlobUrl(e.target.value) ? "" : e.target.value })}
-                      placeholder={imageFieldValue(settings.footerCompanyImage).startsWith("data:") ? "Uploaded image stored in this browser" : "https://… or /brand/…"}
-                    />
-                    <button type="button" className="btn btn-outline" onClick={() => setMediaTarget("light")}><RiImageAddLine /></button>
-                  </div>
-                  <p style={{ fontSize: "0.7rem", color: "#94a3b8", marginTop: "0.35rem" }}>Use a public https URL or a site path. Temporary blob URLs are not kept.</p>
-                </div>
-                <div>
-                  <p style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.35rem" }}>Dark-mode image (optional)</p>
-                  <div style={{ display: "flex", gap: "0.4rem" }}>
-                    <input
-                      style={inputStyle}
-                      value={imageFieldValue(settings.footerCompanyImageDark).startsWith("data:") ? "" : imageFieldValue(settings.footerCompanyImageDark)}
-                      onChange={(e) => patch({ footerCompanyImageDark: isBlobUrl(e.target.value) ? "" : e.target.value })}
-                      placeholder={imageFieldValue(settings.footerCompanyImageDark).startsWith("data:") ? "Uploaded image stored in this browser" : "Optional dark-mode URL"}
-                    />
-                    <button type="button" className="btn btn-outline" onClick={() => setMediaTarget("dark")}><RiImageAddLine /></button>
-                  </div>
-                </div>
+              <div className="dash-form-grid">
                 <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>Link
                   <input style={{ ...inputStyle, marginTop: "0.3rem" }} value={settings.footerCompanyHref || ""} onChange={(e) => patch({ footerCompanyHref: e.target.value })} />
                 </label>
@@ -513,106 +481,62 @@ export default function SettingsPage() {
                       { value: "video", label: "Video" },
                       { value: "carousel", label: "Carousel (up to 3 images)" },
                     ]}
-                    onChange={(value) => patch({ footerCompanyMediaType: value as "image" | "video" | "carousel" })}
+                    onChange={(value) => {
+                      const next = value as "image" | "video" | "carousel";
+                      const media = [...(settings.footerCompanyMedia || [])].filter(Boolean);
+                      if (next === "video") {
+                        patch({
+                          footerCompanyMediaType: next,
+                          footerCompanyMedia: media.slice(0, 1),
+                          footerCompanyImage: media[0] || settings.footerCompanyImage || "",
+                        });
+                      } else if (next === "image") {
+                        patch({
+                          footerCompanyMediaType: next,
+                          footerCompanyMedia: media.slice(0, 1),
+                          footerCompanyImage: media[0] || settings.footerCompanyImage || "",
+                        });
+                      } else {
+                        patch({ footerCompanyMediaType: next });
+                      }
+                    }}
                   />
                 </label>
 
-                <div style={{ gridColumn: "1 / -1", display: "grid", gap: "0.45rem" }}>
-                  <p style={{ margin: 0, fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>Media URLs (max 3)</p>
-                  {[0, 1, 2].map((index) => (
-                    <div key={index} style={{ display: "flex", gap: "0.4rem" }}>
-                      <input
-                        style={inputStyle}
-                        value={(settings.footerCompanyMedia || [])[index] || (index === 0 ? imageFieldValue(settings.footerCompanyImage) : "")}
-                        onChange={(e) => {
-                          const next = [...(settings.footerCompanyMedia || [])];
-                          while (next.length < 3) next.push("");
-                          next[index] = isBlobUrl(e.target.value) ? "" : e.target.value;
-                          const cleaned = next.filter(Boolean).slice(0, 3);
-                          patch({
-                            footerCompanyMedia: cleaned,
-                            footerCompanyImage: cleaned[0] || settings.footerCompanyImage,
-                          });
-                        }}
-                        placeholder={index === 0 ? "Primary image or video URL" : `Optional slide ${index + 1}`}
-                        disabled={(settings.footerCompanyMediaType || "image") === "video" && index > 0}
-                      />
-                      <button
-                        type="button"
-                        className="btn btn-outline"
-                        onClick={() => {
-                          setMediaTarget("light");
-                        }}
-                      >
-                        <RiImageAddLine />
-                      </button>
-                    </div>
-                  ))}
-                  {(settings.footerCompanyMediaType || "image") === "carousel" ? (
-                    <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>
-                      Carousel interval (seconds)
-                      <input
-                        type="number"
-                        min={3}
-                        max={20}
-                        style={{ ...inputStyle, marginTop: "0.3rem" }}
-                        value={settings.footerCompanyCarouselInterval ?? 5}
-                        onChange={(e) => patch({ footerCompanyCarouselInterval: Number(e.target.value) || 5 })}
-                      />
-                    </label>
-                  ) : null}
-                </div>
+                {(settings.footerCompanyMediaType || "image") === "carousel" ? (
+                  <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155", gridColumn: "1 / -1" }}>
+                    Carousel interval (seconds)
+                    <input
+                      type="number"
+                      min={3}
+                      max={20}
+                      style={{ ...inputStyle, marginTop: "0.3rem" }}
+                      value={settings.footerCompanyCarouselInterval ?? 5}
+                      onChange={(e) => patch({ footerCompanyCarouselInterval: Number(e.target.value) || 5 })}
+                    />
+                  </label>
+                ) : null}
 
                 <div style={{ display: "grid", gap: "0.75rem", gridColumn: "1 / -1" }}>
-                  <FooterFocusDragPreview settings={settings} patch={patch} />
-                </div>
-              </div>
-
-              <div style={{ border: "1px solid #e2e8f0", borderRadius: "1rem", overflow: "hidden", background: "#ffffff" }}>
-                <div style={{ padding: "0.65rem 1rem", borderBottom: "1px solid #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <p style={{ fontSize: "0.7rem", fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "#64748b" }}>Live footer preview</p>
-                  <button type="button" className="btn btn-primary" style={{ padding: "0.4rem 0.9rem", fontSize: "0.8rem" }} onClick={() => persist()} disabled={saving}>
-                    <RiSaveLine size={14} /> Save
-                  </button>
-                </div>
-                <div style={{ background: "#ffffff", pointerEvents: "none" }}>
-                  <div style={{ padding: "1.5rem 1.25rem 1.15rem", display: "flex", flexWrap: "wrap", gap: "2rem", justifyContent: "space-between" }}>
-                    <div style={{ flex: "1 1 220px", maxWidth: "22rem" }}>
-                      <img src="/brand/logos/logo-horizontal-blue.png" alt="" style={{ height: "2rem", objectFit: "contain", marginBottom: "0.85rem" }} />
-                      <p style={{ fontSize: "0.8rem", color: "#64748b", lineHeight: 1.6, marginBottom: "0.65rem" }}>{settings.bio}</p>
-                      <p style={{ fontSize: "0.75rem", color: "#0e52a8", fontWeight: 600, marginBottom: "0.75rem" }}>
-                        {setting(settings, "contactEmail")}
-                        {settings.phoneNumber ? ` · ${settings.phoneNumber}` : ""}
-                      </p>
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
-                        {footerSocials.map((link) => {
-                          const Icon = socialIcon(link.platform);
-                          return (
-                            <span key={link.id} className="footer-social-icon" style={{ width: "1.85rem", height: "1.85rem" }}>
-                              <Icon size={14} />
-                            </span>
-                          );
-                        })}
-                      </div>
-                    </div>
-                    {footerNav.map((group) => (
-                      <div key={group.label} style={{ minWidth: "7rem" }}>
-                        <p style={{ fontSize: "0.8rem", fontWeight: 700, color: "#0b192c", marginBottom: "0.7rem" }}>{group.label}</p>
-                        {group.links.map((link) => (
-                          <p key={link.href} style={{ fontSize: "0.78rem", color: "#64748b", marginBottom: "0.4rem" }}>{link.label}</p>
-                        ))}
-                      </div>
-                    ))}
-                  </div>
-                  <FooterCompanyBand
-                    settings={{ ...settings, footerCompanyImage: imageFieldValue(settings.footerCompanyImage) }}
-                    isDark={false}
-                    emptyHint
-                    flush
+                  <FooterFocusDragPreview
+                    settings={settings}
+                    patch={patch}
+                    saving={saving}
+                    onSave={() => void persist()}
+                    onPickMedia={(slotIndex) => setMediaTarget(slotIndex)}
                   />
-                  <div style={{ padding: "1rem 1.25rem 1.25rem", borderTop: "1px solid #e2e8f0", display: "flex", justifyContent: "space-between", gap: "0.75rem", flexWrap: "wrap" }}>
-                    <p style={{ fontSize: "0.72rem", color: "#94a3b8" }}>© {new Date().getFullYear()} {setting(settings, "siteTitle")}. All rights reserved.</p>
-                    <p style={{ fontSize: "0.72rem", color: "#94a3b8" }}>Privacy · Buy me a coffee</p>
+                </div>
+
+                <div style={{ gridColumn: "1 / -1", display: "grid", gap: "0.45rem" }}>
+                  <p style={{ margin: 0, fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>Dark-mode fallback image (optional)</p>
+                  <div style={{ display: "flex", gap: "0.4rem" }}>
+                    <input
+                      style={inputStyle}
+                      value={imageFieldValue(settings.footerCompanyImageDark).startsWith("data:") ? "" : imageFieldValue(settings.footerCompanyImageDark)}
+                      onChange={(e) => patch({ footerCompanyImageDark: isBlobUrl(e.target.value) ? "" : e.target.value })}
+                      placeholder="Optional dark-mode URL"
+                    />
+                    <button type="button" className="btn btn-outline" onClick={() => setMediaTarget("dark")}><RiImageAddLine /></button>
                   </div>
                 </div>
               </div>
@@ -632,18 +556,22 @@ export default function SettingsPage() {
       </div>
 
       <MediaManagerModal
-        isOpen={Boolean(mediaTarget)}
+        isOpen={mediaTarget !== null}
         onClose={() => setMediaTarget(null)}
         onSelect={(url) => {
           if (isBlobUrl(url)) return;
           if (mediaTarget === "dark") {
             patch({ footerCompanyImageDark: url });
-          } else {
+          } else if (typeof mediaTarget === "number") {
             const next = [...(settings.footerCompanyMedia || [])];
-            if (!next.length && settings.footerCompanyImage) next.push(settings.footerCompanyImage);
-            if (next.length >= 3) next[next.length - 1] = url;
-            else next.push(url);
-            patch({ footerCompanyImage: next[0] || url, footerCompanyMedia: next.slice(0, 3) });
+            while (next.length < 3) next.push("");
+            next[mediaTarget] = url;
+            const cleaned = next.map((value) => value.trim()).filter(Boolean).slice(0, 3);
+            const type = settings.footerCompanyMediaType || "image";
+            patch({
+              footerCompanyMedia: type === "video" || type === "image" ? cleaned.slice(0, 1) : cleaned,
+              footerCompanyImage: cleaned[0] || url,
+            });
           }
           setMediaTarget(null);
         }}

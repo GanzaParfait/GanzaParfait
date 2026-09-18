@@ -46,52 +46,51 @@ function SkeletonLines({ widths }: { widths: string[] }) {
 function MiniDoc({
   doc,
   layer,
-  detailed,
 }: {
   doc: CvResolvedDocument;
   layer: "back" | "mid" | "front";
-  detailed: boolean;
 }) {
   const contactLine = [doc.contact.location, doc.contact.email, doc.contact.phone]
     .filter(Boolean)
-    .join(" | ");
+    .join("  |  ");
+  const isFront = layer === "front";
 
   return (
     <article className={`cv-mini-doc is-${layer}`} aria-hidden={layer !== "front"}>
-      <p className="cv-mini-doc-format">{doc.label}</p>
       <header className="cv-mini-doc-head">
         <p className="cv-mini-doc-name">{doc.name}</p>
         <p className="cv-mini-doc-headline">{doc.headline}</p>
-        {detailed ? <p className="cv-mini-doc-meta">{contactLine}</p> : null}
+        {isFront ? <p className="cv-mini-doc-meta">{contactLine}</p> : null}
       </header>
 
-      {detailed ? (
-        <>
-          <section className="cv-mini-doc-block">
-            <h3>Professional Profile</h3>
-            <SkeletonLines widths={["94%", "82%", "68%"]} />
-          </section>
+      {!isFront ? (
+        <section className="cv-mini-doc-block">
+          <h3>Projects</h3>
+          <SkeletonLines widths={["86%", "72%", "64%"]} />
+        </section>
+      ) : null}
 
-          <section className="cv-mini-doc-block">
-            <h3>Core Expertise</h3>
-            <ul className="cv-mini-expertise" aria-hidden="true">
-              {["70%", "62%", "66%", "58%"].map((width, index) => (
-                <li key={index}>
-                  <span className="cv-mini-bullet" />
-                  <span className="cv-skel-line" style={{ width }} />
-                </li>
-              ))}
-            </ul>
-          </section>
+      <section className="cv-mini-doc-block">
+        <h3>Professional Profile</h3>
+        <SkeletonLines widths={isFront ? ["94%", "82%", "68%"] : ["90%", "74%"]} />
+      </section>
 
-          <section className="cv-mini-doc-block">
-            <h3>Experience</h3>
-            <SkeletonLines widths={["88%", "74%", "60%"]} />
-          </section>
-        </>
-      ) : (
-        <SkeletonLines widths={["90%", "76%", "82%", "64%", "70%"]} />
-      )}
+      <section className="cv-mini-doc-block">
+        <h3>Core Expertise</h3>
+        <ul className="cv-mini-expertise" aria-hidden="true">
+          {(isFront ? ["70%", "62%", "66%", "58%"] : ["68%", "60%", "64%", "54%"]).map((width, index) => (
+            <li key={index}>
+              <span className="cv-mini-bullet" />
+              <span className="cv-skel-line" style={{ width }} />
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="cv-mini-doc-block">
+        <h3>Experience</h3>
+        <SkeletonLines widths={isFront ? ["88%", "74%", "60%"] : ["84%", "70%"]} />
+      </section>
     </article>
   );
 }
@@ -319,10 +318,15 @@ export default function CvPageClient({ settings }: { settings: SiteSettings }) {
         <div className="container cv-hero-grid">
           <div className="cv-hero-copy">
             <p className="cv-landing-kicker">— CV / Resume</p>
-            <h1>My professional profile in one place.</h1>
+            <h1>
+              My professional profile
+              <span className="cv-hero-break"> in one place.</span>
+            </h1>
             <p className="cv-landing-lead">
-              Download a professionally designed CV tailored to different contexts. All content is
-              based on verified portfolio, experience and education data.
+              Download a professionally designed CV tailored to different contexts.
+              <span className="cv-hero-break">
+                {" "}All content is based on verified portfolio, experience and education data.
+              </span>
             </p>
             <p className="cv-hero-script" aria-hidden="true">
               Ideas to impact
@@ -338,27 +342,28 @@ export default function CvPageClient({ settings }: { settings: SiteSettings }) {
             <div className="cv-doc-stack">
               <div className="cv-doc-glow" />
               {stackDocs[2] ? (
-                <MiniDoc doc={stackDocs[2]} layer="back" detailed={false} />
+                <MiniDoc doc={stackDocs[2]} layer="back" />
               ) : stackDocs.length === 1 ? (
-                <MiniDoc doc={frontDoc} layer="back" detailed={false} />
+                <MiniDoc doc={frontDoc} layer="back" />
               ) : null}
               {stackDocs[1] ? (
-                <MiniDoc doc={stackDocs[1]} layer="mid" detailed={false} />
+                <MiniDoc doc={stackDocs[1]} layer="mid" />
               ) : stackDocs.length === 1 ? (
-                <MiniDoc doc={frontDoc} layer="mid" detailed={false} />
+                <MiniDoc doc={frontDoc} layer="mid" />
               ) : null}
-              <MiniDoc doc={frontDoc} layer="front" detailed />
+              <MiniDoc doc={frontDoc} layer="front" />
             </div>
-            <aside className="cv-hero-aside">
-              <div className="cv-hero-pillars">
-                <span>Build</span>
-                <span>Solve</span>
-                <span>Collaborate</span>
-                <span className="is-accent">Impact</span>
-              </div>
-              <p>A professional summary of my journey, skills and experience.</p>
-            </aside>
           </div>
+
+          <aside className="cv-hero-aside">
+            <div className="cv-hero-pillars">
+              <span>Build</span>
+              <span>Solve</span>
+              <span>Collaborate</span>
+              <span className="is-accent">Impact</span>
+            </div>
+            <p>A professional summary of my journey, skills and experience.</p>
+          </aside>
         </div>
       </section>
 
@@ -453,12 +458,12 @@ export default function CvPageClient({ settings }: { settings: SiteSettings }) {
               <span className="cv-contact-icon" aria-hidden="true">
                 <RiMailLine size={22} />
               </span>
-              <p>
-                Prefer a conversation instead? I&apos;m open to new opportunities, collaborations and
-                interesting ideas.
-              </p>
+              <div>
+                <strong>Prefer a conversation instead?</strong>
+                <p>I&apos;m open to new opportunities, collaborations and interesting ideas.</p>
+              </div>
             </div>
-            <Link href="/contact" className="btn btn-primary">
+            <Link href="/contact" className="btn btn-primary cv-contact-btn">
               Contact me →
             </Link>
           </div>

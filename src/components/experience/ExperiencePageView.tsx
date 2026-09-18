@@ -110,15 +110,18 @@ export default function ExperiencePageView() {
               Roles, systems work, training, and education that shaped the founder, entrepreneur, and technologist
               path — kept as a record of progress, not just positions.
             </p>
-            <div className="experience-hero-actions" style={{ marginTop: "1.1rem" }}>
-              <Link href="/cv?source=experience" className="btn btn-outline">
-                Download CV <RiArrowRightLine size={16} />
-              </Link>
-            </div>
           </AnimatedSection>
-          <AnimatedSection delay={80} className="experience-hero-rail" aria-hidden="true">
-            <p>People Systems Ideas Impact</p>
-            <span>A record of progress, not just positions.</span>
+          <AnimatedSection delay={80} className="experience-hero-aside" aria-hidden="true">
+            <p className="experience-hero-aside-line">
+              <span>People</span>
+              <span className="experience-hero-aside-dot" aria-hidden="true">·</span>
+              <span>Systems</span>
+              <span className="experience-hero-aside-dot" aria-hidden="true">·</span>
+              <span>Ideas</span>
+              <span className="experience-hero-aside-dot" aria-hidden="true">·</span>
+              <span>Impact</span>
+            </p>
+            <p className="experience-hero-aside-note">A record of progress, not just positions.</p>
           </AnimatedSection>
         </div>
       </section>
@@ -147,7 +150,7 @@ export default function ExperiencePageView() {
               { value: "oldest", label: "Oldest first" },
             ]}
             onChange={(value) => setSort(value as SortId)}
-            className="dash-cselect"
+            className="dash-cselect experience-sort"
           />
         </div>
       </section>
@@ -188,7 +191,7 @@ export default function ExperiencePageView() {
             <div className="experience-side-cta">
               <p>Want the full story?</p>
               <Link href="#experience-timeline" className="btn btn-primary">
-                View full timeline <RiArrowRightLine size={16} />
+                View full timeline <RiArrowRightLine size={14} />
               </Link>
             </div>
           </aside>
@@ -196,7 +199,7 @@ export default function ExperiencePageView() {
           <div className="experience-timeline" id="experience-timeline">
             {visible.length ? (
               visible.map((item, index) => (
-                <AnimatedSection key={item.id} delay={Math.min(index, 8) * 45}>
+                <AnimatedSection key={item.id} delay={Math.min(index, 8) * 35}>
                   <ExperienceCard item={item} current={index === 0 && sort === "latest"} />
                 </AnimatedSection>
               ))
@@ -209,23 +212,23 @@ export default function ExperiencePageView() {
 
       <section className="experience-next" data-page-section aria-label="Next chapter">
         <div className="container experience-next-grid">
-          <AnimatedSection>
+          <div className="experience-next-copy">
             <p className="section-label">Next chapter</p>
             <h2>Let&apos;s build what&apos;s next.</h2>
-            <Link href="/contact" className="btn btn-primary btn-lg">
-              Start a conversation <RiArrowRightLine size={16} />
+          </div>
+          <div className="experience-next-actions">
+            <Link href="/contact" className="btn btn-primary experience-next-primary">
+              Start a conversation <RiArrowRightLine size={14} />
             </Link>
-          </AnimatedSection>
-          <AnimatedSection delay={70}>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", alignItems: "flex-start" }}>
-              <Link href="/projects" className="btn btn-outline btn-lg">
-                View selected work <RiArrowRightLine size={16} />
+            <div className="experience-next-secondary">
+              <Link href="/projects" className="btn btn-outline">
+                View selected work <RiArrowRightLine size={14} />
               </Link>
               <Link href="/cv?source=experience" className="btn btn-ghost">
-                Download CV <RiArrowRightLine size={16} />
+                Download CV <RiArrowRightLine size={14} />
               </Link>
             </div>
-          </AnimatedSection>
+          </div>
         </div>
       </section>
     </div>

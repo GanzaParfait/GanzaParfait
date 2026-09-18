@@ -123,43 +123,9 @@ export default function ProjectEditorModal({
   };
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 200,
-        background: "rgba(0, 0, 0, 0.65)",
-        backdropFilter: "blur(4px)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "1rem",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "72rem",
-          maxHeight: "90vh",
-          background: "var(--color-surface)",
-          border: "1px solid var(--color-border)",
-          borderRadius: "0.75rem",
-          boxShadow: "var(--shadow-xl)",
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-        }}
-      >
-        <div
-          style={{
-            padding: "1rem 1.25rem",
-            borderBottom: "1px solid var(--color-border)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "1rem",
-          }}
-        >
+    <div className="dash-modal-layer" role="dialog" aria-modal="true" aria-label={project ? "Edit project" : "Add project"}>
+      <div className="dash-modal-sheet is-project">
+        <div className="dash-modal-head">
           <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "var(--color-text)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <RiFolderLine style={{ color: "var(--color-primary)" }} /> {project ? "Edit Project" : "Add New Project"}
           </h3>
@@ -183,10 +149,10 @@ export default function ProjectEditorModal({
           ))}
         </nav>
 
-        <form onSubmit={handleSubmit} style={{ flex: 1, padding: "1.25rem", overflowY: "auto", display: "grid", gap: "1rem" }}>
+        <form id="project-editor-form" onSubmit={handleSubmit} style={{ flex: 1, padding: "1.25rem", overflowY: "auto", display: "grid", gap: "1rem" }}>
           {tab === "basics" && (
             <>
-              <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: "0.875rem" }}>
+              <div className="dash-form-grid" style={{ gridTemplateColumns: "1.5fr 1fr", gap: "0.875rem" }}>
                 <div>
                   <label style={labelStyle}>
                     Project Title <span style={{ color: "#ef4444" }}>*</span>
@@ -220,7 +186,7 @@ export default function ProjectEditorModal({
                   ) : null}
                 </div>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.875rem" }}>
+              <div className="dash-form-grid" style={{ gridTemplateColumns: "1fr 1fr 1fr", gap: "0.875rem" }}>
                 <div>
                   <label style={labelStyle}>Status</label>
                   <CustomSelect
@@ -235,7 +201,7 @@ export default function ProjectEditorModal({
                 </div>
                 <div>
                   <label style={labelStyle}>Client / organization</label>
-                  <input type="text" value={formData.organization || ""} onChange={(e) => set("organization", e.target.value)} style={fieldStyle} />
+                  <input type="text" placeholder="e.g. Caritas Rwanda" value={formData.organization || ""} onChange={(e) => set("organization", e.target.value)} style={fieldStyle} />
                 </div>
                 <div>
                   <label style={labelStyle}>Duration</label>
@@ -244,25 +210,25 @@ export default function ProjectEditorModal({
               </div>
               <div>
                 <label style={labelStyle}>Short description (cards)</label>
-                <textarea rows={2} value={formData.description || ""} onChange={(e) => set("description", e.target.value)} style={fieldStyle} />
+                <textarea rows={2} placeholder="One short sentence for project cards" value={formData.description || ""} onChange={(e) => set("description", e.target.value)} style={fieldStyle} />
               </div>
               <div>
                 <label style={labelStyle}>Tagline</label>
-                <input type="text" value={formData.tagline || ""} onChange={(e) => set("tagline", e.target.value)} style={fieldStyle} />
+                <input type="text" placeholder="Optional short tagline" value={formData.tagline || ""} onChange={(e) => set("tagline", e.target.value)} style={fieldStyle} />
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.875rem" }}>
+              <div className="dash-form-grid" style={{ gap: "0.875rem" }}>
                 <div>
                   <label style={labelStyle}>Live URL</label>
-                  <input type="url" value={formData.links?.live || ""} onChange={(e) => setFormData({ ...formData, links: { ...formData.links, live: e.target.value } })} style={fieldStyle} />
+                  <input type="url" placeholder="https://" value={formData.links?.live || ""} onChange={(e) => setFormData({ ...formData, links: { ...formData.links, live: e.target.value } })} style={fieldStyle} />
                 </div>
                 <div>
                   <label style={labelStyle}>GitHub URL</label>
-                  <input type="url" value={formData.links?.github || ""} onChange={(e) => setFormData({ ...formData, links: { ...formData.links, github: e.target.value } })} style={fieldStyle} />
+                  <input type="url" placeholder="https://github.com/…" value={formData.links?.github || ""} onChange={(e) => setFormData({ ...formData, links: { ...formData.links, github: e.target.value } })} style={fieldStyle} />
                 </div>
               </div>
               <div>
                 <label style={labelStyle}>Hero flourish text</label>
-                <input type="text" value={formData.flourish || ""} onChange={(e) => set("flourish", e.target.value)} style={fieldStyle} />
+                <input type="text" placeholder="Short flourish near the case hero" value={formData.flourish || ""} onChange={(e) => set("flourish", e.target.value)} style={fieldStyle} />
               </div>
               <div>
                 <label style={labelStyle}>Project logo</label>
@@ -319,16 +285,29 @@ export default function ProjectEditorModal({
             <>
               <div>
                 <label style={labelStyle}>Long description</label>
-                <textarea rows={5} value={formData.longDescription || ""} onChange={(e) => set("longDescription", e.target.value)} style={fieldStyle} />
+                <textarea
+                  rows={5}
+                  placeholder="Full case narrative for the project detail page"
+                  value={formData.longDescription || ""}
+                  onChange={(e) => set("longDescription", e.target.value)}
+                  style={fieldStyle}
+                />
               </div>
               <div>
                 <label style={labelStyle}>Context</label>
-                <textarea rows={3} value={formData.context || ""} onChange={(e) => set("context", e.target.value)} style={fieldStyle} />
+                <textarea
+                  rows={3}
+                  placeholder="Who the client is and why the work mattered"
+                  value={formData.context || ""}
+                  onChange={(e) => set("context", e.target.value)}
+                  style={fieldStyle}
+                />
               </div>
               <div>
                 <label style={labelStyle}>Key highlights, one per line</label>
                 <textarea
                   rows={4}
+                  placeholder={"Digitized intake workflows\nRole-based reporting\nOffline-capable forms"}
                   value={(formData.highlights || []).join("\n")}
                   onChange={(e) => set("highlights", linesFromTextarea(e.target.value))}
                   style={fieldStyle}
@@ -343,6 +322,7 @@ export default function ProjectEditorModal({
                 <label style={labelStyle}>Features, one per line</label>
                 <textarea
                   rows={6}
+                  placeholder={"Search & filters\nRole-based access\nExport reports"}
                   value={(formData.features || []).join("\n")}
                   onChange={(e) => set("features", linesFromTextarea(e.target.value))}
                   style={fieldStyle}
@@ -350,7 +330,7 @@ export default function ProjectEditorModal({
               </div>
               <div>
                 <label style={labelStyle}>Solution summary</label>
-                <textarea rows={3} value={formData.solution || ""} onChange={(e) => set("solution", e.target.value)} style={fieldStyle} />
+                <textarea rows={3} placeholder="What was delivered and why it matters" value={formData.solution || ""} onChange={(e) => set("solution", e.target.value)} style={fieldStyle} />
               </div>
             </>
           )}
@@ -359,11 +339,11 @@ export default function ProjectEditorModal({
             <>
               <div>
                 <label style={labelStyle}>My role</label>
-                <input type="text" value={formData.myRole || ""} onChange={(e) => set("myRole", e.target.value)} style={fieldStyle} />
+                <input type="text" placeholder="e.g. Lead engineer / Product owner" value={formData.myRole || ""} onChange={(e) => set("myRole", e.target.value)} style={fieldStyle} />
               </div>
               <div>
                 <label style={labelStyle}>What I built</label>
-                <textarea rows={5} value={formData.whatIBuilt || ""} onChange={(e) => set("whatIBuilt", e.target.value)} style={fieldStyle} />
+                <textarea rows={5} placeholder="Concrete systems, flows, or modules you owned" value={formData.whatIBuilt || ""} onChange={(e) => set("whatIBuilt", e.target.value)} style={fieldStyle} />
               </div>
             </>
           )}
@@ -373,6 +353,7 @@ export default function ProjectEditorModal({
               <label style={labelStyle}>Technologies, separated by commas</label>
               <input
                 type="text"
+                placeholder="Next.js, PostgreSQL, Supabase…"
                 value={(formData.technologies || []).join(", ")}
                 onChange={(e) => set("technologies", e.target.value.split(",").map((item) => item.trim()).filter(Boolean))}
                 style={fieldStyle}
@@ -384,26 +365,56 @@ export default function ProjectEditorModal({
             <>
               <div>
                 <label style={labelStyle}>Outcome</label>
-                <textarea rows={3} value={formData.outcome || ""} onChange={(e) => set("outcome", e.target.value)} style={fieldStyle} />
+                <textarea
+                  rows={3}
+                  placeholder="What changed after launch (no unverified numbers)"
+                  value={formData.outcome || ""}
+                  onChange={(e) => set("outcome", e.target.value)}
+                  style={fieldStyle}
+                />
               </div>
               <div>
                 <label style={labelStyle}>Result / impact (verified only)</label>
-                <textarea rows={3} value={formData.result || ""} onChange={(e) => set("result", e.target.value)} style={fieldStyle} />
+                <textarea
+                  rows={3}
+                  placeholder="Only outcomes you can stand behind"
+                  value={formData.result || ""}
+                  onChange={(e) => set("result", e.target.value)}
+                  style={fieldStyle}
+                />
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1.2fr 0.8fr", gap: "0.875rem" }}>
                 <div>
                   <label style={labelStyle}>Quote (only with permission)</label>
-                  <textarea rows={2} value={formData.quote || ""} onChange={(e) => set("quote", e.target.value)} style={fieldStyle} />
+                  <textarea
+                    rows={2}
+                    placeholder="Optional short quote"
+                    value={formData.quote || ""}
+                    onChange={(e) => set("quote", e.target.value)}
+                    style={fieldStyle}
+                  />
                 </div>
                 <div>
                   <label style={labelStyle}>Quote attribution</label>
-                  <input type="text" value={formData.quoteBy || ""} onChange={(e) => set("quoteBy", e.target.value)} style={fieldStyle} />
+                  <input
+                    type="text"
+                    placeholder="Name · Role"
+                    value={formData.quoteBy || ""}
+                    onChange={(e) => set("quoteBy", e.target.value)}
+                    style={fieldStyle}
+                  />
                 </div>
               </div>
               <div>
                 <label style={labelStyle}>Case study file</label>
                 <div style={{ display: "flex", gap: "0.5rem" }}>
-                  <input type="text" value={formData.caseStudyFile || ""} onChange={(e) => set("caseStudyFile", e.target.value)} style={fieldStyle} />
+                  <input
+                    type="text"
+                    placeholder="/images/projects/… or media URL"
+                    value={formData.caseStudyFile || ""}
+                    onChange={(e) => set("caseStudyFile", e.target.value)}
+                    style={fieldStyle}
+                  />
                   <button type="button" className="btn btn-outline btn-sm" onClick={() => onPickMedia((url) => set("caseStudyFile", url))}>
                     Choose
                   </button>
@@ -519,6 +530,7 @@ export default function ProjectEditorModal({
                 <label style={labelStyle}>Media captions, one per line (aligned with stills)</label>
                 <textarea
                   rows={3}
+                  placeholder={"Dashboard overview\nIntake form\nReports view"}
                   value={(formData.screenshotCaptions || []).join("\n")}
                   onChange={(e) => set("screenshotCaptions", linesFromTextarea(e.target.value))}
                   style={fieldStyle}
@@ -577,7 +589,13 @@ export default function ProjectEditorModal({
               <div>
                 <label style={labelStyle}>Video poster image URL</label>
                 <div style={{ display: "flex", gap: "0.5rem" }}>
-                  <input type="text" value={formData.videoPoster || ""} onChange={(e) => set("videoPoster", e.target.value)} style={fieldStyle} />
+                  <input
+                    type="text"
+                    placeholder="/images/projects/… poster"
+                    value={formData.videoPoster || ""}
+                    onChange={(e) => set("videoPoster", e.target.value)}
+                    style={fieldStyle}
+                  />
                   <button type="button" className="btn btn-outline btn-sm" onClick={() => onPickMedia((url) => set("videoPoster", url))}>
                     Choose
                   </button>
@@ -590,11 +608,23 @@ export default function ProjectEditorModal({
             <>
               <div>
                 <label style={labelStyle}>Challenge</label>
-                <textarea rows={4} value={formData.challenge || ""} onChange={(e) => set("challenge", e.target.value)} style={fieldStyle} />
+                <textarea
+                  rows={4}
+                  placeholder="What made this hard to ship"
+                  value={formData.challenge || ""}
+                  onChange={(e) => set("challenge", e.target.value)}
+                  style={fieldStyle}
+                />
               </div>
               <div>
                 <label style={labelStyle}>Problem</label>
-                <textarea rows={4} value={formData.problem || ""} onChange={(e) => set("problem", e.target.value)} style={fieldStyle} />
+                <textarea
+                  rows={4}
+                  placeholder="The concrete problem the product solved"
+                  value={formData.problem || ""}
+                  onChange={(e) => set("problem", e.target.value)}
+                  style={fieldStyle}
+                />
               </div>
             </>
           )}
@@ -602,14 +632,20 @@ export default function ProjectEditorModal({
           {tab === "learned" && (
             <div>
               <label style={labelStyle}>What I learned</label>
-              <textarea rows={6} value={formData.learned || ""} onChange={(e) => set("learned", e.target.value)} style={fieldStyle} />
+              <textarea
+                rows={6}
+                placeholder="Lessons you would carry into the next build"
+                value={formData.learned || ""}
+                onChange={(e) => set("learned", e.target.value)}
+                style={fieldStyle}
+              />
             </div>
           )}
 
           <p style={{ margin: 0, fontSize: "0.75rem", color: "var(--color-text-3)" }}>
             Do not add visitor counts, revenue, or other numbers taken from a screenshot.
           </p>
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
+          <div className="dash-modal-actions-desktop" style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
             <button type="button" onClick={onClose} className="btn btn-ghost btn-sm">
               Cancel
             </button>
@@ -618,6 +654,14 @@ export default function ProjectEditorModal({
             </button>
           </div>
         </form>
+        <div className="dash-modal-footer">
+          <button type="button" onClick={onClose} className="btn btn-ghost">
+            Cancel
+          </button>
+          <button type="submit" form="project-editor-form" className="btn btn-primary">
+            <RiSaveLine size={16} /> Save Project
+          </button>
+        </div>
       </div>
     </div>
   );

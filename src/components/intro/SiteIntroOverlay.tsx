@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import {
   activeIntroGreetings,
   introExperienceFrom,
@@ -152,7 +152,14 @@ export default function SiteIntroOverlay({ force = false, previewConfig, onCompl
   return (
     <div
       className={`site-intro ${transitionClass} is-${phase}`}
-      style={{ background: config.background, color: config.textColor }}
+      style={
+        {
+          "--intro-bg": config.background,
+          "--intro-fg": config.textColor,
+          background: config.background,
+          color: config.textColor,
+        } as CSSProperties
+      }
       role="presentation"
       aria-hidden="true"
     >
@@ -161,6 +168,7 @@ export default function SiteIntroOverlay({ force = false, previewConfig, onCompl
         className="site-intro-greeting"
         lang={current.locale || undefined}
         dir={dir}
+        style={{ color: config.textColor }}
       >
         {current.text}
       </p>

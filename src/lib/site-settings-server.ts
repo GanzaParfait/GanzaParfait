@@ -2,6 +2,7 @@ import { unstable_cache } from "next/cache";
 import { createServerSupabase } from "@/lib/supabase-server";
 import { DEFAULT_SETTINGS, type SiteSettings } from "@/lib/supabase";
 import { DEFAULT_SOCIAL_LINKS } from "@/lib/socials";
+import { sanitizeWelcomeBody } from "@/lib/welcome-copy";
 
 async function loadSiteSettings(): Promise<SiteSettings> {
   try {
@@ -28,6 +29,10 @@ async function loadSiteSettings(): Promise<SiteSettings> {
       bio: json.bio || data.bio || DEFAULT_SETTINGS.bio,
       headerSocialLimit: json.headerSocialLimit ?? data.header_social_limit ?? DEFAULT_SETTINGS.headerSocialLimit,
       socialLinks: json.socialLinks?.length ? json.socialLinks : data.social_links || DEFAULT_SOCIAL_LINKS,
+      emailWelcomeBody: sanitizeWelcomeBody(json.emailWelcomeBody),
+      footerQuote: json.footerQuote?.trim() || DEFAULT_SETTINGS.footerQuote,
+      footerQuoteAttribution: json.footerQuoteAttribution?.trim() || DEFAULT_SETTINGS.footerQuoteAttribution,
+      footerShowQuote: json.footerShowQuote !== false,
     };
   } catch {
     return DEFAULT_SETTINGS;

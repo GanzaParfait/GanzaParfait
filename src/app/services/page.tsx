@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { siteConfig } from "@/data/site-data";
 import ServicesPageView from "@/components/services/ServicesPageView";
 import { buildPageMetadata } from "@/lib/seo";
@@ -85,14 +84,12 @@ export default async function ServicesPage({ searchParams }: PageProps) {
           }),
         ])}
       />
-      <Suspense fallback={<div className="section container theme-copy">Loading services…</div>}>
-        <ServicesPageView
-          content={content}
-          initialFocus={focus}
-          projects={projects}
-          whatsappUrl={whatsapp}
-        />
-      </Suspense>
+      <ServicesPageView
+        content={content}
+        initialFocus={focus}
+        projects={projects}
+        whatsappUrl={whatsapp}
+      />
     </>
   );
 }

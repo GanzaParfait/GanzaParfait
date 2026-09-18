@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import { RiArrowRightLine, RiArrowRightSLine } from "react-icons/ri";
 import { SiteSettings } from "@/lib/supabase";
 import { heroHighlights, heroImageFor, setting } from "@/lib/hero";
@@ -14,6 +15,8 @@ export default function FeaturedOverlayHero({
 }) {
   const image = heroImageFor(settings, "featured_overlay");
   const highlights = heroHighlights(settings);
+  const mobileX = settings.heroOverlayMobilePositionX ?? 78;
+  const mobileY = settings.heroOverlayMobilePositionY ?? 12;
 
   return (
     <section
@@ -26,7 +29,21 @@ export default function FeaturedOverlayHero({
       } : undefined}
     >
       <div className="hero-cinematic-media">
-        <img src={image} alt={setting(settings, "siteTitle")} />
+        <img
+          src={image}
+          alt={setting(settings, "siteTitle")}
+          width={1600}
+          height={2000}
+          decoding="async"
+          fetchPriority={isPreview ? "low" : "high"}
+          style={
+            {
+              objectPosition: "center 20%",
+              ["--hero-mobile-pos-x" as string]: `${mobileX}%`,
+              ["--hero-mobile-pos-y" as string]: `${mobileY}%`,
+            } as CSSProperties
+          }
+        />
         <div className="hero-cinematic-shade" aria-hidden="true" />
       </div>
 

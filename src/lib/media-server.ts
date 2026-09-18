@@ -6,11 +6,14 @@ import {
   classifyMediaType,
   formatBytes,
   isAllowedLibraryFile,
+  mediaMaxBytesFor,
+  mediaMaxLabel,
   mimeFromName,
   type MediaAsset,
   type MediaAssetType,
   type MediaSource,
 } from "@/lib/media";
+import { isCloudinaryConfigured, uploadToCloudinary, cloudinaryOptimizedUrl } from "@/lib/cloudinary";
 import { createServerSupabase, hasServiceRoleKey } from "@/lib/supabase-server";
 
 export interface MediaAssetRow {
@@ -187,20 +190,59 @@ export async function uploadMediaBuffer(
   options: { alt?: string; source: MediaSource; originalUrl?: string },
 ): Promise<MediaAsset> {
   if (file.size <= 0) throw new Error("That file is empty.");
-  if (file.size > MEDIA_MAX_FILE_BYTES) {
-    throw new Error("Files must be 10 MB or smaller.");
+  const mime = file.type || mimeFromName(file.name) || "application/octet-stream";
+  const maxBytes = mediaMaxBytesFor(mime || file.name);
+  if (file.size > maxBytes) {
+    throw new Error(`Files must be ${mediaMaxLabel(maxBytes)} or smaller.`);
   }
 
-  const mime = file.type || mimeFromName(file.name) || "application/octet-stream";
   if (!isAllowedLibraryFile(mime, file.name)) {
     throw new Error("That file type is not allowed. Upload images, video, PDF, Excel, Word, or similar blog files.");
   }
   const type = classifyMediaType(mime, file.name);
+  const id = randomUUID();
+  const title = sanitizeFileName(file.name);
+  const createdAt = new Date().toISOString();
+
+  // Prefer Cloudinary for images/videos when configured (CDN + auto format/quality).
+  if (isCloudinaryConfigured() && (type === "image" || type === "video")) {
+    const uploaded = await uploadToCloudinary(file.buffer, {
+      filename: title,
+      mime,
+      folder: "princeparfait/library",
+    });
+    const delivery =
+      type === "image"
+        ? cloudinaryOptimizedUrl(uploaded.secureUrl || uploaded.url, { width: 1920, crop: "limit" })
+        : uploaded.secureUrl || uploaded.url;
+
+    const asset: MediaAsset = {
+      id,
+      name: title,
+      url: delivery,
+      type,
+      size: formatBytes(uploaded.bytes || file.size),
+      sizeBytes: uploaded.bytes || file.size,
+      uploadedAt: createdAt.slice(0, 10),
+      alt: options.alt || title.replace(/[-_]/g, " "),
+      source: options.source,
+      storagePath: `cloudinary:${uploaded.publicId}`,
+      originalUrl: options.originalUrl || uploaded.secureUrl,
+      mimeType: mime,
+    };
+
+    try {
+      const catalog = await readCatalog(supabase);
+      await writeCatalog(supabase, [asset, ...catalog.filter((item) => item.id !== asset.id)]);
+    } catch {
+      // Cloudinary already holds the file; catalog sync is best-effort.
+    }
+    void syncTableInsert(supabase, asset);
+    return asset;
+  }
 
   await withRetry(() => ensureMediaBucket(supabase));
 
-  const id = randomUUID();
-  const title = sanitizeFileName(file.name);
   const storagePath = `library/${id}-${title}`;
   await withRetry(async () => {
     const { error: uploadError } = await supabase.storage.from(MEDIA_BUCKET).upload(storagePath, file.buffer, {
@@ -213,7 +255,6 @@ export async function uploadMediaBuffer(
   });
 
   const { data: publicData } = supabase.storage.from(MEDIA_BUCKET).getPublicUrl(storagePath);
-  const createdAt = new Date().toISOString();
   const asset: MediaAsset = {
     id,
     name: title,
@@ -222,7 +263,7 @@ export async function uploadMediaBuffer(
     size: formatBytes(file.size),
     sizeBytes: file.size,
     uploadedAt: createdAt.slice(0, 10),
-    alt: options.alt || "",
+    alt: options.alt || title.replace(/[-_]/g, " "),
     source: options.source,
     storagePath,
     originalUrl: options.originalUrl,

@@ -82,16 +82,15 @@ export const footerNav = [
       { label: "Experience", href: "/experience" },
       { label: "Services", href: "/services" },
       { label: "CV / Resume", href: "/cv?source=footer" },
-    ],
-  },
-  {
-    label: "Connect",
-    links: [
-      { label: "Speaking", href: "/#speaking" },
       { label: "Contact", href: "/contact" },
     ],
   },
 ] as const;
+
+export const defaultFooterQuote = {
+  text: "Build things people can actually use.",
+  attribution: "Prince Parfait GANZA",
+} as const;
 
 export type Project = {
   id: string;

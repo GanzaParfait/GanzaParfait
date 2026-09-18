@@ -29,6 +29,9 @@ import { useDashboardFeedback } from "@/components/dashboard/DashboardFeedback";
 import {
   LIBRARY_ACCEPT,
   MEDIA_MAX_FILE_BYTES,
+  MEDIA_MAX_VIDEO_BYTES,
+  mediaMaxBytesFor,
+  mediaMaxLabel,
   MEDIA_PAGE_SIZE,
   classifyMediaType,
   fileExtension,
@@ -247,7 +250,7 @@ export default function MediaManagerPage({ onSelect, asModal, pickerMode = "any"
     }
     const oversized = files.find((file) => file.size > MEDIA_MAX_FILE_BYTES);
     if (oversized) {
-      notify(`${oversized.name} is larger than 10 MB.`, "error");
+      notify(`${oversized.name} is larger than ${mediaMaxLabel(mediaMaxBytesFor(oversized.type || oversized.name))}.`, "error");
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
@@ -308,7 +311,8 @@ export default function MediaManagerPage({ onSelect, asModal, pickerMode = "any"
             <RiFolder3Line style={{ color: "#0e52a8" }} /> Media Library
           </h2>
           <p style={{ fontSize: "0.75rem", color: "#64748b", marginTop: "0.1rem" }}>
-            {assets.length} stored assets. Images, video, PDF, Excel, and other blog files up to 10 MB.
+            {assets.length} stored assets. Images up to {mediaMaxLabel(MEDIA_MAX_FILE_BYTES)}, video up to{" "}
+            {mediaMaxLabel(MEDIA_MAX_VIDEO_BYTES)}. Cloudinary is used when configured for fast CDN delivery.
           </p>
         </div>
 
@@ -393,6 +397,7 @@ export default function MediaManagerPage({ onSelect, asModal, pickerMode = "any"
       {isAdding && (
         <form
           onSubmit={handleImportUrl}
+          className="media-import-form"
           style={{
             margin: asModal ? "0 1rem 0.9rem" : "0 0 0.9rem",
             padding: "1rem",
@@ -464,7 +469,7 @@ export default function MediaManagerPage({ onSelect, asModal, pickerMode = "any"
         </form>
       )}
 
-      <div style={{ flex: 1, display: "flex", overflow: "hidden", minHeight: 0, gap: selectedAsset ? "0.9rem" : 0 }}>
+      <div className="media-browser" style={{ flex: 1, display: "flex", overflow: "hidden", minHeight: 0, gap: selectedAsset ? "0.9rem" : 0 }}>
         <div style={{ flex: 1, overflowY: "auto", minWidth: 0, paddingRight: "0.15rem" }}>
           {loading ? (
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "16rem", color: "#64748b", gap: "0.6rem" }}>
@@ -554,6 +559,7 @@ export default function MediaManagerPage({ onSelect, asModal, pickerMode = "any"
 
         {selectedAsset && (
           <div
+            className="media-detail-panel"
             style={{
               width: "17rem",
               border: "1px solid #dbe4f0",

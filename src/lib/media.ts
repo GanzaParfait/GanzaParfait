@@ -18,9 +18,24 @@ export interface MediaAsset {
 }
 
 export const MEDIA_PAGE_SIZE = 12;
-export const MEDIA_MAX_FILE_BYTES = 10 * 1024 * 1024;
+/** Soft cap for documents on Supabase; videos/images via Cloudinary can be larger. */
+export const MEDIA_MAX_FILE_BYTES = 50 * 1024 * 1024;
+export const MEDIA_MAX_VIDEO_BYTES = 100 * 1024 * 1024;
 export const MEDIA_BUCKET = "media";
 export const LOCAL_MEDIA_STORAGE_KEY = "ppg_media_assets";
+
+export function mediaMaxBytesFor(mimeOrName: string) {
+  const value = mimeOrName.toLowerCase();
+  if (value.startsWith("video/") || /\.(mp4|webm|mov|m4v|ogg)$/i.test(value)) {
+    return MEDIA_MAX_VIDEO_BYTES;
+  }
+  return MEDIA_MAX_FILE_BYTES;
+}
+
+export function mediaMaxLabel(bytes = MEDIA_MAX_FILE_BYTES) {
+  const mb = Math.round(bytes / (1024 * 1024));
+  return `${mb} MB`;
+}
 
 const IMAGE_EXT = ["jpg", "jpeg", "png", "gif", "webp", "avif", "svg", "bmp", "ico"];
 const VIDEO_EXT = ["mp4", "webm", "mov", "m4v", "ogg"];

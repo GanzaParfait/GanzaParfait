@@ -13,6 +13,7 @@ import SiteIntroOverlay from "@/components/intro/SiteIntroOverlay";
 import {
   DEFAULT_INTRO_EXPERIENCE,
   introExperienceFrom,
+  normalizeIntroHex,
   type IntroExperience,
   type IntroFrequency,
   type IntroGreeting,
@@ -43,6 +44,42 @@ const panelStyle = {
   borderRadius: "0.85rem",
   padding: "1rem 1.1rem",
 } as const;
+
+function ColorField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (next: string) => void;
+}) {
+  const hex = normalizeIntroHex(value, "#000000");
+  return (
+    <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>
+      {label}
+      <div style={{ display: "flex", gap: "0.45rem", alignItems: "center", marginTop: "0.35rem" }}>
+        <input
+          type="color"
+          aria-label={`${label} swatch`}
+          style={{ ...inputStyle, width: "3rem", padding: "0.2rem", height: "2.4rem", flex: "0 0 auto" }}
+          value={hex}
+          onChange={(e) => onChange(normalizeIntroHex(e.target.value, hex))}
+        />
+        <input
+          type="text"
+          aria-label={`${label} hex`}
+          spellCheck={false}
+          style={{ ...inputStyle, fontFamily: "ui-monospace, monospace", letterSpacing: "0.02em" }}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onBlur={() => onChange(normalizeIntroHex(value, hex))}
+          placeholder="#000000"
+        />
+      </div>
+    </label>
+  );
+}
 
 export default function DashboardIntroPage() {
   const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
@@ -126,17 +163,17 @@ export default function DashboardIntroPage() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem", height: "100%", minHeight: 0 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
+      <header className="dash-page-head">
         <div>
-          <p style={{ fontSize: "0.7rem", fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "#0e52a8" }}>
+          <p style={{ fontSize: "0.7rem", fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "#0e52a8", margin: 0 }}>
             Control center
           </p>
-          <h1 style={{ fontSize: "1.2rem", fontWeight: 800, color: "#0b192c", margin: 0 }}>Intro Experience</h1>
-          <p style={{ fontSize: "0.8rem", color: "#64748b", maxWidth: "40rem", margin: "0.35rem 0 0" }}>
+          <h1 style={{ fontSize: "1.2rem", fontWeight: 800, color: "#0b192c", margin: "0.2rem 0 0" }}>Intro Experience</h1>
+          <p style={{ fontSize: "0.8rem", color: "#64748b", maxWidth: "42rem", margin: "0.35rem 0 0" }}>
             Short multilingual greeting overlay on first homepage visit. Homepage loads behind it — this is not a loading screen.
           </p>
         </div>
-        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+        <div className="dash-page-head-actions">
           <button type="button" className="btn btn-outline" onClick={() => setPreviewing(true)}>
             <RiEyeLine size={16} /> Preview Intro
           </button>
@@ -147,10 +184,10 @@ export default function DashboardIntroPage() {
             <RiSaveLine size={16} /> {saving ? "Saving..." : "Save"}
           </button>
         </div>
-      </div>
+      </header>
 
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.05fr) minmax(16rem, 0.85fr)", gap: "0.85rem", flex: 1, minHeight: 0 }}>
-        <div style={{ overflowY: "auto", display: "flex", flexDirection: "column", gap: "0.75rem", paddingBottom: "1rem" }}>
+      <div className="dash-split">
+        <div className="dash-split-main" style={{ display: "flex", flexDirection: "column", gap: "0.75rem", paddingBottom: "1rem" }}>
           <section style={panelStyle}>
             <h2 style={{ fontSize: "0.85rem", fontWeight: 800, margin: "0 0 0.65rem" }}>Status</h2>
             <label className="ann-check" style={{ marginBottom: "0.75rem" }}>
@@ -185,24 +222,16 @@ export default function DashboardIntroPage() {
           <section style={panelStyle}>
             <h2 style={{ fontSize: "0.85rem", fontWeight: 800, margin: "0 0 0.65rem" }}>Appearance & timing</h2>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.65rem" }}>
-              <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>
-                Background
-                <input
-                  type="color"
-                  style={{ ...inputStyle, marginTop: "0.35rem", padding: "0.2rem", height: "2.4rem" }}
-                  value={config.background}
-                  onChange={(e) => patch({ background: e.target.value })}
-                />
-              </label>
-              <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>
-                Text
-                <input
-                  type="color"
-                  style={{ ...inputStyle, marginTop: "0.35rem", padding: "0.2rem", height: "2.4rem" }}
-                  value={config.textColor}
-                  onChange={(e) => patch({ textColor: e.target.value })}
-                />
-              </label>
+              <ColorField
+                label="Background"
+                value={config.background}
+                onChange={(background) => patch({ background })}
+              />
+              <ColorField
+                label="Text"
+                value={config.textColor}
+                onChange={(textColor) => patch({ textColor })}
+              />
               <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>
                 Total duration (sec)
                 <input
@@ -252,10 +281,10 @@ export default function DashboardIntroPage() {
           </section>
 
           <section style={panelStyle}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.65rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: "0.75rem", alignItems: "center", marginBottom: "0.65rem" }}>
               <h2 style={{ fontSize: "0.85rem", fontWeight: 800, margin: 0 }}>Greetings</h2>
-              <button type="button" className="btn btn-outline" onClick={addGreeting} style={{ padding: "0.35rem 0.65rem", fontSize: "0.75rem" }}>
-                <RiAddLine size={15} /> Add greeting
+              <button type="button" className="btn btn-outline" style={{ padding: "0.35rem 0.7rem", fontSize: "0.75rem" }} onClick={addGreeting}>
+                <RiAddLine size={14} /> Add greeting
               </button>
             </div>
             <div style={{ display: "grid", gap: "0.45rem" }}>
@@ -273,87 +302,97 @@ export default function DashboardIntroPage() {
                   onDragEnd={() => setDragIndex(null)}
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "auto auto minmax(0, 1.2fr) minmax(0, 0.9fr) minmax(0, 0.55fr) auto auto",
-                    gap: "0.4rem",
+                    gridTemplateColumns: "auto minmax(0, 1fr) auto",
+                    gap: "0.55rem",
                     alignItems: "center",
-                    padding: "0.55rem",
+                    padding: "0.55rem 0.65rem",
                     borderRadius: "0.65rem",
                     border: "1px solid #e2e8f0",
                     background: greeting.enabled ? "#fff" : "#f8fafc",
                     opacity: greeting.enabled ? 1 : 0.72,
                   }}
                 >
-                  <span aria-hidden style={{ color: "#94a3b8", cursor: "grab", display: "grid", placeItems: "center" }}>
+                  <span style={{ color: "#94a3b8", cursor: "grab", display: "inline-flex" }} aria-hidden>
                     <RiDraggable size={16} />
                   </span>
-                  <span style={{ fontSize: "0.7rem", fontWeight: 800, color: "#94a3b8", width: "1.4rem" }}>
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                  <input
-                    style={inputStyle}
-                    value={greeting.text}
-                    dir={greeting.direction === "rtl" ? "rtl" : "ltr"}
-                    onChange={(e) => updateGreeting(greeting.id, { text: e.target.value })}
-                    aria-label="Greeting text"
-                  />
-                  <input
-                    style={inputStyle}
-                    value={greeting.language}
-                    onChange={(e) => updateGreeting(greeting.id, { language: e.target.value })}
-                    aria-label="Language name"
-                    placeholder="Language"
-                  />
-                  <input
-                    style={inputStyle}
-                    value={greeting.locale}
-                    onChange={(e) => updateGreeting(greeting.id, { locale: e.target.value })}
-                    aria-label="Locale"
-                    placeholder="en"
-                  />
-                  <label className="ann-check" style={{ margin: 0, whiteSpace: "nowrap" }}>
-                    <input
-                      type="checkbox"
-                      checked={greeting.enabled}
-                      onChange={(e) => updateGreeting(greeting.id, { enabled: e.target.checked })}
-                    />
-                    On
-                  </label>
+                  <div style={{ display: "grid", gap: "0.35rem", minWidth: 0 }}>
+                    <div style={{ display: "flex", gap: "0.45rem", flexWrap: "wrap" }}>
+                      <input
+                        style={{ ...inputStyle, flex: "1 1 8rem" }}
+                        value={greeting.text}
+                        onChange={(e) => updateGreeting(greeting.id, { text: e.target.value })}
+                        placeholder="Hello."
+                      />
+                      <input
+                        style={{ ...inputStyle, flex: "1 1 6rem" }}
+                        value={greeting.language}
+                        onChange={(e) => updateGreeting(greeting.id, { language: e.target.value })}
+                        placeholder="Language"
+                      />
+                      <input
+                        style={{ ...inputStyle, width: "4.5rem", flex: "0 0 auto" }}
+                        value={greeting.locale}
+                        onChange={(e) => updateGreeting(greeting.id, { locale: e.target.value })}
+                        placeholder="en"
+                      />
+                    </div>
+                    <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", alignItems: "center" }}>
+                      <label style={{ display: "inline-flex", gap: "0.35rem", alignItems: "center", fontSize: "0.72rem", fontWeight: 700 }}>
+                        <input
+                          type="checkbox"
+                          checked={greeting.enabled}
+                          onChange={(e) => updateGreeting(greeting.id, { enabled: e.target.checked })}
+                        />
+                        Enabled
+                      </label>
+                      <label style={{ display: "inline-flex", gap: "0.35rem", alignItems: "center", fontSize: "0.72rem", fontWeight: 700 }}>
+                        Dir
+                        <select
+                          style={{ ...inputStyle, width: "auto", padding: "0.25rem 0.45rem" }}
+                          value={greeting.direction}
+                          onChange={(e) =>
+                            updateGreeting(greeting.id, {
+                              direction: e.target.value as IntroGreeting["direction"],
+                            })
+                          }
+                        >
+                          <option value="auto">Auto</option>
+                          <option value="ltr">LTR</option>
+                          <option value="rtl">RTL</option>
+                        </select>
+                      </label>
+                    </div>
+                  </div>
                   <button
                     type="button"
-                    className="btn btn-outline"
-                    style={{ padding: "0.3rem", color: "#b91c1c" }}
                     onClick={() => removeGreeting(greeting.id)}
-                    aria-label="Delete greeting"
                     disabled={config.greetings.length <= 1}
+                    style={{
+                      border: "none",
+                      background: "transparent",
+                      color: "#ef4444",
+                      cursor: config.greetings.length <= 1 ? "not-allowed" : "pointer",
+                      opacity: config.greetings.length <= 1 ? 0.4 : 1,
+                      padding: "0.25rem",
+                    }}
+                    aria-label="Remove greeting"
                   >
-                    <RiDeleteBinLine size={15} />
+                    <RiDeleteBinLine size={16} />
                   </button>
-                  <select
-                    style={{ ...inputStyle, gridColumn: "3 / 6" }}
-                    value={greeting.direction}
-                    onChange={(e) =>
-                      updateGreeting(greeting.id, {
-                        direction: e.target.value as IntroGreeting["direction"],
-                      })
-                    }
-                  >
-                    <option value="auto">Direction: Auto</option>
-                    <option value="ltr">Direction: LTR</option>
-                    <option value="rtl">Direction: RTL</option>
-                  </select>
                 </div>
               ))}
             </div>
           </section>
         </div>
 
-        <aside style={{ ...panelStyle, alignSelf: "start" }}>
+        <aside style={{ ...panelStyle, alignSelf: "start" }} className="dash-split-aside">
           <h2 style={{ fontSize: "0.85rem", fontWeight: 800, margin: "0 0 0.55rem" }}>Notes</h2>
           <ul style={{ margin: 0, paddingLeft: "1.1rem", fontSize: "0.78rem", color: "#64748b", lineHeight: 1.55 }}>
             <li>Only the homepage shows the intro. Deep links skip it.</li>
             <li>Preview never sets the visitor first-visit flag.</li>
             <li>Arabic and other RTL locales use automatic direction when set to Auto.</li>
             <li>Max greetings caps how many enabled lines play in one visit.</li>
+            <li>Use pure #000000 / #ffffff for a stark look; Save after changing colors.</li>
           </ul>
           <div
             style={{
@@ -364,12 +403,13 @@ export default function DashboardIntroPage() {
               minHeight: "10rem",
               display: "grid",
               placeItems: "center",
+              padding: "2.5rem 1rem",
               fontSize: "1.6rem",
               fontWeight: 600,
               letterSpacing: "-0.02em",
             }}
           >
-            {config.greetings.find((g) => g.enabled)?.text || "Hello."}
+            <span style={{ color: config.textColor }}>{config.greetings.find((g) => g.enabled)?.text || "Hello."}</span>
           </div>
         </aside>
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   RiGroupLine,
@@ -25,6 +25,10 @@ import {
   RiMore2Fill,
   RiArrowRightLine,
   RiMicLine,
+  RiDownloadLine,
+  RiDeleteBin6Line,
+  RiCloseLine,
+  RiArrowDownSLine,
 } from "react-icons/ri";
 import type { AnalyticsMetrics } from "@/lib/supabase";
 import { projects, services, experience, speakingEngagements, blogPosts, education } from "@/data/site-data";
@@ -102,10 +106,18 @@ export default function DashboardOverviewPage() {
   const [analytics, setAnalytics] = useState<AnalyticsMetrics>(EMPTY_ANALYTICS);
   const [loading, setLoading] = useState(true);
   const [expandedSession, setExpandedSession] = useState<string | null>(null);
+  const [openPathIndex, setOpenPathIndex] = useState<number | null>(0);
+  const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
+  const [busyAction, setBusyAction] = useState<"reset" | "export" | null>(null);
   const [preset, setPreset] = useState<RangePreset>("14d");
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState("");
   const [useCustom, setUseCustom] = useState(false);
+  const [rangeSheetOpen, setRangeSheetOpen] = useState(false);
+  const [draftPreset, setDraftPreset] = useState<RangePreset>("14d");
+  const [draftFrom, setDraftFrom] = useState("");
+  const [draftTo, setDraftTo] = useState("");
+  const [draftUseCustom, setDraftUseCustom] = useState(false);
 
   const query = useMemo(() => {
     if (useCustom && customFrom && customTo) return `from=${customFrom}&to=${customTo}`;
@@ -149,6 +161,76 @@ export default function DashboardOverviewPage() {
   const applyPreset = (next: RangePreset) => {
     setPreset(next);
     setUseCustom(false);
+  };
+
+  const openSessionDrawer = (sessionId: string) => {
+    setExpandedSession(sessionId);
+    setOpenPathIndex(0);
+  };
+
+  const closeSessionDrawer = () => {
+    setExpandedSession(null);
+    setOpenPathIndex(null);
+  };
+
+  const selectedSession = useMemo(
+    () => analytics.recentSessions.find((session) => session.id === expandedSession) || null,
+    [analytics.recentSessions, expandedSession]
+  );
+
+  const exportCsv = async () => {
+    setBusyAction("export");
+    try {
+      const res = await fetch(`/api/analytics/export?${query}`, { cache: "no-store" });
+      if (!res.ok) throw new Error("Export failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `prince-parfait-ganza-analytics-${new Date().toISOString().slice(0, 10)}.csv`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      setAnalytics((prev) => ({ ...prev, error: "Could not export analytics CSV." }));
+    } finally {
+      setBusyAction(null);
+    }
+  };
+
+  const resetMetrics = async () => {
+    setBusyAction("reset");
+    try {
+      const res = await fetch("/api/analytics/metrics", { method: "DELETE" });
+      if (!res.ok) throw new Error("Reset failed");
+      setResetConfirmOpen(false);
+      closeSessionDrawer();
+      await loadAnalytics();
+    } catch {
+      setAnalytics((prev) => ({ ...prev, error: "Could not reset analytics metrics." }));
+    } finally {
+      setBusyAction(null);
+    }
+  };
+
+  const openRangeSheet = () => {
+    setDraftPreset(preset);
+    setDraftFrom(customFrom);
+    setDraftTo(customTo);
+    setDraftUseCustom(useCustom);
+    setRangeSheetOpen(true);
+  };
+
+  const applyRangeSheet = () => {
+    if (draftUseCustom) {
+      if (!draftFrom || !draftTo) return;
+      setCustomFrom(draftFrom);
+      setCustomTo(draftTo);
+      setUseCustom(true);
+    } else {
+      setPreset(draftPreset);
+      setUseCustom(false);
+    }
+    setRangeSheetOpen(false);
   };
 
   const getStatValue = (key: (typeof STAT_CARDS)[number]["key"]) => {
@@ -222,7 +304,7 @@ export default function DashboardOverviewPage() {
         </div>
 
         <div className="analytics-header-actions">
-          <label className="analytics-date-range">
+          <label className="analytics-date-range analytics-date-range-desktop">
             <RiCalendarLine size={15} />
             <input
               type="date"
@@ -258,12 +340,102 @@ export default function DashboardOverviewPage() {
             ))}
           </div>
 
-          <button type="button" className="analytics-btn" onClick={loadAnalytics} disabled={loading}>
+          <button type="button" className="analytics-btn" onClick={loadAnalytics} disabled={loading} title="Refresh">
             <RiRefreshLine size={15} />
-            Refresh
+            <span className="analytics-btn-label">Refresh</span>
           </button>
+
+          <button
+            type="button"
+            className="analytics-btn analytics-range-more"
+            onClick={openRangeSheet}
+            aria-label="Custom date range"
+            title="Custom date range"
+          >
+            <RiMore2Fill size={16} />
+          </button>
+
+          <div className="analytics-tools">
+            <button type="button" className="analytics-btn" onClick={() => void exportCsv()} disabled={busyAction === "export"}>
+              <RiDownloadLine size={15} />
+              <span className="analytics-btn-label">{busyAction === "export" ? "Exporting…" : "Export CSV"}</span>
+            </button>
+            <button type="button" className="analytics-btn" onClick={() => setResetConfirmOpen(true)} disabled={busyAction === "reset"}>
+              <RiDeleteBin6Line size={15} />
+              <span className="analytics-btn-label">Reset data</span>
+            </button>
+          </div>
         </div>
       </div>
+
+      {rangeSheetOpen ? (
+        <div className="analytics-sheet-layer" role="presentation">
+          <button
+            type="button"
+            className="analytics-sheet-backdrop"
+            aria-label="Close date range"
+            onClick={() => setRangeSheetOpen(false)}
+          />
+          <div className="analytics-sheet" role="dialog" aria-modal="true" aria-labelledby="analytics-range-title">
+            <div className="analytics-sheet-handle" aria-hidden="true" />
+            <h2 id="analytics-range-title">Date range</h2>
+            <p>Choose a preset or custom dates, then apply.</p>
+
+            <div className="analytics-sheet-presets" role="group" aria-label="Preset ranges">
+              {PRESETS.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={!draftUseCustom && draftPreset === item.id ? "is-on" : undefined}
+                  onClick={() => {
+                    setDraftPreset(item.id);
+                    setDraftUseCustom(false);
+                  }}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+
+            <label className="analytics-sheet-dates">
+              <span>From</span>
+              <input
+                type="date"
+                value={draftFrom}
+                onChange={(event) => {
+                  setDraftFrom(event.target.value);
+                  setDraftUseCustom(true);
+                }}
+              />
+            </label>
+            <label className="analytics-sheet-dates">
+              <span>To</span>
+              <input
+                type="date"
+                value={draftTo}
+                onChange={(event) => {
+                  setDraftTo(event.target.value);
+                  setDraftUseCustom(true);
+                }}
+              />
+            </label>
+
+            <div className="analytics-sheet-actions">
+              <button type="button" className="btn btn-ghost" onClick={() => setRangeSheetOpen(false)}>
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={applyRangeSheet}
+                disabled={draftUseCustom && (!draftFrom || !draftTo)}
+              >
+                Apply
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <div className="analytics-stats">
         {STAT_CARDS.map((stat) => {
@@ -397,7 +569,15 @@ export default function DashboardOverviewPage() {
             </div>
           </div>
           {analytics.countryBreakdown.length === 0 ? (
-            <div className="analytics-empty">No geography recorded yet.</div>
+            <div className="analytics-skeleton-list" aria-hidden="true">
+              {[0, 1, 2, 3].map((item) => (
+                <div key={item} className="analytics-skeleton-row">
+                  <div className="analytics-skeleton-bar is-mid" />
+                  <div className="analytics-skeleton-bar is-meter" />
+                  <div className="analytics-skeleton-bar is-num" />
+                </div>
+              ))}
+            </div>
           ) : (
             <div className="analytics-rank-list">
               {analytics.countryBreakdown.map((country) => (
@@ -429,6 +609,7 @@ export default function DashboardOverviewPage() {
             </div>
           </div>
 
+          <div className="analytics-panel-body">
           {analytics.recentSessions.length === 0 ? (
             <div className="analytics-empty">No sessions in this range.</div>
           ) : (
@@ -452,70 +633,43 @@ export default function DashboardOverviewPage() {
                       const isOpen = expandedSession === session.id;
                       const place = [session.city, session.country].filter(Boolean).join(", ") || session.country;
                       return (
-                        <Fragment key={session.id}>
-                          <tr className={isOpen ? "is-open" : undefined} onClick={() => setExpandedSession(isOpen ? null : session.id)}>
-                            <td className="analytics-index">{String(index + 1).padStart(2, "0")}</td>
-                            <td>
-                              <span className="analytics-loc">
-                                <span className="analytics-flag">{session.flag}</span>
-                                <span>
-                                  <strong>{place}</strong>
-                                  <small>{session.region || "—"}</small>
-                                </span>
+                        <tr key={session.id} className={isOpen ? "is-open" : undefined}>
+                          <td className="analytics-index">{String(index + 1).padStart(2, "0")}</td>
+                          <td>
+                            <span className="analytics-loc">
+                              <span className="analytics-flag">{session.flag}</span>
+                              <span>
+                                <strong>{place}</strong>
+                                <small>{session.region || "—"}</small>
                               </span>
-                            </td>
-                            <td>
-                              <span className="analytics-chip">
-                                <DeviceIcon device={session.device} />
-                                {session.device}
-                              </span>
-                            </td>
-                            <td>
-                              <span className="analytics-chip">
-                                <BrowserIcon browser={session.browser} />
-                                {session.browser || "—"}
-                              </span>
-                            </td>
-                            <td>{session.pageCount}</td>
-                            <td>{session.duration}</td>
-                            <td>{session.time}</td>
-                            <td>
-                              <button
-                                type="button"
-                                className="analytics-more"
-                                aria-label="Session actions"
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                  setExpandedSession(isOpen ? null : session.id);
-                                }}
-                              >
-                                <RiMore2Fill size={16} />
-                              </button>
-                            </td>
-                          </tr>
-                          {isOpen ? (
-                            <tr className="analytics-detail-row">
-                              <td colSpan={8}>
-                                <div className="analytics-session-meta">
-                                  {session.latitude != null && session.longitude != null
-                                    ? `Coords ${session.latitude.toFixed(4)}, ${session.longitude.toFixed(4)} · ${session.ip}`
-                                    : `IP ${session.ip}`}
-                                </div>
-                                <div className="analytics-session-pages">
-                                  {session.pages.map((page, pageIndex) => (
-                                    <div key={`${session.id}-${page.path}-${pageIndex}`} className="analytics-session-page">
-                                      <div>
-                                        <div className="analytics-session-page-path">{page.path}</div>
-                                        <div className="analytics-session-page-name">{page.name}</div>
-                                      </div>
-                                      <div className="analytics-session-page-time">{page.time}</div>
-                                    </div>
-                                  ))}
-                                </div>
-                              </td>
-                            </tr>
-                          ) : null}
-                        </Fragment>
+                            </span>
+                          </td>
+                          <td>
+                            <span className="analytics-chip">
+                              <DeviceIcon device={session.device} />
+                              {session.device}
+                            </span>
+                          </td>
+                          <td>
+                            <span className="analytics-chip">
+                              <BrowserIcon browser={session.browser} />
+                              {session.browser || "—"}
+                            </span>
+                          </td>
+                          <td>{session.pageCount}</td>
+                          <td>{session.duration}</td>
+                          <td>{session.time}</td>
+                          <td>
+                            <button
+                              type="button"
+                              className="analytics-more"
+                              aria-label="Open session details"
+                              onClick={() => openSessionDrawer(session.id)}
+                            >
+                              <RiMore2Fill size={16} />
+                            </button>
+                          </td>
+                        </tr>
                       );
                     })}
                   </tbody>
@@ -530,7 +684,6 @@ export default function DashboardOverviewPage() {
                     <article
                       key={`card-${session.id}`}
                       className={isOpen ? "analytics-session-card is-open" : "analytics-session-card"}
-                      onClick={() => setExpandedSession(isOpen ? null : session.id)}
                     >
                       <header>
                         <span className="analytics-index">{String(index + 1).padStart(2, "0")}</span>
@@ -541,7 +694,14 @@ export default function DashboardOverviewPage() {
                             <small>{session.time}</small>
                           </span>
                         </span>
-                        <RiMore2Fill size={16} />
+                        <button
+                          type="button"
+                          className="analytics-more"
+                          aria-label="Open session details"
+                          onClick={() => openSessionDrawer(session.id)}
+                        >
+                          <RiMore2Fill size={16} />
+                        </button>
                       </header>
                       <div className="analytics-session-card-grid">
                         <div>
@@ -565,25 +725,13 @@ export default function DashboardOverviewPage() {
                           <strong>{session.duration}</strong>
                         </div>
                       </div>
-                      {isOpen ? (
-                        <div className="analytics-session-pages">
-                          {session.pages.map((page, pageIndex) => (
-                            <div key={`${session.id}-m-${page.path}-${pageIndex}`} className="analytics-session-page">
-                              <div>
-                                <div className="analytics-session-page-path">{page.path}</div>
-                                <div className="analytics-session-page-name">{page.name}</div>
-                              </div>
-                              <div className="analytics-session-page-time">{page.time}</div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : null}
                     </article>
                   );
                 })}
               </div>
             </>
           )}
+          </div>
         </section>
 
         <section className="analytics-panel">
@@ -596,6 +744,7 @@ export default function DashboardOverviewPage() {
               Go to Content <RiArrowRightLine size={14} />
             </Link>
           </div>
+          <div className="analytics-panel-body">
           <div className="analytics-content-list">
             {contentItems.map((item) => {
               const Icon = item.Icon;
@@ -616,8 +765,120 @@ export default function DashboardOverviewPage() {
               );
             })}
           </div>
+          </div>
         </section>
       </div>
+
+      {selectedSession ? (
+        <div className="analytics-session-drawer-layer" role="presentation">
+          <button type="button" className="analytics-session-drawer-backdrop" aria-label="Close session details" onClick={closeSessionDrawer} />
+          <aside className="analytics-session-drawer" role="dialog" aria-modal="true" aria-label="Session details">
+            <div className="analytics-session-drawer-head">
+              <div>
+                <h3>
+                  {selectedSession.flag} {[selectedSession.city, selectedSession.country].filter(Boolean).join(", ") || selectedSession.country}
+                </h3>
+                <p>
+                  {selectedSession.device} · {selectedSession.browser || "Browser"} · {selectedSession.time}
+                </p>
+              </div>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={closeSessionDrawer} aria-label="Close">
+                <RiCloseLine size={18} />
+              </button>
+            </div>
+            <div className="analytics-session-drawer-body">
+              <div className="analytics-session-facts">
+                <div>
+                  <span>Pages</span>
+                  <strong>{selectedSession.pageCount}</strong>
+                </div>
+                <div>
+                  <span>Duration</span>
+                  <strong>{selectedSession.duration}</strong>
+                </div>
+                <div>
+                  <span>IP</span>
+                  <strong>{selectedSession.ip}</strong>
+                </div>
+                <div>
+                  <span>Source</span>
+                  <strong>{selectedSession.utmSource || "Direct"}</strong>
+                </div>
+              </div>
+
+              <p style={{ margin: "0 0 0.55rem", fontSize: "0.74rem", fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                Path journey
+              </p>
+              <div className="analytics-path-list">
+                {selectedSession.pages.map((page, pageIndex) => {
+                  const open = openPathIndex === pageIndex;
+                  return (
+                    <div key={`${selectedSession.id}-${page.path}-${pageIndex}-${page.at || page.time}`} className="analytics-path-item">
+                      <button type="button" onClick={() => setOpenPathIndex(open ? null : pageIndex)} aria-expanded={open}>
+                        <div>
+                          <strong>{page.summary || page.name}</strong>
+                          <span>{page.path}</span>
+                        </div>
+                        <em>{page.time}</em>
+                        <RiArrowDownSLine size={16} style={{ transform: open ? "rotate(180deg)" : undefined, color: "#94a3b8" }} />
+                      </button>
+                      {open ? (
+                        <div className="analytics-path-detail">
+                          <div>
+                            <strong>Page:</strong> {page.name} ({page.path})
+                          </div>
+                          <div>
+                            <strong>When:</strong> {page.time}
+                          </div>
+                          {page.isLanding ? (
+                            <div>
+                              <strong>Entry:</strong> First page in this session
+                            </div>
+                          ) : (
+                            <div>
+                              <strong>Arrived from:</strong> {page.arrivedFromName || "Previous page"} ({page.arrivedFrom || "—"})
+                            </div>
+                          )}
+                          {pageIndex < selectedSession.pages.length - 1 ? (
+                            <div>
+                              <strong>Next:</strong> {selectedSession.pages[pageIndex + 1].name} ({selectedSession.pages[pageIndex + 1].path})
+                            </div>
+                          ) : (
+                            <div>
+                              <strong>Exit:</strong> Last recorded page in this session
+                            </div>
+                          )}
+                        </div>
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </aside>
+        </div>
+      ) : null}
+
+      {resetConfirmOpen ? (
+        <div className="dash-sheet-layer" role="presentation">
+          <button type="button" className="dash-sheet-backdrop" aria-label="Cancel reset" onClick={() => setResetConfirmOpen(false)} />
+          <div className="dash-sheet" role="dialog" aria-modal="true" aria-labelledby="analytics-reset-title">
+            <div className="dash-sheet-handle" aria-hidden="true" />
+            <h2 id="analytics-reset-title">Reset all metrics?</h2>
+            <p>
+              This permanently deletes every recorded page view for Prince Parfait GANZA analytics so you can start from scratch. Export a CSV first if you need a backup.
+            </p>
+            <div className="dash-sheet-actions">
+              <button type="button" className="btn btn-ghost" onClick={() => setResetConfirmOpen(false)}>
+                Cancel
+              </button>
+              <button type="button" className="btn btn-primary dash-logout-confirm" onClick={() => void resetMetrics()} disabled={busyAction === "reset"}>
+                {busyAction === "reset" ? "Deleting…" : "Delete all"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -57,8 +57,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     } catch {}
   }
 
-  // Navigation & UI States
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  // Navigation & UI States — start closed to avoid mobile overlay flash
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isMobileNav, setIsMobileNav] = useState(false);
+  const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [pagesOpen, setPagesOpen] = useState(
     () =>
       pathname.startsWith("/dashboard/homepage") ||
@@ -85,20 +87,37 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       pathname.startsWith("/dashboard/homepage") ||
       pathname.startsWith("/dashboard/contact") ||
       pathname.startsWith("/dashboard/about") ||
-      pathname.startsWith("/dashboard/services")
+      pathname.startsWith("/dashboard/services") ||
+      pathname.startsWith("/dashboard/intro")
     ) {
       setPagesOpen(true);
     }
   }, [pathname]);
 
-  // Load settings + sidebar state client-side only
+  // Close drawer after navigation on mobile
   useEffect(() => {
-    try {
-      const savedSidebar = localStorage.getItem(SIDEBAR_STORAGE_KEY);
-      if (savedSidebar !== null) {
-        setSidebarOpen(savedSidebar === "true");
+    if (isMobileNav) setSidebarOpen(false);
+  }, [pathname, isMobileNav]);
+
+  // Load settings + sidebar state; mobile always starts closed
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 980px)");
+    const syncSidebar = () => {
+      const mobile = mq.matches;
+      setIsMobileNav(mobile);
+      if (mobile) {
+        setSidebarOpen(false);
+        return;
       }
-    } catch {}
+      try {
+        const savedSidebar = localStorage.getItem(SIDEBAR_STORAGE_KEY);
+        setSidebarOpen(savedSidebar === null ? true : savedSidebar === "true");
+      } catch {
+        setSidebarOpen(true);
+      }
+    };
+    syncSidebar();
+    mq.addEventListener("change", syncSidebar);
 
     const loadProfile = () => {
       try {
@@ -110,7 +129,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     };
     loadProfile();
     window.addEventListener("ppg_profile_updated", loadProfile);
-    return () => window.removeEventListener("ppg_profile_updated", loadProfile);
+    return () => {
+      mq.removeEventListener("change", syncSidebar);
+      window.removeEventListener("ppg_profile_updated", loadProfile);
+    };
   }, []);
 
   // Modals Control for Layout (Profile & Search)
@@ -138,13 +160,30 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       localStorage.removeItem("ppg_admin_auth");
       document.cookie = "ppg_admin_auth=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
     }
+    setLogoutConfirmOpen(false);
     router.push("/dashboard/login");
+  };
+
+  const requestLogout = () => {
+    if (isMobileNav) {
+      setLogoutConfirmOpen(true);
+      return;
+    }
+    handleLogout();
   };
 
   const toggleSidebar = () => {
     const next = !sidebarOpen;
     setSidebarOpen(next);
-    try { localStorage.setItem(SIDEBAR_STORAGE_KEY, String(next)); } catch {}
+    if (!isMobileNav) {
+      try {
+        localStorage.setItem(SIDEBAR_STORAGE_KEY, String(next));
+      } catch {}
+    }
+  };
+
+  const closeMobileSidebar = () => {
+    if (isMobileNav) setSidebarOpen(false);
   };
 
   const triggerMediaPicker = (callback: (url: string) => void) => {
@@ -172,13 +211,35 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return <>{children}</>;
   }
 
+  const showNavLabels = sidebarOpen || isMobileNav;
+  const sidebarClass = [
+    "dash-sidebar",
+    showNavLabels ? "is-open" : "",
+    isMobileNav && sidebarOpen ? "is-drawer-open" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <DashboardFeedbackProvider>
     <div className="dash-shell">
-      <aside className={sidebarOpen ? "dash-sidebar is-open" : "dash-sidebar"}>
+      {isMobileNav && sidebarOpen ? (
+        <button
+          type="button"
+          className="dash-sidebar-backdrop"
+          aria-label="Close navigation"
+          onClick={closeMobileSidebar}
+        />
+      ) : null}
+      <aside className={sidebarClass} aria-hidden={isMobileNav && !sidebarOpen ? true : undefined}>
         <div className="dash-sidebar-top">
-          <Link href="/dashboard" className="dash-brand" title="Prince Parfait GANZA">
-            {sidebarOpen ? (
+          <Link
+            href="/dashboard"
+            className="dash-brand"
+            title="Prince Parfait GANZA"
+            onClick={closeMobileSidebar}
+          >
+            {showNavLabels ? (
               <img
                 src="/brand/logos/logo-horizontal-light.png"
                 alt="Prince Parfait GANZA"
@@ -210,9 +271,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   href={tab.path}
                   title={tab.label}
                   className={active ? "dash-nav-link is-active" : "dash-nav-link"}
+                  onClick={closeMobileSidebar}
                 >
-                  <Icon size={19} />
-                  {sidebarOpen ? <span>{tab.label}</span> : null}
+                  <Icon size={17} />
+                  {showNavLabels ? <span>{tab.label}</span> : null}
                 </Link>
               );
             })}
@@ -244,12 +306,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 aria-expanded={pagesOpen}
                 onClick={() => setPagesOpen((current) => !current)}
               >
-                <RiPagesLine size={19} />
-                {sidebarOpen ? <span>Pages</span> : null}
-                {sidebarOpen ? <RiArrowDownSLine size={16} className="dash-nav-caret" /> : null}
+                <RiPagesLine size={17} />
+                {showNavLabels ? <span>Pages</span> : null}
+                {showNavLabels ? <RiArrowDownSLine size={16} className="dash-nav-caret" /> : null}
               </button>
-              {pagesOpen || !sidebarOpen ? (
-                <div className="dash-nav-sub" hidden={!pagesOpen && sidebarOpen}>
+              {pagesOpen || !showNavLabels ? (
+                <div className="dash-nav-sub" hidden={!pagesOpen && showNavLabels}>
                   {[
                     { id: "homepage", path: "/dashboard/homepage", label: "Homepage", icon: RiHome5Line },
                     { id: "intro", path: "/dashboard/intro", label: "Intro Experience", icon: RiSparklingLine },
@@ -265,9 +327,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         href={tab.path}
                         title={tab.label}
                         className={active ? "dash-nav-link is-sub is-active" : "dash-nav-link is-sub"}
+                        onClick={closeMobileSidebar}
                       >
                         <Icon size={17} />
-                        {sidebarOpen ? <span>{tab.label}</span> : null}
+                        {showNavLabels ? <span>{tab.label}</span> : null}
                       </Link>
                     );
                   })}
@@ -288,9 +351,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   href={tab.path}
                   title={tab.label}
                   className={active ? "dash-nav-link is-active" : "dash-nav-link"}
+                  onClick={closeMobileSidebar}
                 >
-                  <Icon size={19} />
-                  {sidebarOpen ? <span>{tab.label}</span> : null}
+                  <Icon size={17} />
+                  {showNavLabels ? <span>{tab.label}</span> : null}
                 </Link>
               );
             })}
@@ -301,11 +365,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           href="/dashboard/profile"
           className={pathname === "/dashboard/profile" ? "dash-profile is-active" : "dash-profile"}
           title="Update Profile & Avatar"
+          onClick={closeMobileSidebar}
         >
           <div className="dash-avatar">
             <img src={profile.avatarUrl} alt={profile.name} />
           </div>
-          {sidebarOpen ? (
+          {showNavLabels ? (
             <div className="dash-profile-copy">
               <p>{profile.name}</p>
               <span>{profile.email}</span>
@@ -321,7 +386,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               type="button"
               onClick={toggleSidebar}
               className="dash-icon-btn"
-              title={sidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
+              title={
+                isMobileNav
+                  ? sidebarOpen
+                    ? "Close menu"
+                    : "Open menu"
+                  : sidebarOpen
+                    ? "Collapse Sidebar"
+                    : "Expand Sidebar"
+              }
+              aria-expanded={sidebarOpen}
             >
               {sidebarOpen ? <RiMenuFoldLine size={20} /> : <RiMenuUnfoldLine size={20} />}
             </button>
@@ -333,7 +407,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <RiSearchLine size={16} className="dash-search-icon" />
               <input
                 type="text"
-                placeholder="Search sections, content, media..."
+                placeholder={isMobileNav ? "Search…" : "Search sections, content, media..."}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => setIsSearchFocused(true)}
@@ -395,11 +469,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
 
           <div className="dash-topbar-right">
-            <Link href="/" target="_blank" className="btn btn-outline btn-sm dash-live-btn">
-              View Live Site <RiExternalLinkLine size={13} />
+            <Link href="/" target="_blank" className="btn btn-outline btn-sm dash-live-btn" title="View live site">
+              <span className="dash-live-label">Live</span>
+              <span className="dash-live-label-full">View Live Site</span>
+              <RiExternalLinkLine size={13} />
             </Link>
-            <button type="button" onClick={handleLogout} className="btn btn-ghost btn-sm dash-logout-btn">
-              <RiLogoutBoxRLine size={15} /> Logout
+            <button
+              type="button"
+              onClick={requestLogout}
+              className="btn btn-ghost btn-sm dash-logout-btn"
+              title="Logout"
+              aria-label="Logout"
+            >
+              <RiLogoutBoxRLine size={16} />
+              <span className="dash-logout-label">Logout</span>
             </button>
           </div>
         </header>
@@ -436,6 +519,30 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         onSave={() => { /* Only for search edit */ }}
         onOpenMedia={() => triggerMediaPicker((url) => setEditingBlog((prev) => (prev ? { ...prev, coverImage: url } : null)))}
       />
+
+      {logoutConfirmOpen ? (
+        <div className="dash-sheet-layer" role="presentation">
+          <button
+            type="button"
+            className="dash-sheet-backdrop"
+            aria-label="Dismiss logout confirmation"
+            onClick={() => setLogoutConfirmOpen(false)}
+          />
+          <div className="dash-sheet" role="dialog" aria-modal="true" aria-labelledby="dash-logout-title">
+            <div className="dash-sheet-handle" aria-hidden="true" />
+            <h2 id="dash-logout-title">Log out?</h2>
+            <p>You will need to sign in again to open the control center.</p>
+            <div className="dash-sheet-actions">
+              <button type="button" className="btn btn-ghost" onClick={() => setLogoutConfirmOpen(false)}>
+                Cancel
+              </button>
+              <button type="button" className="btn btn-primary dash-logout-confirm" onClick={handleLogout}>
+                <RiLogoutBoxRLine size={16} /> Log out
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
     </DashboardFeedbackProvider>
   );

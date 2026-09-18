@@ -13,6 +13,7 @@ import type { AnalyticsMetrics } from "@/lib/supabase";
 interface PageViewRow {
   id: string;
   page_path: string;
+  referrer?: string | null;
   country_name: string | null;
   country_flag: string | null;
   city?: string | null;
@@ -219,7 +220,7 @@ export async function GET(request: NextRequest) {
   const geoQuery = await supabase
     .from("page_views")
     .select(
-      "id, page_path, country_name, country_flag, city, region, latitude, longitude, device, device_type, ip_address, visitor_id, session_id, user_agent, utm_source, utm_medium, utm_campaign, utm_term, utm_content, created_at"
+      "id, page_path, referrer, country_name, country_flag, city, region, latitude, longitude, device, device_type, ip_address, visitor_id, session_id, user_agent, utm_source, utm_medium, utm_campaign, utm_term, utm_content, created_at"
     )
     .gte("created_at", fetchFrom)
     .lte("created_at", to.toISOString())
@@ -445,11 +446,27 @@ export async function GET(request: NextRequest) {
         duration: formatDuration(durationSeconds),
         utmSource: first.utm_source || undefined,
         utmCampaign: first.utm_campaign || undefined,
-        pages: sorted.map((row) => ({
-          path: row.page_path,
-          name: pagePathToName(row.page_path),
-          time: formatRelativeTime(row.created_at),
-        })),
+        pages: sorted.map((row, index) => {
+          const prev = index > 0 ? sorted[index - 1] : null;
+          const arrivedFrom = prev?.page_path || null;
+          const arrivedFromName = prev ? pagePathToName(prev.page_path) : null;
+          const isLanding = index === 0;
+          const name = pagePathToName(row.page_path);
+          let summary = isLanding ? `Landed on ${name}` : `Moved from ${arrivedFromName} to ${name}`;
+          if (prev && prev.page_path === row.page_path) {
+            summary = `Viewed ${name} again`;
+          }
+          return {
+            path: row.page_path,
+            name,
+            time: formatRelativeTime(row.created_at),
+            at: row.created_at,
+            arrivedFrom,
+            arrivedFromName,
+            isLanding,
+            summary,
+          };
+        }),
       };
     })
     .sort((a, b) => b.lastSeen - a.lastSeen)
@@ -527,4 +544,25 @@ export async function GET(request: NextRequest) {
   };
 
   return NextResponse.json(metrics);
+}
+
+export async function DELETE(request: NextRequest) {
+  if (!isAuthorized(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!hasServiceRoleKey()) {
+    return NextResponse.json({ error: "Analytics service is not configured." }, { status: 503 });
+  }
+
+  const supabase = createServerSupabase(true);
+  const { error, count } = await supabase
+    .from("page_views")
+    .delete({ count: "exact" })
+    .gte("created_at", "1970-01-01T00:00:00.000Z");
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true, deleted: count ?? 0 });
 }

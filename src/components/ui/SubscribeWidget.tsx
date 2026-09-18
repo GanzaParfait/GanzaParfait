@@ -1,183 +1,164 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useId, useState, type FormEvent } from "react";
+import { usePathname } from "next/navigation";
 import { RiMailSendLine, RiCloseLine, RiCheckDoubleLine } from "react-icons/ri";
+import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
+import {
+  hasSubscribeJoined,
+  SUBSCRIBE_JOINED_EVENT,
+  submitSubscribe,
+} from "@/lib/subscribe-client";
+import { WIDGET_BLURB } from "@/lib/welcome-copy";
+
+const APPEAR_DELAY_MS = 8000;
+const REOPEN_AFTER_DISMISS_MS = 2 * 60 * 1000;
+const SUCCESS_HOLD_MS = 7000;
+const MOBILE_MQ = "(max-width: 720px)";
 
 export default function SubscribeWidget() {
+  const pathname = usePathname();
+  const titleId = useId();
   const [isVisible, setIsVisible] = useState(false);
-  const [isDismissed, setIsDismissed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [joined, setJoined] = useState(false);
 
   useEffect(() => {
-    if (localStorage.getItem("subscribe-dismissed")) {
-      setIsDismissed(true);
-      return;
-    }
-    const timer = setTimeout(() => setIsVisible(true), 8000); // 8s for new visitors
-    return () => clearTimeout(timer);
+    const mq = window.matchMedia(MOBILE_MQ);
+    const sync = () => setIsMobile(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
   }, []);
 
-  const handleDismiss = () => {
+  useEffect(() => {
+    const syncJoined = () => setJoined(hasSubscribeJoined());
+    syncJoined();
+    window.addEventListener(SUBSCRIBE_JOINED_EVENT, syncJoined);
+    return () => window.removeEventListener(SUBSCRIBE_JOINED_EVENT, syncJoined);
+  }, []);
+
+  useEffect(() => {
+    if (joined) {
+      setIsVisible(false);
+      return;
+    }
     setIsVisible(false);
-    setTimeout(() => {
-      setIsDismissed(true);
-    }, 500);
-    localStorage.setItem("subscribe-dismissed", "true");
-  };
+    const appear = window.setTimeout(() => setIsVisible(true), APPEAR_DELAY_MS);
+    return () => window.clearTimeout(appear);
+  }, [pathname, joined]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email) return;
+  const handleDismiss = useCallback(() => {
+    setIsVisible(false);
+    setStatus("idle");
+  }, []);
+
+  useEffect(() => {
+    if (joined || isVisible) return;
+    const reopen = window.setTimeout(() => setIsVisible(true), REOPEN_AFTER_DISMISS_MS);
+    return () => window.clearTimeout(reopen);
+  }, [joined, isVisible]);
+
+  useHistoryBackClose(isVisible && isMobile, handleDismiss);
+
+  useEffect(() => {
+    if (!isVisible || !isMobile) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [isVisible, isMobile]);
+
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!email || status === "loading") return;
     setStatus("loading");
-
     try {
-      const device = navigator.userAgent;
-      let country = "Unknown";
-      let location = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-      try {
-        const res = await fetch("https://ipapi.co/json/");
-        const data = await res.json();
-        if (data.country_name) country = data.country_name;
-        if (data.city) location = `${data.city}, ${data.region}`;
-      } catch (e) {
-        console.warn("Could not fetch location", e);
-      }
-
-      const response = await fetch("/api/subscribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, device, location, country }),
-      });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.error || "Subscribe failed");
-
+      await submitSubscribe(email, "widget");
       setStatus("success");
-      setTimeout(() => {
+      window.setTimeout(() => {
         handleDismiss();
-      }, 5000);
-    } catch (err) {
-      console.error(err);
+        setJoined(true);
+      }, SUCCESS_HOLD_MS);
+    } catch {
       setStatus("error");
     }
   };
 
-  if (isDismissed) return null;
+  if (joined) return null;
+
+  const sheet = isMobile;
+  const layerClass = [
+    "subscribe-widget-layer",
+    sheet ? "is-sheet" : "is-card",
+    isVisible ? "is-open" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        bottom: "1.5rem",
-        left: "1.5rem",
-        zIndex: 9999,
-        background: "var(--color-surface)",
-        border: "1px solid var(--color-border)",
-        borderRadius: "1.25rem",
-        boxShadow: "var(--shadow-lg)",
-        padding: "1.5rem",
-        width: "calc(100vw - 3rem)",
-        maxWidth: "22rem",
-        transform: isVisible ? "translateY(0) scale(1)" : "translateY(100px) scale(0.9)",
-        opacity: isVisible ? 1 : 0,
-        pointerEvents: isVisible ? "auto" : "none",
-        transition: "all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)",
-      }}
-    >
-      <button
-        onClick={handleDismiss}
-        style={{
-          position: "absolute",
-          top: "0.75rem",
-          right: "0.75rem",
-          width: "2rem",
-          height: "2rem",
-          borderRadius: "50%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "transparent",
-          border: "none",
-          color: "var(--color-text-3)",
-          cursor: "pointer",
-        }}
-        aria-label="Close"
+    <div className={layerClass} aria-hidden={!isVisible}>
+      {sheet ? (
+        <button type="button" className="subscribe-widget-backdrop" aria-label="Close" onClick={handleDismiss} tabIndex={isVisible ? 0 : -1} />
+      ) : null}
+      <div
+        className="subscribe-widget"
+        role={sheet ? "dialog" : "complementary"}
+        aria-labelledby={titleId}
+        aria-modal={sheet && isVisible ? true : undefined}
       >
-        <RiCloseLine size={20} />
-      </button>
+        {sheet ? <span className="subscribe-widget-handle" aria-hidden="true" /> : null}
+        <button type="button" className="subscribe-widget-close" onClick={handleDismiss} aria-label="Close">
+          <RiCloseLine size={20} />
+        </button>
 
-      {status === "success" ? (
-        <div style={{ textAlign: "center", padding: "1rem 0" }}>
-          <RiCheckDoubleLine
-            size={56}
-            color="#22c55e"
-            style={{ margin: "0 auto 1rem", animation: "float 3s ease-in-out infinite" }}
-          />
-          <h4 style={{ fontSize: "1.25rem", fontWeight: 700, color: "var(--color-text)", marginBottom: "0.5rem" }}>
-            You&apos;re In! ✓
-          </h4>
-          <p style={{ fontSize: "0.875rem", color: "var(--color-text-2)" }}>
-            Thanks for joining. I'll keep you updated with my latest projects and insights.
-          </p>
-        </div>
-      ) : (
-        <form onSubmit={handleSubmit}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
-            <div style={{ width: "2.5rem", height: "2.5rem", borderRadius: "0.75rem", background: "rgba(14,82,168,0.1)", color: "var(--color-primary)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <RiMailSendLine size={20} />
+        {status === "success" ? (
+          <div className="subscribe-widget-success">
+            <RiCheckDoubleLine size={48} aria-hidden="true" />
+            <h4 id={titleId}>You&apos;re in</h4>
+            <p>Thanks for joining. I&apos;ll send a note when there is something worth sharing.</p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <div className="subscribe-widget-head">
+              <span className="subscribe-widget-icon" aria-hidden="true">
+                <RiMailSendLine size={20} />
+              </span>
+              <h4 id={titleId}>Stay updated</h4>
             </div>
-            <h4 style={{ fontSize: "1.125rem", fontWeight: 700, color: "var(--color-text)", margin: 0 }}>
-              Stay Updated
-            </h4>
-          </div>
-          <p style={{ fontSize: "0.875rem", color: "var(--color-text-2)", marginBottom: "1.25rem", lineHeight: 1.5 }}>
-            Notes from a founder, entrepreneur and technologist — published only when there is something worth saying.
-          </p>
-          
-          <div style={{ position: "relative" }}>
-            <input
-              type="email"
-              placeholder="Your email address..."
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={status === "loading"}
-              style={{
-                width: "100%",
-                padding: "0.75rem 1rem",
-                paddingRight: "5rem",
-                borderRadius: "0.75rem",
-                border: "1px solid var(--color-border)",
-                background: "var(--color-bg)",
-                color: "var(--color-text)",
-                fontSize: "0.875rem",
-                outline: "none",
-                transition: "border-color 0.2s",
-              }}
-            />
-            <button
-              type="submit"
-              disabled={status === "loading"}
-              className="btn btn-primary"
-              style={{
-                position: "absolute",
-                right: "0.25rem",
-                top: "0.25rem",
-                bottom: "0.25rem",
-                padding: "0 1rem",
-                borderRadius: "0.5rem",
-                fontSize: "0.8125rem",
-              }}
-            >
-              {status === "loading" ? "..." : "Join"}
-            </button>
-          </div>
-          {status === "error" && (
-            <p style={{ fontSize: "0.75rem", color: "#ef4444", marginTop: "0.5rem" }}>Something went wrong. Please try again.</p>
-          )}
-        </form>
-      )}
+            <p className="subscribe-widget-copy">{WIDGET_BLURB}</p>
+            <div className="subscribe-widget-row">
+              <label className="sr-only" htmlFor="subscribe-widget-email">
+                Email address
+              </label>
+              <input
+                id="subscribe-widget-email"
+                type="email"
+                autoComplete="email"
+                placeholder="Your email address"
+                value={email}
+                onChange={(event) => {
+                  setEmail(event.target.value);
+                  if (status === "error") setStatus("idle");
+                }}
+                required
+                disabled={status === "loading"}
+              />
+              <button type="submit" className="btn btn-primary" disabled={status === "loading"}>
+                {status === "loading" ? "…" : "Join"}
+              </button>
+            </div>
+            {status === "error" ? (
+              <p className="subscribe-widget-error" role="alert">
+                Something went wrong. Please try again.
+              </p>
+            ) : null}
+          </form>
+        )}
+      </div>
     </div>
   );
 }

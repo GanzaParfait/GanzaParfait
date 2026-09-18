@@ -156,6 +156,7 @@ export default function DashboardCvPage() {
   const [leadFilterAction, setLeadFilterAction] = useState("all");
   const [leadsLoading, setLeadsLoading] = useState(false);
   const [selectedLead, setSelectedLead] = useState<LeadRow | null>(null);
+  const [docPreviewOpen, setDocPreviewOpen] = useState(false);
   const { runSave, saving } = useDashboardFeedback();
 
   useEffect(() => {
@@ -309,7 +310,7 @@ export default function DashboardCvPage() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, height: "100%", gap: "0.85rem" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", flexShrink: 0 }}>
+      <div className="dash-page-head">
         <div>
           <p style={{ fontSize: "0.7rem", fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "#0e52a8" }}>
             Control center
@@ -320,7 +321,10 @@ export default function DashboardCvPage() {
             CV overrides never change website copy.
           </p>
         </div>
-        <div style={{ display: "flex", gap: "0.5rem", flexShrink: 0, flexWrap: "wrap" }}>
+        <div className="dash-page-head-actions">
+          <button type="button" className="btn btn-outline hp-mobile-preview-btn" onClick={() => setDocPreviewOpen(true)}>
+            <RiEyeLine size={16} /> Live doc
+          </button>
           <button type="button" className="btn btn-outline" onClick={previewPdf}>
             <RiEyeLine size={16} /> Preview PDF
           </button>
@@ -340,7 +344,7 @@ export default function DashboardCvPage() {
         </p>
       ) : null}
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
+      <div style={{ display: "flex", flexWrap: "nowrap", gap: "0.4rem" }} className="dash-hscroll">
         {CV_TEMPLATE_OPTIONS.map((opt) => (
           <button
             key={opt.id}
@@ -367,7 +371,7 @@ export default function DashboardCvPage() {
         {format.label}: {sectionChips.join(" · ") || "No sections enabled"}
       </p>
 
-      <div style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap", borderBottom: "1px solid #e2e8f0", paddingBottom: "0.35rem" }}>
+      <div className="dash-hscroll" style={{ gap: "0.35rem", borderBottom: "1px solid #e2e8f0", paddingBottom: "0.35rem" }}>
         {TABS.map((item) => (
           <button
             key={item.id}
@@ -389,8 +393,8 @@ export default function DashboardCvPage() {
         ))}
       </div>
 
-      <div className="dash-cv-responsive" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.05fr) minmax(18rem, 0.95fr)", gap: "0.85rem", flex: 1, minHeight: 0 }}>
-        <div style={{ overflowY: "auto", display: "flex", flexDirection: "column", gap: "0.75rem", paddingBottom: "1rem" }}>
+      <div className={docPreviewOpen ? "dash-cv-responsive dash-split is-preview-open" : "dash-cv-responsive dash-split"} style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.05fr) minmax(18rem, 0.95fr)", gap: "0.85rem", flex: 1, minHeight: 0 }}>
+        <div className="dash-split-main" style={{ overflowY: "auto", display: "flex", flexDirection: "column", gap: "0.75rem", paddingBottom: "1rem" }}>
           {tab === "content" ? (
             <>
               <section style={panelStyle}>
@@ -1079,12 +1083,17 @@ export default function DashboardCvPage() {
           ) : null}
         </div>
 
-        <aside style={{ ...panelStyle, overflow: "auto", minHeight: 0 }}>
+        <aside className="dash-split-preview" style={{ ...panelStyle, overflow: "auto", minHeight: 0 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
             <h2 style={{ fontSize: "0.85rem", fontWeight: 800, margin: 0, display: "inline-flex", gap: "0.4rem", alignItems: "center" }}>
               <RiEyeLine size={16} /> Live document
             </h2>
-            <span style={{ fontSize: "0.72rem", color: "#64748b", fontWeight: 700 }}>{format.label}</span>
+            <div style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
+              <span style={{ fontSize: "0.72rem", color: "#64748b", fontWeight: 700 }}>{format.label}</span>
+              <button type="button" className="btn btn-ghost btn-sm hp-preview-close" onClick={() => setDocPreviewOpen(false)}>
+                Close
+              </button>
+            </div>
           </div>
           <div id="cv-dash-print">
             <DocumentPreview settings={{ ...settings, cvConfig: config }} template={template} />

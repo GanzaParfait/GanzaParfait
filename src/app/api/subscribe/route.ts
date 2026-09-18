@@ -1,7 +1,11 @@
-import { NextResponse, after } from "next/server";
+import { NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase-server";
 import { sendMail, subscriberThanksMail } from "@/lib/mail";
-import { upsertSubscriber } from "@/lib/subscribers";
+import { upsertSubscriber, type SubscriberSource } from "@/lib/subscribers";
+
+function subscribeSource(value: unknown): SubscriberSource {
+  return value === "footer" ? "footer" : "widget";
+}
 
 export async function POST(request: Request) {
   try {
@@ -17,7 +21,7 @@ export async function POST(request: Request) {
     const result = await upsertSubscriber(supabase, {
       email,
       name,
-      source: confirmOnly ? "contact" : "widget",
+      source: confirmOnly ? "contact" : subscribeSource(body.source),
       confirmed: true,
       device: String(body.device || "").slice(0, 500) || null,
       location: String(body.location || "").slice(0, 200) || null,
@@ -25,22 +29,24 @@ export async function POST(request: Request) {
     });
 
     const shouldThanks = result.created || !result.alreadyConfirmed;
+    let emailed = false;
+    let mailError: string | undefined;
     if (shouldThanks) {
-      after(async () => {
-        try {
-          const mail = await subscriberThanksMail(email);
-          await sendMail({
-            ...mail,
-            log: {
-              kind: "subscriber_thanks",
-              relatedType: "subscriber",
-              relatedId: result.row?.id,
-            },
-          });
-        } catch (mailError) {
-          console.error("Subscriber thanks mail failed", mailError);
-        }
-      });
+      try {
+        const mail = await subscriberThanksMail(email);
+        await sendMail({
+          ...mail,
+          log: {
+            kind: "subscriber_thanks",
+            relatedType: "subscriber",
+            relatedId: result.row?.id,
+          },
+        });
+        emailed = true;
+      } catch (error) {
+        mailError = error instanceof Error ? error.message.slice(0, 280) : "SMTP send failed";
+        console.error("Subscriber thanks mail failed", error);
+      }
     }
 
     return NextResponse.json({
@@ -48,6 +54,8 @@ export async function POST(request: Request) {
       confirmed: true,
       created: result.created,
       alreadyConfirmed: result.alreadyConfirmed,
+      emailed,
+      ...(mailError ? { mailError } : {}),
     });
   } catch (error) {
     console.error(error);
