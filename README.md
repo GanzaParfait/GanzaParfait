@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="public/brand/logos/logo-horizontal-blue.png" alt="Prince Parfait GANZA" width="400" />
+<img src="public/brand/logos/logo-horizontal-blue.webp" alt="Prince Parfait GANZA" width="360" />
 
 <br />
 <br />
@@ -19,122 +19,126 @@ Founder · Entrepreneur · Technologist
 
 ## About
 
-This repository contains the source code for **princeparfait.com**, the official personal website of **Prince Parfait GANZA**, a Rwandan founder, entrepreneur and technologist based in Kigali.
+This repository is the source for **[www.princeparfait.com](https://www.princeparfait.com)** — the personal website of **Prince Parfait GANZA**, a Rwandan founder, entrepreneur and technologist based in Kigali.
 
-The site presents him as a founder and leader whose technical skill supports a wider identity: technology, products, and ventures. Software engineering remains evidence, not the ceiling.
+The site presents a founder-led identity. Software engineering, product delivery, systems work, and AI building are evidence — not the ceiling.
 
-It is designed to serve as the central source for professional identity, projects, experience, achievements, services, and public work.
+> Building technology, products and ventures that turn ambitious ideas into real-world impact.
+
+He is also Founder & CEO of **[LERONY Ltd](https://lerony.com)**. This personal site is not lerony.com.
 
 ## Purpose
 
-The website is built to:
+- Clear professional identity for search, social, and people who land cold
+- Verified projects, experience, and services — no invented metrics
+- Contact paths for ventures, products, systems, speaking, and collaboration
+- Consistent canonical host, metadata, and structured data for Google and AI systems
+- Private dashboard for content and analytics (not public)
 
-- Present a clear and credible professional identity.
-- Showcase real projects and measurable work.
-- Document experience and entrepreneurial journey.
-- Publish case studies and insights.
-- Make it easy for organizations, founders, recruiters, and collaborators to understand the work.
-- Provide a consistent source of information for search engines and other public platforms.
-- Create opportunities for collaborations, speaking, consulting, software projects, and partnerships.
+## Public site map
 
-## Core Positioning
+Primary navigation:
 
-> **Founder · Entrepreneur · Technologist**
+| Route | Job |
+|-------|-----|
+| `/` | Who, what, where, proof, action |
+| `/about` | Story, principles, context |
+| `/projects` | Selected work and case studies |
+| `/experience` | Timeline and roles |
+| `/services` | How Prince helps clients and organizations |
+| `/contact` | Start a conversation |
 
-Prince builds full-stack products and integrates AI to solve real-world problems across Africa and beyond.
+Also public:
 
-He is also the Founder of **LERONY Ltd**, a Rwanda-based technology and innovation company building digital solutions for organizations and businesses.
+| Route | Notes |
+|-------|--------|
+| `/cv` | CV / résumé access flow |
+| `/blog` | Insights (footer until verified articles exist) |
 
-## Technology
+There is **no** dedicated public Ventures page. LERONY appears in About / Experience with a link to lerony.com.
 
-The portfolio is built with:
+## Stack
 
-- Next.js
-- React
-- TypeScript
-- Tailwind CSS
-- Supabase
-- Vercel
+| Layer | Choice |
+|-------|--------|
+| Framework | Next.js 16 (App Router) |
+| UI | React 19, TypeScript, Tailwind CSS 4 |
+| Motion | Framer Motion (respects reduced motion) |
+| Data | Supabase + local/settings fallbacks |
+| Media | Cloudinary (where configured) |
+| Email | SMTP (Namecheap / Nodemailer) |
+| Hosting | Vercel |
+| Analytics | First-party page-view metrics in the dashboard |
 
-Additional technologies and services may be introduced as the platform evolves.
+Package manager: **Yarn** (`packageManager` in `package.json`).
 
-## Main Areas
+## Control center
 
-The website includes or is being developed around:
+Authenticated area at `/dashboard` (cookie-gated, `noindex`):
 
-- Home
-- About
-- Experience
-- Work
-- Case Studies
-- Ventures
-- Skills & Technologies
-- Education
-- Speaking & Training
-- Insights
-- Contact
+- Analytics (sessions, sources, geo, export / reset)
+- Hero layouts & banners, homepage sections
+- Projects, CV, media library, blog articles
+- Messages, subscribers, site settings
 
-## Project Philosophy
+Do not expose secrets, service-role keys, or private lead data in the public README or client bundles.
 
-This portfolio is not intended to be a static résumé.
+## SEO & canonical host
 
-It is a continuously evolving record of:
+- **Canonical:** `https://www.princeparfait.com` (www, HTTPS, no homepage trailing slash)
+- Apex `princeparfait.com` and `http` permanently redirect to www
+- Sitemap: `/sitemap.xml` · Image sitemap: `/image-sitemap.xml` · Robots: `/robots.ts`
+- Default share image: `/images/og/seo-share-image.jpg` (person card); legacy `/og-image.png` kept in sync
+- Person portrait for Google: `/images/profile/prince-parfait-ganza-kigali-rwanda.webp`
 
-**Work → Evidence → Results → Experience → Reputation**
+Details: [`docs/SEO_STRATEGY.md`](docs/SEO_STRATEGY.md).
 
-Projects should therefore emphasize the problem, solution, contribution, technologies, and outcome rather than simply listing tools.
+## Documentation map
+
+| File | Purpose |
+|------|---------|
+| [`docs/PORTFOLIO_CONTEXT.md`](docs/PORTFOLIO_CONTEXT.md) | Biography & facts (source of truth) |
+| [`docs/CONTENT_STRATEGY.md`](docs/CONTENT_STRATEGY.md) | Voice, IA, page jobs |
+| [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md) | Visual & motion rules |
+| [`docs/SEO_STRATEGY.md`](docs/SEO_STRATEGY.md) | Entity, metadata, structured data |
+| [`docs/TECH_STACK.md`](docs/TECH_STACK.md) | Stack rationale |
+| [`AGENTS.md`](AGENTS.md) | How coding agents should work |
+| [`PRINCE_PARFAIT_PORTFOLIO_REPOSITIONING_IMPLEMENTATION_BRIEF.md`](PRINCE_PARFAIT_PORTFOLIO_REPOSITIONING_IMPLEMENTATION_BRIEF.md) | Completed repositioning brief (identity rules + status) |
 
 ## Development
 
-Install dependencies:
-
 ```bash
 yarn install
-```
-
-Start the development server:
-
-```bash
 yarn dev
 ```
 
-Then open [http://localhost:3000](http://localhost:3000).
-
-Build for production:
+Open [http://localhost:3000](http://localhost:3000).
 
 ```bash
 yarn build
 yarn start
+yarn lint
 ```
 
-## Content Accuracy
+Environment variables are private. Copy from your secure store / Vercel project settings — never commit `.env` files with secrets.
 
-Information published on this website should be based on verified professional information.
+SQL migrations: `supabase/migrations/<YYYY-MM-DD_HHMMSS>/<name>.sql`.
 
-Do not invent:
+## Content accuracy
 
-- clients
-- project results
-- statistics
-- job titles
-- awards
-- partnerships
-- testimonials
-- qualifications
-- media coverage
-- dates
+Publish only verified information. Do not invent clients, results, statistics, titles, awards, partnerships, testimonials, qualifications, media coverage, or dates.
 
-See [`docs/PORTFOLIO_CONTEXT.md`](docs/PORTFOLIO_CONTEXT.md) for the project's detailed content and implementation guidance.
+Do not use **PPG** as a public brand abbreviation. Do not claim the ULK Computer Science degree is complete.
 
 ## Brand
 
-- **Name:** Prince Parfait GANZA
-- **Primary domain:** princeparfait.com
-- **Location:** Kigali, Rwanda
-- **Primary brand direction:** Blue
-- **Primary public identity:** Prince Parfait GANZA
-
-The visual identity should remain clean, modern, professional, technology-oriented, and human.
+| | |
+|--|--|
+| Name | Prince Parfait GANZA |
+| Domain | www.princeparfait.com |
+| Location | Kigali, Rwanda |
+| Direction | Blue, clean, modern, human |
+| Role line | Founder · Entrepreneur · Technologist |
 
 ---
 
