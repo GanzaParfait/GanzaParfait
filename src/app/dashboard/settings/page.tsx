@@ -41,7 +41,6 @@ import FooterFocusDragPreview from "@/components/dashboard/FooterFocusDragPrevie
 import CustomSelect from "@/components/ui/CustomSelect";
 import { setting } from "@/lib/hero";
 import { defaultFooterQuote } from "@/data/site-data";
-import { defaultFooterQuote } from "@/data/site-data";
 
 const inputStyle = {
   width: "100%",
