@@ -124,8 +124,8 @@ export default function Navbar() {
   const showBottomBar = Boolean(settings.announcementIsActive && barText && barPosition === "bottom");
 
   const logoSrc = isDark
-    ? "/brand/logos/logo-horizontal-light.png"
-    : "/brand/logos/logo-horizontal-blue.png";
+    ? "/brand/logos/logo-horizontal-light.webp"
+    : "/brand/logos/logo-horizontal-blue.webp";
 
   // Theme-adaptive pill colors
   const pillBg = isDark ? "rgba(10, 22, 40, 0.92)" : "rgba(255, 255, 255, 0.97)";

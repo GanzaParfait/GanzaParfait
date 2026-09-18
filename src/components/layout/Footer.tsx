@@ -313,12 +313,12 @@ export default function Footer() {
             <div className="site-footer-brand">
               <Link href="/" className="site-footer-logo" aria-label="Home">
                 <img
-                  src="/brand/logos/logo-horizontal-blue.png"
+                  src="/brand/logos/logo-horizontal-blue.webp"
                   alt={setting(settings, "siteTitle")}
                   className="footer-logo-dark"
                 />
                 <img
-                  src="/brand/logos/logo-horizontal-light.png"
+                  src="/brand/logos/logo-horizontal-light.webp"
                   alt={setting(settings, "siteTitle")}
                   className="footer-logo-light"
                 />

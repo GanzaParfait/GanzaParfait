@@ -19,6 +19,7 @@ const caveat = Caveat({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-script",
+  preload: false,
 });
 
 const googleVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;

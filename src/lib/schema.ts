@@ -15,12 +15,21 @@ export const PORTRAIT_PATH = "/images/profile/prince-parfait-ganza-kigali-rwanda
 export const OG_IMAGE_PATH = "/images/og/seo-share-image.jpg";
 
 /** Date the public factual content was last revised. Do not stamp deploy time. */
-export const SITE_CONTENT_REVISED = "2026-09-18";
+export const SITE_CONTENT_REVISED = "2026-09-19";
 
+/**
+ * Canonical absolute URL.
+ * Homepage has no trailing slash (matches Next.js default + live <link rel="canonical">).
+ * Other paths never end with a slash. Optional `#fragment` is preserved.
+ */
 export function canonicalUrl(path = "/"): string {
-  if (!path || path === "/") return `${CANONICAL_ORIGIN}/`;
-  const normalized = `/${path}`.replace(/\/{2,}/g, "/");
-  return `${CANONICAL_ORIGIN}${normalized.replace(/\/+$/, "")}`;
+  if (!path || path === "/") return CANONICAL_ORIGIN;
+  const hashIndex = path.indexOf("#");
+  const hash = hashIndex >= 0 ? path.slice(hashIndex + 1) : "";
+  const pathname = hashIndex >= 0 ? path.slice(0, hashIndex) : path;
+  const normalized = `/${pathname}`.replace(/\/{2,}/g, "/").replace(/\/+$/, "") || "";
+  const base = normalized === "/" || !normalized ? CANONICAL_ORIGIN : `${CANONICAL_ORIGIN}${normalized}`;
+  return hash ? `${base}#${hash}` : base;
 }
 
 export function absoluteAssetUrl(path: string): string {

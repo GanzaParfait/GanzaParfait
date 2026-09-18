@@ -121,7 +121,7 @@ export function resolveUtmAttribution(
 export function appendUtmToUrl(url: string, utm: UtmParams): string {
   if (!hasUtmParams(utm)) return url;
   try {
-    const parsed = new URL(url, typeof window !== "undefined" ? window.location.origin : "https://princeparfait.com");
+    const parsed = new URL(url, typeof window !== "undefined" ? window.location.origin : "https://www.princeparfait.com");
     for (const key of UTM_PARAM_KEYS) {
       const value = utm[key];
       if (value) parsed.searchParams.set(key, value);

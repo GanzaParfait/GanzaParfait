@@ -11,13 +11,19 @@ import {
 import { JsonLd } from "@/components/seo/JsonLd";
 
 const PAGE_DESCRIPTION =
-  "Case studies of software systems built by Prince Parfait GANZA, including organizational reporting, inventory operations, ticket accounting, and product work.";
+  "Selected systems and case studies by Prince Parfait GANZA in Kigali — reporting platforms, inventory operations, ticket accounting, and product builds for real organizations.";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Projects & Case Studies | Prince Parfait GANZA",
+  title: "Work & Case Studies by Prince Parfait GANZA",
   description: PAGE_DESCRIPTION,
   path: "/projects",
   absoluteTitle: true,
+  keywords: [
+    "Prince Parfait GANZA projects",
+    "Prince Parfait GANZA case studies",
+    "software systems Kigali",
+    "LERONY projects",
+  ],
 });
 
 export const revalidate = 60;
@@ -36,7 +42,7 @@ export default async function ProjectsPage() {
         data={buildGraph([
           buildWebPageJsonLd({
             path: "/projects",
-            name: "Projects & Case Studies | Prince Parfait GANZA",
+            name: "Work & Case Studies by Prince Parfait GANZA",
             description: PAGE_DESCRIPTION,
             type: "CollectionPage",
           }),

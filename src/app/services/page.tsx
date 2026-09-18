@@ -18,10 +18,12 @@ type PageProps = {
   searchParams?: Promise<{ focus?: string | string[] }>;
 };
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
   const settings = await getServerSiteSettings();
   const content = servicesPageFrom(settings);
-  return buildPageMetadata({
+  const params = searchParams ? await searchParams : {};
+  const focus = parseServiceFocus(params.focus);
+  const base = buildPageMetadata({
     title: content.seo.title,
     description: content.seo.description,
     path: "/services",
@@ -36,6 +38,14 @@ export async function generateMetadata(): Promise<Metadata> {
       "technology consulting Kigali",
     ],
   });
+  // Focus query variants are UX filters; keep one indexable services URL.
+  if (focus) {
+    return {
+      ...base,
+      robots: { index: false, follow: true },
+    };
+  }
+  return base;
 }
 
 const breadcrumbItems = [
@@ -62,7 +72,7 @@ export default async function ServicesPage({ searchParams }: PageProps) {
 
   const listItems = content.families.map((family, index) => ({
     name: `${family.title} — Prince Parfait GANZA`,
-    path: `/services?focus=${family.id}`,
+    path: `/services#${family.id}`,
     position: index + 1,
   }));
 

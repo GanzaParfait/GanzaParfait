@@ -17,7 +17,7 @@ Google already associates this identity with the www host. Keep it.
 - JSON-LD `@id`, sitemap, canonical tags, and Open Graph URLs all use www
 - Do not mix hosts
 
-Homepage canonical is `https://www.princeparfait.com/` (trailing slash). Other pages have no trailing slash.
+Homepage canonical is `https://www.princeparfait.com` (no trailing slash — matches Next.js defaults). Other pages also have no trailing slash.
 
 ---
 
