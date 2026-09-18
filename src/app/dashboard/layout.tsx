@@ -22,6 +22,7 @@ import {
   RiArrowDownSLine,
   RiUser3Line,
   RiUserHeartLine,
+  RiFileTextLine,
 } from "react-icons/ri";
 
 import {
@@ -190,6 +191,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               { id: "banners", path: "/dashboard/banners", label: "Banners & Hero", icon: RiLayoutGridLine },
               { id: "blogs", path: "/dashboard/blogs", label: "Blog Articles", icon: RiBookOpenLine },
               { id: "projects", path: "/dashboard/projects", label: "Projects", icon: RiFolderLine },
+              { id: "cv", path: "/dashboard/cv", label: "CV / Resume", icon: RiFileTextLine },
               { id: "media", path: "/dashboard/media", label: "Media Library", icon: RiImageLine },
             ].map((tab) => {
               const Icon = tab.icon;

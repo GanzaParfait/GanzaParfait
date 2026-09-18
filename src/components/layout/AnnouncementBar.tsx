@@ -32,7 +32,11 @@ import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
 
 export default function AnnouncementBar({ settings }: { settings: SiteSettings }) {
   const [open, setOpen] = useState(false);
-  const text = settings.announcementText?.trim() || "";
+  const text =
+    settings.announcementText?.trim() ||
+    settings.announcementHeadline?.trim() ||
+    settings.announcementEyebrow?.trim() ||
+    "";
   const position = settings.announcementBarPosition === "bottom" ? "bottom" : "top";
 
   useEffect(() => {

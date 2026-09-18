@@ -163,6 +163,8 @@ export interface SiteSettings {
   heroCarouselLayouts?: HeroLayoutType[];
   heroCarouselInterval?: number;
   identityRevision?: number;
+  /** CV / Resume formats, public default, and CV-only overrides (stored in settings_json). */
+  cvConfig?: import("@/lib/cv").CvConfig;
 }
 
 export type HeroLayoutCopy = {

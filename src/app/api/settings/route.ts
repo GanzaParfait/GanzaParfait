@@ -5,7 +5,7 @@ import { createServerSupabase, hasServiceRoleKey } from "@/lib/supabase-server";
 import { DEFAULT_SOCIAL_LINKS } from "@/lib/socials";
 import type { SiteSettings } from "@/lib/supabase";
 
-const PUBLIC_PATHS = ["/", "/projects", "/about", "/contact", "/experience", "/services"] as const;
+const PUBLIC_PATHS = ["/", "/projects", "/about", "/contact", "/experience", "/services", "/cv"] as const;
 
 function isAuthorized(request: NextRequest): boolean {
   return request.cookies.get("ppg_admin_auth")?.value === "true";

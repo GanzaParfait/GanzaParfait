@@ -49,7 +49,7 @@ export default function KnowledgeSection({
   const showBar = (display.showStatement && knowledge.statement) || (display.showStats && knowledge.stats.length) || (display.showQuote && knowledge.quote);
 
   return (
-    <Tag className={embedded ? "knowledge knowledge-embedded" : "knowledge"} id={embedded ? undefined : "knowledge"} aria-label="Knowledge system" data-page-section={embedded ? undefined : true}>
+    <Tag className={embedded ? "knowledge knowledge-embedded" : "knowledge"} id={embedded ? undefined : "knowledge"} aria-label="Knowledge preview" data-page-section={embedded ? undefined : true}>
       <div className="container">
         <div className="knowledge-head">
           <div className="knowledge-copy">
@@ -76,7 +76,7 @@ export default function KnowledgeSection({
             return (
               <article
                 key={`${item.title}-${index}`}
-                className={on ? "knowledge-card is-on" : "knowledge-card"}
+                className={on ? `knowledge-card is-on is-${iconKey}` : `knowledge-card is-${iconKey}`}
                 onMouseEnter={() => setActive(index)}
                 onFocus={() => setActive(index)}
               >
@@ -88,6 +88,9 @@ export default function KnowledgeSection({
                 </div>
                 <h3>{item.title}</h3>
                 <p>{item.body}</p>
+                {item.tags?.length ? (
+                  <p className="knowledge-tags">{item.tags.join(" · ")}</p>
+                ) : null}
                 <div className="knowledge-card-foot">
                   <Link href={href} className="knowledge-more">
                     {knowledge.learnMore} <RiArrowRightLine size={14} />

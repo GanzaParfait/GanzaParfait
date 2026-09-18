@@ -89,29 +89,39 @@ export default function Navbar() {
 
   useEffect(() => {
     document.documentElement.setAttribute("data-navbar", isPill ? "pill" : "full");
-    const el = headerRef.current;
-    if (!el) return;
+    const header = headerRef.current;
+    if (!header) return;
 
     const applyOffset = () => {
-      const height = Math.ceil(el.getBoundingClientRect().height);
-      // Buffer so page content never sits under the fixed announcement + nav.
-      const px = Math.max(height + 4, isPill ? 70 : 64);
+      const nav = header.querySelector<HTMLElement>("[data-public-nav]");
+      // Only top bars push content; bottom bars are fixed and must not inflate hero padding.
+      const bar = header.querySelector<HTMLElement>(".announcement-bar.is-top");
+      const navHeight = Math.ceil((nav || header).getBoundingClientRect().height);
+      const barHeight = bar ? Math.ceil(bar.getBoundingClientRect().height) : 0;
+      const chrome = navHeight + barHeight;
+      const px = Math.max(chrome, isPill ? 60 : 52);
       document.documentElement.style.setProperty("--public-nav-offset", `${px}px`);
+      document.documentElement.style.setProperty("--announcement-bar-height", `${barHeight}px`);
     };
 
     applyOffset();
     const observer = new ResizeObserver(applyOffset);
-    observer.observe(el);
+    observer.observe(header);
     window.addEventListener("resize", applyOffset);
     return () => {
       observer.disconnect();
       window.removeEventListener("resize", applyOffset);
     };
-  }, [isPill, settings.announcementIsActive, settings.announcementText, settings.announcementBarPosition]);
+  }, [isPill, settings.announcementIsActive, settings.announcementText, settings.announcementHeadline, settings.announcementBarPosition]);
 
+  const barText =
+    settings.announcementText?.trim() ||
+    settings.announcementHeadline?.trim() ||
+    settings.announcementEyebrow?.trim() ||
+    "";
   const barPosition = settings.announcementBarPosition === "bottom" ? "bottom" : "top";
-  const showTopBar = settings.announcementIsActive && Boolean(settings.announcementText?.trim()) && barPosition === "top";
-  const showBottomBar = settings.announcementIsActive && Boolean(settings.announcementText?.trim()) && barPosition === "bottom";
+  const showTopBar = Boolean(settings.announcementIsActive && barText && barPosition === "top");
+  const showBottomBar = Boolean(settings.announcementIsActive && barText && barPosition === "bottom");
 
   const logoSrc = isDark
     ? "/brand/logos/logo-horizontal-light.png"
@@ -184,7 +194,7 @@ export default function Navbar() {
         }}
       >
         {showTopBar ? <AnnouncementBar settings={settings} /> : null}
-        <div style={{ padding: isPill ? "0.45rem clamp(1.1rem, 3vw, 2.75rem) 0" : 0 }}>
+        <div data-public-nav style={{ padding: isPill ? "0.45rem clamp(1.1rem, 3vw, 2.75rem) 0" : 0 }}>
         <div
           style={{
             background: pillBg,

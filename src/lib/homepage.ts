@@ -8,6 +8,7 @@ export type KnowledgeItem = {
   body: string;
   href?: string;
   icon?: KnowledgeIcon;
+  tags?: string[];
 };
 export type KnowledgeStat = { value: string; label: string };
 export type PrincipleIcon = "search" | "cube" | "trend";
@@ -235,52 +236,51 @@ export const DEFAULT_HOMEPAGE: HomepageContent = {
   },
   knowledge: {
     label: "Knowledge",
-    title: "How ideas become working systems.",
-    body: "A practical approach that turns complex problems into useful, scalable and people-centered solutions.",
+    title: "Different challenges. Practical ways forward.",
+    body: "From building digital products to growing an online presence, improving operations or providing hands-on support.",
     script: "From ideas to impact",
-    rail: ["People", "Process", "Technology", "Impact"],
+    rail: ["Build", "Grow", "Transform", "Support"],
     learnMore: "Learn more",
     items: [
       {
-        title: "Strategy & Discovery",
-        body: "Requirements, problem framing, and solution planning before a line of interface is treated as the answer.",
-        href: "/services",
-        icon: "strategy",
-      },
-      {
-        title: "Product & Experience",
-        body: "Product thinking, workflows, and interfaces people can actually follow.",
+        title: "Build digital products",
+        body: "Software, websites, digital platforms, e-commerce experiences and practical technology built around real needs.",
         href: "/services",
         icon: "product",
+        tags: ["Products", "Websites", "Software", "Commerce"],
       },
       {
-        title: "Technology & Systems",
-        body: "React, Next.js, PHP, APIs, integrations, and databases already used in the documented work.",
+        title: "Grow a digital presence",
+        body: "Digital branding, social platforms, marketplace support, product publishing and stronger online business presence.",
+        href: "/services",
+        icon: "strategy",
+        tags: ["Social Media", "Marketplaces", "Branding", "E-commerce"],
+      },
+      {
+        title: "Improve how work gets done",
+        body: "Business systems, data, integrations, automation and practical AI that improve everyday operations.",
         href: "/services",
         icon: "technology",
+        tags: ["Systems", "Data", "Automation", "AI"],
       },
       {
-        title: "Data & Operations",
-        body: "SQL, reporting systems, dashboards, and operational records.",
+        title: "Support ideas and operations",
+        body: "Technology guidance, international client assistance, Rwanda-based digital/process support, training and ongoing technical help.",
         href: "/services",
         icon: "data",
+        tags: ["Consulting", "International Support", "Training", "Technical Support"],
       },
     ],
-    statement: "Knowledge matters most when it creates real value.",
-    statementMark: "real value",
-    stats: [
-      { value: "4+", label: "Focus Areas" },
-      { value: `${projects.length}+`, label: "Projects Applied" },
-      { value: "Real World", label: "Impact" },
-      { value: "Continuous", label: "Learning" },
-    ],
-    quote: "Better systems create brighter opportunities.",
-    attribution: "Prince Parfait GANZA",
+    statement: "BUILD · GROW · TRANSFORM · SUPPORT",
+    statementMark: "",
+    stats: [],
+    quote: "Technology is one tool. The goal is useful progress.",
+    attribution: "",
     display: {
       showScript: false,
       showRail: true,
-      showStatement: false,
-      showStats: true,
+      showStatement: true,
+      showStats: false,
       showQuote: true,
       showIndex: false,
       showGo: false,
@@ -463,19 +463,37 @@ export function homepageFrom(settings: SiteSettings): HomepageContent {
         return { ...fallback, ...story, images: story.images?.length ? story.images : fallback.images };
       }),
     },
-    knowledge: {
-      ...DEFAULT_HOMEPAGE.knowledge,
-      ...saved.knowledge,
-      rail: saved.knowledge?.rail?.length ? saved.knowledge.rail : DEFAULT_HOMEPAGE.knowledge.rail,
-      stats: saved.knowledge?.stats?.length ? saved.knowledge.stats : DEFAULT_HOMEPAGE.knowledge.stats,
-      display: { ...DEFAULT_HOMEPAGE.knowledge.display, ...saved.knowledge?.display },
-      items: (saved.knowledge?.items?.length ? saved.knowledge.items : DEFAULT_HOMEPAGE.knowledge.items).map((item, index) => ({
-        ...DEFAULT_HOMEPAGE.knowledge.items[index],
-        ...item,
-        icon: item.icon || DEFAULT_HOMEPAGE.knowledge.items[index]?.icon || "strategy",
-        href: item.href || DEFAULT_HOMEPAGE.knowledge.items[index]?.href || "/services",
-      })),
-    },
+    knowledge: (() => {
+      const savedKnowledge = saved.knowledge || {};
+      const staleTitle = "How ideas become working systems.";
+      const staleFirst = "Strategy & Discovery";
+      const isStale =
+        !savedKnowledge.title ||
+        savedKnowledge.title === staleTitle ||
+        savedKnowledge.items?.[0]?.title === staleFirst;
+
+      if (isStale) {
+        return { ...DEFAULT_HOMEPAGE.knowledge };
+      }
+
+      return {
+        ...DEFAULT_HOMEPAGE.knowledge,
+        ...savedKnowledge,
+        rail: savedKnowledge.rail?.length ? savedKnowledge.rail : DEFAULT_HOMEPAGE.knowledge.rail,
+        stats: savedKnowledge.stats?.length ? savedKnowledge.stats : DEFAULT_HOMEPAGE.knowledge.stats,
+        display: { ...DEFAULT_HOMEPAGE.knowledge.display, ...savedKnowledge.display },
+        items: (savedKnowledge.items?.length ? savedKnowledge.items : DEFAULT_HOMEPAGE.knowledge.items).map((item, index) => {
+          const fallback = DEFAULT_HOMEPAGE.knowledge.items[index];
+          return {
+            ...fallback,
+            ...item,
+            icon: item.icon || fallback?.icon || "strategy",
+            href: item.href || fallback?.href || "/services",
+            tags: item.tags?.length ? item.tags : fallback?.tags || [],
+          };
+        }),
+      };
+    })(),
     journey: {
       ...DEFAULT_HOMEPAGE.journey,
       ...saved.journey,

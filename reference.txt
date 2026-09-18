@@ -1,0 +1,159 @@
+Exactly. I was still framing the page too much around your developer/technical identity, while the evidence from your actual work is wider.
+
+Your Services page should answer:
+
+“What can Prince Parfait GANZA help me or my organization accomplish?”
+
+—not merely “What software can he build?”
+
+Based on the work you've actually done, I'd structure your capabilities into broader service divisions, with software being only one of them.
+
+1. Software, Products & Digital Systems
+
+This remains one of your strongest technical areas, but it is one division rather than the entire page.
+
+Custom Software Development · Web Applications · Business Systems · Full-Stack Development · API Integrations · PWA/Mobile Solutions · Authentication & User Systems · Maintenance & Technical Support
+
+Evidence can point toward AskField, StockPro, CRNIS, PSTA and GotAllNews.
+
+2. Websites & Digital Presence
+
+This deserves its own category because a client asking for a website isn't necessarily looking for “software engineering.”
+
+Corporate Websites · Organization/NGO Websites · Personal & Portfolio Websites · Landing Pages · Website Revamps · CMS Integration · Hosting & Deployment · Domain/DNS Setup · Website Maintenance · SEO Foundations · Analytics/Search Console
+
+You already have real experience here across organizational and business websites.
+
+3. E-commerce & Online Marketplace Support
+
+This is a significant missing category.
+
+Your APN African Marketplace work is not simply “web development.” You've worked across the commercial digital presence surrounding the business.
+
+E-commerce Setup · Marketplace Management · Product Listings · Product Catalog Management · Amazon Seller/Product Publishing · TikTok Commerce Presence · Online Store Setup · Product Content Preparation · Storefront Optimization · Marketplace Technical Support
+
+This gives someone searching for help selling products online a reason to contact you even if they need zero custom software.
+
+4. Social Media & Digital Brand Management
+
+This should absolutely appear.
+
+From the APN work and your own/Lerony digital presence experience, you have practical capability around:
+
+Social Media Setup · Account Configuration · Business Profile Optimization · Content Publishing · Cross-platform Presence · Facebook/Instagram/TikTok/Threads Setup · Social Branding · Content Coordination · Profile/Bio Optimization · Digital Presence Management
+
+I would avoid presenting yourself as a full-scale “performance marketing expert” unless you have evidence of running and optimizing paid advertising campaigns. Digital presence management is a stronger, defensible description.
+
+5. Branding & Digital Creative Support
+
+You've also done work that falls between development and design:
+
+Digital Brand Setup · Social Media Graphics · Web Visual Direction · Promotional Banners · QR-enabled Marketing Materials · Digital Campaign Assets · Business Profile Assets · Print-ready Digital Materials
+
+For example, the APN banners and Lerony digital-brand work support this category.
+
+Again, position this as digital creative/brand support, rather than claiming to be a specialist graphic-design studio.
+
+6. Business Digitization & Operations
+
+This is where your systems experience becomes understandable to a nontechnical business owner.
+
+Instead of:
+
+PHP, SQL, APIs, Supabase...
+
+the customer sees:
+
+Move Manual Processes Online · Inventory & Sales Digitization · Reporting & Dashboards · Digital Records · Workflow Automation · Customer/Staff Portals · Administrative Systems · Data Collection Systems
+
+Then underneath:
+
+Technology may include React, Next.js, PHP, Node.js, MySQL, Supabase, APIs and other appropriate tools.
+
+That's a much stronger commercial presentation.
+
+7. Data, Reporting & Digital Research Tools
+
+Keep this separate because your experience extends into surveys/data systems.
+
+Survey Systems · Digital Data Collection · XLSForm/Structured Forms · Reporting Systems · Dashboards · Database Design · Data Management · Operational Reporting · Data Export/Processing
+
+This can connect naturally with AskField, CRNIS and your training/data-system background.
+
+8. AI, Automation & Integrations
+
+Not “AI expert” as the headline. Make it practical:
+
+AI Feature Integration · AI Assistants · Workflow Automation · API Integration · Third-party Services · Notifications · Authentication · Recommendation Features · Business Process Automation
+
+It tells businesses what they can actually buy.
+
+9. International Client & Rwanda Support
+
+This is the category we just identified, and it becomes even more valuable in this wider architecture.
+
+Remote Client Assistance · Rwanda Business Registration Process Support · Digital Platform Assistance · OTP/Account Verification Coordination · Local Process Coordination · Provider Communication · Technical Troubleshooting · Digital Document Assistance
+
+Your Sanad-type engagement belongs here.
+
+The important wording is assistance/support, not legal, tax, banking or government representation.
+
+10. Technology Consulting & Project Support
+
+There are clients who don't initially need you to build anything.
+
+They may simply ask:
+
+“We have this idea. What technology do we need?”
+
+So include:
+
+Technology Consultation · Product Discovery · Requirements Analysis · Technical Planning · Solution Architecture · Digital Transformation Guidance · Project Scoping · Technical Evaluation · Vendor/Technology Selection
+
+This is particularly relevant as you increasingly operate as a founder rather than only as the person writing code.
+
+11. Training & Knowledge Transfer
+
+This shouldn't disappear inside technology consulting because you have actual training experience.
+
+Technical Training · Data Systems Training · Software/Web Training · Team Onboarding · System User Training · Digital Skills Support · Documentation & Knowledge Transfer
+
+Your Eshuri experience provides direct evidence for this.
+
+So I would change the architecture
+
+I wouldn't display 11 giant service cards. That's exactly the clutter we've been removing elsewhere.
+
+I'd organize them visually into five commercial groups:
+
+Group	Services inside
+Build	Software · Products · Websites · E-commerce
+Grow	Digital Presence · Social Media · Branding · Marketplace Support
+Transform	Business Digitization · Data · Automation · AI & Integrations
+Support	International/Rwanda Support · Technical Support · Maintenance
+Advise & Teach	Technology Consulting · Discovery · Training · Knowledge Transfer
+
+This is much closer to your actual identity.
+
+And there's a particularly good commercial benefit: different client budgets now have an entry point.
+
+Someone might contact you to publish products and manage their digital channels. Another may need a website. Another may need assistance operating something in Rwanda. Another may need training. Another organization may eventually need a multimillion-RWF information system.
+
+They shouldn't all have to interpret “Full-Stack Development” to realize you can help them.
+
+I'd also slightly change that homepage Knowledge section you showed earlier. Its current four boxes—
+
+Strategy & Discovery · Product & Experience · Technology & Systems · Data & Operations
+
+—still make you look almost exclusively technical.
+
+It could instead introduce the broader picture as:
+
+BUILD — Products, software, websites & commerce
+GROW — Digital presence, marketplaces & brand support
+TRANSFORM — Systems, data, automation & AI
+SUPPORT — International assistance, consulting & training
+
+Then Explore services → takes the visitor to the complete /services architecture.
+
+That would make the site represent the range of work you've actually been doing instead of accidentally reducing your personal brand to “a developer who builds systems.”

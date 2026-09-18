@@ -54,8 +54,19 @@ export default function AnnouncementEditor({
   const pickerMode = kind === "video" ? "video" : kind === "image" ? "image" : "any";
 
   const applyAndSave = (next: Partial<SiteSettings>) => {
-    patch(next);
-    onSave?.(next);
+    const merged = { ...next };
+    if (merged.announcementIsActive) {
+      const bar =
+        (merged.announcementText ?? settings.announcementText)?.trim() ||
+        (merged.announcementHeadline ?? settings.announcementHeadline)?.trim() ||
+        (merged.announcementEyebrow ?? settings.announcementEyebrow)?.trim() ||
+        "";
+      if (bar && !(merged.announcementText ?? settings.announcementText)?.trim()) {
+        merged.announcementText = bar;
+      }
+    }
+    patch(merged);
+    onSave?.(merged);
   };
 
   const addMedia = (url: string) => {
