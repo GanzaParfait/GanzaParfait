@@ -5365,6 +5365,14 @@ code, pre {
   min-height: 0;
   line-height: 1.2;
 }
+[data-theme="dark"] .announcement-bar {
+  background: #0b192c;
+  color: #e2e8f0;
+  border-bottom: 1px solid rgba(147, 197, 253, 0.18);
+}
+[data-theme="dark"] .announcement-bar-cta {
+  color: #93c5fd;
+}
 .announcement-bar.is-bottom {
   position: fixed;
   left: 0;
@@ -5415,6 +5423,15 @@ code, pre {
   border-radius: 1.5rem;
   box-shadow: 0 28px 70px rgba(7, 17, 31, 0.34);
   isolation: isolate;
+}
+[data-theme="dark"] .announcement-sheet {
+  background: #0a1628;
+  color: #e2e8f0;
+  border: 1px solid rgba(147, 197, 253, 0.16);
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.55);
+}
+[data-theme="dark"] .announcement-sheet.is-preview {
+  border-color: rgba(147, 197, 253, 0.2);
 }
 .announcement-sheet.is-stack,
 .announcement-sheet.is-preview.is-stack {
@@ -5665,6 +5682,78 @@ code, pre {
   overflow-x: hidden;
   overflow-y: auto;
   background: #fff;
+}
+[data-theme="dark"] .announcement-copy {
+  background: #0a1628;
+}
+[data-theme="dark"] .announcement-kicker {
+  color: #94a3b8;
+}
+[data-theme="dark"] .announcement-copy h2 {
+  color: #f8fafc;
+}
+[data-theme="dark"] .announcement-detail,
+[data-theme="dark"] .announcement-copy p {
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .announcement-facts li {
+  border-color: rgba(147, 197, 253, 0.16);
+  background: #0f2040;
+  color: #e2e8f0;
+}
+[data-theme="dark"] .announcement-fact-icon {
+  background: rgba(14, 82, 168, 0.28);
+  color: #93c5fd;
+}
+[data-theme="dark"] .announcement-facts strong {
+  color: #f8fafc;
+}
+[data-theme="dark"] .announcement-facts em {
+  color: #94a3b8;
+}
+[data-theme="dark"] .announcement-calendar-menu {
+  border-color: rgba(147, 197, 253, 0.18);
+  background: #0f2040;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+}
+[data-theme="dark"] .announcement-calendar-menu a,
+[data-theme="dark"] .announcement-calendar-menu button {
+  color: #e2e8f0;
+}
+[data-theme="dark"] .announcement-calendar-menu a:hover,
+[data-theme="dark"] .announcement-calendar-menu button:hover {
+  background: rgba(147, 197, 253, 0.12);
+}
+[data-theme="dark"] .announcement-share a,
+[data-theme="dark"] .announcement-share button {
+  border-color: rgba(147, 197, 253, 0.2);
+  background: #0f2040;
+  color: #e2e8f0;
+}
+[data-theme="dark"] .announcement-share a:hover,
+[data-theme="dark"] .announcement-share button:hover {
+  background: rgba(147, 197, 253, 0.14);
+}
+[data-theme="dark"] .announcement-actions .btn-outline {
+  border-color: rgba(147, 197, 253, 0.28);
+  color: #e2e8f0;
+  background: transparent;
+}
+[data-theme="dark"] .announcement-actions .btn-outline:hover {
+  background: rgba(147, 197, 253, 0.12);
+}
+[data-theme="dark"] .announcement-docs a {
+  color: #93c5fd;
+}
+[data-theme="dark"] .announcement-share p {
+  color: #94a3b8;
+}
+[data-theme="dark"] .announcement-close {
+  background: rgba(248, 250, 252, 0.12);
+  color: #f8fafc;
+}
+[data-theme="dark"] .announcement-close:hover {
+  background: rgba(248, 250, 252, 0.2);
 }
 .announcement-kicker {
   margin: 0;

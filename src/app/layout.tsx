@@ -62,6 +62,13 @@ export const metadata: Metadata = {
         alt: "Prince Parfait GANZA, founder, entrepreneur, technologist and software engineer in Kigali",
         type: "image/jpeg",
       },
+      {
+        url: "/images/og/prince-parfait-ganza.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Prince Parfait GANZA",
+        type: "image/jpeg",
+      },
     ],
   },
   twitter: {
@@ -73,10 +80,10 @@ export const metadata: Metadata = {
     images: [OG_IMAGE_PATH],
   },
   icons: {
-    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
-    other: [{ rel: "manifest", url: "/site.webmanifest" }],
+    apple: [{ url: "/apple-touch-icon.png?v=20260918", sizes: "180x180" }],
+    other: [{ rel: "manifest", url: "/site.webmanifest?v=20260918" }],
   },
-  manifest: "/site.webmanifest",
+  manifest: "/site.webmanifest?v=20260918",
   ...(googleVerification || bingVerification
     ? {
         verification: {
@@ -106,8 +113,8 @@ export default async function RootLayout({
     <html lang="en" dir="ltr" id="top" data-theme="light" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         <JsonLd data={buildIdentityGraph()} />
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-        <meta name="msapplication-TileColor" content="#0E52A8" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=20260918" />
+        <meta name="msapplication-TileColor" content="#050816" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
       </head>
       <body className={`${outfit.variable} ${caveat.variable} antialiased`} suppressHydrationWarning>
@@ -115,7 +122,7 @@ export default async function RootLayout({
           id="theme-init"
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('theme');document.documentElement.setAttribute('data-theme',t==='dark'?'dark':'light');}catch(e){}})();`,
+            __html: `(function(){try{var d=localStorage.getItem('theme')==='dark';var c=d?'#050816':'#ffffff';document.documentElement.setAttribute('data-theme',d?'dark':'light');document.documentElement.style.colorScheme=d?'dark':'light';var m=document.querySelectorAll('meta[name="theme-color"]');if(!m.length){var n=document.createElement('meta');n.setAttribute('name','theme-color');n.setAttribute('content',c);document.head.appendChild(n);}else{m.forEach(function(el){el.setAttribute('content',c);});}}catch(e){}})();`,
           }}
         />
         <SiteSettingsProvider initial={settings}>

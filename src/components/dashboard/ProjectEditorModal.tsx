@@ -153,10 +153,10 @@ export default function ProjectEditorModal({
           {tab === "basics" && (
             <>
               <div className="dash-form-grid" style={{ gridTemplateColumns: "1.5fr 1fr", gap: "0.875rem" }}>
-                <div>
+            <div>
                   <label style={labelStyle}>
-                    Project Title <span style={{ color: "#ef4444" }}>*</span>
-                  </label>
+                Project Title <span style={{ color: "#ef4444" }}>*</span>
+              </label>
                   <input type="text" required value={formData.title || ""} onChange={(e) => set("title", e.target.value)} style={fieldStyle} />
                 </div>
                 <div>
@@ -176,8 +176,8 @@ export default function ProjectEditorModal({
                     onChange={(value) => set("category", value as Project["category"])}
                   />
                   {formData.category === "other" ? (
-                    <input
-                      type="text"
+              <input
+                type="text"
                       placeholder="Name this category"
                       value={formData.categoryNote || ""}
                       onChange={(e) => set("categoryNote", e.target.value)}
@@ -197,9 +197,9 @@ export default function ProjectEditorModal({
                       { value: "archived", label: "Archived" },
                     ]}
                     onChange={(value) => set("status", value as Project["status"])}
-                  />
-                </div>
-                <div>
+              />
+            </div>
+            <div>
                   <label style={labelStyle}>Client / organization</label>
                   <input type="text" placeholder="e.g. Caritas Rwanda" value={formData.organization || ""} onChange={(e) => set("organization", e.target.value)} style={fieldStyle} />
                 </div>
@@ -256,8 +256,8 @@ export default function ProjectEditorModal({
                   <button type="button" className="btn btn-outline btn-sm" onClick={() => onPickMedia((url) => set("logo", url))}>
                     Choose
                   </button>
-                </div>
-              </div>
+            </div>
+          </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
                 <label style={{ display: "flex", alignItems: "center", gap: "0.45rem", fontSize: "0.8rem", fontWeight: 600 }}>
                   <input type="checkbox" checked={Boolean(formData.featured)} onChange={(e) => set("featured", e.target.checked)} />
@@ -349,7 +349,7 @@ export default function ProjectEditorModal({
           )}
 
           {tab === "stack" && (
-            <div>
+          <div>
               <label style={labelStyle}>Technologies, separated by commas</label>
               <input
                 type="text"
@@ -363,38 +363,38 @@ export default function ProjectEditorModal({
 
           {tab === "results" && (
             <>
-              <div>
+          <div>
                 <label style={labelStyle}>Outcome</label>
-                <textarea
-                  rows={3}
+              <textarea
+                rows={3}
                   placeholder="What changed after launch (no unverified numbers)"
                   value={formData.outcome || ""}
                   onChange={(e) => set("outcome", e.target.value)}
                   style={fieldStyle}
-                />
-              </div>
-              <div>
+              />
+            </div>
+            <div>
                 <label style={labelStyle}>Result / impact (verified only)</label>
-                <textarea
-                  rows={3}
+              <textarea
+                rows={3}
                   placeholder="Only outcomes you can stand behind"
                   value={formData.result || ""}
                   onChange={(e) => set("result", e.target.value)}
                   style={fieldStyle}
-                />
-              </div>
+              />
+            </div>
               <div style={{ display: "grid", gridTemplateColumns: "1.2fr 0.8fr", gap: "0.875rem" }}>
-                <div>
+            <div>
                   <label style={labelStyle}>Quote (only with permission)</label>
-                  <textarea
-                    rows={2}
+              <textarea
+                rows={2}
                     placeholder="Optional short quote"
                     value={formData.quote || ""}
                     onChange={(e) => set("quote", e.target.value)}
                     style={fieldStyle}
-                  />
-                </div>
-                <div>
+              />
+            </div>
+            <div>
                   <label style={labelStyle}>Quote attribution</label>
                   <input
                     type="text"
@@ -402,9 +402,9 @@ export default function ProjectEditorModal({
                     value={formData.quoteBy || ""}
                     onChange={(e) => set("quoteBy", e.target.value)}
                     style={fieldStyle}
-                  />
-                </div>
-              </div>
+              />
+            </div>
+          </div>
               <div>
                 <label style={labelStyle}>Case study file</label>
                 <div style={{ display: "flex", gap: "0.5rem" }}>
@@ -586,10 +586,10 @@ export default function ProjectEditorModal({
                   </button>
                 </div>
               </div>
-              <div>
+            <div>
                 <label style={labelStyle}>Video poster image URL</label>
                 <div style={{ display: "flex", gap: "0.5rem" }}>
-                  <input
+              <input
                     type="text"
                     placeholder="/images/projects/… poster"
                     value={formData.videoPoster || ""}
@@ -624,8 +624,8 @@ export default function ProjectEditorModal({
                   value={formData.problem || ""}
                   onChange={(e) => set("problem", e.target.value)}
                   style={fieldStyle}
-                />
-              </div>
+              />
+            </div>
             </>
           )}
 

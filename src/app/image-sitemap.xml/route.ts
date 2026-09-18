@@ -17,6 +17,18 @@ export async function GET() {
       caption: "Prince Parfait GANZA, founder, entrepreneur and technologist in Kigali, Rwanda",
     },
     {
+      page: canonicalUrl("/"),
+      loc: absoluteAssetUrl("/images/og/prince-parfait-ganza.jpg"),
+      title: "Prince Parfait GANZA",
+      caption: "Prince Parfait GANZA portrait share image",
+    },
+    {
+      page: canonicalUrl("/"),
+      loc: absoluteAssetUrl(PORTRAIT_PATH),
+      title: "Prince Parfait GANZA",
+      caption: "Official portrait of Prince Parfait GANZA in Kigali, Rwanda",
+    },
+    {
       page: canonicalUrl("/about"),
       loc: absoluteAssetUrl(PORTRAIT_PATH),
       title: "Prince Parfait GANZA",

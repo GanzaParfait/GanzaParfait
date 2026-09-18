@@ -3,6 +3,23 @@
 import { useEffect, useState } from "react";
 import { RiSunLine, RiMoonLine } from "react-icons/ri";
 
+const LIGHT_THEME = "#ffffff";
+const DARK_THEME = "#050816";
+
+function applyThemeColor(dark: boolean) {
+  const color = dark ? DARK_THEME : LIGHT_THEME;
+  document.documentElement.style.colorScheme = dark ? "dark" : "light";
+  const metas = document.querySelectorAll('meta[name="theme-color"]');
+  if (metas.length === 0) {
+    const meta = document.createElement("meta");
+    meta.setAttribute("name", "theme-color");
+    meta.setAttribute("content", color);
+    document.head.appendChild(meta);
+    return;
+  }
+  metas.forEach((meta) => meta.setAttribute("content", color));
+}
+
 export default function ThemeToggle() {
   const [isDark, setIsDark] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -13,6 +30,7 @@ export default function ThemeToggle() {
     const dark = stored === "dark";
     setIsDark(dark);
     document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+    applyThemeColor(dark);
   }, []);
 
   const toggle = () => {
@@ -21,6 +39,7 @@ export default function ThemeToggle() {
     const theme = next ? "dark" : "light";
     localStorage.setItem("theme", theme);
     document.documentElement.setAttribute("data-theme", theme);
+    applyThemeColor(next);
   };
 
   if (!mounted) {
