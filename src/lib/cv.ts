@@ -1,5 +1,6 @@
 import {
   education as siteEducation,
+  certifications as siteCertifications,
   experience as siteExperience,
   projects as siteProjects,
   skills as siteSkills,
@@ -220,6 +221,7 @@ function defaultFormat(template: CvTemplateId): CvFormatConfig {
   const allExp = siteExperience.map((e) => `experience:${e.id}`);
   const allProj = siteProjects.map((p) => `projects:${p.id}`);
   const allEdu = siteEducation.map((e) => `education:${e.id}`);
+  const allCerts = siteCertifications.map((c) => `certifications:${c.id}`);
   const skillGroups = [...new Set(siteSkills.map((s) => s.category))];
 
   if (template === "compact") {
@@ -235,11 +237,11 @@ function defaultFormat(template: CvTemplateId): CvFormatConfig {
         { id: "experience", maxItems: 4 },
         { id: "projects", maxItems: 3 },
         { id: "education" },
+        { id: "certifications", maxItems: 3 },
         { id: "skills" },
         { id: "languages" },
         { id: "leadership", included: false },
         { id: "training", included: false },
-        { id: "certifications", included: false },
         { id: "achievements", included: false },
         { id: "links", included: false },
         { id: "references", included: false },
@@ -248,6 +250,7 @@ function defaultFormat(template: CvTemplateId): CvFormatConfig {
         ...includesMap(allExp, ["experience:lerony", "experience:askfield", "experience:eshuri"]),
         ...includesMap(allProj, ["projects:caritas-systems", "projects:askfield", "projects:stockpro"]),
         ...includesMap(allEdu, allEdu),
+        ...includesMap(allCerts, allCerts),
       },
       itemOrder: {},
       itemOverrides: {},
@@ -273,10 +276,10 @@ function defaultFormat(template: CvTemplateId): CvFormatConfig {
         { id: "expertise", titleOverride: "Capabilities" },
         { id: "education" },
         { id: "languages" },
+        { id: "certifications", maxItems: 3 },
         { id: "links", titleOverride: "Professional Links" },
         { id: "skills", included: false },
         { id: "training", included: false },
-        { id: "certifications", included: false },
         { id: "achievements", included: false },
         { id: "references", included: false },
       ]),
@@ -291,6 +294,7 @@ function defaultFormat(template: CvTemplateId): CvFormatConfig {
           "projects:psta-accounting",
         ]),
         ...includesMap(allEdu, allEdu),
+        ...includesMap(allCerts, allCerts),
         "experience:lerony": false,
         "projects:lerony": false,
       },
@@ -319,8 +323,8 @@ function defaultFormat(template: CvTemplateId): CvFormatConfig {
       { id: "skills" },
       { id: "languages" },
       { id: "training" },
+      { id: "certifications" },
       { id: "achievements", included: false },
-      { id: "certifications", included: false },
       { id: "links" },
       { id: "references", included: false },
     ]),
@@ -343,6 +347,7 @@ function defaultFormat(template: CvTemplateId): CvFormatConfig {
       "projects:gotallnews": false,
       "projects:caritas-website": false,
       ...includesMap(allEdu, allEdu),
+      ...includesMap(allCerts, allCerts),
     },
     itemOrder: {},
     itemOverrides: {},
@@ -686,6 +691,25 @@ function educationItems(format: CvFormatConfig): CvResolvedItem[] {
   return sortByOrder(rows, format);
 }
 
+function certificationItems(format: CvFormatConfig): CvResolvedItem[] {
+  const rows = siteCertifications
+    .filter((item) => itemIncluded(format, `certifications:${item.id}`, true))
+    .map((item) =>
+      applyItemOverride(
+        {
+          key: `certifications:${item.id}`,
+          title: item.title,
+          subtitle: item.issuer,
+          period: item.period,
+          summary: `${item.program}. Completed ${item.completedOn}.`,
+          href: normalizeUrl(item.verifyUrl),
+        },
+        format
+      )
+    );
+  return sortByOrder(rows, format);
+}
+
 function projectItems(
   format: CvFormatConfig,
   template: CvTemplateId,
@@ -1018,13 +1042,14 @@ export function resolveCvDocument(
       continue;
     }
     if (section.id === "certifications") {
-      const body = format.itemOverrides["certifications:note"]?.summary?.trim();
-      if (body) {
+      const items = takeMax(certificationItems(format), section.maxItems);
+      const legacyNote = format.itemOverrides["certifications:note"]?.summary?.trim();
+      if (items.length || legacyNote) {
         built.set("certifications", {
           id: "certifications",
           title: sectionTitle(format, "certifications", template),
-          items: [],
-          body,
+          items,
+          body: items.length ? undefined : legacyNote,
         });
       }
       continue;
@@ -1089,12 +1114,12 @@ export function resolveCvDocument(
 export function cvCatalogItems(): {
   key: string;
   label: string;
-  group: "Experience" | "Leadership" | "Projects" | "Education" | "Training" | "Achievements";
+  group: "Experience" | "Leadership" | "Projects" | "Education" | "Certifications" | "Training" | "Achievements";
 }[] {
   const items: {
     key: string;
     label: string;
-    group: "Experience" | "Leadership" | "Projects" | "Education" | "Training" | "Achievements";
+    group: "Experience" | "Leadership" | "Projects" | "Education" | "Certifications" | "Training" | "Achievements";
   }[] = [];
 
   for (const item of siteExperience) {
@@ -1123,6 +1148,13 @@ export function cvCatalogItems(): {
       key: `education:${item.id}`,
       label: `${item.program} — ${item.institution}`,
       group: "Education",
+    });
+  }
+  for (const item of siteCertifications) {
+    items.push({
+      key: `certifications:${item.id}`,
+      label: `${item.title} — ${item.issuer}`,
+      group: "Certifications",
     });
   }
   for (const item of siteProjects) {

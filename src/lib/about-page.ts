@@ -155,6 +155,12 @@ export const DEFAULT_ABOUT_PAGE: AboutPageContent = {
         href: "/experience",
       },
       {
+        title: "ALX Africa",
+        subtitle: "Data Analytics · Founder Academy · Professional Foundations",
+        meta: "2025 · Verified certificates",
+        href: "/experience",
+      },
+      {
         title: "Selected systems",
         subtitle: "Client and product work",
         meta: "AskField, Caritas, and more",

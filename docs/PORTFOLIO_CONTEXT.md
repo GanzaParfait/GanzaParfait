@@ -246,6 +246,35 @@ Graduated with distinction.
 
 Do not label SJITC as Software Engineering. That name belongs to the ULK bachelor pathway, not secondary school.
 
+## Certifications (verified)
+
+Only list certificates with a verification URL or certificate file on record. Do not invent issuers, titles, or dates.
+
+### ALX Africa — Data Analytics
+
+- Program: 6 Month programme in Data Analytics with Professional Development Skills for the Digital Age
+- Issuer: ALX | Data Analytics (powered by ExploreAI Academy)
+- Completed: 15 August 2025
+- Issued: 27 August 2025
+- Verify: https://savanna.alxafrica.com/certificates/XSrPTHhxM6
+
+### ALX Ventures — Founder Academy
+
+- Program: ALX Ventures Founder Academy 6-week Deep Dive
+- Issuer: ALX Ventures | Founder Academy
+- Completed: 1 July 2025
+- Issued: 27 June 2025
+- Verify: https://savanna.alxafrica.com/certificates/RXYG7PrL6F
+
+### ALX — Professional Foundations
+
+- Program: Professional Development Skills for the Digital Age
+- Issuer: ALX Professional Foundations
+- Completed / issued: 15 April 2025
+- Verify: https://savanna.alxafrica.com/certificates/5hxpC7P3YS
+
+Additional certificates may be added only when the same evidence standard is met.
+
 ---
 
 # 7. Professional Experience

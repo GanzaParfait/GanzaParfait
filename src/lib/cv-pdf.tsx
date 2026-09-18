@@ -360,7 +360,7 @@ export function CvPdfDocument({ doc }: { doc: CvResolvedDocument }) {
                   summary={item.summary}
                   highlights={item.highlights}
                   meta={item.meta}
-                  href={section.id === "links" ? item.href : undefined}
+                  href={section.id === "links" || section.id === "certifications" ? item.href : undefined}
                   dense={dense || section.id === "links"}
                   hideSummary={section.id === "links"}
                 />

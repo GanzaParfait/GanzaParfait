@@ -97,10 +97,17 @@ export function buildPersonJsonLd() {
       "@type": "Country",
       name: "Rwanda",
     },
-    alumniOf: {
-      "@type": "EducationalOrganization",
-      name: "SJITC Nyamirambo",
-    },
+    alumniOf: [
+      {
+        "@type": "EducationalOrganization",
+        name: "SJITC Nyamirambo",
+      },
+      {
+        "@type": "EducationalOrganization",
+        name: "ALX Africa",
+        url: "https://www.alxafrica.com",
+      },
+    ],
     contactPoint: {
       "@type": "ContactPoint",
       contactType: "professional inquiries",

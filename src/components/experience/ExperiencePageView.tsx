@@ -12,7 +12,7 @@ import {
   RiLineChartLine,
   RiGraduationCapLine,
 } from "react-icons/ri";
-import { education, experience } from "@/data/site-data";
+import { certifications, education, experience } from "@/data/site-data";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import CustomSelect from "@/components/ui/CustomSelect";
 
@@ -21,7 +21,7 @@ type SortId = "latest" | "oldest";
 
 type TimelineEntry = {
   id: string;
-  kind: "experience" | "education";
+  kind: "experience" | "education" | "certification";
   category: FilterId;
   period: string;
   location?: string;
@@ -73,7 +73,24 @@ function toTimeline(): TimelineEntry[] {
     badge: "Education",
   }));
 
-  return [...roles, ...schools];
+  const credentials: TimelineEntry[] = certifications.map((item) => ({
+    id: `cert-${item.id}`,
+    kind: "certification",
+    category: "education",
+    period: item.period,
+    title: item.title,
+    organization: item.issuer,
+    summary: item.program,
+    highlights: [`Completed ${item.completedOn}`, `Issued ${item.issuedOn}`],
+    skills: ["Verified certificate"],
+    href: item.verifyUrl,
+    hrefLabel: "Verify certificate",
+    external: true,
+    sortYear: item.sortYear,
+    badge: "Certificate",
+  }));
+
+  return [...roles, ...schools, ...credentials];
 }
 
 const FILTERS: { id: FilterId; label: string }[] = [
@@ -253,7 +270,9 @@ function ExperienceCard({ item, current }: { item: TimelineEntry; current?: bool
         )}
       </div>
       <h3>
-        {item.kind === "education" ? <RiGraduationCapLine size={18} aria-hidden="true" /> : null}
+        {item.kind === "education" || item.kind === "certification" ? (
+          <RiGraduationCapLine size={18} aria-hidden="true" />
+        ) : null}
         {item.title}
       </h3>
       <p className="experience-card-org">{item.organization}</p>

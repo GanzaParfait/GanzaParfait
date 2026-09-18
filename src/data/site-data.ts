@@ -699,6 +699,60 @@ export const education: EducationItem[] = [
   },
 ];
 
+export type CertificationItem = {
+  id: string;
+  title: string;
+  issuer: string;
+  program: string;
+  period: string;
+  completedOn: string;
+  issuedOn: string;
+  verifyUrl: string;
+  image?: string;
+  sortYear: number;
+};
+
+/** Verified certificates only — each entry needs a public verification URL. */
+export const certifications: CertificationItem[] = [
+  {
+    id: "alx-data-analytics",
+    title: "Data Analytics",
+    issuer: "ALX Africa",
+    program:
+      "6 Month programme in Data Analytics with Professional Development Skills for the Digital Age",
+    period: "2025",
+    completedOn: "15 August 2025",
+    issuedOn: "27 August 2025",
+    verifyUrl: "https://savanna.alxafrica.com/certificates/XSrPTHhxM6",
+    image: "/images/certificates/alx-data-analytics.webp",
+    sortYear: 2025,
+  },
+  {
+    id: "alx-founder-academy",
+    title: "Founder Academy",
+    issuer: "ALX Ventures",
+    program: "ALX Ventures Founder Academy 6-week Deep Dive",
+    period: "2025",
+    completedOn: "1 July 2025",
+    issuedOn: "27 June 2025",
+    verifyUrl: "https://savanna.alxafrica.com/certificates/RXYG7PrL6F",
+    image: "/images/certificates/alx-founder-academy.webp",
+    sortYear: 2025,
+  },
+  {
+    id: "alx-professional-foundations",
+    title: "Professional Foundations",
+    issuer: "ALX Africa",
+    program: "Professional Development Skills for the Digital Age",
+    period: "2025",
+    completedOn: "15 April 2025",
+    issuedOn: "15 April 2025",
+    verifyUrl: "https://savanna.alxafrica.com/certificates/5hxpC7P3YS",
+    image: "/images/certificates/alx-professional-foundations.webp",
+    sortYear: 2025,
+  },
+];
+
 export type SpeakingEngagement = {
   title: string;
   event: string;
