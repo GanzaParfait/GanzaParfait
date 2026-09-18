@@ -65,7 +65,10 @@ function toTimeline(): TimelineEntry[] {
     organization: item.institution,
     summary: item.note || item.status,
     highlights: [item.status],
-    skills: ["Computer science", "Software engineering"].slice(0, item.id === "ulk" ? 1 : 2),
+    skills:
+      item.id === "ulk"
+        ? ["Bachelor of Computer Science in Software Engineering"]
+        : ["Software Development (SOD)"],
     sortYear: item.sortYear,
     badge: "Education",
   }));

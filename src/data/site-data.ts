@@ -520,14 +520,18 @@ export const timeline: TimelineItem[] = [
   {
     id: "ulk",
     year: "2025–Present",
-    title: "Computer Science",
+    title: "Bachelor of Computer Science in Software Engineering",
     organization: "Kigali Independent University (ULK)",
     description:
-      "Undergraduate Computer Science studies. Degree in progress.",
+      "Undergraduate studies toward a Bachelor of Computer Science in Software Engineering. Degree in progress.",
     type: "education",
     location: "Kigali, Rwanda",
-    summary: "Undergraduate Computer Science studies at ULK. Degree in progress — not presented as complete.",
-    highlights: ["Computer Science coursework", "Degree in progress"],
+    summary:
+      "Bachelor of Computer Science in Software Engineering at ULK. Degree in progress — not presented as complete.",
+    highlights: [
+      "Bachelor of Computer Science in Software Engineering",
+      "Degree in progress",
+    ],
     status: "In progress",
     relatedHref: "/experience",
   },
@@ -553,14 +557,14 @@ export const timeline: TimelineItem[] = [
   {
     id: "sjitc",
     year: "2021–2024",
-    title: "Software Engineering",
+    title: "Software Development (SOD)",
     organization: "SJITC Nyamirambo",
     description:
-      "Secondary software engineering studies. Graduated with distinction in 2024.",
+      "Secondary Software Development (SOD) studies. Graduated with distinction in 2024.",
     type: "education",
     location: "Kigali, Rwanda",
-    summary: "Secondary software engineering studies at SJITC Nyamirambo. Graduated with distinction in 2024.",
-    highlights: ["Software engineering studies", "Graduated with distinction in 2024"],
+    summary: "Secondary Software Development (SOD) studies at SJITC Nyamirambo. Graduated with distinction in 2024.",
+    highlights: ["Software Development (SOD)", "Graduated with distinction in 2024"],
     status: "Completed",
     relatedHref: "/experience",
   },
@@ -679,7 +683,7 @@ export const education: EducationItem[] = [
   {
     id: "ulk",
     institution: "Kigali Independent University (ULK)",
-    program: "Computer Science",
+    program: "Bachelor of Computer Science in Software Engineering",
     period: "2025–Present",
     status: "Ongoing",
     note: "Degree not yet completed.",
@@ -688,7 +692,7 @@ export const education: EducationItem[] = [
   {
     id: "sjitc",
     institution: "SJITC Nyamirambo",
-    program: "Software Engineering",
+    program: "Software Development (SOD)",
     period: "2021–2024",
     status: "Graduated with distinction",
     sortYear: 2021,

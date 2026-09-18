@@ -128,7 +128,7 @@ SQL migrations: `supabase/migrations/<YYYY-MM-DD_HHMMSS>/<name>.sql`.
 
 Publish only verified information. Do not invent clients, results, statistics, titles, awards, partnerships, testimonials, qualifications, media coverage, or dates.
 
-Do not use **PPG** as a public brand abbreviation. Do not claim the ULK Computer Science degree is complete.
+Do not use **PPG** as a public brand abbreviation. Do not claim the ULK Bachelor of Computer Science in Software Engineering degree is complete.
 
 ## Brand
 

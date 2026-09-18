@@ -54,6 +54,6 @@ Do not copy the factual biography into this file. `docs/PORTFOLIO_CONTEXT.md` is
 - Motion must be restrained and respect `prefers-reduced-motion`.
 - Use consistent naming: **Prince Parfait GANZA**, **LERONY Ltd**, **Kigali, Rwanda**.
 - Do not use "PPG" as a public brand abbreviation.
-- Do not claim the ULK Computer Science degree is complete.
+- Do not claim the ULK Bachelor of Computer Science in Software Engineering degree is complete.
 - Do not present LERONY Ltd as if this personal site were lerony.com.
 - Stable structural copy may stay in `src/data/site-data.ts`. Do not move content to Supabase only because it can be dynamic.

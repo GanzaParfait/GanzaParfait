@@ -98,7 +98,7 @@ export const DEFAULT_ABOUT_PAGE: AboutPageContent = {
     facts: [
       { icon: "pin", label: "Location", value: "Kigali, Rwanda" },
       { icon: "briefcase", label: "Current role", value: "Founder & CEO, LERONY Ltd · 2025–Present" },
-      { icon: "grad", label: "Education", value: "Computer Science, ULK · 2025–Present (ongoing)" },
+      { icon: "grad", label: "Education", value: "Bachelor of Computer Science in Software Engineering, ULK · 2025–Present (ongoing)" },
       { icon: "bolt", label: "Focus", value: "Software · Data · AI · Impact" },
       { icon: "target", label: "Status", value: "Open to collaborations & opportunities" },
     ],
@@ -144,13 +144,13 @@ export const DEFAULT_ABOUT_PAGE: AboutPageContent = {
       },
       {
         title: "Kigali Independent University (ULK)",
-        subtitle: "Computer Science",
+        subtitle: "Bachelor of Computer Science in Software Engineering",
         meta: "2025–Present · Ongoing",
         href: "/experience",
       },
       {
         title: "SJITC Nyamirambo",
-        subtitle: "Software Engineering",
+        subtitle: "Software Development (SOD)",
         meta: "2021–2024 · Distinction",
         href: "/experience",
       },
@@ -169,7 +169,7 @@ export const DEFAULT_ABOUT_PAGE: AboutPageContent = {
       { icon: "diamond", title: "Evidence over claims", body: "Named organizations and clear contribution." },
       { icon: "gear", title: "Ship what operations need", body: "Tools staff can log into and run." },
       { icon: "person", title: "Person and company apart", body: "This site is the person; Lerony is the firm." },
-      { icon: "chart", title: "Keep learning visible", body: "University Computer Science is ongoing — stated plainly." },
+      { icon: "chart", title: "Keep learning visible", body: "The Bachelor of Computer Science in Software Engineering at ULK is ongoing — stated plainly." },
     ],
   },
   strengths: {
@@ -201,6 +201,46 @@ function mergeList<T>(saved: T[] | undefined, fallback: T[]) {
   return saved?.length ? saved : fallback;
 }
 
+const FULL_ULK_PROGRAM = "Bachelor of Computer Science in Software Engineering";
+const FULL_SJITC_PROGRAM = "Software Development (SOD)";
+
+/** Upgrade legacy short education labels saved in dashboard/settings. */
+function upgradeEducationCopy<T extends Record<string, unknown>>(item: T): T {
+  const next = { ...item } as T & {
+    value?: string;
+    subtitle?: string;
+    body?: string;
+    title?: string;
+  };
+  const replace = (text: string | undefined) => {
+    if (!text) return text;
+    return text
+      .replace(/\bUniversity Computer Science\b/gi, FULL_ULK_PROGRAM)
+      .replace(/\bComputer Science, ULK\b/gi, `${FULL_ULK_PROGRAM}, ULK`)
+      .replace(/^Computer Science$/i, FULL_ULK_PROGRAM)
+      .replace(/\bUndergraduate Computer Science studies\b/gi, `studies toward a ${FULL_ULK_PROGRAM}`)
+      .replace(/\bSoftware Engineering\b/g, (match, offset, full) => {
+        // Only rewrite SJITC secondary-school labels, not ULK bachelor wording.
+        const window = full.slice(Math.max(0, offset - 40), offset + match.length + 40);
+        if (/ULK|Bachelor of Computer Science/i.test(window)) return match;
+        if (/SJITC|Nyamirambo|secondary/i.test(window) || /^Software Engineering$/i.test(text)) {
+          return FULL_SJITC_PROGRAM;
+        }
+        return match;
+      });
+  };
+  if (typeof next.value === "string") next.value = replace(next.value);
+  if (typeof next.subtitle === "string") {
+    next.subtitle =
+      /^Software Engineering$/i.test(next.subtitle) ? FULL_SJITC_PROGRAM : replace(next.subtitle);
+  }
+  if (typeof next.body === "string") next.body = replace(next.body);
+  if (typeof next.title === "string" && /^Computer Science$/i.test(next.title)) {
+    next.title = FULL_ULK_PROGRAM;
+  }
+  return next;
+}
+
 export function aboutPageFrom(settings: SiteSettings): AboutPageContent {
   const saved = settings.aboutPage;
   if (!saved) {
@@ -226,7 +266,7 @@ export function aboutPageFrom(settings: SiteSettings): AboutPageContent {
         saved.hero?.roles ||
         settings.siteSubtitle?.split("·").slice(0, 3).join(" · ").trim() ||
         DEFAULT_ABOUT_PAGE.hero.roles,
-      facts: mergeList(saved.hero?.facts, DEFAULT_ABOUT_PAGE.hero.facts),
+      facts: mergeList(saved.hero?.facts, DEFAULT_ABOUT_PAGE.hero.facts).map(upgradeEducationCopy),
     },
     focus: {
       ...DEFAULT_ABOUT_PAGE.focus,
@@ -246,12 +286,12 @@ export function aboutPageFrom(settings: SiteSettings): AboutPageContent {
     facts: {
       ...DEFAULT_ABOUT_PAGE.facts,
       ...saved.facts,
-      items: mergeList(saved.facts?.items, DEFAULT_ABOUT_PAGE.facts.items),
+      items: mergeList(saved.facts?.items, DEFAULT_ABOUT_PAGE.facts.items).map(upgradeEducationCopy),
     },
     values: {
       ...DEFAULT_ABOUT_PAGE.values,
       ...saved.values,
-      items: mergeList(saved.values?.items, DEFAULT_ABOUT_PAGE.values.items),
+      items: mergeList(saved.values?.items, DEFAULT_ABOUT_PAGE.values.items).map(upgradeEducationCopy),
     },
     strengths: {
       ...DEFAULT_ABOUT_PAGE.strengths,

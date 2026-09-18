@@ -214,7 +214,7 @@ Institution:
 Kigali Independent University (ULK)
 
 Program:
-Computer Science
+Bachelor of Computer Science in Software Engineering
 
 Started:
 2025
@@ -223,6 +223,7 @@ Status:
 Ongoing
 
 Do not state that the degree has been completed until verified.
+Do not shorten the public program name to only “Computer Science” when education is shown.
 
 Do not list University of Rwanda as the university.
 
@@ -232,7 +233,7 @@ Institution:
 SJITC Nyamirambo
 
 Field:
-Software Engineering
+Software Development (SOD)
 
 Period:
 2021–2024
@@ -242,6 +243,8 @@ Graduation:
 
 Achievement:
 Graduated with distinction.
+
+Do not label SJITC as Software Engineering. That name belongs to the ULK bachelor pathway, not secondary school.
 
 ---
 
