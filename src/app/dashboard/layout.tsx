@@ -62,7 +62,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     () =>
       pathname.startsWith("/dashboard/homepage") ||
       pathname.startsWith("/dashboard/contact") ||
-      pathname.startsWith("/dashboard/about"),
+      pathname.startsWith("/dashboard/about") ||
+      pathname.startsWith("/dashboard/services"),
   );
 
   // Search & Global State
@@ -78,7 +79,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   });
 
   useEffect(() => {
-    if (pathname.startsWith("/dashboard/homepage") || pathname.startsWith("/dashboard/contact")) {
+    if (
+      pathname.startsWith("/dashboard/homepage") ||
+      pathname.startsWith("/dashboard/contact") ||
+      pathname.startsWith("/dashboard/about") ||
+      pathname.startsWith("/dashboard/services")
+    ) {
       setPagesOpen(true);
     }
   }, [pathname]);
@@ -214,7 +220,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 pagesOpen ||
                 pathname.startsWith("/dashboard/homepage") ||
                 pathname.startsWith("/dashboard/contact") ||
-                pathname.startsWith("/dashboard/about")
+                pathname.startsWith("/dashboard/about") ||
+                pathname.startsWith("/dashboard/services")
                   ? "dash-nav-group is-open"
                   : "dash-nav-group"
               }
@@ -224,7 +231,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 className={
                   pathname.startsWith("/dashboard/homepage") ||
                   pathname.startsWith("/dashboard/contact") ||
-                  pathname.startsWith("/dashboard/about")
+                  pathname.startsWith("/dashboard/about") ||
+                  pathname.startsWith("/dashboard/services")
                     ? "dash-nav-link is-active"
                     : "dash-nav-link"
                 }
@@ -241,6 +249,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   {[
                     { id: "homepage", path: "/dashboard/homepage", label: "Homepage", icon: RiHome5Line },
                     { id: "about", path: "/dashboard/about", label: "About", icon: RiUser3Line },
+                    { id: "services", path: "/dashboard/services", label: "Services", icon: RiLayoutGridLine },
                     { id: "contact", path: "/dashboard/contact", label: "Contact", icon: RiContactsBook2Line },
                   ].map((tab) => {
                     const Icon = tab.icon;

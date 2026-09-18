@@ -245,28 +245,28 @@ export const DEFAULT_HOMEPAGE: HomepageContent = {
       {
         title: "Build digital products",
         body: "Software, websites, digital platforms, e-commerce experiences and practical technology built around real needs.",
-        href: "/services",
+        href: "/services?focus=build",
         icon: "product",
         tags: ["Products", "Websites", "Software", "Commerce"],
       },
       {
         title: "Grow a digital presence",
         body: "Digital branding, social platforms, marketplace support, product publishing and stronger online business presence.",
-        href: "/services",
+        href: "/services?focus=grow",
         icon: "strategy",
         tags: ["Social Media", "Marketplaces", "Branding", "E-commerce"],
       },
       {
         title: "Improve how work gets done",
         body: "Business systems, data, integrations, automation and practical AI that improve everyday operations.",
-        href: "/services",
+        href: "/services?focus=transform",
         icon: "technology",
         tags: ["Systems", "Data", "Automation", "AI"],
       },
       {
         title: "Support ideas and operations",
         body: "Technology guidance, international client assistance, Rwanda-based digital/process support, training and ongoing technical help.",
-        href: "/services",
+        href: "/services?focus=support",
         icon: "data",
         tags: ["Consulting", "International Support", "Training", "Technical Support"],
       },
@@ -484,11 +484,15 @@ export function homepageFrom(settings: SiteSettings): HomepageContent {
         display: { ...DEFAULT_HOMEPAGE.knowledge.display, ...savedKnowledge.display },
         items: (savedKnowledge.items?.length ? savedKnowledge.items : DEFAULT_HOMEPAGE.knowledge.items).map((item, index) => {
           const fallback = DEFAULT_HOMEPAGE.knowledge.items[index];
+          const href =
+            item.href && item.href !== "/services"
+              ? item.href
+              : fallback?.href || "/services";
           return {
             ...fallback,
             ...item,
             icon: item.icon || fallback?.icon || "strategy",
-            href: item.href || fallback?.href || "/services",
+            href,
             tags: item.tags?.length ? item.tags : fallback?.tags || [],
           };
         }),

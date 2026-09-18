@@ -31,12 +31,13 @@ export async function GET(request: NextRequest) {
     const buffer = await renderToBuffer(<CvPdfDocument doc={doc} />);
     const filename = cvPdfFilename(doc.template);
     const bytes = new Uint8Array(buffer);
+    const forceDownload = request.nextUrl.searchParams.get("download") === "1";
 
     return new NextResponse(bytes, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${filename}"`,
+        "Content-Disposition": `${forceDownload ? "attachment" : "inline"}; filename="${filename}"`,
         "Cache-Control": "private, no-store, max-age=0, must-revalidate",
       },
     });

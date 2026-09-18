@@ -1,193 +1,201 @@
 import React from "react";
-import {
-  Document,
-  Page,
-  Text,
-  View,
-  StyleSheet,
-  Link,
-} from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet, Link } from "@react-pdf/renderer";
 import type { CvResolvedDocument, CvTemplateId } from "@/lib/cv";
 
-const colors = {
-  ink: "#0f172a",
-  muted: "#475569",
-  line: "#cbd5e1",
-  accent: "#0E52AB",
-  soft: "#f8fafc",
-};
+const navy = "#0E52AB";
+const ink = "#0B192C";
+const muted = "#475569";
+const line = "#E2E8F0";
 
-const base = StyleSheet.create({
+const styles = StyleSheet.create({
   page: {
-    paddingTop: 42,
-    paddingBottom: 48,
-    paddingHorizontal: 48,
-    fontSize: 10,
+    paddingTop: 40,
+    paddingBottom: 44,
+    paddingHorizontal: 46,
+    fontSize: 9.5,
     fontFamily: "Helvetica",
-    color: colors.ink,
-    lineHeight: 1.4,
+    color: ink,
+    lineHeight: 1.35,
+  },
+  pageCompact: {
+    paddingTop: 34,
+    paddingBottom: 38,
+    paddingHorizontal: 40,
+    fontSize: 9,
   },
   header: {
-    marginBottom: 14,
+    marginBottom: 12,
     paddingBottom: 10,
-    borderBottomWidth: 1.5,
-    borderBottomColor: colors.accent,
+    borderBottomWidth: 1.25,
+    borderBottomColor: navy,
   },
   name: {
     fontSize: 18,
     fontFamily: "Helvetica-Bold",
-    color: colors.ink,
-    letterSpacing: 0.2,
+    color: ink,
+    letterSpacing: 0.3,
+  },
+  nameExec: {
+    fontSize: 19,
   },
   headline: {
-    marginTop: 4,
+    marginTop: 3,
     fontSize: 9.5,
-    color: colors.muted,
+    color: navy,
+    fontFamily: "Helvetica-Bold",
   },
-  contactRow: {
-    marginTop: 6,
+  meta: {
+    marginTop: 5,
     fontSize: 8.5,
-    color: colors.muted,
+    color: muted,
+  },
+  metaLinks: {
+    marginTop: 3,
+    fontSize: 8.5,
+    color: muted,
+  },
+  link: {
+    color: navy,
+    textDecoration: "none",
   },
   section: {
-    marginTop: 12,
+    marginTop: 11,
   },
-  sectionTitle: {
-    fontSize: 10,
+  sectionCompact: {
+    marginTop: 8,
+  },
+  sectionLabel: {
+    fontSize: 8,
     fontFamily: "Helvetica-Bold",
-    color: colors.accent,
+    color: navy,
     textTransform: "uppercase",
-    letterSpacing: 1.1,
-    marginBottom: 6,
-    paddingBottom: 3,
-    borderBottomWidth: 0.75,
-    borderBottomColor: colors.line,
+    letterSpacing: 1.2,
+    marginBottom: 5,
+    paddingBottom: 2,
+    borderBottomWidth: 0.6,
+    borderBottomColor: line,
+  },
+  body: {
+    fontSize: 9.5,
+    color: ink,
+    lineHeight: 1.45,
+  },
+  chips: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 4,
+  },
+  chip: {
+    fontSize: 8,
+    color: ink,
+    backgroundColor: "#F1F5F9",
+    paddingVertical: 3,
+    paddingHorizontal: 6,
+    borderRadius: 2,
+    marginRight: 4,
+    marginBottom: 4,
   },
   item: {
     marginBottom: 8,
+  },
+  itemCompact: {
+    marginBottom: 5,
   },
   itemHead: {
     flexDirection: "row",
     justifyContent: "space-between",
     gap: 8,
+    alignItems: "flex-start",
   },
   itemTitle: {
-    fontSize: 10.5,
+    fontSize: 10,
     fontFamily: "Helvetica-Bold",
     flexGrow: 1,
     flexShrink: 1,
   },
   itemPeriod: {
-    fontSize: 8.5,
-    color: colors.muted,
+    fontSize: 8,
+    color: muted,
     flexShrink: 0,
   },
   itemSub: {
-    fontSize: 9,
-    color: colors.muted,
     marginTop: 1,
-  },
-  body: {
-    marginTop: 3,
-    fontSize: 9.5,
-    color: colors.ink,
+    fontSize: 8.5,
+    color: muted,
   },
   bullet: {
-    marginTop: 2,
-    paddingLeft: 8,
-    fontSize: 9,
-    color: colors.ink,
+    marginTop: 1.5,
+    paddingLeft: 6,
+    fontSize: 8.5,
+    color: ink,
   },
-  meta: {
-    marginTop: 2,
-    fontSize: 8,
-    color: colors.muted,
+  twoCol: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
   },
-  skillsRow: {
+  col: {
+    width: "48%",
+  },
+  skillRow: {
     marginBottom: 3,
-    fontSize: 9,
+    fontSize: 8.5,
   },
-  skillsCat: {
+  skillCat: {
     fontFamily: "Helvetica-Bold",
+    color: ink,
+  },
+  langRow: {
+    marginBottom: 2,
+    fontSize: 8.5,
   },
   footer: {
     position: "absolute",
-    left: 48,
-    right: 48,
-    bottom: 24,
+    left: 46,
+    right: 46,
+    bottom: 22,
     flexDirection: "row",
     justifyContent: "space-between",
-    fontSize: 7.5,
-    color: colors.muted,
-  },
-  link: {
-    color: colors.accent,
-    textDecoration: "none",
+    fontSize: 7,
+    color: muted,
   },
 });
 
-const compactStyles = StyleSheet.create({
-  page: {
-    ...base.page,
-    paddingTop: 36,
-    paddingBottom: 40,
-    paddingHorizontal: 40,
-    fontSize: 9.5,
-  },
-  name: { ...base.name, fontSize: 16 },
-  section: { marginTop: 8 },
-  item: { marginBottom: 5 },
-});
-
-const executiveStyles = StyleSheet.create({
-  page: {
-    ...base.page,
-    paddingTop: 44,
-    paddingHorizontal: 50,
-  },
-  header: {
-    ...base.header,
-    backgroundColor: colors.soft,
-    marginHorizontal: -12,
-    paddingHorizontal: 12,
-    paddingTop: 8,
-    borderBottomWidth: 0,
-    borderLeftWidth: 3,
-    borderLeftColor: colors.accent,
-    marginBottom: 16,
-  },
-  name: { ...base.name, fontSize: 19 },
-});
-
-function stylesFor(template: CvTemplateId) {
-  if (template === "compact") return { ...base, ...compactStyles, page: compactStyles.page };
-  if (template === "executive") return { ...base, ...executiveStyles, page: executiveStyles.page, header: executiveStyles.header };
-  return base;
+function isCompact(template: CvTemplateId) {
+  return template === "compact";
 }
 
-function ContactLine({ doc }: { doc: CvResolvedDocument }) {
-  const parts = [
-    doc.contact.email,
-    doc.contact.phone,
-    doc.contact.location,
-    doc.contact.website,
-  ].filter(Boolean);
-  return <Text style={base.contactRow}>{parts.join("  ·  ")}</Text>;
-}
+function HeaderBlock({ doc }: { doc: CvResolvedDocument }) {
+  const contactBits = [doc.contact.location, doc.contact.email, doc.contact.phone]
+    .filter(Boolean)
+    .join("  ·  ");
+  const site = doc.contact.website?.replace(/^https?:\/\//, "");
+  const social = doc.contact.links
+    .filter((l) => l.id !== "website")
+    .slice(0, 3);
 
-function SectionBlock({
-  title,
-  children,
-  s,
-}: {
-  title: string;
-  children: React.ReactNode;
-  s: ReturnType<typeof stylesFor>;
-}) {
   return (
-    <View style={s.section}>
-      <Text style={s.sectionTitle}>{title}</Text>
-      {children}
+    <View style={styles.header}>
+      <Text style={doc.template === "executive" ? [styles.name, styles.nameExec] : styles.name}>
+        {doc.name}
+      </Text>
+      <Text style={styles.headline}>{doc.headline}</Text>
+      <Text style={styles.meta}>
+        {contactBits}
+        {site ? `  ·  ${site}` : ""}
+      </Text>
+      {social.length ? (
+        <Text style={styles.metaLinks}>
+          {social.map((link, index) => (
+            <Text key={link.id}>
+              {index > 0 ? "  ·  " : ""}
+              <Link src={link.url} style={styles.link}>
+                {link.label}
+              </Link>
+            </Text>
+          ))}
+        </Text>
+      ) : null}
     </View>
   );
 }
@@ -201,8 +209,8 @@ function ItemBlock({
   highlights,
   meta,
   href,
-  s,
   dense,
+  hideSummary,
 }: {
   title: string;
   subtitle?: string;
@@ -212,32 +220,29 @@ function ItemBlock({
   highlights?: string[];
   meta?: string;
   href?: string;
-  s: ReturnType<typeof stylesFor>;
   dense?: boolean;
+  hideSummary?: boolean;
 }) {
   return (
-    <View style={s.item}>
-      <View style={s.itemHead}>
-        <Text style={s.itemTitle}>{title}</Text>
-        {period ? <Text style={s.itemPeriod}>{period}</Text> : null}
+    <View style={dense ? styles.itemCompact : styles.item} wrap={false}>
+      <View style={styles.itemHead}>
+        <Text style={styles.itemTitle}>{title}</Text>
+        {period ? <Text style={styles.itemPeriod}>{period}</Text> : null}
       </View>
       {subtitle || location ? (
-        <Text style={s.itemSub}>
-          {[subtitle, location].filter(Boolean).join(" · ")}
-        </Text>
+        <Text style={styles.itemSub}>{[subtitle, location].filter(Boolean).join(" · ")}</Text>
       ) : null}
-      {summary ? <Text style={s.body}>{summary}</Text> : null}
-      {!dense && highlights?.length
-        ? highlights.map((line) => (
-            <Text key={line} style={s.bullet}>
-              • {line}
-            </Text>
-          ))
-        : null}
-      {meta ? <Text style={s.meta}>{meta}</Text> : null}
+      {!hideSummary && summary ? <Text style={styles.body}>{summary}</Text> : null}
+      {!dense &&
+        highlights?.map((line) => (
+          <Text key={line} style={styles.bullet}>
+            • {line}
+          </Text>
+        ))}
+      {meta ? <Text style={styles.itemSub}>{meta}</Text> : null}
       {href ? (
-        <Link src={href} style={s.link}>
-          <Text style={s.meta}>{href.replace(/^https?:\/\//, "")}</Text>
+        <Link src={href} style={styles.link}>
+          <Text style={styles.itemSub}>{href.replace(/^https?:\/\//, "")}</Text>
         </Link>
       ) : null}
     </View>
@@ -245,55 +250,106 @@ function ItemBlock({
 }
 
 export function CvPdfDocument({ doc }: { doc: CvResolvedDocument }) {
-  const s = stylesFor(doc.template);
-  const dense = doc.template === "compact";
+  const dense = isCompact(doc.template);
+  const keywords = [
+    "Prince Parfait GANZA",
+    "CV",
+    "Resume",
+    "Kigali",
+    "Rwanda",
+    "Software Engineer",
+    "Founder",
+    "LERONY",
+  ].join(", ");
 
   return (
     <Document
       title={`${doc.name} — ${doc.label}`}
-      author={doc.name}
+      author="Prince Parfait GANZA"
       subject={doc.headline}
+      keywords={keywords}
       creator="princeparfait.com"
+      producer="princeparfait.com"
     >
-      <Page size="A4" style={s.page} wrap>
-        <View style={s.header}>
-          <Text style={s.name}>{doc.name}</Text>
-          <Text style={s.headline}>{doc.headline}</Text>
-          <ContactLine doc={doc} />
-        </View>
+      <Page size="A4" style={dense ? [styles.page, styles.pageCompact] : styles.page} wrap>
+        <HeaderBlock doc={doc} />
 
         {doc.sections.map((section) => {
-          if (section.id === "contact") return null;
-          if (section.id === "summary") {
+          const sectionStyle = dense ? styles.sectionCompact : styles.section;
+
+          if (section.id === "profile" && section.body) {
             return (
-              <SectionBlock key={section.id} title={section.title} s={s}>
-                <Text style={s.body}>{section.body || doc.summary}</Text>
-              </SectionBlock>
+              <View key={section.id} style={sectionStyle}>
+                <Text style={styles.sectionLabel}>{section.title}</Text>
+                <Text style={styles.body}>{section.body}</Text>
+              </View>
             );
           }
+
+          if (section.id === "expertise" && section.chips?.length) {
+            return (
+              <View key={section.id} style={sectionStyle}>
+                <Text style={styles.sectionLabel}>{section.title}</Text>
+                <View style={styles.chips}>
+                  {section.chips.map((chip) => (
+                    <Text key={chip} style={styles.chip}>
+                      {chip}
+                    </Text>
+                  ))}
+                </View>
+              </View>
+            );
+          }
+
           if (section.id === "skills" && section.skillsByCategory?.length) {
             return (
-              <SectionBlock key={section.id} title={section.title} s={s}>
-                {section.skillsByCategory.map((group) => (
-                  <Text key={group.category} style={s.skillsRow}>
-                    <Text style={s.skillsCat}>{group.category}: </Text>
-                    {group.names.join(", ")}
-                  </Text>
-                ))}
-              </SectionBlock>
+              <View key={section.id} style={sectionStyle}>
+                <Text style={styles.sectionLabel}>{section.title}</Text>
+                <View style={styles.twoCol}>
+                  {section.skillsByCategory.map((group) => (
+                    <View key={group.category} style={styles.col} wrap={false}>
+                      <Text style={styles.skillRow}>
+                        <Text style={styles.skillCat}>{group.category}: </Text>
+                        {group.names.join(", ")}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
             );
           }
+
+          if (section.id === "languages" && section.languages?.length) {
+            return (
+              <View key={section.id} style={sectionStyle} wrap={false}>
+                <Text style={styles.sectionLabel}>{section.title}</Text>
+                <View style={styles.twoCol}>
+                  {section.languages.map((lang) => (
+                    <Text key={lang.name} style={[styles.langRow, styles.col]}>
+                      <Text style={styles.skillCat}>{lang.name}</Text>
+                      {lang.proficiency ? ` — ${lang.proficiency}` : ""}
+                      {lang.note ? ` (${lang.note})` : ""}
+                    </Text>
+                  ))}
+                </View>
+              </View>
+            );
+          }
+
           if (section.body && !section.items.length) {
             return (
-              <SectionBlock key={section.id} title={section.title} s={s}>
-                <Text style={s.body}>{section.body}</Text>
-              </SectionBlock>
+              <View key={section.id} style={sectionStyle}>
+                <Text style={styles.sectionLabel}>{section.title}</Text>
+                <Text style={styles.body}>{section.body}</Text>
+              </View>
             );
           }
+
           if (!section.items.length) return null;
+
           return (
-            <View key={section.id} style={s.section}>
-              <Text style={s.sectionTitle}>{section.title}</Text>
+            <View key={section.id} style={sectionStyle}>
+              <Text style={styles.sectionLabel}>{section.title}</Text>
               {section.items.map((item) => (
                 <ItemBlock
                   key={item.key}
@@ -304,20 +360,20 @@ export function CvPdfDocument({ doc }: { doc: CvResolvedDocument }) {
                   summary={item.summary}
                   highlights={item.highlights}
                   meta={item.meta}
-                  href={item.href}
-                  s={s}
-                  dense={dense}
+                  href={section.id === "links" ? item.href : undefined}
+                  dense={dense || section.id === "links"}
+                  hideSummary={section.id === "links"}
                 />
               ))}
             </View>
           );
         })}
 
-        <View style={s.footer} fixed>
+        <View style={styles.footer} fixed>
           <Text>Prince Parfait GANZA · princeparfait.com</Text>
           <Text
             render={({ pageNumber, totalPages }) =>
-              totalPages > 1 ? `Page ${pageNumber} of ${totalPages}` : "Curriculum Vitae"
+              totalPages > 1 ? `${pageNumber} / ${totalPages}` : doc.label
             }
           />
         </View>

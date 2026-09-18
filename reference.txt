@@ -1,159 +1,369 @@
-Exactly. I was still framing the page too much around your developer/technical identity, while the evidence from your actual work is wider.
+Redesign ONLY the existing CV/Resume system. Do not redesign unrelated website pages, navigation, dashboard modules, database architecture, or global visual identity.
+
+The current CV feature works, including PDF generation, but its information architecture and document design are weak. It currently feels like website content exported into PDF. Improve it into a genuinely professional CV/resume generator.
+
+IMPORTANT:
+Preserve existing verified portfolio data and existing CV functionality. Do not invent experience, dates, qualifications, language proficiency, certifications, metrics, employers, or achievements.
+
+==================================================
+1. THREE PURPOSE-BUILT CV FORMATS
+==================================================
+
+Keep these three formats, but make them genuinely different:
+
+1. PROFESSIONAL CV
+Detailed professional document, normally 2–3 pages.
+
+Recommended structure:
+- Header/contact
+- Professional Profile
+- Core Expertise
+- Professional Experience
+- Selected Projects / Systems
+- Leadership & Entrepreneurship
+- Education
+- Technical Skills
+- Languages
+- Training / Certifications / Achievements when verified
+- Selected professional links
+
+2. COMPACT RESUME
+Maximum 1–2 pages.
+Prioritize:
+- Header
+- Short profile
+- Core expertise
+- Most relevant experience
+- 2–3 selected projects
+- Education
+- Skills
+- Languages
+
+Remove long descriptions and unnecessary links.
+
+3. EXECUTIVE / PROFILE CV
+Leadership-oriented profile.
+Prioritize:
+- Executive identity
+- Executive profile
+- Leadership
+- Entrepreneurship
+- Major engagements
+- Selected impact/work
+- Capabilities
+- Education
+- Languages
+- Essential professional links
+
+Do NOT simply reuse identical content/order for all three formats.
+
+==================================================
+2. REDESIGN THE GENERATED PDF
+==================================================
+
+Create a premium, restrained professional document.
+
+Visual direction:
+- A4
+- clean white background
+- Prince Parfait brand navy/deep blue accents
+- strong typography
+- excellent spacing
+- subtle dividers
+- compact header
+- small section labels
+- clear hierarchy
+- no oversized website-style headings
+- no unnecessary cards
+- no decorative clutter
+- ATS-conscious/selectable text
+- print friendly
+- clickable links
+- proper page breaking
+- never split an experience awkwardly across pages where avoidable
+
+The PDF must look intentionally typeset as a CV, NOT like the website printed to PDF.
+
+Use a restrained 1-column layout for major narrative sections. A small 2-column area may be used intelligently for compact metadata such as skills/languages, but maintain readability and ATS compatibility.
+
+Do not waste a whole page on social links.
+
+Header should roughly contain:
+
+Prince Parfait GANZA
+Professional title/headline
+Kigali, Rwanda
+Email | Phone | Website
+LinkedIn | GitHub
+
+Only essential links should appear by default.
+
+==================================================
+3. REMOVE CONTENT DUPLICATION
+==================================================
 
-Your Services page should answer:
+The current generated CV duplicates LERONY Ltd under Leadership, Selected Work and Experience.
 
-“What can Prince Parfait GANZA help me or my organization accomplish?”
+Introduce deduplication/content-role logic.
 
-—not merely “What software can he build?”
+A record may be referenced in different sections only when the information serves a genuinely different purpose.
 
-Based on the work you've actually done, I'd structure your capabilities into broader service divisions, with software being only one of them.
+Do not repeat identical:
+- organization descriptions
+- role descriptions
+- dates
+- bullet points
+- project descriptions
 
-1. Software, Products & Digital Systems
+For example:
+Founder & CEO at LERONY can be the professional/leadership record.
+Selected projects should then show actual selected systems/projects rather than another duplicate LERONY company entry.
 
-This remains one of your strongest technical areas, but it is one division rather than the entire page.
+==================================================
+4. LANGUAGES
+==================================================
 
-Custom Software Development · Web Applications · Business Systems · Full-Stack Development · API Integrations · PWA/Mobile Solutions · Authentication & User Systems · Maintenance & Technical Support
+Add Languages as a first-class CV data type.
 
-Evidence can point toward AskField, StockPro, CRNIS, PSTA and GotAllNews.
+Dashboard fields:
+- Language
+- Proficiency
+- Optional note
+- Public on CV
+- Sort order
 
-2. Websites & Digital Presence
+Do NOT infer proficiency.
 
-This deserves its own category because a client asking for a website isn't necessarily looking for “software engineering.”
+Allow the administrator to enter/edit the actual proficiency.
 
-Corporate Websites · Organization/NGO Websites · Personal & Portfolio Websites · Landing Pages · Website Revamps · CMS Integration · Hosting & Deployment · Domain/DNS Setup · Website Maintenance · SEO Foundations · Analytics/Search Console
+Languages must be individually selectable per CV format.
 
-You already have real experience here across organizational and business websites.
+==================================================
+5. FORMAT-SPECIFIC SECTION MANAGER
+==================================================
 
-3. E-commerce & Online Marketplace Support
+Each of the 3 CV formats needs independent configuration.
 
-This is a significant missing category.
+For each format allow:
 
-Your APN African Marketplace work is not simply “web development.” You've worked across the commercial digital presence surrounding the business.
+- section visibility
+- drag/drop section ordering
+- record selection
+- record ordering
+- maximum number of records where relevant
+- CV-specific section title
+- optional CV-specific content override
 
-E-commerce Setup · Marketplace Management · Product Listings · Product Catalog Management · Amazon Seller/Product Publishing · TikTok Commerce Presence · Online Store Setup · Product Content Preparation · Storefront Optimization · Marketplace Technical Support
+Possible sections:
 
-This gives someone searching for help selling products online a reason to contact you even if they need zero custom software.
+Profile
+Core Expertise
+Experience
+Leadership
+Projects
+Education
+Skills
+Languages
+Training
+Certifications
+Achievements
+Professional Links
+References
 
-4. Social Media & Digital Brand Management
+Changing CV-specific copy MUST NOT overwrite the main website copy.
 
-This should absolutely appear.
+==================================================
+6. RECORD SELECTION
+==================================================
 
-From the APN work and your own/Lerony digital presence experience, you have practical capability around:
+Experience and projects should not automatically dump every portfolio record into every CV.
 
-Social Media Setup · Account Configuration · Business Profile Optimization · Content Publishing · Cross-platform Presence · Facebook/Instagram/TikTok/Threads Setup · Social Branding · Content Coordination · Profile/Bio Optimization · Digital Presence Management
+Provide selectors such as:
 
-I would avoid presenting yourself as a full-scale “performance marketing expert” unless you have evidence of running and optimizing paid advertising campaigns. Digital presence management is a stronger, defensible description.
+Experience
+[✓] Founder & CEO — LERONY
+[✓] Frontend Development / API Integration — AskField
+[✓] Reservation Agent — PSTA
+[✓] Data Systems Trainer — Eshuri
 
-5. Branding & Digital Creative Support
+Projects
+[✓] Caritas Rwanda Information Systems
+[✓] AskField
+[✓] StockPro
+[ ] GotAllNews
+[ ] PSTA Ticket Accounting System
 
-You've also done work that falls between development and design:
+The exact available records must come from existing portfolio/database data.
 
-Digital Brand Setup · Social Media Graphics · Web Visual Direction · Promotional Banners · QR-enabled Marketing Materials · Digital Campaign Assets · Business Profile Assets · Print-ready Digital Materials
+Do not hard-code these examples if equivalent records already exist.
 
-For example, the APN banners and Lerony digital-brand work support this category.
+==================================================
+7. SKILLS ARCHITECTURE
+==================================================
 
-Again, position this as digital creative/brand support, rather than claiming to be a specialist graphic-design studio.
+Do not render skills as one giant comma-separated list.
 
-6. Business Digitization & Operations
+Support grouped skills such as:
 
-This is where your systems experience becomes understandable to a nontechnical business owner.
+Engineering
+Frontend
+Backend
+Data & Reporting
+Databases
+Infrastructure / Deployment
+Product & Systems
+Business / Operations
 
-Instead of:
+Use only verified skills already stored or explicitly entered in the dashboard.
 
-PHP, SQL, APIs, Supabase...
+Allow each skill group to be enabled/disabled per CV format.
 
-the customer sees:
+==================================================
+8. DASHBOARD UX
+==================================================
 
-Move Manual Processes Online · Inventory & Sales Digitization · Reporting & Dashboards · Digital Records · Workflow Automation · Customer/Staff Portals · Administrative Systems · Data Collection Systems
+Keep the existing split editor/preview concept because it is useful, but improve it.
 
-Then underneath:
+Left:
+configuration/editor
 
-Technology may include React, Next.js, PHP, Node.js, MySQL, Supabase, APIs and other appropriate tools.
+Right:
+live document preview
 
-That's a much stronger commercial presentation.
+Add clear tabs:
 
-7. Data, Reporting & Digital Research Tools
+Content | Sections | Records | Appearance | Download
 
-Keep this separate because your experience extends into surveys/data systems.
+At the top retain:
+Professional CV
+Compact Resume
+Executive / Profile CV
 
-Survey Systems · Digital Data Collection · XLSForm/Structured Forms · Reporting Systems · Dashboards · Database Design · Data Management · Operational Reporting · Data Export/Processing
+Preview must update immediately when settings change.
 
-This can connect naturally with AskField, CRNIS and your training/data-system background.
+Add:
+Save
+Preview PDF
+Download PDF
 
-8. AI, Automation & Integrations
+If safe within the existing architecture, also support:
+Print
+DOCX export
 
-Not “AI expert” as the headline. Make it practical:
+But PDF remains the canonical visual version.
 
-AI Feature Integration · AI Assistants · Workflow Automation · API Integration · Third-party Services · Notifications · Authentication · Recommendation Features · Business Process Automation
+Do not implement DOCX by sacrificing PDF quality.
 
-It tells businesses what they can actually buy.
+==================================================
+9. PUBLIC /CV PAGE
+==================================================
 
-9. International Client & Rwanda Support
+Redesign /cv so it does not display an enormous raw CV inside a generic website card.
 
-This is the category we just identified, and it becomes even more valuable in this wider architecture.
+Create a compact professional landing page:
 
-Remote Client Assistance · Rwanda Business Registration Process Support · Digital Platform Assistance · OTP/Account Verification Coordination · Local Process Coordination · Provider Communication · Technical Troubleshooting · Digital Document Assistance
+CV / Resume
+Prince Parfait GANZA
 
-Your Sanad-type engagement belongs here.
+Short description.
 
-The important wording is assistance/support, not legal, tax, banking or government representation.
+Three format options:
+Professional CV
+Compact Resume
+Executive / Profile CV
 
-10. Technology Consulting & Project Support
+Each can have:
+View
+Download PDF
 
-There are clients who don't initially need you to build anything.
+Clearly indicate the administrator-selected default.
 
-They may simply ask:
+The embedded preview should resemble an A4 document and not simply become another long webpage.
 
-“We have this idea. What technology do we need?”
+==================================================
+10. PDF DATA QUALITY
+==================================================
 
-So include:
+Before rendering, normalize:
 
-Technology Consultation · Product Discovery · Requirements Analysis · Technical Planning · Solution Architecture · Digital Transformation Guidance · Project Scoping · Technical Evaluation · Vendor/Technology Selection
+- duplicated records
+- blank fields
+- invalid URLs
+- empty bullet arrays
+- missing dates
+- page-breaking issues
+- unnecessary social links
+- excessively long descriptions
 
-This is particularly relevant as you increasingly operate as a founder rather than only as the person writing code.
+Never invent missing information.
 
-11. Training & Knowledge Transfer
+If information is missing, omit it or allow the dashboard administrator to add it.
 
-This shouldn't disappear inside technology consulting because you have actual training experience.
+==================================================
+11. SEO / STRUCTURED DATA
+==================================================
 
-Technical Training · Data Systems Training · Software/Web Training · Team Onboarding · System User Training · Digital Skills Support · Documentation & Knowledge Transfer
+The public /cv page should have appropriate metadata:
+- title
+- description
+- canonical
+- Open Graph
+- Twitter metadata
 
-Your Eshuri experience provides direct evidence for this.
+Connect it consistently to the existing Prince Parfait GANZA Person structured data where appropriate.
 
-So I would change the architecture
+Do not create conflicting Person entities.
 
-I wouldn't display 11 giant service cards. That's exactly the clutter we've been removing elsewhere.
+The downloadable PDF should have meaningful document metadata:
+Title
+Author
+Subject
+Keywords
 
-I'd organize them visually into five commercial groups:
+Use Prince Parfait GANZA as document author.
 
-Group	Services inside
-Build	Software · Products · Websites · E-commerce
-Grow	Digital Presence · Social Media · Branding · Marketplace Support
-Transform	Business Digitization · Data · Automation · AI & Integrations
-Support	International/Rwanda Support · Technical Support · Maintenance
-Advise & Teach	Technology Consulting · Discovery · Training · Knowledge Transfer
+==================================================
+12. RESPONSIVENESS + QUALITY
+==================================================
 
-This is much closer to your actual identity.
+Dashboard:
+desktop-first split preview, responsive on tablets/mobile.
 
-And there's a particularly good commercial benefit: different client budgets now have an entry point.
+Public CV page:
+fully responsive.
 
-Someone might contact you to publish products and manage their digital channels. Another may need a website. Another may need assistance operating something in Rwanda. Another may need training. Another organization may eventually need a multimillion-RWF information system.
+PDF:
+must remain A4 regardless of screen size.
 
-They shouldn't all have to interpret “Full-Stack Development” to realize you can help them.
+Test:
+- long experience descriptions
+- multiple pages
+- page breaks
+- hidden sections
+- reordered sections
+- different format configurations
+- empty optional sections
+- URLs
+- selectable PDF text
+- printing
 
-I'd also slightly change that homepage Knowledge section you showed earlier. Its current four boxes—
+==================================================
+FINAL REQUIREMENT
+==================================================
 
-Strategy & Discovery · Product & Experience · Technology & Systems · Data & Operations
+Do not rebuild unrelated parts of the project.
 
-—still make you look almost exclusively technical.
+First inspect the existing CV implementation, database/schema, reusable portfolio records and PDF generation approach.
 
-It could instead introduce the broader picture as:
+Then refactor the smallest necessary surface area.
 
-BUILD — Products, software, websites & commerce
-GROW — Digital presence, marketplaces & brand support
-TRANSFORM — Systems, data, automation & AI
-SUPPORT — International assistance, consulting & training
+Preserve current functionality while significantly improving:
+1. CV information architecture
+2. visual quality
+3. format-specific configuration
+4. languages
+5. content selection
+6. deduplication
+7. generated PDF quality
 
-Then Explore services → takes the visitor to the complete /services architecture.
-
-That would make the site represent the range of work you've actually been doing instead of accidentally reducing your personal brand to “a developer who builds systems.”
+The final result should look like a professionally designed CV system belonging to a serious personal brand, not a website-to-PDF exporter.

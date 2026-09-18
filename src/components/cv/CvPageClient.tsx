@@ -5,82 +5,76 @@ import Link from "next/link";
 import { RiDownloadLine, RiEyeLine, RiLoader4Line } from "react-icons/ri";
 import type { SiteSettings } from "@/lib/supabase";
 import {
+  CV_TEMPLATE_OPTIONS,
   cvPdfFilename,
   getCvConfig,
   resolveCvDocument,
   type CvTemplateId,
 } from "@/lib/cv";
 
-function CvArticle({ template, settings }: { template: CvTemplateId; settings: SiteSettings }) {
+function A4Preview({ settings, template }: { settings: SiteSettings; template: CvTemplateId }) {
   const doc = useMemo(() => resolveCvDocument(settings, template), [settings, template]);
-
   return (
-    <article className="cv-article" data-template={doc.template}>
-      <header className="cv-article-head">
+    <article className="cv-sheet is-public" data-template={doc.template}>
+      <header className="cv-sheet-head">
         <h1>{doc.name}</h1>
-        <p className="cv-article-headline">{doc.headline}</p>
-        <p className="cv-article-contact">
-          {[doc.contact.email, doc.contact.phone, doc.contact.location, doc.contact.website]
+        <p className="cv-sheet-headline">{doc.headline}</p>
+        <p className="cv-sheet-meta">
+          {[doc.contact.location, doc.contact.email, doc.contact.phone]
             .filter(Boolean)
             .join(" · ")}
         </p>
       </header>
-
-      {doc.sections.map((section) => {
-        if (section.id === "contact") return null;
-        return (
-          <section key={section.id} className="cv-article-section">
-            <h2>{section.title}</h2>
-            {section.body ? <p>{section.body}</p> : null}
-            {section.skillsByCategory?.map((group) => (
-              <p key={group.category} className="cv-skills-row">
-                <strong>{group.category}:</strong> {group.names.join(", ")}
-              </p>
-            ))}
-            {section.items.map((item) => (
-              <div key={item.key} className="cv-article-item">
-                <div className="cv-article-item-head">
-                  <h3>{item.title}</h3>
-                  {item.period ? <span>{item.period}</span> : null}
-                </div>
-                {item.subtitle || item.location ? (
-                  <p className="cv-article-sub">
-                    {[item.subtitle, item.location].filter(Boolean).join(" · ")}
-                  </p>
-                ) : null}
-                {item.summary ? <p>{item.summary}</p> : null}
-                {item.highlights?.length ? (
-                  <ul>
-                    {item.highlights.map((line) => (
-                      <li key={line}>{line}</li>
-                    ))}
-                  </ul>
-                ) : null}
-                {item.meta ? <p className="cv-article-meta">{item.meta}</p> : null}
+      {doc.sections.slice(0, 6).map((section) => (
+        <section key={section.id} className="cv-sheet-section">
+          <h2>{section.title}</h2>
+          {section.body ? <p>{section.body}</p> : null}
+          {section.chips?.length ? (
+            <p className="cv-sheet-chips">{section.chips.join(" · ")}</p>
+          ) : null}
+          {section.skillsByCategory?.slice(0, 3).map((group) => (
+            <p key={group.category} className="cv-sheet-skill">
+              <strong>{group.category}:</strong> {group.names.join(", ")}
+            </p>
+          ))}
+          {section.languages?.map((lang) => (
+            <p key={lang.name} className="cv-sheet-skill">
+              <strong>{lang.name}</strong>
+              {lang.proficiency ? ` — ${lang.proficiency}` : ""}
+            </p>
+          ))}
+          {section.items.slice(0, 3).map((item) => (
+            <div key={item.key} className="cv-sheet-item">
+              <div className="cv-sheet-item-head">
+                <h3>{item.title}</h3>
+                {item.period ? <span>{item.period}</span> : null}
               </div>
-            ))}
-          </section>
-        );
-      })}
+              {item.subtitle ? <p className="cv-sheet-sub">{item.subtitle}</p> : null}
+              {item.summary ? <p>{item.summary}</p> : null}
+            </div>
+          ))}
+        </section>
+      ))}
+      <p className="cv-sheet-more">Preview excerpt — download the PDF for the full document.</p>
     </article>
   );
 }
 
 export default function CvPageClient({ settings }: { settings: SiteSettings }) {
   const config = getCvConfig(settings);
-  const [active, setActive] = useState<CvTemplateId>(config.defaultTemplate);
-  const [downloading, setDownloading] = useState(false);
-  const [error, setError] = useState("");
-
-  const publicTemplates = (Object.keys(config.formats) as CvTemplateId[]).filter(
+  const publicFormats = (Object.keys(config.formats) as CvTemplateId[]).filter(
     (id) => id === config.defaultTemplate || config.formats[id].isPublic
   );
+  const [active, setActive] = useState<CvTemplateId>(config.defaultTemplate);
+  const [viewing, setViewing] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [error, setError] = useState("");
 
   const download = async (template: CvTemplateId) => {
     setError("");
     setDownloading(true);
     try {
-      const res = await fetch(`/api/cv/pdf?template=${template}`);
+      const res = await fetch(`/api/cv/pdf?template=${template}&download=1`);
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || "Download failed.");
@@ -102,63 +96,88 @@ export default function CvPageClient({ settings }: { settings: SiteSettings }) {
   };
 
   return (
-    <div className="cv-page">
-      <div className="container cv-page-inner">
-        <header className="cv-page-hero">
-          <p className="cv-page-kicker">Curriculum Vitae</p>
+    <div className="cv-landing">
+      <div className="container cv-landing-inner">
+        <header className="cv-landing-hero">
+          <p className="cv-landing-kicker">Curriculum Vitae</p>
           <h1>CV / Resume</h1>
-          <p className="cv-page-lead">
-            View and download a selectable-text PDF of Prince Parfait GANZA&apos;s professional
-            profile. Content is managed from the Control Center and grounded in verified portfolio
-            data.
+          <p className="cv-landing-name">Prince Parfait GANZA</p>
+          <p className="cv-landing-lead">
+            Professionally typeset A4 documents — selectable text, print-ready, grounded in verified
+            portfolio records. Choose a format, preview, or download PDF.
           </p>
-          <div className="cv-page-actions">
-            <a href="#cv-preview" className="btn btn-primary">
-              <RiEyeLine size={18} /> View CV
-            </a>
-            <button
-              type="button"
-              className="btn btn-secondary"
-              disabled={downloading}
-              onClick={() => download(active)}
-            >
-              {downloading ? <RiLoader4Line size={18} className="cv-spin" /> : <RiDownloadLine size={18} />}
-              {downloading ? "Preparing PDF…" : "Download PDF"}
-            </button>
-            <Link href="/contact" className="cv-page-link">
-              Contact
-            </Link>
-          </div>
-          {error ? <p className="cv-page-error" role="alert">{error}</p> : null}
+          {error ? (
+            <p className="cv-page-error" role="alert">
+              {error}
+            </p>
+          ) : null}
         </header>
 
-        {publicTemplates.length > 1 ? (
-          <div className="cv-format-tabs" role="tablist" aria-label="CV formats">
-            {publicTemplates.map((id) => (
-              <button
-                key={id}
-                type="button"
-                role="tab"
-                aria-selected={active === id}
-                className={active === id ? "is-active" : undefined}
-                onClick={() => setActive(id)}
-              >
-                {config.formats[id].label}
-                {id === config.defaultTemplate ? " · Default" : ""}
-              </button>
-            ))}
+        <div className="cv-format-cards">
+          {publicFormats.map((id) => {
+            const opt = CV_TEMPLATE_OPTIONS.find((o) => o.id === id)!;
+            const isDefault = id === config.defaultTemplate;
+            return (
+              <article key={id} className={active === id ? "cv-format-card is-active" : "cv-format-card"}>
+                <div className="cv-format-card-top">
+                  <h2>{opt.label}</h2>
+                  {isDefault ? <span className="cv-format-badge">Default</span> : null}
+                </div>
+                <p>{opt.hint}</p>
+                <p className="cv-format-headline">{config.formats[id].headline}</p>
+                <div className="cv-format-card-actions">
+                  <button
+                    type="button"
+                    className="btn btn-outline"
+                    onClick={() => {
+                      setActive(id);
+                      setViewing(true);
+                    }}
+                  >
+                    <RiEyeLine size={16} /> View
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    disabled={downloading}
+                    onClick={() => void download(id)}
+                  >
+                    {downloading && active === id ? (
+                      <RiLoader4Line size={16} className="cv-spin" />
+                    ) : (
+                      <RiDownloadLine size={16} />
+                    )}
+                    Download PDF
+                  </button>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+
+        <p className="cv-landing-note">
+          Prefer a conversation? <Link href="/contact">Contact</Link> ·{" "}
+          <Link href="/experience">Experience</Link>
+        </p>
+
+        {viewing ? (
+          <div className="cv-a4-stage">
+            <div className="cv-a4-toolbar">
+              <span>{config.formats[active].label}</span>
+              <div className="cv-a4-toolbar-actions">
+                <button type="button" onClick={() => void download(active)} disabled={downloading}>
+                  <RiDownloadLine size={16} /> {cvPdfFilename(active)}
+                </button>
+                <button type="button" onClick={() => setViewing(false)}>
+                  Close
+                </button>
+              </div>
+            </div>
+            <div className="cv-a4-frame">
+              <A4Preview settings={settings} template={active} />
+            </div>
           </div>
         ) : null}
-
-        <div id="cv-preview" className="cv-preview-shell">
-          <div className="cv-preview-toolbar">
-            <span>{config.formats[active].label}</span>
-            <button type="button" disabled={downloading} onClick={() => download(active)}>
-              <RiDownloadLine size={16} /> {cvPdfFilename(active)}
-            </button>
-          </div>
-          <CvArticle template={active} settings={settings} />
-        </div>
       </div>
     </div>
   );

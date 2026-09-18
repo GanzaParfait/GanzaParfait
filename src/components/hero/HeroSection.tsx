@@ -71,6 +71,7 @@ export default function HeroSection() {
   return (
     <div
       className="hero-carousel"
+      data-home-page
       data-page-section
       onMouseEnter={pauseOnFinePointer}
       onMouseLeave={() => setPaused(false)}

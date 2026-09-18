@@ -15,7 +15,7 @@ export const PORTRAIT_PATH = "/images/profile/prince-parfait-ganza-kigali-rwanda
 export const OG_IMAGE_PATH = "/images/og/seo-share-image.jpg";
 
 /** Date the public factual content was last revised. Do not stamp deploy time. */
-export const SITE_CONTENT_REVISED = "2026-09-13";
+export const SITE_CONTENT_REVISED = "2026-09-18";
 
 export function canonicalUrl(path = "/"): string {
   if (!path || path === "/") return `${CANONICAL_ORIGIN}/`;
@@ -111,7 +111,12 @@ export function buildPersonJsonLd() {
       "Software engineering",
       "Full-stack development",
       "Business systems",
-      "AI-enabled software",
+      "Digital product development",
+      "Digital presence",
+      "Data and reporting systems",
+      "Practical AI integration",
+      "Technology consulting",
+      "Technical training",
       "Technology entrepreneurship",
     ],
   };
@@ -230,6 +235,25 @@ export function buildItemListJsonLd(
       position: index + 1,
       url: canonicalUrl(`/projects/${project.id}`),
       name: project.title,
+    })),
+  };
+}
+
+export function buildNamedPathItemListJsonLd(input: {
+  name: string;
+  path: string;
+  items: { name: string; path: string; position?: number }[];
+}) {
+  return {
+    "@type": "ItemList",
+    "@id": `${canonicalUrl(input.path)}#capability-families`,
+    name: input.name,
+    numberOfItems: input.items.length,
+    itemListElement: input.items.map((item, index) => ({
+      "@type": "ListItem",
+      position: item.position ?? index + 1,
+      name: item.name,
+      url: canonicalUrl(item.path),
     })),
   };
 }

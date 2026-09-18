@@ -46,7 +46,7 @@ Do not copy the factual biography into this file. `docs/PORTFOLIO_CONTEXT.md` is
 ## Implementation Rules
 
 - Read `docs/PORTFOLIO_CONTEXT.md` before content-heavy changes.
-- Keep primary navigation focused: About, Work, Experience, Contact. Services remains a secondary page. Insights belongs in the footer until verified articles exist.
+- Keep primary navigation focused: About, Work, Experience, Services, Contact. Insights belongs in the footer until verified articles exist.
 - LERONY Ltd may appear in About/Experience with a link to lerony.com. Do not restore a dedicated Ventures page unless explicitly requested.
 - New SQL migrations go in `supabase/migrations/<YYYY-MM-DD_HHMMSS>/<name>.sql`. Do not add flat files beside that folder.
 - Every public section must have meaningful, verified content.

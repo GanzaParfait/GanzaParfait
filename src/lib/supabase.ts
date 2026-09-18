@@ -3,6 +3,7 @@ import { DEFAULT_SOCIAL_LINKS, type SocialLink } from "@/lib/socials";
 import type { HomepageContent } from "@/lib/homepage";
 import type { ContactPageContent } from "@/lib/contact-page";
 import type { AboutPageContent } from "@/lib/about-page";
+import type { ServicesPageContent } from "@/lib/services-page";
 import type { Project } from "@/data/site-data";
 
 export type AnnouncementSharePlatform = "linkedin" | "twitter" | "facebook" | "whatsapp" | "link";
@@ -106,6 +107,7 @@ export interface SiteSettings {
   homepage?: HomepageContent;
   contactPage?: ContactPageContent;
   aboutPage?: AboutPageContent;
+  servicesPage?: ServicesPageContent;
   projectRecords?: ProjectRecord[];
   /** Outbound email branding (thanks, contact, newsletter shell). */
   emailHeaderLayout?: EmailHeaderLayout;
