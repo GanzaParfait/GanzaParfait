@@ -143,15 +143,9 @@ export const DEFAULT_ABOUT_PAGE: AboutPageContent = {
         href: "https://lerony.com",
       },
       {
-        title: "Kigali Independent University (ULK)",
-        subtitle: "Bachelor of Computer Science in Software Engineering",
-        meta: "2025–Present · Ongoing",
-        href: "/experience",
-      },
-      {
-        title: "SJITC Nyamirambo",
-        subtitle: "Software Development (SOD)",
-        meta: "2021–2024 · Distinction",
+        title: "Education",
+        subtitle: "ULK · Bachelor of Computer Science in Software Engineering",
+        meta: "SJITC Nyamirambo · Software Development (SOD) · Distinction",
         href: "/experience",
       },
       {
@@ -205,6 +199,20 @@ export const DEFAULT_ABOUT_PAGE: AboutPageContent = {
 
 function mergeList<T>(saved: T[] | undefined, fallback: T[]) {
   return saved?.length ? saved : fallback;
+}
+
+type FactItem = { title: string; subtitle: string; meta: string; href: string };
+
+/** Prefer a balanced 4-card Key Facts set when older 5-card education splits are saved. */
+function normalizeKeyFacts(items: FactItem[]): FactItem[] {
+  const hasUlk = items.some((item) => /ULK|Kigali Independent University/i.test(item.title));
+  const hasSjitc = items.some((item) => /SJITC/i.test(item.title));
+  const hasAlx = items.some((item) => /ALX/i.test(item.title));
+  const hasEducationCard = items.some((item) => /^Education$/i.test(item.title));
+  if (items.length === 5 && hasUlk && hasSjitc && hasAlx && !hasEducationCard) {
+    return DEFAULT_ABOUT_PAGE.facts.items;
+  }
+  return items;
 }
 
 const FULL_ULK_PROGRAM = "Bachelor of Computer Science in Software Engineering";
@@ -292,7 +300,9 @@ export function aboutPageFrom(settings: SiteSettings): AboutPageContent {
     facts: {
       ...DEFAULT_ABOUT_PAGE.facts,
       ...saved.facts,
-      items: mergeList(saved.facts?.items, DEFAULT_ABOUT_PAGE.facts.items).map(upgradeEducationCopy),
+      items: normalizeKeyFacts(
+        mergeList(saved.facts?.items, DEFAULT_ABOUT_PAGE.facts.items).map(upgradeEducationCopy),
+      ),
     },
     values: {
       ...DEFAULT_ABOUT_PAGE.values,

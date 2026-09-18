@@ -423,17 +423,14 @@ export default function Footer() {
               </span>
             ) : null}
             {coffee ? (
-              <>
-                {(showPrivacy || showSitemap) ? <span className="footer-legal-divider" aria-hidden="true" /> : null}
-                <a
-                  href={coffee.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="footer-coffee"
-                >
-                  ☕ Buy me a coffee
-                </a>
-              </>
+              <a
+                href={coffee.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-coffee"
+              >
+                ☕ Buy me a coffee
+              </a>
             ) : null}
           </div>
         </div>

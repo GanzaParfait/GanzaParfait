@@ -178,7 +178,7 @@ export default function AboutPageView({
             <p className="section-label">{page.facts.label}</p>
             <h2>{page.facts.title}</h2>
           </div>
-          <div className="about-key-grid">
+          <div className="about-key-grid" data-count={page.facts.items.length}>
             {page.facts.items.map((item) => {
               const external = /^https?:\/\//i.test(item.href);
               if (external) {
