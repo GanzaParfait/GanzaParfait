@@ -18,6 +18,7 @@ const categoryLabels: Record<Project["category"], string> = {
   mobile: "Mobile",
   ai: "AI-enabled",
   saas: "Company",
+  technology: "Technology & Innovation",
   "open-source": "Open Source",
   systems: "Systems",
   product: "Product",

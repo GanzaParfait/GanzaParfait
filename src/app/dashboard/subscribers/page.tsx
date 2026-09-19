@@ -11,7 +11,7 @@ import {
   RiUserAddLine,
   RiUserHeartLine,
 } from "react-icons/ri";
-import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
+import { useHistoryBackClose, dismissOnBackdrop } from "@/hooks/useHistoryBackClose";
 
 type Subscriber = {
   id: string;
@@ -324,8 +324,14 @@ export default function SubscribersPage() {
       </div>
 
       {bulkOpen ? (
-        <div className="dash-subs-modal" role="dialog" aria-modal="true" aria-label="Bulk email">
-          <div className="dash-subs-modal-card">
+        <div
+          className="dash-subs-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Bulk email"
+          onMouseDown={dismissOnBackdrop(() => setBulkOpen(false))}
+        >
+          <div className="dash-subs-modal-card" onMouseDown={(event) => event.stopPropagation()}>
             <header>
               <div>
                 <p className="section-label">Broadcast</p>

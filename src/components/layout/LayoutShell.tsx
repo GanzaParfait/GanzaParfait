@@ -6,6 +6,7 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import SubscribeWidget from "@/components/ui/SubscribeWidget";
 import PageFloaters from "@/components/ui/PageFloaters";
+import CommandPalette from "@/components/ui/CommandPalette";
 import PageViewTracker from "@/components/analytics/PageViewTracker";
 import UtmCapture from "@/components/analytics/UtmCapture";
 import SiteIntroOverlay from "@/components/intro/SiteIntroOverlay";
@@ -37,6 +38,7 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
       </main>
       <Footer />
       <PageFloaters />
+      <CommandPalette />
       <SubscribeWidget />
       <Suspense fallback={null}>
         <UtmCapture />

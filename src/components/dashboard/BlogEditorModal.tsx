@@ -7,7 +7,7 @@ import { BlogPost } from "@/data/site-data";
 import dynamic from "next/dynamic";
 import "@uiw/react-md-editor/markdown-editor.css";
 import "@uiw/react-markdown-preview/markdown.css";
-import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
+import { useHistoryBackClose, dismissOnBackdrop } from "@/hooks/useHistoryBackClose";
 
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false });
 
@@ -86,8 +86,14 @@ export default function BlogEditorModal({
   };
 
   return (
-    <div className="dash-modal-layer" role="dialog" aria-modal="true" aria-label={post ? "Edit blog article" : "Create blog article"}>
-      <div className="dash-modal-sheet is-blog">
+    <div
+      className="dash-modal-layer"
+      role="dialog"
+      aria-modal="true"
+      aria-label={post ? "Edit blog article" : "Create blog article"}
+      onMouseDown={dismissOnBackdrop(onClose)}
+    >
+      <div className="dash-modal-sheet is-blog" onMouseDown={(event) => event.stopPropagation()}>
         <div className="dash-modal-head">
           <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "var(--color-text)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <RiBookOpenLine style={{ color: "var(--color-primary)" }} /> {post ? "Edit Blog Article" : "Create New Blog Article"}

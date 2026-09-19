@@ -23,6 +23,7 @@ const FILTERS = [
   { id: "product", label: "Platforms" },
   { id: "tools", label: "Tools" },
   { id: "saas", label: "Company" },
+  { id: "technology", label: "Technology" },
   { id: "other", label: "Other" },
 ] as const;
 
@@ -44,15 +45,11 @@ function matchesFilter(project: Project, filter: FilterId) {
 }
 
 function tagTone(category: Project["category"]) {
-  if (category === "saas") return "is-company";
+  if (category === "saas" || category === "technology") return "is-company";
   if (category === "systems") return "is-systems";
   if (category === "product") return "is-platform";
   if (category === "web") return "is-web";
   return "is-other";
-}
-
-function isFullSpan(project: Project) {
-  return project.cardSpan === "full" || project.wide === true;
 }
 
 export default function ProjectsPageView() {
@@ -150,12 +147,8 @@ export default function ProjectsPageView() {
           ) : visible.length ? (
             <div className="projects-grid is-two">
               {visible.map((project, index) => (
-                <AnimatedSection
-                  key={project.id}
-                  delay={Math.min(index, 8) * 40}
-                  className={isFullSpan(project) ? "is-full" : undefined}
-                >
-                  <ProjectIndexCard project={project} location={location} banner={isFullSpan(project)} />
+                <AnimatedSection key={project.id} delay={Math.min(index, 8) * 40}>
+                  <ProjectIndexCard project={project} location={location} />
                 </AnimatedSection>
               ))}
             </div>
@@ -178,10 +171,12 @@ export default function ProjectsPageView() {
             </AnimatedSection>
             <AnimatedSection delay={80} className="projects-company-visual">
               {projectCover(company) ? (
-                <img src={projectCover(company)} alt="" />
+                <img src={projectCover(company)} alt={`${company.title} — LERONY Ltd`} />
+              ) : company.logo ? (
+                <img className="projects-company-logo" src={company.logo} alt={`${company.title} logo`} />
               ) : (
                 <div className="projects-company-fallback" aria-hidden="true">
-                  LERONY
+                  <img src="/images/projects/logos/lerony.png" alt="" />
                 </div>
               )}
             </AnimatedSection>
@@ -231,11 +226,9 @@ export default function ProjectsPageView() {
 function ProjectIndexCard({
   project,
   location,
-  banner,
 }: {
   project: Project;
   location: string;
-  banner?: boolean;
 }) {
   const cover = projectCover(project);
   const category = workCategoryLabel(project);
@@ -244,7 +237,7 @@ function ProjectIndexCard({
 
   return (
     <article
-      className={`projects-card${banner ? " is-banner" : ""}`}
+      className="projects-card"
       data-advance-item
       data-advance-label={project.title}
     >

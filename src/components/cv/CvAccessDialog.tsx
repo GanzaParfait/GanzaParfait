@@ -263,7 +263,7 @@ export default function CvAccessDialog({
 
       <p className="cv-access-privacy">
         {access.privacyHelper}{" "}
-        <Link href="/contact">Privacy</Link>
+        <Link href="/privacy">Privacy</Link>
       </p>
     </div>
   );

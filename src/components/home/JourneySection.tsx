@@ -38,6 +38,33 @@ function typeLabel(type: JourneyType) {
   return "Work";
 }
 
+function yearTokens(year: string): string[] {
+  const tokens: string[] = year.match(/\d{4}/g) || [];
+  if (/present/i.test(year)) tokens.push("NOW");
+  return tokens;
+}
+
+function buildYearRail(entries: JourneyEntry[]) {
+  const years = new Set<string>();
+  let hasNow = false;
+  for (const entry of entries) {
+    for (const token of yearTokens(entry.year)) {
+      if (token === "NOW") hasNow = true;
+      else years.add(token);
+    }
+  }
+  const ordered = [...years].sort((a, b) => Number(a) - Number(b));
+  if (hasNow || entries.some((entry) => /present/i.test(entry.year))) ordered.push("NOW");
+  return ordered;
+}
+
+function entryMatchesYear(entry: JourneyEntry, year: string | null) {
+  if (!year) return true;
+  const tokens = yearTokens(entry.year);
+  if (year === "NOW") return tokens.includes("NOW") || /present/i.test(entry.year);
+  return tokens.includes(year);
+}
+
 export default function JourneySection({
   journey,
   embedded = false,
@@ -48,11 +75,15 @@ export default function JourneySection({
   const [progress, setProgress] = useState(embedded ? 1 : 0);
   const [filter, setFilter] = useState<FilterId>("all");
   const [sort, setSort] = useState<SortId>("latest");
+  const [yearFocus, setYearFocus] = useState<string | null>(null);
+  const [yearHover, setYearHover] = useState<string | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [detailTab, setDetailTab] = useState<DetailTab>("overview");
   useHistoryBackClose(Boolean(activeId), () => setActiveId(null));
   const Tag = embedded ? "div" : "section";
   const entries = journey.entries || [];
+  const yearRail = useMemo(() => buildYearRail(entries), [entries]);
+  const activeYear = yearHover || yearFocus;
 
   const counts = useMemo(() => {
     const next: Record<FilterId, number> = {
@@ -67,13 +98,20 @@ export default function JourneySection({
   }, [entries]);
 
   const visible = useMemo(() => {
-    const filtered = filter === "all" ? entries : entries.filter((entry) => entry.type === filter);
+    const filtered = (filter === "all" ? entries : entries.filter((entry) => entry.type === filter)).filter((entry) =>
+      entryMatchesYear(entry, yearFocus),
+    );
     return [...filtered].sort((a, b) => {
       const aIndex = entries.findIndex((item) => item.id === a.id);
       const bIndex = entries.findIndex((item) => item.id === b.id);
       return sort === "latest" ? aIndex - bIndex : bIndex - aIndex;
     });
-  }, [entries, filter, sort]);
+  }, [entries, filter, sort, yearFocus]);
+
+  const yearPreview = useMemo(() => {
+    if (!activeYear) return null;
+    return entries.find((entry) => entryMatchesYear(entry, activeYear)) || null;
+  }, [entries, activeYear]);
 
   const active = entries.find((entry) => entry.id === activeId) || null;
 
@@ -162,6 +200,60 @@ export default function JourneySection({
           </div>
 
           <div className="journey-panel">
+            {yearRail.length > 1 ? (
+              <div
+                className="journey-rail"
+                role="group"
+                aria-label="Timeline years"
+                onMouseLeave={() => setYearHover(null)}
+              >
+                <div className="journey-rail-row">
+                  <p className="journey-rail-label">Years</p>
+                  <ul className="journey-rail-years">
+                    {yearRail.map((year) => {
+                      const preview = entries.find((entry) => entryMatchesYear(entry, year));
+                      const selected = yearFocus === year || yearHover === year;
+                      return (
+                        <li key={year}>
+                          <button
+                            type="button"
+                            className={selected ? "is-on" : undefined}
+                            aria-pressed={yearFocus === year}
+                            aria-label={
+                              preview
+                                ? `${year}: ${preview.title} at ${preview.organization}`
+                                : `Show ${year}`
+                            }
+                            onClick={() => setYearFocus((current) => (current === year ? null : year))}
+                            onMouseEnter={() => {
+                              if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+                                setYearHover(year);
+                              }
+                            }}
+                            onFocus={() => setYearHover(year)}
+                            onBlur={() => setYearHover(null)}
+                          >
+                            {year}
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                  {yearFocus ? (
+                    <button type="button" className="journey-rail-clear" onClick={() => setYearFocus(null)}>
+                      All
+                    </button>
+                  ) : null}
+                </div>
+                {yearPreview ? (
+                  <p className="journey-rail-preview">
+                    <strong>{yearPreview.title}</strong>
+                    <em>{yearPreview.organization}</em>
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
+
             <div className="journey-toolbar">
               {journey.display.showFilters ? (
                 <div className="journey-filters" role="tablist" aria-label="Timeline filters">

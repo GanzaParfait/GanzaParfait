@@ -15,6 +15,7 @@ import {
   RiImageLine,
   RiMegaphoneLine,
   RiMailSendLine,
+  RiSearchLine,
 } from "react-icons/ri";
 import {
   getLocalSettings,
@@ -53,7 +54,7 @@ const inputStyle = {
   outline: "none",
 } as const;
 
-type SettingsView = "identity" | "contact" | "socials" | "navbar" | "footer" | "announcement" | "email";
+type SettingsView = "identity" | "contact" | "socials" | "navbar" | "footer" | "announcement" | "email" | "search";
 
 const VIEWS: { id: SettingsView; label: string; hint: string; icon: typeof RiUser3Line }[] = [
   { id: "identity", label: "Identity", hint: "Name, location, roles, bio", icon: RiUser3Line },
@@ -63,6 +64,7 @@ const VIEWS: { id: SettingsView; label: string; hint: string; icon: typeof RiUse
   { id: "footer", label: "Footer", hint: "Company image and layout", icon: RiImageLine },
   { id: "announcement", label: "Announcement", hint: "Bar, sheet, and preview", icon: RiMegaphoneLine },
   { id: "email", label: "Email", hint: "Header layouts, signature, copy", icon: RiMailSendLine },
+  { id: "search", label: "Site search", hint: "⌘K command palette", icon: RiSearchLine },
 ];
 
 function isBlobUrl(url: string) {
@@ -551,6 +553,42 @@ export default function SettingsPage() {
             />
           )}
           {view === "email" && <EmailEditor settings={settings} patch={patch} />}
+
+          {view === "search" && (
+            <div className="dash-form-grid" style={{ maxWidth: "44rem" }}>
+              <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <input
+                  type="checkbox"
+                  checked={settings.siteSearch?.enabled !== false}
+                  onChange={(e) =>
+                    patch({
+                      siteSearch: {
+                        ...(settings.siteSearch || {}),
+                        enabled: e.target.checked,
+                      },
+                    })
+                  }
+                />
+                Enable ⌘K / Ctrl+K site search
+              </label>
+              <label style={{ gridColumn: "1 / -1", fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>
+                Search placeholder
+                <input
+                  style={{ ...inputStyle, marginTop: "0.3rem" }}
+                  value={settings.siteSearch?.placeholder || ""}
+                  onChange={(e) =>
+                    patch({
+                      siteSearch: {
+                        ...(settings.siteSearch || {}),
+                        placeholder: e.target.value,
+                      },
+                    })
+                  }
+                  placeholder="Search name, email, projects…"
+                />
+              </label>
+            </div>
+          )}
         </div>
       </div>
 

@@ -61,7 +61,7 @@ export const siteConfig = {
     established: "2025",
     location: "Kigali, Rwanda",
     summary:
-      "A Rwanda-based technology and innovation company building digital solutions for organizations and businesses.",
+      "A Rwanda-based technology and innovation company building practical solutions that help organizations, businesses, and communities operate better, grow, and prepare for the future.",
   },
 };
 
@@ -104,11 +104,15 @@ export type Project = {
   problem?: string;
   whatIBuilt?: string;
   technologies: string[];
+  /** Company-level capabilities (for technology/company records). Distinct from website stack. */
+  capabilities?: string[];
+  /** Tech stack for the company website or a specific software product — not the company identity. */
+  websiteTechnologies?: string[];
   myRole?: string;
   outcome?: string;
   result?: string;
   screenshots?: string[];
-  category: "web" | "mobile" | "ai" | "saas" | "open-source" | "systems" | "product" | "other";
+  category: "web" | "mobile" | "ai" | "saas" | "technology" | "open-source" | "systems" | "product" | "other";
   categoryNote?: string;
   status: "live" | "in-progress" | "archived";
   featured: boolean;
@@ -150,28 +154,50 @@ export const projects: Project[] = [
     title: "LERONY Ltd",
     organization: "LERONY Ltd",
     description:
-      "Technology and innovation company founded in Kigali to build digital solutions for organizations and businesses.",
+      "A Rwanda-based technology and innovation company building practical solutions that help organizations, businesses, and communities operate better, grow, and prepare for the future.",
     longDescription:
-      "LERONY Ltd is the company Prince Parfait GANZA founded in 2025. It is the commercial home for custom software, digital transformation, enterprise systems, AI-enabled solutions, and technology consulting. This personal site tells the founder story; lerony.com is the company brand.",
+      "LERONY Ltd is a technology and innovation company founded in Kigali, Rwanda in 2025. The company works with organizations, businesses, and communities to understand real challenges and create practical, scalable solutions through technology, innovation, strategy, and implementation. Its work can include digital solutions, smart systems, business transformation, software and platforms, AI-enabled solutions, technology consulting, and emerging technologies. LERONY is not defined by a single technology, product, or service category; its focus is using the right technologies and approaches to solve meaningful problems and create long-term value. This personal website presents the founder's journey and role in building LERONY, while lerony.com represents the company itself.",
     context:
-      "Organizations and businesses in Rwanda and beyond need practical digital systems, not generic software catalogues.",
+      "Organizations and businesses are navigating changing technology, growing operational complexity, and increasing expectations for efficient, connected, and future-ready services.",
     challenge:
-      "Many teams still run critical operations on disconnected tools, manual reporting, and websites that do not support how the organization actually works.",
+      "Many organizations have valuable ideas and important operational needs but lack the right combination of technology, strategy, systems, and implementation capacity to turn them into effective solutions.",
     solution:
-      "A technology company focused on custom software, web platforms, business systems, and practical AI integration.",
+      "LERONY brings together technology, innovation, strategy, and implementation to design and build solutions around real organizational and business needs.",
     problem:
-      "Organizations need production digital systems that match real operational workflows.",
+      "Organizations need technology and innovation partners capable of understanding real challenges and turning them into practical, scalable, and sustainable solutions.",
     whatIBuilt:
-      "Founded LERONY Ltd as a Rwanda-based technology and innovation company.",
+      "Founded LERONY Ltd as a Rwanda-based technology and innovation company focused on creating practical solutions and building what comes next.",
     myRole: "Founder & CEO",
     outcome:
-      "LERONY Ltd operates as the commercial vehicle for software, systems, and consulting work.",
+      "Established LERONY Ltd as an independent technology and innovation company serving organizations and businesses through a growing range of technology, digital, strategic, and innovation capabilities.",
+    capabilities: [
+      "Technology & Innovation",
+      "Digital Solutions",
+      "Smart Systems",
+      "Business Transformation",
+      "Software & Platforms",
+      "AI-Enabled Solutions",
+      "Technology Strategy & Consulting",
+      "Emerging Technologies",
+    ],
+    websiteTechnologies: ["Next.js", "TypeScript", "React", "Node.js", "Supabase"],
     technologies: ["Next.js", "TypeScript", "React", "Node.js", "Supabase"],
-    category: "saas",
+    category: "technology",
     status: "live",
     featured: true,
     period: "2025–Present",
     year: 2025,
+    logo: "/images/projects/logos/lerony.png",
+    image: "/images/projects/lerony/lerony-wide.jpg",
+    pinnedMedia: [
+      "/images/projects/lerony/lerony-wide.jpg",
+      "/images/projects/lerony/lerony-portrait.jpg",
+      "/images/projects/logos/lerony.png",
+    ],
+    screenshots: [
+      "/images/projects/lerony/lerony-wide.jpg",
+      "/images/projects/lerony/lerony-portrait.jpg",
+    ],
     links: {
       live: "https://lerony.com",
     },
@@ -500,16 +526,16 @@ export const timeline: TimelineItem[] = [
     title: "Founder & CEO",
     organization: "LERONY Ltd",
     description:
-      "Founded and leads a Kigali-based technology and innovation company that turns organizational problems into digital products and working systems.",
+      "Founded and leads a Kigali-based technology and innovation company that helps organizations and businesses solve real problems and build for the future.",
     type: "leadership",
     location: "Kigali, Rwanda",
     summary:
-      "Founder and CEO of a technology and innovation company. The role is leadership of the venture: direction, delivery, and turning organizational problems into products and systems that can be operated.",
+      "Founder and CEO of a technology and innovation company. The role is leadership of the venture: direction, delivery, and turning organizational problems into practical solutions.",
     highlights: [
-      "Custom software and web platforms",
-      "Enterprise and business systems",
-      "Digital transformation and technology consulting",
-      "AI-enabled product integration",
+      "Technology and innovation leadership",
+      "Digital solutions and smart systems",
+      "Business transformation and strategy",
+      "Software platforms and AI-enabled solutions as delivery capabilities",
     ],
     website: "https://lerony.com",
     industry: "Technology & Innovation",
@@ -595,14 +621,14 @@ export const experience: ExperienceItem[] = [
     period: "2025–Present",
     location: "Kigali, Rwanda",
     summary:
-      "Founder and CEO of a technology and innovation company. The role is leadership of the venture: direction, delivery, and turning organizational problems into products and systems that can be operated.",
+      "Founder and CEO of a technology and innovation company. The role is leadership of the venture: direction, delivery, and turning organizational problems into practical solutions.",
     highlights: [
-      "Custom software and web platforms",
-      "Enterprise and business systems",
-      "Digital transformation and technology consulting",
-      "AI-enabled product integration",
+      "Technology and innovation leadership",
+      "Digital solutions and smart systems",
+      "Business transformation and strategy",
+      "Software platforms and AI-enabled solutions as delivery capabilities",
     ],
-    skills: ["Strategy", "Product development", "Systems", "AI-enabled software"],
+    skills: ["Strategy", "Technology & innovation", "Systems", "AI-enabled solutions"],
     type: "work",
     category: "leadership",
     website: "https://lerony.com",

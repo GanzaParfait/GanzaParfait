@@ -18,6 +18,7 @@ import {
   RiCheckLine,
   RiCloseLine,
   RiMore2Line,
+  RiSearchLine,
 } from "react-icons/ri";
 import { siteConfig, primaryNav } from "@/data/site-data";
 import ThemeToggle from "@/components/ui/ThemeToggle";
@@ -25,6 +26,7 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { socialIcon, socialsFor } from "@/lib/socials";
 import AnnouncementBar from "@/components/layout/AnnouncementBar";
 import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
+import { openSiteSearch } from "@/components/ui/CommandPalette";
 
 const navLinks = primaryNav;
 
@@ -319,11 +321,27 @@ export default function Navbar() {
               Let&apos;s Talk
             </Link>
 
-            {/* Desktop share occupies the old desktop hamburger position */}
+            {settings.siteSearch?.enabled !== false ? (
+              <button
+                type="button"
+                onClick={() => openSiteSearch()}
+                className="navbar-icon-button nav-search-btn"
+                aria-label="Search this site"
+                aria-haspopup="dialog"
+                title="Search (⌘K / Ctrl+K)"
+              >
+                <RiSearchLine size={17} />
+                <kbd className="nav-search-kbd" aria-hidden="true">
+                  ⌘K
+                </kbd>
+              </button>
+            ) : null}
+
+            {/* Desktop only — mobile share lives in the bottom sheet */}
             <button
               type="button"
               onClick={() => setShareOpen(true)}
-              className="navbar-icon-button hidden md:inline-flex"
+              className="navbar-icon-button nav-share-desktop"
               aria-label="Share this page"
               aria-haspopup="dialog"
               aria-expanded={shareOpen}

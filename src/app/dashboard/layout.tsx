@@ -24,6 +24,7 @@ import {
   RiUserHeartLine,
   RiFileTextLine,
   RiSparklingLine,
+  RiShieldCheckLine,
 } from "react-icons/ri";
 
 import {
@@ -36,6 +37,7 @@ import { SIDEBAR_STORAGE_KEY } from "@/lib/supabase";
 
 import MediaManagerModal from "@/components/dashboard/MediaManagerModal";
 import { DashboardFeedbackProvider } from "@/components/dashboard/DashboardFeedback";
+import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
 export interface AdminProfile {
   name: string;
   email: string;
@@ -61,13 +63,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobileNav, setIsMobileNav] = useState(false);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
+  useHistoryBackClose(logoutConfirmOpen, () => setLogoutConfirmOpen(false));
   const [pagesOpen, setPagesOpen] = useState(
     () =>
       pathname.startsWith("/dashboard/homepage") ||
       pathname.startsWith("/dashboard/contact") ||
       pathname.startsWith("/dashboard/about") ||
       pathname.startsWith("/dashboard/services") ||
-      pathname.startsWith("/dashboard/intro"),
+      pathname.startsWith("/dashboard/intro") ||
+      pathname.startsWith("/dashboard/privacy"),
   );
 
   // Search & Global State
@@ -88,7 +92,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       pathname.startsWith("/dashboard/contact") ||
       pathname.startsWith("/dashboard/about") ||
       pathname.startsWith("/dashboard/services") ||
-      pathname.startsWith("/dashboard/intro")
+      pathname.startsWith("/dashboard/intro") ||
+      pathname.startsWith("/dashboard/privacy")
     ) {
       setPagesOpen(true);
     }
@@ -286,7 +291,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 pathname.startsWith("/dashboard/contact") ||
                 pathname.startsWith("/dashboard/about") ||
                 pathname.startsWith("/dashboard/services") ||
-                pathname.startsWith("/dashboard/intro")
+                pathname.startsWith("/dashboard/intro") ||
+                pathname.startsWith("/dashboard/privacy")
                   ? "dash-nav-group is-open"
                   : "dash-nav-group"
               }
@@ -298,7 +304,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   pathname.startsWith("/dashboard/contact") ||
                   pathname.startsWith("/dashboard/about") ||
                   pathname.startsWith("/dashboard/services") ||
-                  pathname.startsWith("/dashboard/intro")
+                  pathname.startsWith("/dashboard/intro") ||
+                  pathname.startsWith("/dashboard/privacy")
                     ? "dash-nav-link is-active"
                     : "dash-nav-link"
                 }
@@ -318,6 +325,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     { id: "about", path: "/dashboard/about", label: "About", icon: RiUser3Line },
                     { id: "services", path: "/dashboard/services", label: "Services", icon: RiLayoutGridLine },
                     { id: "contact", path: "/dashboard/contact", label: "Contact", icon: RiContactsBook2Line },
+                    { id: "privacy", path: "/dashboard/privacy", label: "Privacy", icon: RiShieldCheckLine },
                   ].map((tab) => {
                     const Icon = tab.icon;
                     const active = pathname.startsWith(tab.path);

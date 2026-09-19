@@ -33,6 +33,7 @@ import {
 import type { AnalyticsMetrics } from "@/lib/supabase";
 import { projects, services, experience, speakingEngagements, blogPosts, education } from "@/data/site-data";
 import { DonutChart, LineChart, Sparkline } from "@/components/dashboard/Charts";
+import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
 import "./analytics.css";
 
 type RangePreset = "7d" | "14d" | "30d" | "90d" | "1y";
@@ -177,6 +178,10 @@ export default function DashboardOverviewPage() {
     () => analytics.recentSessions.find((session) => session.id === expandedSession) || null,
     [analytics.recentSessions, expandedSession]
   );
+
+  useHistoryBackClose(resetConfirmOpen, () => setResetConfirmOpen(false));
+  useHistoryBackClose(rangeSheetOpen, () => setRangeSheetOpen(false));
+  useHistoryBackClose(Boolean(selectedSession), closeSessionDrawer);
 
   const exportCsv = async () => {
     setBusyAction("export");

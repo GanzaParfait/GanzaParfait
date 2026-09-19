@@ -4,7 +4,7 @@ import { createPortal } from "react-dom";
 import { useEffect, useState } from "react";
 import { RiCloseLine } from "react-icons/ri";
 import MediaManagerPage from "@/app/dashboard/media/page";
-import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
+import { useHistoryBackClose, dismissOnBackdrop } from "@/hooks/useHistoryBackClose";
 
 interface MediaManagerModalProps {
   isOpen: boolean;
@@ -52,11 +52,9 @@ export default function MediaManagerModal({
       role="dialog"
       aria-modal="true"
       aria-label={heading}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
+      onMouseDown={dismissOnBackdrop(onClose)}
     >
-      <div className="dash-modal-sheet is-media">
+      <div className="dash-modal-sheet is-media" onMouseDown={(event) => event.stopPropagation()}>
         <div
           className="dash-modal-head"
           style={{ background: "#0b1329", borderBottom: "none" }}
@@ -65,6 +63,7 @@ export default function MediaManagerModal({
           <button
             type="button"
             onClick={onClose}
+            aria-label="Close media library"
             style={{
               border: "none",
               background: "rgba(255,255,255,0.1)",

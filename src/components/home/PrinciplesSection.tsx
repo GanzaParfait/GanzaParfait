@@ -4,7 +4,6 @@ import Link from "next/link";
 import {
   RiArrowRightLine,
   RiBox3Line,
-  RiBookOpenLine,
   RiLineChartLine,
   RiSearchLine,
 } from "react-icons/ri";
@@ -49,20 +48,6 @@ export default function PrinciplesSection({
               <cite>— {cite}</cite>
             </blockquote>
           ) : null}
-
-          {principles.rails?.length ? (
-            <div className="principles-orbit" aria-hidden="true">
-              <span className="principles-orbit-ring" />
-              <span className="principles-orbit-ring is-mid" />
-              <span className="principles-orbit-ring is-inner" />
-              <span className="principles-orbit-cross" />
-              <ul>
-                {principles.rails.map((rail) => (
-                  <li key={rail}>{rail}</li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
         </div>
 
         <ol className="principles-grid">
@@ -83,23 +68,14 @@ export default function PrinciplesSection({
           ))}
         </ol>
 
-        <div className="principles-foot">
-          {principles.footNote ? (
-            <p className="principles-foot-note">
-              <span className="principles-foot-icon" aria-hidden="true">
-                <RiBookOpenLine size={16} />
-              </span>
-              {principles.footNote}
-            </p>
-          ) : (
+        {principles.ctaHref && principles.ctaLabel ? (
+          <div className="principles-foot">
             <span />
-          )}
-          {principles.ctaHref && principles.ctaLabel ? (
             <Link href={principles.ctaHref} className="btn btn-outline principles-cta">
               {principles.ctaLabel} <RiArrowRightLine size={16} />
             </Link>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
       </div>
     </section>
   );

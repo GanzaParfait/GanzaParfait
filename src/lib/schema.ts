@@ -1,4 +1,13 @@
-import { siteConfig, type Project } from "@/data/site-data";
+import {
+  certifications,
+  education,
+  experience,
+  siteConfig,
+  type CertificationItem,
+  type EducationItem,
+  type ExperienceItem,
+  type Project,
+} from "@/data/site-data";
 
 /** Production canonical origin. Always used for JSON-LD @id values. */
 export const CANONICAL_ORIGIN =
@@ -145,12 +154,26 @@ export function buildLeronyOrganizationJsonLd() {
     name: "LERONY Ltd",
     url: "https://lerony.com",
     foundingDate: "2025",
+    description:
+      "A Rwanda-based technology and innovation company building practical solutions that help organizations, businesses, and communities operate better, grow, and prepare for the future.",
+    logo: absoluteAssetUrl("/images/projects/logos/lerony-icon.png"),
+    image: absoluteAssetUrl("/images/projects/lerony/lerony-wide.jpg"),
     address: {
       "@type": "PostalAddress",
       addressLocality: "Kigali",
       addressCountry: "RW",
     },
     founder: personRef(),
+    knowsAbout: [
+      "Technology and innovation",
+      "Digital solutions",
+      "Smart systems",
+      "Business transformation",
+      "Software and platforms",
+      "AI-enabled solutions",
+      "Technology strategy and consulting",
+      "Emerging technologies",
+    ],
   };
 }
 
@@ -240,11 +263,12 @@ export function buildBreadcrumbListJsonLd(
 export function buildItemListJsonLd(
   projects: Project[],
   pagePath: string,
+  name = "Selected work by Prince Parfait GANZA",
 ) {
   return {
     "@type": "ItemList",
     "@id": `${canonicalUrl(pagePath)}#itemlist`,
-    name: "Selected work by Prince Parfait GANZA",
+    name,
     numberOfItems: projects.length,
     itemListElement: projects.map((project, index) => ({
       "@type": "ListItem",
@@ -274,6 +298,108 @@ export function buildNamedPathItemListJsonLd(input: {
   };
 }
 
+function parsePeriodBounds(period: string): { startDate?: string; endDate?: string } {
+  const years = period.match(/\d{4}/g) || [];
+  const startDate = years[0];
+  if (!startDate) return {};
+  if (/present/i.test(period)) return { startDate };
+  if (years[1]) return { startDate, endDate: years[1] };
+  return { startDate };
+}
+
+export function buildOrganizationRoleJsonLd(item: ExperienceItem) {
+  const bounds = parsePeriodBounds(item.period);
+  return {
+    "@type": "OrganizationRole",
+    "@id": `${canonicalUrl("/experience")}#role-${item.id}`,
+    roleName: item.role,
+    description: item.summary,
+    ...bounds,
+    ...(item.location
+      ? {
+          location: {
+            "@type": "Place",
+            name: item.location,
+          },
+        }
+      : {}),
+    worksFor: {
+      "@type": "Organization",
+      name: item.organization,
+      ...(item.website ? { url: item.website } : {}),
+    },
+    ...(item.skills?.length ? { skills: item.skills.join(", ") } : {}),
+  };
+}
+
+export function buildExperienceItemListJsonLd() {
+  return {
+    "@type": "ItemList",
+    "@id": `${canonicalUrl("/experience")}#roles`,
+    name: "Professional roles of Prince Parfait GANZA",
+    numberOfItems: experience.length,
+    itemListElement: experience.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      item: buildOrganizationRoleJsonLd(item),
+    })),
+  };
+}
+
+export function buildEducationItemListJsonLd() {
+  return {
+    "@type": "ItemList",
+    "@id": `${canonicalUrl("/experience")}#education`,
+    name: "Education of Prince Parfait GANZA",
+    numberOfItems: education.length,
+    itemListElement: education.map((item: EducationItem, index) => {
+      const bounds = parsePeriodBounds(item.period);
+      return {
+        "@type": "ListItem",
+        position: index + 1,
+        item: {
+          "@type": "EducationalOccupationalProgram",
+          "@id": `${canonicalUrl("/experience")}#education-${item.id}`,
+          name: item.program,
+          description: item.note || `${item.program} at ${item.institution}. Status: ${item.status}.`,
+          provider: {
+            "@type": "EducationalOrganization",
+            name: item.institution,
+          },
+          ...bounds,
+        },
+      };
+    }),
+  };
+}
+
+export function buildCertificationItemListJsonLd() {
+  return {
+    "@type": "ItemList",
+    "@id": `${canonicalUrl("/experience")}#certifications`,
+    name: "Verified certifications of Prince Parfait GANZA",
+    numberOfItems: certifications.length,
+    itemListElement: certifications.map((item: CertificationItem, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      item: {
+        "@type": "EducationalOccupationalCredential",
+        "@id": `${canonicalUrl("/experience")}#credential-${item.id}`,
+        name: item.title,
+        description: item.program,
+        credentialCategory: "Certificate",
+        dateCreated: item.completedOn,
+        recognizedBy: {
+          "@type": "Organization",
+          name: item.issuer,
+        },
+        url: item.verifyUrl,
+        ...(item.image ? { image: absoluteAssetUrl(item.image) } : {}),
+      },
+    })),
+  };
+}
+
 export function buildCreativeWorkJsonLd(project: Project) {
   const url = canonicalUrl(`/projects/${project.id}`);
   const roleProperty = project.contribution === "contributor" ? "contributor" : "creator";
@@ -285,7 +411,12 @@ export function buildCreativeWorkJsonLd(project: Project) {
   const videoSources = project.videos?.length ? project.videos : project.video ? [project.video] : [];
   const softwareCategories = new Set(["systems", "product", "saas", "web", "mobile", "ai"]);
   const isSoftware = softwareCategories.has(project.category);
-  const type = isSoftware ? (["SoftwareApplication", "CreativeWork"] as const) : "CreativeWork";
+  const type =
+    project.category === "technology"
+      ? (["Organization", "CreativeWork"] as const)
+      : isSoftware
+        ? (["SoftwareApplication", "CreativeWork"] as const)
+        : "CreativeWork";
 
   return {
     "@type": type,

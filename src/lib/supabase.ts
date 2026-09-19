@@ -116,6 +116,11 @@ export interface SiteSettings {
   contactPage?: ContactPageContent;
   aboutPage?: AboutPageContent;
   servicesPage?: ServicesPageContent;
+  privacyPage?: import("@/lib/privacy-page").PrivacyPageContent;
+  siteSearch?: {
+    enabled?: boolean;
+    placeholder?: string;
+  };
   projectRecords?: ProjectRecord[];
   /** Outbound email branding (thanks, contact, newsletter shell). */
   emailHeaderLayout?: EmailHeaderLayout;

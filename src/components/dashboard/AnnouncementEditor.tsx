@@ -15,6 +15,7 @@ import type { AnnouncementBarPosition, AnnouncementMedia, AnnouncementSharePlatf
 import CustomSelect from "@/components/ui/CustomSelect";
 import SocialMultiSelect from "@/components/ui/SocialMultiSelect";
 import { resolvedSocials } from "@/lib/socials";
+import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
 
 const inputStyle = {
   width: "100%",
@@ -109,6 +110,8 @@ export default function AnnouncementEditor({
     if (save) onSave?.();
     setEditing(false);
   };
+
+  useHistoryBackClose(editing, () => closeEditor(true));
 
   return (
     <div className="ann-editor-root">

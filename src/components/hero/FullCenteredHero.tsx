@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { SiteSettings } from "@/lib/supabase";
 import { heroHighlights, heroImageFor, heroRoles, setting } from "@/lib/hero";
 import { socialIcon, heroSocialsFor } from "@/lib/socials";
@@ -19,6 +20,19 @@ export default function FullCenteredHero({
   const location = setting(settings, "location");
   const socials = heroSocialsFor(settings);
   const highlights = heroHighlights(settings);
+  const [roleIndex, setRoleIndex] = useState(0);
+
+  useEffect(() => {
+    if (roles.length <= 1) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) return;
+
+    const timer = window.setInterval(() => {
+      setRoleIndex((current) => (current + 1) % roles.length);
+    }, 2400);
+
+    return () => window.clearInterval(timer);
+  }, [roles.length]);
 
   return (
     <section
@@ -48,9 +62,15 @@ export default function FullCenteredHero({
       <div className="hero-centered-info">
         <div className="hero-centered-left">
           <div className="hero-centered-pill">
-            <ul className="hero-role-list">
-              {roles.map((role) => (
-                <li key={role}>{role}</li>
+            <ul className="hero-role-list is-cycling" aria-live="polite">
+              {roles.map((role, index) => (
+                <li
+                  key={role}
+                  className={index === roleIndex ? "is-active" : "is-idle"}
+                  aria-current={index === roleIndex ? "true" : undefined}
+                >
+                  {role}
+                </li>
               ))}
             </ul>
             <p className="hero-centered-pill-sub">Based in {location}</p>

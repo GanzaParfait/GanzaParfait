@@ -34,13 +34,20 @@ export default function BookingSection({
   const primaryHref = calendar || booking.primaryHref || "/contact";
   const primaryExternal = Boolean(calendar) || /^https?:\/\//i.test(primaryHref);
 
+  const resolveHref = (itemHref?: string) => {
+    if (itemHref && /^https?:\/\//i.test(itemHref)) return itemHref;
+    if (calendar) return calendar;
+    if (itemHref) return itemHref;
+    return primaryHref;
+  };
+
   return (
     <section
       className={embedded ? "booking-band booking-embedded" : "booking-band"}
       aria-label="Book a conversation"
       id="book"
       data-page-section={embedded ? undefined : true}
-      data-section-label={embedded ? undefined : "Book a conversation"}
+      data-section-label={embedded ? undefined : "Connect"}
     >
       <div className="container booking-shell">
         <div className="booking-copy">
@@ -50,7 +57,7 @@ export default function BookingSection({
           <div className="book-actions">
             {primaryExternal ? (
               <a className="btn btn-primary" href={primaryHref} target="_blank" rel="noopener noreferrer">
-                {booking.primaryCta} <RiArrowRightLine size={16} />
+                {calendar ? "Open calendar" : booking.primaryCta} <RiArrowRightLine size={16} />
               </a>
             ) : (
               <Link className="btn btn-primary" href={primaryHref}>
@@ -68,7 +75,7 @@ export default function BookingSection({
 
         <ul className="booking-options">
           {booking.items.map((item) => {
-            const href = item.href || primaryHref;
+            const href = resolveHref(item.href);
             const external = /^https?:\/\//i.test(href);
             const content = (
               <>

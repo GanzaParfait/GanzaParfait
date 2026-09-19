@@ -23,6 +23,7 @@ import {
 import HeroEditorModal from "@/components/dashboard/HeroEditorModal";
 import MediaManagerModal from "@/components/dashboard/MediaManagerModal";
 import { useDashboardFeedback } from "@/components/dashboard/DashboardFeedback";
+import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
 
 const menuItemStyle: CSSProperties = {
   width: "100%",
@@ -43,6 +44,7 @@ export default function BannersPage() {
   const [selectedMediaUrl, setSelectedMediaUrl] = useState<string | undefined>();
   const [menuOpen, setMenuOpen] = useState<HeroLayoutType | null>(null);
   const [carouselSheetOpen, setCarouselSheetOpen] = useState(false);
+  useHistoryBackClose(carouselSheetOpen, () => setCarouselSheetOpen(false));
   const { runSave } = useDashboardFeedback();
 
   useEffect(() => {

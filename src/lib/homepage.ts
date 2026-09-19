@@ -198,9 +198,9 @@ export const DEFAULT_HOMEPAGE: HomepageContent = {
   work: {
     label: "03 / Selected work",
     title: "Real work. Real impact.",
-    intro: "A selection of systems, products and digital solutions I have built or contributed to — solving real problems for organizations, businesses and communities.",
+    intro: "Systems, products, and digital solutions built for organizations, businesses, and communities.",
     cta: "View all projects",
-    flourish: "Data People Impact",
+    flourish: "",
     moreLabel: "More projects",
     moreTitle: "Explore more of my work.",
     moreBody: "Systems, web applications, data solutions, and ventures — each built to solve a real problem.",
@@ -448,9 +448,12 @@ export function homepageFrom(settings: SiteSettings): HomepageContent {
     work: {
       ...DEFAULT_HOMEPAGE.work,
       ...saved.work,
-      intro: saved.work?.intro || DEFAULT_HOMEPAGE.work.intro,
+      intro: (() => {
+        const raw = saved.work?.intro?.trim() || DEFAULT_HOMEPAGE.work.intro;
+        return /contributed to\s*[—–-]\s*solving/i.test(raw) ? DEFAULT_HOMEPAGE.work.intro : raw;
+      })(),
       cta: saved.work?.cta || DEFAULT_HOMEPAGE.work.cta,
-      flourish: saved.work?.flourish || DEFAULT_HOMEPAGE.work.flourish,
+      flourish: "",
       moreLabel: saved.work?.moreLabel || DEFAULT_HOMEPAGE.work.moreLabel,
       moreTitle: saved.work?.moreTitle || DEFAULT_HOMEPAGE.work.moreTitle,
       moreBody: saved.work?.moreBody || DEFAULT_HOMEPAGE.work.moreBody,

@@ -4,7 +4,7 @@ import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
 import { RiCloseLine, RiSaveLine, RiImageAddLine, RiFolderLine } from "react-icons/ri";
 import { Project } from "@/data/site-data";
 import CustomSelect from "@/components/ui/CustomSelect";
-import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
+import { useHistoryBackClose, dismissOnBackdrop } from "@/hooks/useHistoryBackClose";
 
 function projectVideos(project: Partial<Project>) {
   return project.videos?.length ? project.videos : project.video ? [project.video] : [];
@@ -123,8 +123,14 @@ export default function ProjectEditorModal({
   };
 
   return (
-    <div className="dash-modal-layer" role="dialog" aria-modal="true" aria-label={project ? "Edit project" : "Add project"}>
-      <div className="dash-modal-sheet is-project">
+    <div
+      className="dash-modal-layer"
+      role="dialog"
+      aria-modal="true"
+      aria-label={project ? "Edit project" : "Add project"}
+      onMouseDown={dismissOnBackdrop(onClose)}
+    >
+      <div className="dash-modal-sheet is-project" onMouseDown={(event) => event.stopPropagation()}>
         <div className="dash-modal-head">
           <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "var(--color-text)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <RiFolderLine style={{ color: "var(--color-primary)" }} /> {project ? "Edit Project" : "Add New Project"}
@@ -167,7 +173,8 @@ export default function ProjectEditorModal({
                       { value: "web", label: "Web Application" },
                       { value: "mobile", label: "Mobile App" },
                       { value: "ai", label: "AI / Machine Learning" },
-                      { value: "saas", label: "Company" },
+                      { value: "saas", label: "Company (legacy)" },
+                      { value: "technology", label: "Technology & Innovation" },
                       { value: "open-source", label: "Open Source" },
                       { value: "systems", label: "Systems" },
                       { value: "product", label: "Product / Platform" },

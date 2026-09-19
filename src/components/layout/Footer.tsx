@@ -416,7 +416,7 @@ export default function Footer() {
             {(showPrivacy || showSitemap) ? (
               <span className="footer-legal-links">
                 {showPrivacy ? (
-                  <Link href="/contact">Privacy</Link>
+                  <Link href="/privacy">Privacy</Link>
                 ) : null}
                 {showPrivacy && showSitemap ? <span aria-hidden="true">·</span> : null}
                 {showSitemap ? <Link href="/sitemap.xml">Sitemap</Link> : null}

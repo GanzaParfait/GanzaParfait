@@ -101,10 +101,34 @@ const FILTERS: { id: FilterId; label: string }[] = [
   { id: "other", label: "Other" },
 ];
 
+function matchesYear(item: TimelineEntry, year: string | null) {
+  if (!year || year === "All") return true;
+  const tokens = item.period.match(/\d{4}/g) || [String(item.sortYear)];
+  if (year === "NOW") return /present/i.test(item.period);
+  return tokens.includes(year) || String(item.sortYear) === year;
+}
+
 export default function ExperiencePageView() {
   const [filter, setFilter] = useState<FilterId>("all");
   const [sort, setSort] = useState<SortId>("latest");
+  const [yearFocus, setYearFocus] = useState<string | null>(null);
+  const [yearHover, setYearHover] = useState<string | null>(null);
   const all = useMemo(() => toTimeline(), []);
+
+  const yearRail = useMemo(() => {
+    const years = new Set<string>();
+    let hasNow = false;
+    for (const item of all) {
+      const tokens = item.period.match(/\d{4}/g) || [String(item.sortYear)];
+      if (/present/i.test(item.period)) hasNow = true;
+      for (const token of tokens) years.add(token);
+    }
+    const ordered = [...years].sort((a, b) => Number(a) - Number(b));
+    if (hasNow) ordered.push("NOW");
+    return ordered;
+  }, [all]);
+
+  const activeYear = yearHover || yearFocus;
 
   const counts = useMemo(() => {
     const next: Record<FilterId, number> = { all: all.length, leadership: 0, work: 0, education: 0, other: 0 };
@@ -113,9 +137,16 @@ export default function ExperiencePageView() {
   }, [all]);
 
   const visible = useMemo(() => {
-    const list = all.filter((item) => (filter === "all" ? true : item.category === filter));
+    const list = all
+      .filter((item) => (filter === "all" ? true : item.category === filter))
+      .filter((item) => matchesYear(item, yearFocus));
     return [...list].sort((a, b) => (sort === "latest" ? b.sortYear - a.sortYear : a.sortYear - b.sortYear));
-  }, [all, filter, sort]);
+  }, [all, filter, sort, yearFocus]);
+
+  const yearPreview = useMemo(() => {
+    if (!activeYear || activeYear === "All") return null;
+    return all.find((item) => matchesYear(item, activeYear)) || null;
+  }, [all, activeYear]);
 
   const orgCount = new Set(experience.map((item) => item.organization)).size;
 
@@ -131,15 +162,14 @@ export default function ExperiencePageView() {
               path — kept as a record of progress, not just positions.
             </p>
           </AnimatedSection>
-          <AnimatedSection delay={80} className="experience-hero-aside" aria-hidden="true">
+          <AnimatedSection delay={80} className="experience-hero-aside" aria-label="Experience principles">
             <p className="experience-hero-aside-line">
-              <span>People</span>
-              <span className="experience-hero-aside-dot" aria-hidden="true">·</span>
-              <span>Systems</span>
-              <span className="experience-hero-aside-dot" aria-hidden="true">·</span>
-              <span>Ideas</span>
-              <span className="experience-hero-aside-dot" aria-hidden="true">·</span>
-              <span>Impact</span>
+              {["Ideas", "People", "Systems", "Impact"].map((item, index) => (
+                <span key={item}>
+                  {index > 0 ? <i className="experience-hero-aside-dot" aria-hidden="true">·</i> : null}
+                  <strong>{item}</strong>
+                </span>
+              ))}
             </p>
             <p className="experience-hero-aside-note">A record of progress, not just positions.</p>
           </AnimatedSection>
@@ -147,31 +177,90 @@ export default function ExperiencePageView() {
       </section>
 
       <section className="experience-toolbar-section" data-page-section aria-label="Filter experience">
-        <div className="container experience-toolbar">
-          <div className="experience-filters" role="tablist" aria-label="Experience categories">
-            {FILTERS.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                role="tab"
-                aria-selected={filter === item.id}
-                className={filter === item.id ? "is-on" : undefined}
-                onClick={() => setFilter(item.id)}
-              >
-                {item.label} ({counts[item.id]})
-              </button>
-            ))}
+        <div className="container experience-toolbar-stack">
+          {yearRail.length > 1 ? (
+            <div
+              className="journey-rail experience-year-rail"
+              role="group"
+              aria-label="Timeline years"
+              onMouseLeave={() => setYearHover(null)}
+            >
+              <div className="journey-rail-row">
+                <p className="journey-rail-label">Years</p>
+                <ul className="journey-rail-years">
+                  {yearRail.map((year) => {
+                    const preview = all.find((entry) => matchesYear(entry, year));
+                    const selected = yearFocus === year || yearHover === year;
+                    return (
+                      <li key={year}>
+                        <button
+                          type="button"
+                          className={selected ? "is-on" : undefined}
+                          aria-pressed={yearFocus === year}
+                          aria-label={
+                            preview ? `${year}: ${preview.title} at ${preview.organization}` : `Show ${year}`
+                          }
+                          onClick={() => setYearFocus((current) => (current === year ? null : year))}
+                          onMouseEnter={() => {
+                            if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+                              setYearHover(year);
+                            }
+                          }}
+                          onFocus={() => setYearHover(year)}
+                          onBlur={() => setYearHover(null)}
+                        >
+                          {year}
+                        </button>
+                      </li>
+                    );
+                  })}
+                  <li>
+                    <button
+                      type="button"
+                      className={yearFocus === null ? "is-on" : undefined}
+                      aria-pressed={yearFocus === null}
+                      onClick={() => setYearFocus(null)}
+                    >
+                      All
+                    </button>
+                  </li>
+                </ul>
+              </div>
+              {yearPreview ? (
+                <p className="journey-rail-preview">
+                  <strong>{yearPreview.title}</strong>
+                  <em>{yearPreview.organization}</em>
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+
+          <div className="experience-toolbar">
+            <div className="experience-filters" role="tablist" aria-label="Experience categories">
+              {FILTERS.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={filter === item.id}
+                  className={filter === item.id ? "is-on" : undefined}
+                  onClick={() => setFilter(item.id)}
+                >
+                  {item.label} ({counts[item.id]})
+                </button>
+              ))}
+            </div>
+            <CustomSelect
+              value={sort}
+              aria-label="Sort experience"
+              options={[
+                { value: "latest", label: "Latest first" },
+                { value: "oldest", label: "Oldest first" },
+              ]}
+              onChange={(value) => setSort(value as SortId)}
+              className="dash-cselect experience-sort"
+            />
           </div>
-          <CustomSelect
-            value={sort}
-            aria-label="Sort experience"
-            options={[
-              { value: "latest", label: "Latest first" },
-              { value: "oldest", label: "Oldest first" },
-            ]}
-            onChange={(value) => setSort(value as SortId)}
-            className="dash-cselect experience-sort"
-          />
         </div>
       </section>
 

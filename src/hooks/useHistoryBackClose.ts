@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef } from "react";
+import { useEffect, useId, useRef, type MouseEvent } from "react";
 
 const STATE_KEY = "__pp_modal";
 
@@ -13,9 +13,10 @@ const stack: StackEntry[] = [];
 let listening = false;
 let ignorePops = 0;
 
-function ensurePopListener() {
+function ensureListeners() {
   if (listening || typeof window === "undefined") return;
   listening = true;
+
   window.addEventListener("popstate", () => {
     if (ignorePops > 0) {
       ignorePops -= 1;
@@ -24,10 +25,18 @@ function ensurePopListener() {
     const top = stack.pop();
     top?.close();
   });
+
+  // Escape closes only the topmost registered overlay (nested modals stay open underneath).
+  window.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape" || stack.length === 0) return;
+    if (event.defaultPrevented) return;
+    event.preventDefault();
+    stack[stack.length - 1]?.close();
+  });
 }
 
 /**
- * When a modal/sheet is open, phone/browser Back closes it instead of leaving the page.
+ * When a modal/sheet is open, phone/browser Back and Escape close it instead of leaving the page.
  * Supports nested modals via a shared history stack.
  */
 export function useHistoryBackClose(open: boolean, onClose: () => void) {
@@ -38,7 +47,7 @@ export function useHistoryBackClose(open: boolean, onClose: () => void) {
   useEffect(() => {
     if (!open || typeof window === "undefined") return;
 
-    ensurePopListener();
+    ensureListeners();
     const entry: StackEntry = {
       id,
       close: () => onCloseRef.current(),
@@ -57,4 +66,11 @@ export function useHistoryBackClose(open: boolean, onClose: () => void) {
       }
     };
   }, [open, id]);
+}
+
+/** Close when the dimmed backdrop itself is pressed (not the sheet). */
+export function dismissOnBackdrop<T extends HTMLElement>(onClose: () => void) {
+  return (event: MouseEvent<T>) => {
+    if (event.target === event.currentTarget) onClose();
+  };
 }

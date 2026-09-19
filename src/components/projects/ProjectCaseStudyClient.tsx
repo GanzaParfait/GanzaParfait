@@ -60,6 +60,7 @@ const CATEGORY: Record<string, string> = {
   mobile: "Mobile",
   ai: "AI-enabled",
   saas: "Company",
+  technology: "Technology & Innovation",
   "open-source": "Open source",
   systems: "Systems",
   product: "Product",
@@ -149,14 +150,18 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
   }, [cover, project.pinnedMedia, project.screenshotCaptions, project.screenshots, project.video, project.videos]);
 
   const tabs = [
-    { id: "overview", label: "Overview", show: Boolean(project.longDescription || project.description || project.context || project.highlights?.length) },
-    { id: "features", label: "Features", show: Boolean(project.features?.length || project.solution) },
-    { id: "role", label: "My Role", show: Boolean(project.myRole || project.whatIBuilt) },
-    { id: "stack", label: "Tech Stack", show: Boolean(project.technologies?.length) },
-    { id: "results", label: "Results", show: Boolean(project.outcome || project.result) },
-    { id: "media", label: "Media", show: mediaItems.length > 0 },
-    { id: "challenges", label: "Challenges", show: Boolean(project.challenge || project.problem) },
-    { id: "learned", label: "What I Learned", show: Boolean(project.learned) },
+    {
+      id: "overview",
+      label: "Overview",
+      show: Boolean(project.longDescription || project.description || project.context || project.highlights?.length),
+    },
+    { id: "challenges", label: "Challenge", show: Boolean(project.challenge || project.problem) },
+    { id: "role", label: "My role", show: Boolean(project.myRole || project.whatIBuilt) },
+    { id: "features", label: "Process", show: Boolean(project.features?.length || project.solution) },
+    { id: "stack", label: "Architecture", show: Boolean(project.technologies?.length || project.capabilities?.length || project.websiteTechnologies?.length) },
+    { id: "media", label: "Screens", show: mediaItems.length > 0 },
+    { id: "results", label: "Outcome", show: Boolean(project.outcome || project.result) },
+    { id: "learned", label: "Lessons", show: Boolean(project.learned) },
   ].filter((tab) => tab.show);
   const [tab, setTab] = useState(tabs[0]?.id || "overview");
   const [shotStart, setShotStart] = useState(0);
@@ -299,10 +304,16 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
               {tab === "overview" && (
                 <>
                   <h2>Project overview</h2>
-                  <p>{project.longDescription || project.context || project.description}</p>
+                  <p>{project.longDescription || project.description}</p>
+                  {project.context ? (
+                    <div className="case-context">
+                      <h3>Context</h3>
+                      <p>{project.context}</p>
+                    </div>
+                  ) : null}
                   {project.highlights?.length ? (
                     <div className="case-highlights">
-                      <h3>Key highlights</h3>
+                      <h3>Key decisions</h3>
                       <ul>
                         {project.highlights.map((item, highlightIndex) => {
                           const Icon = HIGHLIGHT_ICONS[highlightIndex % HIGHLIGHT_ICONS.length];
@@ -322,7 +333,8 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
               )}
               {tab === "features" && (
                 <>
-                  <h2>Features</h2>
+                  <h2>Process &amp; solution</h2>
+                  {project.solution ? <p>{project.solution}</p> : null}
                   {project.features?.length ? (
                     <ul className="case-list">
                       {project.features.map((item, featureIndex) => {
@@ -337,49 +349,59 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
                         );
                       })}
                     </ul>
-                  ) : (
-                    <p>{project.solution}</p>
-                  )}
+                  ) : null}
                 </>
               )}
               {tab === "role" && (
                 <>
-                  <h2>My role</h2>
+                  <h2>My responsibility</h2>
                   {project.myRole ? <p className="case-role-title">{project.myRole}</p> : null}
                   {project.whatIBuilt ? <p>{project.whatIBuilt}</p> : null}
                 </>
               )}
               {tab === "stack" && (
                 <>
-                  <h2>Tech stack</h2>
+                  {project.capabilities?.length ? (
+                    <>
+                      <h2>Capabilities</h2>
+                      <ul className="case-tech">
+                        {project.capabilities.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </>
+                  ) : null}
+                  <h2>{project.capabilities?.length ? "Website technology" : "Architecture & technology"}</h2>
                   <ul className="case-tech">
-                    {project.technologies.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
+                    {(project.websiteTechnologies?.length ? project.websiteTechnologies : project.technologies).map(
+                      (item) => (
+                        <li key={item}>{item}</li>
+                      ),
+                    )}
                   </ul>
                 </>
               )}
               {tab === "results" && (
                 <>
-                  <h2>Results</h2>
+                  <h2>Outcome</h2>
                   <p>{project.outcome || project.result}</p>
                 </>
               )}
               {tab === "media" && mediaItems.length > 0 && (
                 <>
-                  <h2>Project media</h2>
+                  <h2>Screens &amp; media</h2>
                   <p className="case-gallery-note">Screenshots and videos for this case study are shown below.</p>
                 </>
               )}
               {tab === "challenges" && (
                 <>
-                  <h2>Challenges</h2>
+                  <h2>Challenge</h2>
                   <p>{project.challenge || project.problem}</p>
                 </>
               )}
               {tab === "learned" && (
                 <>
-                  <h2>What I learned</h2>
+                  <h2>Lessons</h2>
                   <p>{project.learned}</p>
                 </>
               )}

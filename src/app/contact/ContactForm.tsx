@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, type ReactNode } from "react";
+import Link from "next/link";
 import {
   RiMailLine,
   RiMapPinLine,
@@ -422,7 +423,8 @@ export default function ContactPageClient({
 
                     <p className="contact-safe">
                       <RiLockLine size={12} aria-hidden />
-                      {page.form.privacyNote}
+                      {page.form.privacyNote}{" "}
+                      <Link href="/privacy">Privacy</Link>
                     </p>
                   </form>
                 </div>

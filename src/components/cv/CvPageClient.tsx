@@ -14,7 +14,7 @@ import {
   RiCloseLine,
 } from "react-icons/ri";
 import CvAccessDialog from "@/components/cv/CvAccessDialog";
-import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
+import { useHistoryBackClose, dismissOnBackdrop } from "@/hooks/useHistoryBackClose";
 import type { SiteSettings } from "@/lib/supabase";
 import {
   CV_TEMPLATE_OPTIONS,
@@ -121,8 +121,14 @@ function FullPreview({
   }, []);
 
   return (
-    <div className="cv-preview-layer" role="dialog" aria-modal="true" aria-label={`${label} preview`}>
-      <div className="cv-preview-dialog">
+    <div
+      className="cv-preview-layer"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${label} preview`}
+      onMouseDown={dismissOnBackdrop(onClose)}
+    >
+      <div className="cv-preview-dialog" onMouseDown={(event) => event.stopPropagation()}>
         <div className="cv-preview-dialog-bar">
           <div>
             <p className="cv-preview-dialog-kicker">Preview</p>

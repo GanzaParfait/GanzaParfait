@@ -9,7 +9,7 @@ import { PORTRAIT_PATH } from "@/lib/schema";
 import HeroPreviewFrame from "@/components/hero/HeroPreviewFrame";
 import { useDashboardFeedback } from "@/components/dashboard/DashboardFeedback";
 import SocialMultiSelect from "@/components/ui/SocialMultiSelect";
-import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
+import { useHistoryBackClose, dismissOnBackdrop } from "@/hooks/useHistoryBackClose";
 
 interface HeroEditorModalProps {
   isOpen: boolean;
@@ -111,10 +111,17 @@ export default function HeroEditorModal({
   };
 
   return (
-    <div className="dash-modal-layer" role="dialog" aria-modal="true" aria-label="Live layout editor">
+    <div
+      className="dash-modal-layer"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Live layout editor"
+      onMouseDown={dismissOnBackdrop(onClose)}
+    >
       <form
         onSubmit={handleSubmit}
         className="dash-modal-sheet is-hero"
+        onMouseDown={(event) => event.stopPropagation()}
       >
         <div className="dash-modal-head">
           <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "0.75rem", width: "100%" }}>
