@@ -26,7 +26,7 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
-      {isHome ? <SiteIntroOverlay /> : null}
+      <SiteIntroOverlay />
       <Navbar />
       <main
         id="main-content"

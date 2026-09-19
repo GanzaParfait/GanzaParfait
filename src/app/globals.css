@@ -1169,7 +1169,8 @@ code, pre {
   flex: none;
   display: grid;
   place-items: center;
-  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+  background: #fff;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 12%, var(--color-border));
 }
 .manifesto-chip-mark img {
   width: 100%;
@@ -1178,9 +1179,10 @@ code, pre {
   object-position: center;
   display: block;
 }
-.manifesto-chip .logo-dark { display: none; }
-[data-theme="dark"] .manifesto-chip .logo-light { display: none; }
-[data-theme="dark"] .manifesto-chip .logo-dark { display: block; }
+[data-theme="dark"] .manifesto-chip-mark {
+  background: #fff;
+  border-color: rgba(186, 210, 255, 0.18);
+}
 [data-theme="dark"] .manifesto-card,
 [data-theme="dark"] .manifesto-chip {
   box-shadow: none;

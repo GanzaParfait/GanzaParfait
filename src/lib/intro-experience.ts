@@ -129,7 +129,11 @@ export function shouldShowIntro(
 ): boolean {
   if (opts?.force) return true;
   if (!config.enabled) return false;
-  if (opts?.pathname && opts.pathname !== "/") return false;
+
+  // Skip admin / utility shells if pathname is passed
+  if (opts?.pathname?.startsWith("/dashboard") || opts?.pathname?.startsWith("/email-preview")) {
+    return false;
+  }
 
   const greetings = activeIntroGreetings(config);
   if (!greetings.length) return false;

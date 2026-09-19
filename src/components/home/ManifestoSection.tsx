@@ -26,8 +26,12 @@ export default function ManifestoSection({ manifesto, embedded = false }: { mani
                   ))}
                 </span>
                 <span className="manifesto-chip-mark" aria-hidden="true">
-                  <img src="/brand/icons/icon-blue.png" alt="" className="logo-light" />
-                  <img src="/brand/icons/icon-white.png" alt="" className="logo-dark" />
+                  <img
+                    src="/brand/icons/favicon/web-app-manifest-192x192.png"
+                    alt=""
+                    width={192}
+                    height={192}
+                  />
                 </span>
               </p>
             ) : null}

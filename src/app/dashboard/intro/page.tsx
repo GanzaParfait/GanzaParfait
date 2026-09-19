@@ -170,7 +170,7 @@ export default function DashboardIntroPage() {
           </p>
           <h1 style={{ fontSize: "1.2rem", fontWeight: 800, color: "#0b192c", margin: "0.2rem 0 0" }}>Intro Experience</h1>
           <p style={{ fontSize: "0.8rem", color: "#64748b", maxWidth: "42rem", margin: "0.35rem 0 0" }}>
-            Short multilingual greeting overlay on first homepage visit. Homepage loads behind it — this is not a loading screen.
+            Short multilingual greeting overlay on a visitor’s first site entry — including deep links from search or shares. The page loads behind it; this is not a loading screen.
           </p>
         </div>
         <div className="dash-page-head-actions">
@@ -196,7 +196,7 @@ export default function DashboardIntroPage() {
                 checked={config.enabled}
                 onChange={(e) => patch({ enabled: e.target.checked })}
               />
-              Enabled on homepage
+              Enabled on public pages
             </label>
 
             <p style={{ fontSize: "0.75rem", fontWeight: 800, color: "#334155", margin: "0 0 0.4rem" }}>Show</p>
@@ -388,7 +388,7 @@ export default function DashboardIntroPage() {
         <aside style={{ ...panelStyle, alignSelf: "start" }} className="dash-split-aside">
           <h2 style={{ fontSize: "0.85rem", fontWeight: 800, margin: "0 0 0.55rem" }}>Notes</h2>
           <ul style={{ margin: 0, paddingLeft: "1.1rem", fontSize: "0.78rem", color: "#64748b", lineHeight: 1.55 }}>
-            <li>Only the homepage shows the intro. Deep links skip it.</li>
+            <li>Shows on any public entry (/about, /projects, shared links) — not only the homepage.</li>
             <li>Preview never sets the visitor first-visit flag.</li>
             <li>Arabic and other RTL locales use automatic direction when set to Auto.</li>
             <li>Max greetings caps how many enabled lines play in one visit.</li>
