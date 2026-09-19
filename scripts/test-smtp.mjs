@@ -213,7 +213,7 @@ if (failed) {
 }
 console.log("All checked transports look good.");
 if (!doSend) console.log("Re-run with --send --to you@example.com to deliver a real test message.");
-console.log("Subscribe welcome mail sends from hello@ with lean transactional HTML.");
+console.log("Subscribe welcome mail sends from hello@ with full branded HTML (matches dashboard preview).");
 
 // SPF must authorize premiumNNN.web-hosting.com — forwarding-only SPF causes silent Gmail drops.
 try {

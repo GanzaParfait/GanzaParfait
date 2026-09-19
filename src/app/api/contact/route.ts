@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     if (!message || message.length < 10) {
       return NextResponse.json({ error: "Please write a short message (at least 10 characters)." }, { status: 400 });
     }
-    if (message.length > 1000) {
+    if (message.length > 4000) {
       return NextResponse.json({ error: "Message is too long." }, { status: 400 });
     }
 
@@ -56,6 +56,23 @@ export async function POST(request: Request) {
       const relatedId = data?.id;
       const primaryTo = (site.contactEmail || "").trim() || mailboxes.contact() || mailboxes.hello();
 
+      // Visitor confirmation first — then inbox notify (avoids shared-host SMTP pile-ups).
+      try {
+        const ack = await contactAckMail({ name, email, subject: reason || undefined }, site);
+        await sendMail({
+          ...ack,
+          log: {
+            kind: "contact_ack",
+            relatedType: "contact_message",
+            relatedId,
+          },
+        });
+      } catch (mailError) {
+        console.error("Contact acknowledgment mail failed", mailError);
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+
       try {
         const notify = await contactNotifyMail(
           {
@@ -77,20 +94,6 @@ export async function POST(request: Request) {
         });
       } catch (mailError) {
         console.error("Contact notify mail failed", mailError);
-      }
-
-      try {
-        const ack = await contactAckMail({ name, email, subject: reason || undefined }, site);
-        await sendMail({
-          ...ack,
-          log: {
-            kind: "contact_ack",
-            relatedType: "contact_message",
-            relatedId,
-          },
-        });
-      } catch (mailError) {
-        console.error("Contact acknowledgment mail failed", mailError);
       }
     });
 

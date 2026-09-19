@@ -5,7 +5,6 @@ import {
   brandEmailText,
   contactEmailContent,
   emailBrandFromSettings,
-  leanTransactionalHtml,
   newsletterEmailContent,
   welcomeEmailContent,
 } from "@/lib/email-template";
@@ -136,8 +135,9 @@ function smtpTransport(user: string, pass: string) {
     port,
     secure,
     auth: { user, pass },
-    connectionTimeout: 20_000,
-    greetingTimeout: 20_000,
+    connectionTimeout: 45_000,
+    greetingTimeout: 30_000,
+    socketTimeout: 60_000,
     tls: {
       servername,
       rejectUnauthorized: process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== "false",
@@ -263,7 +263,7 @@ export async function contactAckMail(
     replyTo: mailboxes.replyTo(),
     subject: `Thanks for writing — ${site.siteTitle || "Prince Parfait GANZA"}`,
     text: brandEmailText(content, site),
-    html: leanTransactionalHtml(content, site),
+    html: brandEmailHtml(content, site),
   } satisfies OutboundMail;
 }
 
@@ -281,8 +281,7 @@ export async function subscriberThanksMail(to: string, settings?: SiteSettings) 
     replyTo: mailboxes.replyTo(),
     subject: `${content.title.replace(/!$/, "")} — ${site.siteTitle || "Prince Parfait GANZA"}`,
     text: brandEmailText(content, withUnsub),
-    // Lean HTML until SPF includes spf.web-hosting.com (full brand template is newsletter-heavy).
-    html: leanTransactionalHtml(content, withUnsub),
+    html: brandEmailHtml(content, withUnsub),
     headers: {
       "List-Unsubscribe": `<${unsub}>`,
       "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",

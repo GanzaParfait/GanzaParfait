@@ -25,11 +25,8 @@ const SOCIAL_ICON_FILES: Record<string, string> = {
 };
 
 function resolveOrigin() {
-  // Always prefer the public site URL in outbound mail. Localhost image/CTA
-  // links are a common reason Gmail accepts SMTP then hides or junks the message.
-  const configured = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "");
-  if (configured) return configured;
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL.replace(/\/+$/, "")}`;
+  // Always the public site — never localhost / preview hosts — so logos and
+  // CTAs resolve in Gmail and match /dashboard/settings#email.
   return siteUrl();
 }
 
@@ -71,6 +68,8 @@ export type EmailBrandContext = {
   portraitUrl: string;
   logoUrl: string;
   logoLightUrl: string;
+  /** Square mark for clients that surface a brand avatar from body images. */
+  logoMarkUrl: string;
   bannerKicker: string;
   bannerHeadline: string;
   navLinks: { label: string; href: string }[];
@@ -162,6 +161,7 @@ export function emailBrandFromSettings(settings?: Partial<SiteSettings> | null):
     portraitUrl: abs(origin, s.emailPortraitUrl || s.heroImageUrl || PORTRAIT_PATH),
     logoUrl: abs(origin, "/brand/logos/logo-horizontal-blue.png"),
     logoLightUrl: abs(origin, "/brand/logos/logo-horizontal-light.png"),
+    logoMarkUrl: abs(origin, "/brand/logos/email-avatar-256.png"),
     bannerKicker: s.emailBannerKicker || "Turning ideas into",
     bannerHeadline: s.emailBannerHeadline || "Real solutions",
     navLinks: parseNavLinks(s.emailHeaderNav || DEFAULT_SETTINGS.emailHeaderNav, origin),
@@ -305,7 +305,7 @@ function renderHeader(brand: EmailBrandContext) {
     </table>`;
   }
 
-  // brand_tagline — logo left; domain + tagline flush right
+  // brand_tagline — logo left; domain + tagline flush right (matches /dashboard/settings#email)
   return `${accent}
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top:14px"><tr>
     <td class="email-stack" style="vertical-align:middle;padding-bottom:8px">${fullLogo}${roles}</td>
@@ -335,10 +335,12 @@ function renderSignature(brand: EmailBrandContext) {
   const quote = brand.signatureQuote
     ? `<div style="margin-top:6px;font-size:12px;color:#64748B;font-style:italic;line-height:1.45">“${escapeHtml(brand.signatureQuote)}”</div>`
     : "";
+  // Prefer portrait; fall back to square brand mark so the message never looks “empty”.
+  const avatar = brand.portraitUrl || brand.logoMarkUrl;
   return `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top:28px;border-top:1px solid #E2E8F0;padding-top:22px">
     <tr>
       <td style="width:56px;vertical-align:top">
-        <img src="${escapeAttr(brand.portraitUrl)}" width="48" height="48" alt="" style="display:block;border-radius:999px;object-fit:cover;border:0" />
+        <img src="${escapeAttr(avatar)}" width="48" height="48" alt="" style="display:block;border-radius:999px;object-fit:cover;border:0" />
       </td>
       <td style="vertical-align:top;padding-left:12px">
         <div style="font-size:14px;font-weight:800;color:#0F172A">${escapeHtml(brand.title)}</div>

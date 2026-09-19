@@ -4555,24 +4555,9 @@ code, pre {
     gap: 0;
   }
 
-  .hero-centered:not(.hero-layout-preview) .hero-centered-orbit {
-    top: 28%;
-    width: min(22rem, 62vw);
-    height: min(22rem, 62vw);
-  }
-
-  .hero-centered:not(.hero-layout-preview) .hero-centered-glow {
-    top: 26%;
-    width: min(24rem, 68vw);
-    height: min(24rem, 68vw);
-  }
-
-  .hero-centered:not(.hero-layout-preview) .hero-centered-floor {
-    display: none;
-  }
-
+  /* Tablet (portrait iPad ~768–1100): keep a centered figure — not full-bleed crop */
   .hero-centered:not(.hero-layout-preview) .hero-centered-figure {
-    width: min(22rem, 58vw);
+    width: min(22rem, 52vw);
     max-width: 100%;
     flex: none;
     height: auto;
@@ -4587,11 +4572,27 @@ code, pre {
     transform: none;
     width: 100%;
     height: auto;
-    max-height: min(42vh, 22rem);
+    max-height: min(46vh, 24rem);
     aspect-ratio: 3 / 4;
     object-fit: contain;
     object-position: bottom center;
     border-radius: 0;
+  }
+
+  .hero-centered:not(.hero-layout-preview) .hero-centered-orbit {
+    top: 28%;
+    width: min(22rem, 58vw);
+    height: min(22rem, 58vw);
+  }
+
+  .hero-centered:not(.hero-layout-preview) .hero-centered-glow {
+    top: 26%;
+    width: min(24rem, 64vw);
+    height: min(24rem, 64vw);
+  }
+
+  .hero-centered:not(.hero-layout-preview) .hero-centered-floor {
+    display: none;
   }
 
   .hero-centered:not(.hero-layout-preview) .hero-centered-caption {
@@ -4617,13 +4618,13 @@ code, pre {
     left: auto;
     transform: none;
     width: 100%;
-    max-width: 44rem;
+    max-width: 40rem;
     margin: 0 auto;
-    padding: 1rem 1.25rem 2.75rem;
+    padding: 1rem 1.5rem 2.75rem;
     display: grid;
-    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-    gap: 1.15rem 1.5rem;
-    align-items: start;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1.25rem 1.75rem;
+    align-items: stretch;
     pointer-events: auto;
   }
 
@@ -4850,26 +4851,32 @@ code, pre {
 
 @media (max-width: 767px) {
   .hero-centered:not(.hero-layout-preview) .hero-centered-figure {
-    width: min(18rem, 78vw);
+    width: 100%;
     min-height: 0;
   }
 
   .hero-centered:not(.hero-layout-preview) .hero-centered-photo {
-    max-height: min(48vh, 22rem);
-    object-fit: contain;
-    object-position: bottom center;
+    max-height: min(52vh, 28rem);
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    object-position: center 16%;
   }
 
   .hero-centered:not(.hero-layout-preview) .hero-centered-orbit {
-    top: 26%;
-    width: min(18rem, 70vw);
-    height: min(18rem, 70vw);
+    top: 24%;
+    width: min(20rem, 88vw);
+    height: min(20rem, 88vw);
   }
 
   .hero-centered:not(.hero-layout-preview) .hero-centered-glow {
-    top: 24%;
-    width: min(20rem, 74vw);
-    height: min(20rem, 74vw);
+    top: 22%;
+    width: min(22rem, 92vw);
+    height: min(22rem, 92vw);
+  }
+
+  .hero-centered:not(.hero-layout-preview) .hero-centered-caption {
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 
   .hero-centered:not(.hero-layout-preview) .hero-centered-info {
@@ -9934,13 +9941,15 @@ a.contact-card:hover {
   font: inherit;
   font-size: 0.88rem;
   font-weight: 500;
-  line-height: 1.35;
+  line-height: 1.45;
   outline: none;
   transition: border-color 0.18s ease, box-shadow 0.18s ease;
 }
 .contact-float textarea {
-  min-height: 7.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
   resize: vertical;
+  min-height: 8.5rem;
   padding-top: 1rem;
   padding-bottom: 1.35rem;
 }
@@ -9994,10 +10003,14 @@ a.contact-card:hover {
   position: absolute;
   right: 0.7rem;
   bottom: 0.55rem;
+  z-index: 2;
+  min-width: 4.5rem;
+  text-align: right;
   font-size: 0.66rem;
   font-weight: 650;
   color: var(--color-text-3);
   font-variant-numeric: tabular-nums;
+  pointer-events: none;
 }
 .contact-submit {
   width: 100%;
@@ -10347,7 +10360,7 @@ a.contact-card:hover {
   }
 }
 
-@media (max-width: 980px) {
+@media (max-width: 1100px) {
   .contact-page {
     display: flex;
     flex-direction: column;
@@ -10365,8 +10378,7 @@ a.contact-card:hover {
   .contact-intro-grid,
   .contact-converse-shell,
   .contact-faq-grid,
-  .contact-form-row,
-  .contact-cards {
+  .contact-form-row {
     grid-template-columns: 1fr;
   }
   .contact-converse-shell {
@@ -10379,6 +10391,9 @@ a.contact-card:hover {
   .contact-media-panel {
     min-height: 0;
     height: auto;
+  }
+  .contact-converse-shell > * {
+    min-height: 0;
   }
   .contact-success {
     min-height: 22rem;

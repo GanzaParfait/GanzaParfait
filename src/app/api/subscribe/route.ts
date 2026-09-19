@@ -33,6 +33,10 @@ export async function POST(request: Request) {
     let mailError: string | undefined;
     if (shouldThanks) {
       try {
+        // Contact-page confirm often races the contact_ack SMTP send on shared hosting.
+        if (confirmOnly) {
+          await new Promise((resolve) => setTimeout(resolve, 1500));
+        }
         const mail = await subscriberThanksMail(email);
         await sendMail({
           ...mail,

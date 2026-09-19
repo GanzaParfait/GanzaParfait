@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode, type ClipboardEvent } from "react";
 import Link from "next/link";
 import {
   RiMailLine,
@@ -25,6 +25,7 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { setting } from "@/lib/hero";
 import { resolvedSocials, socialIcon, socialsFor } from "@/lib/socials";
 import { contactPageFrom, type ContactPageContent, type ContactTopicIcon } from "@/lib/contact-page";
+import { plainTextFromClipboard } from "@/lib/paste-plain-text";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import CustomSelect from "@/components/ui/CustomSelect";
 
@@ -98,7 +99,7 @@ export default function ContactPageClient({
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [subscribeOffer, setSubscribeOffer] = useState(false);
   const [subscribeEmail, setSubscribeEmail] = useState("");
-  const [subscribeState, setSubscribeState] = useState<"idle" | "loading" | "done" | "error">("idle");
+  const [subscribeState, setSubscribeState] = useState<"idle" | "loading" | "done" | "error" | "done-no-mail">("idle");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -106,12 +107,38 @@ export default function ContactPageClient({
     message: "",
   });
 
+  const MESSAGE_MAX = 4000;
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     if (formState === "error") {
       setFormState("idle");
       setErrorMessage("");
     }
+  };
+
+  const handleMessagePaste = (event: ClipboardEvent<HTMLTextAreaElement>) => {
+    event.preventDefault();
+    const text = plainTextFromClipboard(event.clipboardData);
+    if (!text) return;
+    const el = event.currentTarget;
+    const start = el.selectionStart ?? el.value.length;
+    const end = el.selectionEnd ?? el.value.length;
+    const next = `${el.value.slice(0, start)}${text}${el.value.slice(end)}`.slice(0, MESSAGE_MAX);
+    setFormData((prev) => ({ ...prev, message: next }));
+    if (formState === "error") {
+      setFormState("idle");
+      setErrorMessage("");
+    }
+    requestAnimationFrame(() => {
+      try {
+        const pos = Math.min(start + text.length, next.length);
+        el.focus();
+        el.setSelectionRange(pos, pos);
+      } catch {
+        /* ignore selection errors while extensions mutate the field */
+      }
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -174,8 +201,12 @@ export default function ContactPageClient({
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(payload.error || "Could not subscribe");
-      setSubscribeState("done");
       setSubscribeOffer(false);
+      if (payload.mailError || payload.emailed === false) {
+        setSubscribeState("done-no-mail");
+      } else {
+        setSubscribeState("done");
+      }
     } catch {
       setSubscribeState("error");
     }
@@ -299,7 +330,10 @@ export default function ContactPageClient({
                     <RiCheckLine size={26} />
                   </div>
                   <h3>Message sent</h3>
-                  <p>Thanks for reaching out. I&apos;ll get back to you soon.</p>
+                  <p>
+                    Thanks for reaching out. I&apos;ll get back to you soon.
+                    {" "}Watch for a confirmation note at your email (and spam if needed).
+                  </p>
                   {subscribeOffer ? (
                     <div className="contact-subscribe-offer">
                       <p>
@@ -321,7 +355,14 @@ export default function ContactPageClient({
                       {subscribeState === "error" ? <small>Could not confirm subscription. Try again.</small> : null}
                     </div>
                   ) : null}
-                  {subscribeState === "done" ? <p className="contact-subscribe-done">You&apos;re subscribed. Welcome.</p> : null}
+                  {subscribeState === "done" ? (
+                    <p className="contact-subscribe-done">You&apos;re subscribed. Welcome — check your inbox for a note.</p>
+                  ) : null}
+                  {subscribeState === "done-no-mail" ? (
+                    <p className="contact-subscribe-done">
+                      You&apos;re on the list. The welcome email couldn&apos;t send just now — you&apos;ll still hear from me when there&apos;s an update.
+                    </p>
+                  ) : null}
                   <button
                     type="button"
                     className="btn btn-outline btn-sm"
@@ -406,15 +447,17 @@ export default function ContactPageClient({
                       <textarea
                         id="contact-message"
                         name="message"
-                        rows={5}
-                        maxLength={1000}
+                        rows={6}
+                        maxLength={MESSAGE_MAX}
                         value={formData.message}
                         onChange={handleChange}
+                        onPaste={handleMessagePaste}
                         required
                         placeholder="Tell me about your project, question, or idea..."
                         disabled={formState === "loading"}
+                        style={{ whiteSpace: "pre-wrap" }}
                       />
-                      <span className="contact-count">{formData.message.length}/1000</span>
+                      <span className="contact-count">{formData.message.length}/{MESSAGE_MAX}</span>
                     </FloatField>
 
                     <button type="submit" className="btn btn-primary contact-submit" disabled={formState === "loading"} aria-busy={formState === "loading"}>
