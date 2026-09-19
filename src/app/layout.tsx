@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Caveat, Outfit } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import LayoutShell from "@/components/layout/LayoutShell";
 import { SiteSettingsProvider } from "@/components/providers/SiteSettingsProvider";
@@ -116,14 +117,15 @@ export default async function RootLayout({
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=20260919" />
         <meta name="msapplication-TileColor" content="#0E52A8" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
-        <script
+      </head>
+      <body className={`${outfit.variable} ${caveat.variable} antialiased`} suppressHydrationWarning>
+        <Script
           id="theme-init"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var d=localStorage.getItem('theme')==='dark';var c='#0E52A8';document.documentElement.setAttribute('data-theme',d?'dark':'light');document.documentElement.style.colorScheme=d?'dark':'light';var m=document.querySelectorAll('meta[name="theme-color"]');if(!m.length){var n=document.createElement('meta');n.setAttribute('name','theme-color');n.setAttribute('content',c);document.head.appendChild(n);}else{m.forEach(function(el){el.setAttribute('content',c);});}}catch(e){}})();`,
           }}
         />
-      </head>
-      <body className={`${outfit.variable} ${caveat.variable} antialiased`} suppressHydrationWarning>
         <SiteSettingsProvider initial={settings}>
           <LayoutShell>{children}</LayoutShell>
         </SiteSettingsProvider>

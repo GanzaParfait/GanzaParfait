@@ -164,7 +164,7 @@ Intentionally **not** done (do not re-open without an explicit request):
 
 - Do not rebuild from scratch without a real architectural need.  
 - Do not turn the portfolio into a generic SaaS landing page or Lerony.com.  
-- Do not erase the software engineering background.  
+- Do not erase the software engineering background.
 - Do not fabricate clients, awards, revenue, partnerships, or impact.  
 - Do not blind-replace every “Software Engineer” string.  
 - Do not edit `.next`, dependency caches, or commit secrets.  
