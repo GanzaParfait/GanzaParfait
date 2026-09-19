@@ -81,10 +81,10 @@ export const metadata: Metadata = {
     images: [OG_IMAGE_PATH],
   },
   icons: {
-    apple: [{ url: "/apple-touch-icon.png?v=20260918", sizes: "180x180" }],
-    other: [{ rel: "manifest", url: "/site.webmanifest?v=20260918" }],
+    apple: [{ url: "/apple-touch-icon.png?v=20260919", sizes: "180x180" }],
+    other: [{ rel: "manifest", url: "/site.webmanifest?v=20260919" }],
   },
-  manifest: "/site.webmanifest?v=20260918",
+  manifest: "/site.webmanifest?v=20260919",
   ...(googleVerification || bingVerification
     ? {
         verification: {
@@ -100,8 +100,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#050816" },
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: light)", color: "#0E52A8" },
+    { media: "(prefers-color-scheme: dark)", color: "#0E52A8" },
   ],
 };
 
@@ -114,8 +114,8 @@ export default async function RootLayout({
     <html lang="en" dir="ltr" id="top" data-theme="light" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         <JsonLd data={buildIdentityGraph()} />
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=20260918" />
-        <meta name="msapplication-TileColor" content="#050816" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=20260919" />
+        <meta name="msapplication-TileColor" content="#0E52A8" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
       </head>
       <body className={`${outfit.variable} ${caveat.variable} antialiased`} suppressHydrationWarning>
@@ -123,7 +123,7 @@ export default async function RootLayout({
           id="theme-init"
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var d=localStorage.getItem('theme')==='dark';var c=d?'#050816':'#ffffff';document.documentElement.setAttribute('data-theme',d?'dark':'light');document.documentElement.style.colorScheme=d?'dark':'light';var m=document.querySelectorAll('meta[name="theme-color"]');if(!m.length){var n=document.createElement('meta');n.setAttribute('name','theme-color');n.setAttribute('content',c);document.head.appendChild(n);}else{m.forEach(function(el){el.setAttribute('content',c);});}}catch(e){}})();`,
+            __html: `(function(){try{var d=localStorage.getItem('theme')==='dark';var c='#0E52A8';document.documentElement.setAttribute('data-theme',d?'dark':'light');document.documentElement.style.colorScheme=d?'dark':'light';var m=document.querySelectorAll('meta[name="theme-color"]');if(!m.length){var n=document.createElement('meta');n.setAttribute('name','theme-color');n.setAttribute('content',c);document.head.appendChild(n);}else{m.forEach(function(el){el.setAttribute('content',c);});}}catch(e){}})();`,
           }}
         />
         <SiteSettingsProvider initial={settings}>

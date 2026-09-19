@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { RiSunLine, RiMoonLine } from "react-icons/ri";
 
-const LIGHT_THEME = "#ffffff";
-const DARK_THEME = "#050816";
+const LIGHT_THEME = "#0E52A8";
+const DARK_THEME = "#0E52A8";
 
 function applyThemeColor(dark: boolean) {
   const color = dark ? DARK_THEME : LIGHT_THEME;
