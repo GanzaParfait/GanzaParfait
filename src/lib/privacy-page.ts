@@ -137,7 +137,7 @@ export const DEFAULT_PRIVACY_PAGE: PrivacyPageContent = {
       title: "Your rights and choices",
       bullets: [
         "Do not submit forms you are uncomfortable with",
-        "Unsubscribe or email to remove a newsletter address",
+        "Unsubscribe or email to remove yourself from updates (your record stays; we stop mailing you)",
         "Clear site data in your browser to reset theme and local dismissals",
         "Use the contact page for any privacy request",
       ],

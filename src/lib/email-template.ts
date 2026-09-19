@@ -167,7 +167,7 @@ export function emailBrandFromSettings(settings?: Partial<SiteSettings> | null):
     bannerHeadline: s.emailBannerHeadline || "Real solutions",
     navLinks: parseNavLinks(s.emailHeaderNav || DEFAULT_SETTINGS.emailHeaderNav, origin),
     preferencesUrl: abs(origin, s.emailPreferencesUrl || "/contact"),
-    unsubscribeUrl: abs(origin, s.emailUnsubscribeUrl || "/contact"),
+    unsubscribeUrl: abs(origin, s.emailUnsubscribeUrl || "/unsubscribe"),
     footerNote: s.emailFooterNote || "",
     socials: socialsFor(s as SiteSettings, "footer").slice(0, 5),
     welcome: {

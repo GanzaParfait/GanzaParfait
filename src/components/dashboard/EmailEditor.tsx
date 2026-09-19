@@ -212,9 +212,17 @@ export default function EmailEditor({
         <Field label="Footer note" value={settings.emailFooterNote || ""} onChange={(emailFooterNote) => patch({ emailFooterNote })} />
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.55rem" }}>
-          <Field label="Preferences URL" value={settings.emailPreferencesUrl || ""} onChange={(emailPreferencesUrl) => patch({ emailPreferencesUrl })} />
-          <Field label="Unsubscribe URL" value={settings.emailUnsubscribeUrl || ""} onChange={(emailUnsubscribeUrl) => patch({ emailUnsubscribeUrl })} />
+          <Field label="Preferences URL" value={settings.emailPreferencesUrl || ""} onChange={(emailPreferencesUrl) => patch({ emailPreferencesUrl })} placeholder="/contact" />
+          <Field
+            label="Unsubscribe URL"
+            value={settings.emailUnsubscribeUrl || ""}
+            onChange={(emailUnsubscribeUrl) => patch({ emailUnsubscribeUrl })}
+            placeholder="/unsubscribe"
+          />
         </div>
+        <p style={{ margin: 0, fontSize: "0.72rem", color: "#64748b", lineHeight: 1.45 }}>
+          Welcome and bulk emails use a signed per-recipient /unsubscribe link automatically. This field is the fallback shown in previews.
+        </p>
 
         <p style={{ margin: 0, fontSize: "0.75rem", color: "#64748b", lineHeight: 1.5 }}>
           Choose the email type first, then the shared header layout. Preview updates live. Full page:{" "}

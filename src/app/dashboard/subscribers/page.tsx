@@ -23,14 +23,15 @@ type Subscriber = {
   country: string | null;
   device: string | null;
   created_at: string;
+  unsubscribed_at?: string | null;
 };
 
-type ConfirmedFilter = "all" | "true" | "false";
+type ConfirmedFilter = "all" | "true" | "false" | "unsubscribed";
 type Audience = "confirmed" | "unconfirmed" | "both";
 
 export default function SubscribersPage() {
   const [rows, setRows] = useState<Subscriber[]>([]);
-  const [counts, setCounts] = useState({ all: 0, confirmed: 0, unconfirmed: 0 });
+  const [counts, setCounts] = useState({ all: 0, confirmed: 0, unconfirmed: 0, unsubscribed: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [q, setQ] = useState("");
@@ -62,7 +63,7 @@ export default function SubscribersPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to load");
       setRows((data.subscribers || []) as Subscriber[]);
-      setCounts(data.counts || { all: 0, confirmed: 0, unconfirmed: 0 });
+      setCounts(data.counts || { all: 0, confirmed: 0, unconfirmed: 0, unsubscribed: 0 });
       setSelected([]);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load subscribers");
@@ -128,7 +129,13 @@ export default function SubscribersPage() {
 
   const removeIds = async (ids: string[]) => {
     if (!ids.length) return;
-    if (!window.confirm(`Remove ${ids.length} subscriber${ids.length === 1 ? "" : "s"}?`)) return;
+    if (
+      !window.confirm(
+        `Soft-unsubscribe ${ids.length} address${ids.length === 1 ? "" : "es"}? Rows are kept — they just stop receiving updates.`,
+      )
+    ) {
+      return;
+    }
     setBusy(true);
     try {
       const res = await fetch("/api/subscribers", {
@@ -137,10 +144,28 @@ export default function SubscribersPage() {
         body: JSON.stringify({ ids }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Delete failed");
+      if (!res.ok) throw new Error(data.error || "Unsubscribe failed");
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Delete failed");
+      setError(err instanceof Error ? err.message : "Unsubscribe failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const resubscribeId = async (id: string) => {
+    setBusy(true);
+    try {
+      const res = await fetch("/api/subscribers", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, resubscribe: true }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not re-subscribe");
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not re-subscribe");
     } finally {
       setBusy(false);
     }
@@ -189,7 +214,7 @@ export default function SubscribersPage() {
         <div>
           <p className="section-label">Audience</p>
           <h1>Subscribers</h1>
-          <p>Manage confirmed and unconfirmed emails from the newsletter widget and contact form.</p>
+          <p>Manage newsletter addresses. Unsubscribe never deletes a row — it only stops mail.</p>
         </div>
         <div className="dash-subs-actions">
           <button type="button" className="btn btn-outline btn-sm" onClick={() => void load()} disabled={loading}>
@@ -210,6 +235,13 @@ export default function SubscribersPage() {
         </button>
         <button type="button" className={confirmed === "false" ? "is-active" : ""} onClick={() => setConfirmed("false")}>
           Unconfirmed <strong>{counts.unconfirmed}</strong>
+        </button>
+        <button
+          type="button"
+          className={confirmed === "unsubscribed" ? "is-active" : ""}
+          onClick={() => setConfirmed("unsubscribed")}
+        >
+          Unsubscribed <strong>{counts.unsubscribed || 0}</strong>
         </button>
       </div>
 
@@ -237,7 +269,7 @@ export default function SubscribersPage() {
         </button>
         {selected.length ? (
           <button type="button" className="btn btn-outline btn-sm" onClick={() => void removeIds(selected)} disabled={busy}>
-            <RiDeleteBin6Line size={15} /> Remove ({selected.length})
+            <RiDeleteBin6Line size={15} /> Unsubscribe ({selected.length})
           </button>
         ) : null}
       </div>
@@ -295,15 +327,23 @@ export default function SubscribersPage() {
                   </td>
                   <td>{row.name || "—"}</td>
                   <td>
-                    <span className={row.confirmed ? "dash-subs-pill is-yes" : "dash-subs-pill is-no"}>
-                      {row.confirmed ? "Confirmed" : "Unconfirmed"}
-                    </span>
+                    {row.unsubscribed_at ? (
+                      <span className="dash-subs-pill is-no">Unsubscribed</span>
+                    ) : (
+                      <span className={row.confirmed ? "dash-subs-pill is-yes" : "dash-subs-pill is-no"}>
+                        {row.confirmed ? "Confirmed" : "Unconfirmed"}
+                      </span>
+                    )}
                   </td>
                   <td>{row.source || "—"}</td>
                   <td>{[row.location, row.country].filter(Boolean).join(", ") || "—"}</td>
                   <td>{new Date(row.created_at).toLocaleDateString()}</td>
                   <td className="dash-subs-row-actions">
-                    {row.confirmed ? (
+                    {row.unsubscribed_at ? (
+                      <button type="button" title="Re-subscribe" onClick={() => void resubscribeId(row.id)} disabled={busy}>
+                        <RiCheckLine size={16} />
+                      </button>
+                    ) : row.confirmed ? (
                       <button type="button" title="Mark unconfirmed" onClick={() => void setConfirmedFlag(row.id, false)} disabled={busy}>
                         <RiCloseLine size={16} />
                       </button>
@@ -312,9 +352,11 @@ export default function SubscribersPage() {
                         <RiCheckLine size={16} />
                       </button>
                     )}
-                    <button type="button" title="Remove" onClick={() => void removeIds([row.id])} disabled={busy}>
-                      <RiDeleteBin6Line size={16} />
-                    </button>
+                    {!row.unsubscribed_at ? (
+                      <button type="button" title="Unsubscribe (keep row)" onClick={() => void removeIds([row.id])} disabled={busy}>
+                        <RiDeleteBin6Line size={16} />
+                      </button>
+                    ) : null}
                   </td>
                 </tr>
               ))

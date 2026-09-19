@@ -29,7 +29,10 @@ export async function POST(request: Request) {
     }
 
     const supabase = createServerSupabase(true);
-    let query = supabase.from("subscribers").select("id, email, confirmed, name");
+    let query = supabase
+      .from("subscribers")
+      .select("id, email, confirmed, name, unsubscribed_at")
+      .is("unsubscribed_at", null);
 
     if (ids.length) {
       query = query.in("id", ids);

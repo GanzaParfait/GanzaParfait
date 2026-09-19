@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useId, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { usePathname } from "next/navigation";
-import { RiMailSendLine, RiCloseLine, RiCheckDoubleLine } from "react-icons/ri";
-import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
+import { RiMailSendLine, RiCloseLine, RiCheckDoubleLine, RiLoader4Line } from "react-icons/ri";
+import { useHistoryBackClose, dismissOnBackdrop } from "@/hooks/useHistoryBackClose";
 import {
   hasSubscribeJoined,
+  markSubscribeJoined,
   SUBSCRIBE_JOINED_EVENT,
   submitSubscribe,
 } from "@/lib/subscribe-client";
@@ -19,6 +20,7 @@ const MOBILE_MQ = "(max-width: 720px)";
 export default function SubscribeWidget() {
   const pathname = usePathname();
   const titleId = useId();
+  const successTimer = useRef<number | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [email, setEmail] = useState("");
@@ -34,32 +36,45 @@ export default function SubscribeWidget() {
   }, []);
 
   useEffect(() => {
-    const syncJoined = () => setJoined(hasSubscribeJoined());
+    const syncJoined = () => {
+      // Keep success UI visible; markJoined is delayed until after the hold.
+      if (status === "success" || status === "loading") return;
+      setJoined(hasSubscribeJoined());
+    };
     syncJoined();
     window.addEventListener(SUBSCRIBE_JOINED_EVENT, syncJoined);
     return () => window.removeEventListener(SUBSCRIBE_JOINED_EVENT, syncJoined);
-  }, []);
+  }, [status]);
 
   useEffect(() => {
-    if (joined) {
+    if (joined && status !== "success") {
       setIsVisible(false);
       return;
     }
+    if (status === "success") return;
     setIsVisible(false);
     const appear = window.setTimeout(() => setIsVisible(true), APPEAR_DELAY_MS);
     return () => window.clearTimeout(appear);
-  }, [pathname, joined]);
+  }, [pathname, joined, status]);
 
   const handleDismiss = useCallback(() => {
+    if (successTimer.current) {
+      window.clearTimeout(successTimer.current);
+      successTimer.current = null;
+    }
     setIsVisible(false);
+    if (status === "success") {
+      markSubscribeJoined();
+      setJoined(true);
+    }
     setStatus("idle");
-  }, []);
+  }, [status]);
 
   useEffect(() => {
-    if (joined || isVisible) return;
+    if (joined || isVisible || status === "success") return;
     const reopen = window.setTimeout(() => setIsVisible(true), REOPEN_AFTER_DISMISS_MS);
     return () => window.clearTimeout(reopen);
-  }, [joined, isVisible]);
+  }, [joined, isVisible, status]);
 
   useHistoryBackClose(isVisible && isMobile, handleDismiss);
 
@@ -72,35 +87,50 @@ export default function SubscribeWidget() {
     };
   }, [isVisible, isMobile]);
 
+  useEffect(() => {
+    return () => {
+      if (successTimer.current) window.clearTimeout(successTimer.current);
+    };
+  }, []);
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     if (!email || status === "loading") return;
     setStatus("loading");
     try {
-      await submitSubscribe(email, "widget");
+      // Delay localStorage mark so the success screen can hold before hide.
+      await submitSubscribe(email, "widget", { markJoined: false });
       setStatus("success");
-      window.setTimeout(() => {
-        handleDismiss();
+      successTimer.current = window.setTimeout(() => {
+        markSubscribeJoined();
         setJoined(true);
+        setIsVisible(false);
+        setStatus("idle");
+        successTimer.current = null;
       }, SUCCESS_HOLD_MS);
     } catch {
       setStatus("error");
     }
   };
 
-  if (joined) return null;
+  if (joined && status !== "success") return null;
 
   const sheet = isMobile;
   const layerClass = [
     "subscribe-widget-layer",
     sheet ? "is-sheet" : "is-card",
     isVisible ? "is-open" : "",
+    status === "success" ? "is-success" : "",
   ]
     .filter(Boolean)
     .join(" ");
 
   return (
-    <div className={layerClass} aria-hidden={!isVisible}>
+    <div
+      className={layerClass}
+      aria-hidden={!isVisible}
+      onMouseDown={sheet ? dismissOnBackdrop(handleDismiss) : undefined}
+    >
       {sheet ? (
         <button type="button" className="subscribe-widget-backdrop" aria-label="Close" onClick={handleDismiss} tabIndex={isVisible ? 0 : -1} />
       ) : null}
@@ -109,6 +139,7 @@ export default function SubscribeWidget() {
         role={sheet ? "dialog" : "complementary"}
         aria-labelledby={titleId}
         aria-modal={sheet && isVisible ? true : undefined}
+        onMouseDown={sheet ? (event) => event.stopPropagation() : undefined}
       >
         {sheet ? <span className="subscribe-widget-handle" aria-hidden="true" /> : null}
         <button type="button" className="subscribe-widget-close" onClick={handleDismiss} aria-label="Close">
@@ -116,8 +147,8 @@ export default function SubscribeWidget() {
         </button>
 
         {status === "success" ? (
-          <div className="subscribe-widget-success">
-            <RiCheckDoubleLine size={48} aria-hidden="true" />
+          <div className="subscribe-widget-success" role="status">
+            <RiCheckDoubleLine size={sheet ? 64 : 48} aria-hidden="true" />
             <h4 id={titleId}>You&apos;re in</h4>
             <p>Thanks for joining. I&apos;ll send a note when there is something worth sharing.</p>
           </div>
@@ -148,7 +179,14 @@ export default function SubscribeWidget() {
                 disabled={status === "loading"}
               />
               <button type="submit" className="btn btn-primary" disabled={status === "loading"}>
-                {status === "loading" ? "…" : "Join"}
+                {status === "loading" ? (
+                  <>
+                    <RiLoader4Line size={16} className="subscribe-widget-spin" aria-hidden="true" />
+                    Joining…
+                  </>
+                ) : (
+                  "Join"
+                )}
               </button>
             </div>
             {status === "error" ? (

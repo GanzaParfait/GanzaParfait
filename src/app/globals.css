@@ -3372,6 +3372,7 @@ code, pre {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.35rem;
 }
 .footer-subscribe-ok,
 .footer-subscribe-error {
@@ -3755,9 +3756,22 @@ code, pre {
   right: 0.25rem;
   top: 0.25rem;
   bottom: 0.25rem;
-  padding: 0 1rem;
-  border-radius: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-width: 5.5rem;
+  padding-inline: 0.85rem;
   font-size: 0.8125rem;
+}
+.subscribe-widget-spin {
+  animation: subscribe-widget-spin 0.75s linear infinite;
+}
+@keyframes subscribe-widget-spin {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .subscribe-widget-spin { animation: none; }
 }
 .subscribe-widget-error {
   margin: 0.5rem 0 0;
@@ -3770,8 +3784,23 @@ code, pre {
 }
 .subscribe-widget-success svg {
   display: block;
-  margin: 0 auto 0.75rem;
+  margin: 0 auto 0.85rem;
   color: #16a34a;
+}
+.subscribe-widget-layer.is-sheet.is-success .subscribe-widget-success {
+  padding: 1.1rem 0 0.6rem;
+}
+.subscribe-widget-layer.is-sheet.is-success .subscribe-widget-success svg {
+  margin-bottom: 1rem;
+  width: 4rem;
+  height: 4rem;
+}
+.subscribe-widget-layer.is-sheet.is-success .subscribe-widget-success h4 {
+  font-size: 1.35rem;
+}
+.subscribe-widget-layer.is-sheet.is-success .subscribe-widget-success p {
+  font-size: 0.95rem;
+  margin-bottom: 0.25rem;
 }
 @media (prefers-reduced-motion: reduce) {
   .subscribe-widget,
@@ -16052,4 +16081,60 @@ button.case-hero-shot {
   .privacy-cta {
     grid-template-columns: 1fr;
   }
+}
+
+/* Unsubscribe public page */
+.unsubscribe-page {
+  padding: calc(var(--public-nav-offset, 4.75rem) + 1.5rem) 0 3.5rem;
+  min-height: 70vh;
+}
+.unsubscribe-card {
+  max-width: 34rem;
+  margin: 0 auto;
+  text-align: center;
+  padding: 2rem 1.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  background: var(--color-surface);
+}
+.unsubscribe-icon {
+  display: grid;
+  place-items: center;
+  width: 4rem;
+  height: 4rem;
+  margin: 0 auto 1rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-primary) 10%, var(--color-bg));
+  color: var(--color-primary);
+}
+.unsubscribe-icon.is-ok {
+  background: color-mix(in srgb, #16a34a 14%, #fff);
+  color: #16a34a;
+}
+.unsubscribe-card h1 {
+  margin: 0.2rem 0 0.65rem;
+  font-size: clamp(1.5rem, 3vw, 1.85rem);
+  letter-spacing: -0.03em;
+}
+.unsubscribe-copy {
+  margin: 0 0 0.75rem;
+  color: var(--color-text-2);
+  line-height: 1.55;
+}
+.unsubscribe-email {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+  color: var(--color-text);
+}
+.unsubscribe-note {
+  margin: 0 0 1.25rem;
+  font-size: 0.78rem;
+  color: var(--color-text-3);
+  line-height: 1.45;
+}
+.unsubscribe-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  justify-content: center;
 }

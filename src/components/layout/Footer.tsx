@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, type CSSProperties, type FormEvent } from "react";
 import Link from "next/link";
-import { RiArrowRightLine, RiMailLine, RiMapPinLine, RiPhoneLine } from "react-icons/ri";
+import { RiArrowRightLine, RiLoader4Line, RiMailLine, RiMapPinLine, RiPhoneLine } from "react-icons/ri";
 import { defaultFooterQuote, footerNav } from "@/data/site-data";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { socialByPlatform, socialIcon, socialsFor } from "@/lib/socials";
@@ -264,7 +264,14 @@ function FooterSubscribe() {
               disabled={status === "loading"}
             />
             <button type="submit" className="btn btn-primary" disabled={status === "loading"}>
-              {status === "loading" ? "…" : "Join"}
+              {status === "loading" ? (
+                <>
+                  <RiLoader4Line size={15} className="subscribe-widget-spin" aria-hidden="true" />
+                  Joining…
+                </>
+              ) : (
+                "Join"
+              )}
             </button>
           </div>
           {status === "error" ? (

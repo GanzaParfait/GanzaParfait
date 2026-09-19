@@ -246,14 +246,16 @@ export async function contactAckMail(
 
 export async function subscriberThanksMail(to: string, settings?: SiteSettings) {
   const site = settings || (await getServerSiteSettings());
-  const content = welcomeEmailContent(emailBrandFromSettings(site));
+  const { unsubscribePathFor } = await import("@/lib/unsubscribe");
+  const withUnsub = { ...site, emailUnsubscribeUrl: unsubscribePathFor(to) };
+  const content = welcomeEmailContent(emailBrandFromSettings(withUnsub));
   return {
     to,
-    from: mailboxes.hello() || mailboxes.thanks(),
+    from: mailboxes.thanks() || mailboxes.hello(),
     replyTo: mailboxes.replyTo(),
     subject: `${content.title.replace(/!$/, "")} — ${site.siteTitle || "Prince Parfait GANZA"}`,
-    text: brandEmailText(content, site),
-    html: brandEmailHtml(content, site),
+    text: brandEmailText(content, withUnsub),
+    html: brandEmailHtml(content, withUnsub),
   } satisfies OutboundMail;
 }
 
@@ -297,7 +299,9 @@ export async function bulkNewsletterMail(
   settings?: SiteSettings,
 ) {
   const site = settings || (await getServerSiteSettings());
-  const brand = emailBrandFromSettings(site);
+  const { unsubscribePathFor } = await import("@/lib/unsubscribe");
+  const withUnsub = { ...site, emailUnsubscribeUrl: unsubscribePathFor(input.to) };
+  const brand = emailBrandFromSettings(withUnsub);
   const content = {
     preheader: input.subject,
     eyebrow: "Update",
@@ -311,7 +315,7 @@ export async function bulkNewsletterMail(
     from: mailboxes.noreply(),
     replyTo: mailboxes.replyTo(),
     subject: input.subject,
-    text: brandEmailText(content, site),
-    html: brandEmailHtml(content, site),
+    text: brandEmailText(content, withUnsub),
+    html: brandEmailHtml(content, withUnsub),
   } satisfies OutboundMail;
 }

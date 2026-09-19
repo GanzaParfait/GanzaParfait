@@ -317,7 +317,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   emailContactBadge: "New contact message",
   emailContactTip: "Quick tip: Reply directly to this email or use the Control Center to manage this conversation, add notes, or convert it to a project.",
   emailPreferencesUrl: "/contact",
-  emailUnsubscribeUrl: "/contact",
+  emailUnsubscribeUrl: "/unsubscribe",
   emailPortraitUrl: "/images/profile/prince-parfait-ganza-kigali-rwanda.webp",
   heroGreeting: "Hi there, I'm",
   heroAvailableText: "Available for new projects",

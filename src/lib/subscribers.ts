@@ -13,12 +13,14 @@ export type SubscriberRow = {
   device: string | null;
   created_at: string;
   updated_at?: string;
+  unsubscribed_at?: string | null;
 };
 
 /**
  * Upsert by email.
  * - contact capture: insert unconfirmed; never downgrade an already-confirmed row
- * - widget/dashboard confirm: set confirmed true
+ * - widget/dashboard confirm: set confirmed true and clear soft-unsubscribe
+ * - rows are never deleted here
  */
 export async function upsertSubscriber(
   supabase: SupabaseClient,
@@ -40,12 +42,14 @@ export async function upsertSubscriber(
     .maybeSingle();
 
   if (existing) {
-    const alreadyConfirmed = Boolean(existing.confirmed);
-    const nextConfirmed = alreadyConfirmed || input.confirmed;
+    const alreadyConfirmed = Boolean(existing.confirmed) && !existing.unsubscribed_at;
+    const nextConfirmed = Boolean(existing.confirmed) || input.confirmed;
     const patch: Record<string, unknown> = {
       updated_at: new Date().toISOString(),
       confirmed: nextConfirmed,
     };
+    // Re-subscribe clears soft opt-out
+    if (input.confirmed) patch.unsubscribed_at = null;
     if (input.name && !existing.name) patch.name = input.name;
     if (input.source && !existing.source) patch.source = input.source;
     if (input.device) patch.device = input.device;
@@ -74,6 +78,7 @@ export async function upsertSubscriber(
         device: input.device || null,
         location: input.location || null,
         country: input.country || null,
+        unsubscribed_at: null,
       },
     ])
     .select("*")
@@ -81,4 +86,52 @@ export async function upsertSubscriber(
 
   if (error) throw error;
   return { row: data as SubscriberRow, created: true, alreadyConfirmed: false };
+}
+
+/** Soft unsubscribe — never deletes the row. */
+export async function softUnsubscribe(
+  supabase: SupabaseClient,
+  email: string,
+): Promise<{ row: SubscriberRow | null; alreadyUnsubscribed: boolean }> {
+  const normalized = email.trim().toLowerCase();
+  const { data: existing } = await supabase
+    .from("subscribers")
+    .select("*")
+    .ilike("email", normalized)
+    .maybeSingle();
+
+  if (!existing) return { row: null, alreadyUnsubscribed: false };
+  if (existing.unsubscribed_at) {
+    return { row: existing as SubscriberRow, alreadyUnsubscribed: true };
+  }
+
+  const { data, error } = await supabase
+    .from("subscribers")
+    .update({
+      unsubscribed_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", existing.id)
+    .select("*")
+    .single();
+
+  if (error) throw error;
+  return { row: data as SubscriberRow, alreadyUnsubscribed: false };
+}
+
+/** Soft-unsubscribe many ids (admin). Never deletes. */
+export async function softUnsubscribeByIds(supabase: SupabaseClient, ids: string[]) {
+  if (!ids.length) return 0;
+  const { data, error } = await supabase
+    .from("subscribers")
+    .update({
+      unsubscribed_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .in("id", ids)
+    .is("unsubscribed_at", null)
+    .select("id");
+
+  if (error) throw error;
+  return data?.length || 0;
 }

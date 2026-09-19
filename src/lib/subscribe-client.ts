@@ -21,7 +21,11 @@ export function markSubscribeJoined() {
   }
 }
 
-export async function submitSubscribe(email: string, source: "widget" | "footer" = "widget") {
+export async function submitSubscribe(
+  email: string,
+  source: "widget" | "footer" = "widget",
+  options?: { markJoined?: boolean },
+) {
   const device = navigator.userAgent;
   let country = "Unknown";
   let location = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -42,6 +46,6 @@ export async function submitSubscribe(email: string, source: "widget" | "footer"
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || "Subscribe failed");
-  markSubscribeJoined();
-  return data as { ok?: boolean; emailed?: boolean };
+  if (options?.markJoined !== false) markSubscribeJoined();
+  return data as { ok?: boolean; emailed?: boolean; mailError?: string };
 }

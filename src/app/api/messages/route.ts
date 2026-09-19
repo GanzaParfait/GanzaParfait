@@ -44,23 +44,33 @@ export async function GET(request: Request) {
       previewHtml: null as string | null,
       createdAt: row.created_at as string,
     })),
-    ...(subscribers || []).map((row) => ({
-      id: `subscribe:${row.id}`,
-      sourceId: row.id as string,
-      type: "subscribe" as const,
-      direction: "inbound" as const,
-      title: (row.name as string | null) || "New subscriber",
-      email: row.email as string,
-      subtitle:
-        [row.confirmed ? "Confirmed" : "Unconfirmed", row.source, row.location, row.country]
-          .filter(Boolean)
-          .join(" · ") || "Newsletter signup",
-      body: `Subscribed from ${row.device || "unknown device"}.`,
-      status: row.confirmed ? "confirmed" : "unconfirmed",
-      replyText: null as string | null,
-      previewHtml: null as string | null,
-      createdAt: row.created_at as string,
-    })),
+    ...(subscribers || []).map((row) => {
+      const unsubscribed = Boolean(row.unsubscribed_at);
+      return {
+        id: `subscribe:${row.id}`,
+        sourceId: row.id as string,
+        type: "subscribe" as const,
+        direction: "inbound" as const,
+        title: (row.name as string | null) || (unsubscribed ? "Unsubscribed" : "New subscriber"),
+        email: row.email as string,
+        subtitle:
+          [
+            unsubscribed ? "Unsubscribed" : row.confirmed ? "Confirmed" : "Unconfirmed",
+            row.source,
+            row.location,
+            row.country,
+          ]
+            .filter(Boolean)
+            .join(" · ") || "Newsletter signup",
+        body: unsubscribed
+          ? `Opted out${row.unsubscribed_at ? ` on ${row.unsubscribed_at}` : ""}.`
+          : `Subscribed from ${row.device || "unknown device"}.`,
+        status: unsubscribed ? "unsubscribed" : row.confirmed ? "confirmed" : "unconfirmed",
+        replyText: null as string | null,
+        previewHtml: null as string | null,
+        createdAt: row.created_at as string,
+      };
+    }),
     ...(sent || []).map((row) => ({
       id: `sent:${row.id}`,
       sourceId: row.id as string,
