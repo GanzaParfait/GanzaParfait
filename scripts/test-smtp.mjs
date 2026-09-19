@@ -208,8 +208,36 @@ if (process.env.RESEND_API_KEY) {
 console.log("");
 if (failed) {
   console.log(`Finished with ${failed} failure(s).`);
-  console.log("Welcome/subscribe mail uses the thanks (fallback hello) From address — fix that mailbox first.");
+  console.log("Subscribe welcome mail sends from hello@ (fallback thanks@) — fix that mailbox first.");
   process.exit(1);
 }
 console.log("All checked transports look good.");
 if (!doSend) console.log("Re-run with --send --to you@example.com to deliver a real test message.");
+console.log("Subscribe welcome mail sends from hello@ with lean transactional HTML.");
+
+// SPF must authorize premiumNNN.web-hosting.com — forwarding-only SPF causes silent Gmail drops.
+try {
+  const { execFileSync } = await import("node:child_process");
+  const domain = (process.env.SMTP_TLS_SERVERNAME || "princeparfait.com").replace(/^www\./, "");
+  const raw = execFileSync("dig", ["+short", "TXT", domain], { encoding: "utf8" });
+  const spf = raw
+    .split("\n")
+    .map((line) => line.replace(/"/g, "").trim())
+    .find((line) => line.startsWith("v=spf1"));
+  console.log("");
+  console.log("SPF check", domain);
+  console.log(" ", spf || "(no v=spf1 TXT found)");
+  if (spf && !/include:spf\.web-hosting\.com/.test(spf)) {
+    console.log("  WARN: SPF does not include spf.web-hosting.com.");
+    console.log("  Outbound via premiumNNN.web-hosting.com will SPF-softfail at Gmail.");
+    console.log("  Set TXT to:");
+    console.log(
+      "  v=spf1 include:spf.efwd.registrar-servers.com include:spf.web-hosting.com ~all",
+    );
+    console.log("  Then enable DKIM in cPanel → Email Deliverability and copy the TXT to Namecheap DNS.");
+  } else if (spf) {
+    console.log("  OK: hosting SPF include present.");
+  }
+} catch {
+  /* dig optional */
+}

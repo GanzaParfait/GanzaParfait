@@ -248,7 +248,7 @@ export default function Navbar() {
 
           <nav
             aria-label="Main navigation"
-            className="hidden md:flex"
+            className="hidden lg:flex"
             style={{ flex: 1, justifyContent: "center" }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "0.85rem" }}>
@@ -353,7 +353,7 @@ export default function Navbar() {
             {/* Mobile hamburger */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="inline-flex md:hidden"
+              className="inline-flex lg:hidden"
               style={{
                 width: "1.9rem",
                 height: "1.9rem",
@@ -435,7 +435,7 @@ export default function Navbar() {
           opacity: isOpen ? 1 : 0,
           pointerEvents: isOpen ? "auto" : "none",
         }}
-        className="md:hidden"
+        className="lg:hidden"
       />
 
       {/* Sheet */}
@@ -444,7 +444,7 @@ export default function Navbar() {
         role="dialog"
         aria-modal="true"
         aria-label="Navigation menu"
-        className="md:hidden"
+        className="lg:hidden"
         style={{
           position: "fixed",
           bottom: 0,

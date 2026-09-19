@@ -5,7 +5,8 @@ import type { EmailHeaderLayout, SiteSettings } from "@/lib/supabase";
 import { DEFAULT_SETTINGS } from "@/lib/supabase";
 import { sanitizeWelcomeBody } from "@/lib/welcome-copy";
 
-const FONT = 'Outfit, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+/** System stack only — web-font <link>s hurt inbox placement. */
+const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif';
 
 const SOCIAL_ICON_FILES: Record<string, string> = {
   linkedin: "linkedin.svg",
@@ -24,13 +25,11 @@ const SOCIAL_ICON_FILES: Record<string, string> = {
 };
 
 function resolveOrigin() {
-  if (typeof window !== "undefined" && window.location?.origin) {
-    return window.location.origin.replace(/\/+$/, "");
-  }
-  if (process.env.NODE_ENV !== "production") {
-    if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
-    return "http://localhost:3000";
-  }
+  // Always prefer the public site URL in outbound mail. Localhost image/CTA
+  // links are a common reason Gmail accepts SMTP then hides or junks the message.
+  const configured = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "");
+  if (configured) return configured;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL.replace(/\/+$/, "")}`;
   return siteUrl();
 }
 
@@ -421,9 +420,6 @@ export function brandEmailHtml(content: BrandMailContent, settings?: Partial<Sit
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <title>${escapeHtml(content.title)}</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <!--[if mso]>
   <style type="text/css">
     body, table, td, a, p, span, div { font-family: Arial, Helvetica, sans-serif !important; }
@@ -503,13 +499,53 @@ export function brandEmailText(content: BrandMailContent, settings?: Partial<Sit
   return parts.filter(Boolean).join("\n");
 }
 
+/**
+ * Minimal transactional HTML (no remote images / social icon grid).
+ * Use for subscribe/contact acks while SPF/DKIM are soft — full brand templates
+ * are more likely to be dropped when SPF only lists email-forwarding hosts.
+ */
+export function leanTransactionalHtml(content: BrandMailContent, settings?: Partial<SiteSettings> | null) {
+  const brand = emailBrandFromSettings(settings);
+  const unsub = brand.unsubscribeUrl
+    ? `<p style="margin:28px 0 0;font-size:12px;line-height:1.5;color:#94A3B8">
+        <a href="${escapeAttr(brand.unsubscribeUrl)}" style="color:#64748B">Unsubscribe</a>
+      </p>`
+    : "";
+  const cta =
+    content.ctaLabel && content.ctaHref
+      ? `<p style="margin:22px 0 0">
+          <a href="${escapeAttr(content.ctaHref)}" style="display:inline-block;padding:12px 18px;background:${brand.primary};color:#fff;text-decoration:none;border-radius:10px;font-weight:700;font-size:14px">${escapeHtml(content.ctaLabel)}</a>
+        </p>`
+      : "";
+  return `<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>${escapeHtml(content.title)}</title></head>
+<body style="margin:0;padding:0;background:#F8FAFC;font-family:${FONT};color:#0F172A">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0">${escapeHtml(content.preheader || content.title)}</div>
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#F8FAFC;padding:24px 12px;font-family:${FONT}">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background:#fff;border:1px solid #E2E8F0;border-radius:16px">
+        <tr><td style="padding:28px 24px;font-family:${FONT}">
+          <div style="font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:${brand.primary}">${escapeHtml(brand.title)}</div>
+          <h1 style="margin:14px 0 0;font-size:22px;line-height:1.25;font-weight:800;color:#0F172A">${escapeHtml(content.title)}</h1>
+          <p style="margin:12px 0 0;font-size:15px;line-height:1.65;color:#475569">${escapeHtml(content.body)}</p>
+          ${cta}
+          <p style="margin:28px 0 0;font-size:13px;line-height:1.5;color:#64748B">— ${escapeHtml(brand.title)}<br/>${escapeHtml(brand.location)} · <a href="${escapeAttr(brand.origin)}" style="color:${brand.primary};text-decoration:none">${escapeHtml(brand.origin.replace(/^https?:\/\//, ""))}</a></p>
+          ${unsub}
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>`;
+}
+
 export function welcomeEmailContent(brand = emailBrandFromSettings()): BrandMailContent {
-  const check = abs(brand.origin, "/brand/email-social/check.svg");
+  // Prefer text markers over remote SVG icons — fewer external fetches for filters.
   const features = brand.welcome.features
     .map(
       (item) =>
         `<tr><td style="padding:8px 0;font-size:14px;color:#0F172A;font-weight:650;font-family:${FONT};vertical-align:top">
-          <img src="${escapeAttr(check)}" width="18" height="18" alt="" style="display:inline-block;vertical-align:middle;border:0;margin-right:10px" />
+          <span style="color:${brand.primary};font-weight:800;margin-right:10px" aria-hidden="true">✓</span>
           <span style="vertical-align:middle">${escapeHtml(item)}</span>
         </td></tr>`,
     )

@@ -5,6 +5,7 @@ import {
   brandEmailText,
   contactEmailContent,
   emailBrandFromSettings,
+  leanTransactionalHtml,
   newsletterEmailContent,
   welcomeEmailContent,
 } from "@/lib/email-template";
@@ -18,6 +19,8 @@ export type OutboundMail = {
   text?: string;
   from?: string;
   replyTo?: string;
+  /** Extra SMTP / provider headers (e.g. List-Unsubscribe). */
+  headers?: Record<string, string>;
   /** When set, a row is written to mail_outbox after send. */
   log?: {
     kind: string;
@@ -25,6 +28,19 @@ export type OutboundMail = {
     relatedId?: string;
   };
 };
+
+const FROM_DISPLAY = "Prince Parfait GANZA";
+
+function bareEmail(address: string) {
+  const match = String(address || "").match(/<([^>]+)>/);
+  return (match ? match[1] : address).trim().toLowerCase();
+}
+
+function formatFrom(address: string) {
+  const email = bareEmail(address);
+  if (!email) return address;
+  return `"${FROM_DISPLAY}" <${email}>`;
+}
 
 function smtpConfigured() {
   return Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
@@ -69,12 +85,13 @@ async function sendWithResend(mail: OutboundMail) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: mail.from || mailboxes.noreply(),
+      from: formatFrom(mail.from || mailboxes.noreply()),
       to: [mail.to],
       subject: mail.subject,
       html: mail.html,
       text: mail.text,
       reply_to: mail.replyTo || mailboxes.replyTo(),
+      headers: mail.headers,
     }),
   });
   if (!response.ok) {
@@ -90,18 +107,19 @@ function smtpSecret(value: string) {
 }
 
 function smtpAuthForFrom(from: string) {
-  const thanks = mailboxes.thanks();
-  const contact = mailboxes.contact();
-  const hello = mailboxes.hello();
+  const address = bareEmail(from);
+  const thanks = bareEmail(mailboxes.thanks());
+  const contact = bareEmail(mailboxes.contact());
+  const hello = bareEmail(mailboxes.hello());
   let user = process.env.SMTP_USER || "";
   let pass = smtpSecret(process.env.SMTP_PASS || "");
-  if (from === thanks && process.env.SMTP_THANKS_USER && process.env.SMTP_THANKS_PASS) {
+  if (address && address === thanks && process.env.SMTP_THANKS_USER && process.env.SMTP_THANKS_PASS) {
     user = process.env.SMTP_THANKS_USER;
     pass = smtpSecret(process.env.SMTP_THANKS_PASS);
-  } else if (from === contact && process.env.SMTP_CONTACT_USER && process.env.SMTP_CONTACT_PASS) {
+  } else if (address && address === contact && process.env.SMTP_CONTACT_USER && process.env.SMTP_CONTACT_PASS) {
     user = process.env.SMTP_CONTACT_USER;
     pass = smtpSecret(process.env.SMTP_CONTACT_PASS);
-  } else if (from === hello && process.env.SMTP_HELLO_USER && process.env.SMTP_HELLO_PASS) {
+  } else if (address && address === hello && process.env.SMTP_HELLO_USER && process.env.SMTP_HELLO_PASS) {
     user = process.env.SMTP_HELLO_USER;
     pass = smtpSecret(process.env.SMTP_HELLO_PASS);
   }
@@ -157,15 +175,19 @@ async function sendWithSmtp(mail: OutboundMail) {
   for (const attempt of attempts) {
     try {
       const transporter = smtpTransport(attempt.user, attempt.pass);
-      await transporter.sendMail({
-        from: attempt.from,
+      const info = await transporter.sendMail({
+        from: formatFrom(attempt.from),
         to: mail.to,
         subject: mail.subject,
         html: mail.html,
         text: mail.text,
         replyTo: mail.replyTo || mailboxes.replyTo(),
+        headers: mail.headers,
       });
-      mail.from = attempt.from;
+      mail.from = bareEmail(attempt.from) || attempt.from;
+      console.info(
+        `SMTP accepted to=${mail.to} from=${mail.from} id=${info.messageId || "?"} response=${info.response || "?"}`,
+      );
       return true;
     } catch (error) {
       lastError = error;
@@ -177,8 +199,9 @@ async function sendWithSmtp(mail: OutboundMail) {
 
 /**
  * Prefer SMTP when configured (custom domain mailboxes), then Resend.
- * Namecheap/cPanel: if the apex A record is CDN/proxy, set SMTP_HOST to the
- * hosting IP (or a mail.* A record) and SMTP_TLS_SERVERNAME=yourdomain.com.
+ * Namecheap/cPanel: do not use the apex domain as SMTP_HOST when it points at
+ * a CDN/proxy (ETIMEDOUT). Use the cPanel hostname (e.g. premiumNNN.web-hosting.com)
+ * or shared hosting IP, with SMTP_TLS_SERVERNAME=yourdomain.com.
  */
 export async function sendMail(mail: OutboundMail) {
   let lastError: unknown = null;
@@ -236,26 +259,34 @@ export async function contactAckMail(
   };
   return {
     to: input.email,
-    from: mailboxes.thanks() || mailboxes.hello(),
+    from: mailboxes.hello() || mailboxes.thanks(),
     replyTo: mailboxes.replyTo(),
     subject: `Thanks for writing — ${site.siteTitle || "Prince Parfait GANZA"}`,
     text: brandEmailText(content, site),
-    html: brandEmailHtml(content, site),
+    html: leanTransactionalHtml(content, site),
   } satisfies OutboundMail;
 }
 
 export async function subscriberThanksMail(to: string, settings?: SiteSettings) {
   const site = settings || (await getServerSiteSettings());
-  const { unsubscribePathFor } = await import("@/lib/unsubscribe");
+  const { unsubscribeLinkFor, unsubscribePathFor } = await import("@/lib/unsubscribe");
   const withUnsub = { ...site, emailUnsubscribeUrl: unsubscribePathFor(to) };
   const content = welcomeEmailContent(emailBrandFromSettings(withUnsub));
+  const unsub = unsubscribeLinkFor(to);
+  // Prefer hello@ — transactional welcome from a personal mailbox lands better than thanks@.
+  const from = mailboxes.hello() || mailboxes.thanks();
   return {
     to,
-    from: mailboxes.thanks() || mailboxes.hello(),
+    from,
     replyTo: mailboxes.replyTo(),
     subject: `${content.title.replace(/!$/, "")} — ${site.siteTitle || "Prince Parfait GANZA"}`,
     text: brandEmailText(content, withUnsub),
-    html: brandEmailHtml(content, withUnsub),
+    // Lean HTML until SPF includes spf.web-hosting.com (full brand template is newsletter-heavy).
+    html: leanTransactionalHtml(content, withUnsub),
+    headers: {
+      "List-Unsubscribe": `<${unsub}>`,
+      "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+    },
   } satisfies OutboundMail;
 }
 
@@ -299,7 +330,7 @@ export async function bulkNewsletterMail(
   settings?: SiteSettings,
 ) {
   const site = settings || (await getServerSiteSettings());
-  const { unsubscribePathFor } = await import("@/lib/unsubscribe");
+  const { unsubscribePathFor, unsubscribeLinkFor } = await import("@/lib/unsubscribe");
   const withUnsub = { ...site, emailUnsubscribeUrl: unsubscribePathFor(input.to) };
   const brand = emailBrandFromSettings(withUnsub);
   const content = {
@@ -310,6 +341,7 @@ export async function bulkNewsletterMail(
     ctaLabel: input.ctaLabel || "Visit the site",
     ctaHref: input.ctaHref || brand.origin,
   };
+  const unsub = unsubscribeLinkFor(input.to);
   return {
     to: input.to,
     from: mailboxes.noreply(),
@@ -317,5 +349,10 @@ export async function bulkNewsletterMail(
     subject: input.subject,
     text: brandEmailText(content, withUnsub),
     html: brandEmailHtml(content, withUnsub),
+    headers: {
+      "List-Unsubscribe": `<${unsub}>`,
+      "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+      Precedence: "bulk",
+    },
   } satisfies OutboundMail;
 }
