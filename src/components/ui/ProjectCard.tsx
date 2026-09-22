@@ -7,9 +7,12 @@ interface ProjectCardProps {
   featured?: boolean;
 }
 
-const statusConfig = {
+const statusConfig: Record<Project["status"], { label: string; className: string }> = {
   live: { label: "Live", className: "badge-success" },
   "in-progress": { label: "In Progress", className: "badge-primary" },
+  staging: { label: "Staging", className: "badge-primary" },
+  completed: { label: "Completed", className: "badge-success" },
+  ongoing: { label: "Ongoing", className: "badge-primary" },
   archived: { label: "Archived", className: "badge-outline" },
 };
 

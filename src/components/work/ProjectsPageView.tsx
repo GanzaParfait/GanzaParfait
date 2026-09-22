@@ -30,7 +30,6 @@ const FILTERS = [
 
 type FilterId = (typeof FILTERS)[number]["id"];
 
-const TOOL_CATEGORIES = new Set(["mobile", "ai", "open-source"]);
 const FILTER_DELAY_MS = 500;
 
 const APPROACH = [
@@ -55,7 +54,6 @@ function matchesFilter(project: Project, filter: FilterId) {
   if (filter === "ventures" || filter === "client" || filter === "research" || filter === "web") {
     return inferredWorkGroup(project) === filter;
   }
-  if (filter === "tools") return TOOL_CATEGORIES.has(project.category);
   return project.category === filter;
 }
 
