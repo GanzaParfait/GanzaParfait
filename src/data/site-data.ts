@@ -409,7 +409,7 @@ export const projects: Project[] = [
     status: "live",
     featured: false,
     contribution: "contributor",
-    logo: "/images/projects/logos/askfield.png",
+    logo: "/images/projects/logos/askfield.webp",
     image: "/images/projects/askfield.webp",
     screenshots: [
       "/images/projects/askfield.webp",
@@ -661,6 +661,7 @@ export const experience: ExperienceItem[] = [
     category: "work",
     relatedHref: "/projects/askfield",
     relatedLabel: "View related work",
+    logo: "/images/projects/logos/askfield.webp",
     sortYear: 2024,
   },
   {
