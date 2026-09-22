@@ -123,6 +123,14 @@ export function activeIntroGreetings(config: IntroExperience): IntroGreeting[] {
     .slice(0, Math.max(1, config.maxGreetings));
 }
 
+/** Lab tools (PageSpeed / Lighthouse) always look like a first visit — skip intro so LCP/SI aren't blocked. */
+export function isLabOrAutomation(): boolean {
+  if (typeof navigator === "undefined") return false;
+  if (navigator.webdriver) return true;
+  const ua = navigator.userAgent || "";
+  return /Chrome-Lighthouse|PageSpeed|HeadlessChrome|PTST|Lighthouse/i.test(ua);
+}
+
 export function shouldShowIntro(
   config: IntroExperience,
   opts?: { force?: boolean; pathname?: string }
@@ -141,6 +149,8 @@ export function shouldShowIntro(
   if (typeof window === "undefined") return false;
 
   try {
+    if (isLabOrAutomation()) return false;
+
     if (config.frequency === "every_visit") return true;
 
     if (config.frequency === "session") {

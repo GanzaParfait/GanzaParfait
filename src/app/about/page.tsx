@@ -5,14 +5,25 @@ import { buildBreadcrumbListJsonLd, buildGraph, buildProfilePageJsonLd } from "@
 import { JsonLd } from "@/components/seo/JsonLd";
 
 const PAGE_DESCRIPTION =
-  "The founder story of Prince Parfait GANZA: leading Lerony from Kigali, building technology, products and ventures, with software engineering as evidence rather than the ceiling.";
+  "About Prince Parfait GANZA — Rwandan founder, entrepreneur and technologist in Kigali. Software engineer and AI builder; Founder and CEO of LERONY Ltd, building technology, digital products and ventures.";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "About Prince Parfait GANZA | Founder, Entrepreneur & Technologist",
+  title: "About Prince Parfait GANZA | Software Engineer & AI Builder in Kigali",
   description: PAGE_DESCRIPTION,
   path: "/about",
   ogType: "profile",
   absoluteTitle: true,
+  keywords: [
+    "About Prince Parfait GANZA",
+    "Prince Parfait GANZA Kigali",
+    "Software engineer Kigali",
+    "AI builder Rwanda",
+    "Tech founder Kigali",
+    "LERONY Ltd founder",
+    "Rwandan technologist",
+  ],
+  ogImageAlt:
+    "Prince Parfait GANZA — Rwandan founder, entrepreneur, technologist, software engineer and AI builder in Kigali",
 });
 
 const breadcrumbItems = [
@@ -27,7 +38,7 @@ export default function AboutPage() {
         data={buildGraph([
           buildProfilePageJsonLd({
             path: "/about",
-            name: "About Prince Parfait GANZA | Founder, Entrepreneur & Technologist",
+            name: "About Prince Parfait GANZA | Software Engineer & AI Builder in Kigali",
             description: PAGE_DESCRIPTION,
           }),
           buildBreadcrumbListJsonLd(breadcrumbItems, "/about"),

@@ -1,3 +1,4 @@
+import { siteConfig } from "@/data/site-data";
 import { getPublicProjects } from "@/lib/projects";
 import { OG_IMAGE_PATH, PORTRAIT_PATH, absoluteAssetUrl, canonicalUrl } from "@/lib/schema";
 
@@ -13,26 +14,38 @@ export async function GET() {
     {
       page: canonicalUrl("/"),
       loc: absoluteAssetUrl(OG_IMAGE_PATH),
-      title: "Prince Parfait GANZA",
-      caption: "Prince Parfait GANZA, founder, entrepreneur and technologist in Kigali, Rwanda",
+      title: "Prince Parfait GANZA — founder, software engineer and AI builder in Kigali",
+      caption: siteConfig.portraitAlt,
     },
     {
       page: canonicalUrl("/"),
       loc: absoluteAssetUrl("/images/og/prince-parfait-ganza.jpg"),
       title: "Prince Parfait GANZA",
-      caption: "Prince Parfait GANZA portrait share image",
+      caption: siteConfig.portraitAlt,
     },
     {
       page: canonicalUrl("/"),
       loc: absoluteAssetUrl(PORTRAIT_PATH),
       title: "Prince Parfait GANZA",
-      caption: "Official portrait of Prince Parfait GANZA in Kigali, Rwanda",
+      caption: siteConfig.portraitAlt,
+    },
+    {
+      page: canonicalUrl("/"),
+      loc: absoluteAssetUrl("/images/profile/hero-centered-portrait.webp"),
+      title: "Prince Parfait GANZA — software engineer and AI builder in Kigali",
+      caption: siteConfig.portraitAlt,
+    },
+    {
+      page: canonicalUrl("/"),
+      loc: absoluteAssetUrl("/images/profile/hero-split-portrait.webp"),
+      title: "Prince Parfait GANZA — Rwandan technologist in Kigali",
+      caption: siteConfig.portraitAlt,
     },
     {
       page: canonicalUrl("/about"),
       loc: absoluteAssetUrl(PORTRAIT_PATH),
-      title: "Prince Parfait GANZA",
-      caption: "Portrait of Prince Parfait GANZA",
+      title: "About Prince Parfait GANZA",
+      caption: siteConfig.portraitAlt,
     },
     ...projects.flatMap((project) => {
       const media = [

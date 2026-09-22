@@ -11,7 +11,7 @@ import {
 import { useState, useEffect } from "react";
 import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
 import { SiteSettings } from "@/lib/supabase";
-import { heroHighlights, heroImageFor, setting, splitDisplayName } from "@/lib/hero";
+import { heroHighlights, heroImageFor, heroPortraitAlt, setting, splitDisplayName } from "@/lib/hero";
 import { socialIcon, heroSocialsFor } from "@/lib/socials";
 
 export default function SplitHero({
@@ -309,7 +309,7 @@ export default function SplitHero({
                 {splitIsStatic ? (
                   <Image
                     src={splitImage}
-                    alt={setting(settings, "siteTitle")}
+                    alt={heroPortraitAlt(settings)}
                     fill
                     priority
                     sizes="(max-width: 1024px) 92vw, 28rem"
@@ -318,7 +318,7 @@ export default function SplitHero({
                 ) : (
                   <img
                     src={splitImage}
-                    alt={setting(settings, "siteTitle")}
+                    alt={heroPortraitAlt(settings)}
                     className="hero-split-img"
                     style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "bottom" }}
                   />

@@ -24,7 +24,7 @@ export const PORTRAIT_PATH = "/images/profile/prince-parfait-ganza-kigali-rwanda
 export const OG_IMAGE_PATH = "/images/og/seo-share-image.jpg";
 
 /** Date the public factual content was last revised. Do not stamp deploy time. */
-export const SITE_CONTENT_REVISED = "2026-09-19";
+export const SITE_CONTENT_REVISED = "2026-09-22";
 
 /**
  * Canonical absolute URL.
@@ -81,18 +81,35 @@ export function buildPersonJsonLd() {
       width: 1024,
       height: 919,
       encodingFormat: "image/webp",
-      caption: "Prince Parfait GANZA",
-      name: "Prince Parfait GANZA",
+      caption: siteConfig.portraitAlt,
+      name: siteConfig.portraitAlt,
     },
     jobTitle: ["Founder", "Entrepreneur", "Technologist", "Software Engineer", "AI Builder"],
     hasOccupation: [
-      { "@type": "Occupation", name: "Founder", occupationLocation: { "@type": "City", name: "Kigali" } },
+      {
+        "@type": "Occupation",
+        name: "Founder",
+        occupationLocation: { "@type": "City", name: "Kigali", address: { "@type": "PostalAddress", addressLocality: "Kigali", addressCountry: "RW" } },
+      },
+      {
+        "@type": "Occupation",
+        name: "Software Engineer",
+        occupationLocation: { "@type": "City", name: "Kigali", address: { "@type": "PostalAddress", addressLocality: "Kigali", addressCountry: "RW" } },
+      },
+      {
+        "@type": "Occupation",
+        name: "AI Builder",
+        occupationLocation: { "@type": "City", name: "Kigali", address: { "@type": "PostalAddress", addressLocality: "Kigali", addressCountry: "RW" } },
+      },
       { "@type": "Occupation", name: "Entrepreneur" },
       { "@type": "Occupation", name: "Technologist" },
-      { "@type": "Occupation", name: "Software Engineer" },
-      { "@type": "Occupation", name: "AI Builder" },
     ],
     worksFor: leronyRef(),
+    brand: {
+      "@type": "Brand",
+      name: "Prince Parfait GANZA",
+      url: `${CANONICAL_ORIGIN}/`,
+    },
     homeLocation: {
       "@type": "Place",
       name: "Kigali, Rwanda",
@@ -122,8 +139,8 @@ export function buildPersonJsonLd() {
       contactType: "professional inquiries",
       email: siteConfig.contact.email,
       telephone: "+250792054846",
-      areaServed: "RW",
-      availableLanguage: "en",
+      areaServed: ["RW", "Africa"],
+      availableLanguage: ["en"],
     },
     sameAs: [
       siteConfig.social.linkedin,
@@ -131,18 +148,34 @@ export function buildPersonJsonLd() {
       siteConfig.social.twitter,
       siteConfig.social.youtube,
       siteConfig.social.instagram,
+      siteConfig.social.tiktok,
+      siteConfig.social.threads,
+      siteConfig.social.luma,
     ],
     knowsAbout: [
       "Software engineering",
+      "Software engineering in Rwanda",
+      "Software engineering in Kigali",
+      "Software engineer Kigali",
       "Full-stack development",
+      "AI builder",
+      "AI builder in Kigali",
+      "Practical AI integration",
       "Business systems",
       "Digital product development",
+      "Digital products Kigali",
       "Digital presence",
       "Data and reporting systems",
-      "Practical AI integration",
       "Technology consulting",
+      "Technology consulting Kigali",
       "Technical training",
       "Technology entrepreneurship",
+      "Tech founder Kigali",
+      "Tech founder",
+      "Founder of LERONY Ltd",
+      "AskField",
+      "StockPro",
+      "Caritas Rwanda information systems",
     ],
   };
 }
@@ -183,10 +216,19 @@ export function buildWebSiteJsonLd() {
     "@id": WEBSITE_ID,
     url: `${CANONICAL_ORIGIN}/`,
     name: "Prince Parfait GANZA",
-    alternateName: ["Prince Parfait"],
+    alternateName: [
+      "Prince Parfait",
+      "Prince Parfait Ganza",
+      "Software engineer and AI builder in Kigali",
+      "Tech founder Kigali",
+      "LERONY founder",
+    ],
     description: siteConfig.description,
     inLanguage: "en",
+    about: personRef(),
     publisher: personRef(),
+    creator: personRef(),
+    keywords: siteConfig.keywords.join(", "),
   };
 }
 
@@ -216,6 +258,7 @@ export function buildWebPageJsonLd(input: {
     dateModified: SITE_CONTENT_REVISED,
     isPartOf: websiteRef(),
     about: personRef(),
+    mainEntity: personRef(),
     ...(input.includePersonImage !== false
       ? { primaryImageOfPage: { "@id": PERSON_IMAGE_ID } }
       : {}),

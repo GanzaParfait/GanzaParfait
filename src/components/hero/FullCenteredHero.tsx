@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { SiteSettings } from "@/lib/supabase";
-import { heroHighlights, heroImageFor, heroRoles, setting } from "@/lib/hero";
+import { heroHighlights, heroImageFor, heroPortraitAlt, heroRoles, setting } from "@/lib/hero";
 import { socialIcon, heroSocialsFor } from "@/lib/socials";
 
 export default function FullCenteredHero({
@@ -17,6 +17,7 @@ export default function FullCenteredHero({
   const roles = heroRoles(settings);
   const image = heroImageFor(settings, "full_centered_floating");
   const name = setting(settings, "siteTitle");
+  const portraitAlt = heroPortraitAlt(settings);
   const email = setting(settings, "contactEmail");
   const location = setting(settings, "location");
   const socials = heroSocialsFor(settings);
@@ -51,19 +52,18 @@ export default function FullCenteredHero({
           {isStatic ? (
             <Image
               src={image}
-              alt={name}
+              alt={portraitAlt}
               width={900}
-              height={1200}
+              height={1350}
               priority={!isPreview}
               fetchPriority={isPreview ? undefined : "high"}
-              sizes="(max-width: 767px) 72vw, (max-width: 1100px) 58vw, 32rem"
+              sizes="(max-width: 767px) 72vw, (max-width: 1100px) 40vw, 472px"
               className="hero-centered-photo"
-              unoptimized
             />
           ) : (
             <img
               src={image}
-              alt={name}
+              alt={portraitAlt}
               className="hero-centered-photo"
               fetchPriority={isPreview ? undefined : "high"}
               decoding="async"
@@ -72,6 +72,10 @@ export default function FullCenteredHero({
         </div>
         <div className="hero-centered-caption">
           <h1 className="hero-centered-name">{name}</h1>
+          <p className="sr-only">
+            Founder, entrepreneur, technologist, software engineer and AI builder based in Kigali, Rwanda.
+            Building digital products, business systems and practical AI with LERONY Ltd.
+          </p>
           <p className="hero-centered-invite">
             {setting(settings, "heroInviteLine")}{" "}
             <Link href={setting(settings, "heroInviteCtaHref")} className="hero-centered-invite-link">

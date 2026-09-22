@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 import { RiArrowRightLine, RiArrowRightSLine } from "react-icons/ri";
 import { SiteSettings } from "@/lib/supabase";
-import { heroHighlights, heroImageFor, setting } from "@/lib/hero";
+import { heroHighlights, heroImageFor, heroPortraitAlt, setting } from "@/lib/hero";
 
 export default function FeaturedOverlayHero({
   settings,
@@ -31,7 +31,7 @@ export default function FeaturedOverlayHero({
       <div className="hero-cinematic-media">
         <img
           src={image}
-          alt={setting(settings, "siteTitle")}
+          alt={heroPortraitAlt(settings)}
           width={1600}
           height={2000}
           decoding="async"

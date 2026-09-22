@@ -28,6 +28,7 @@ import { contactPageFrom, type ContactPageContent, type ContactTopicIcon } from 
 import { plainTextFromClipboard } from "@/lib/paste-plain-text";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import CustomSelect from "@/components/ui/CustomSelect";
+import { siteConfig } from "@/data/site-data";
 
 type FormState = "idle" | "loading" | "success" | "error";
 
@@ -236,7 +237,7 @@ export default function ContactPageClient({
             <div className="contact-portrait-wrap">
               <div className="contact-portrait-glow" aria-hidden="true" />
               {page.hero.portrait ? (
-                <img src={page.hero.portrait} alt="" className="contact-portrait" width={480} height={560} />
+                <img src={page.hero.portrait} alt={siteConfig.portraitAlt} className="contact-portrait" width={480} height={560} />
               ) : null}
               {page.hero.script ? <p className="contact-script">{page.hero.script}</p> : null}
             </div>

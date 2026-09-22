@@ -37,10 +37,11 @@ const bingVerification = process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION;
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.princeparfait.com"),
   title: {
-    default: "Prince Parfait GANZA | Founder, Entrepreneur & Technologist",
+    default: siteConfig.title,
     template: `%s | Prince Parfait GANZA`,
   },
   description: siteConfig.description,
+  keywords: siteConfig.keywords,
   applicationName: "Prince Parfait GANZA",
   authors: [{ name: "Prince Parfait GANZA", url: canonicalUrl("/") }],
   creator: "Prince Parfait GANZA",
@@ -61,7 +62,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    title: "Prince Parfait GANZA | Founder, Entrepreneur & Technologist",
+    title: siteConfig.title,
     description: siteConfig.description,
     siteName: "Prince Parfait GANZA",
     images: [
@@ -69,14 +70,14 @@ export const metadata: Metadata = {
         url: OG_IMAGE_PATH,
         width: 1200,
         height: 630,
-        alt: "Prince Parfait GANZA, founder, entrepreneur, technologist and software engineer in Kigali",
+        alt: siteConfig.portraitAlt,
         type: "image/jpeg",
       },
       {
         url: "/images/og/prince-parfait-ganza.jpg",
         width: 1200,
         height: 630,
-        alt: "Prince Parfait GANZA",
+        alt: siteConfig.portraitAlt,
         type: "image/jpeg",
       },
     ],
@@ -85,7 +86,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     site: "@prince_parfait1",
     creator: "@prince_parfait1",
-    title: "Prince Parfait GANZA | Founder, Entrepreneur & Technologist",
+    title: siteConfig.title,
     description: siteConfig.description,
     images: [OG_IMAGE_PATH],
   },
@@ -126,8 +127,6 @@ export default async function RootLayout({
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=20260919b" />
         <meta name="msapplication-TileColor" content="#ffffff" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
-        <link rel="dns-prefetch" href="https://edhuizzkjdziurqnidks.supabase.co" />
-        <link rel="preconnect" href="https://edhuizzkjdziurqnidks.supabase.co" crossOrigin="" />
       </head>
       <body className={`${outfit.variable} ${sourceSerif.variable} ${caveat.variable} antialiased`} suppressHydrationWarning>
         <Script

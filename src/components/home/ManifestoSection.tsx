@@ -1,11 +1,15 @@
+import Image from "next/image";
 import { RiArrowRightLine, RiBarChartBoxLine, RiLightbulbFlashLine, RiSettings3Line } from "react-icons/ri";
 import type { HomepageContent } from "@/lib/homepage";
 import ManifestoStepDeck from "@/components/home/ManifestoStepDeck";
+import { siteConfig } from "@/data/site-data";
 
 const ICONS = [RiLightbulbFlashLine, RiSettings3Line, RiBarChartBoxLine];
 
 export default function ManifestoSection({ manifesto, embedded = false }: { manifesto: HomepageContent["manifesto"]; embedded?: boolean }) {
   const Tag = embedded ? "div" : "section";
+  const portraitLocal = Boolean(manifesto.image?.startsWith("/") && !manifesto.image.startsWith("//"));
+
   return (
     <Tag className={embedded ? "manifesto manifesto-embedded" : "manifesto"} id={embedded ? undefined : "manifesto"} aria-label="Opening statement" data-page-section={embedded ? undefined : true} data-section-label={embedded ? undefined : "Manifesto"}>
       <div className="container manifesto-stage">
@@ -18,15 +22,27 @@ export default function ManifestoSection({ manifesto, embedded = false }: { mani
           <div className="manifesto-portrait">
             <div className="manifesto-halo" aria-hidden="true" />
             {manifesto.image ? (
-              <img
-                src={manifesto.image}
-                alt=""
-                className="manifesto-photo"
-                width={800}
-                height={1200}
-                loading="lazy"
-                decoding="async"
-              />
+              portraitLocal ? (
+                <Image
+                  src={manifesto.image}
+                  alt={siteConfig.portraitAlt}
+                  className="manifesto-photo"
+                  width={800}
+                  height={1200}
+                  sizes="(max-width: 767px) 88vw, 312px"
+                  loading="lazy"
+                />
+              ) : (
+                <img
+                  src={manifesto.image}
+                  alt={siteConfig.portraitAlt}
+                  className="manifesto-photo"
+                  width={800}
+                  height={1200}
+                  loading="lazy"
+                  decoding="async"
+                />
+              )
             ) : null}
             {manifesto.chip ? (
               <p className="manifesto-chip">
@@ -36,13 +52,12 @@ export default function ManifestoSection({ manifesto, embedded = false }: { mani
                   ))}
                 </span>
                 <span className="manifesto-chip-mark" aria-hidden="true">
-                  <img
+                  <Image
                     src="/brand/icons/favicon/mark-64.webp"
                     alt=""
                     width={40}
                     height={40}
                     loading="lazy"
-                    decoding="async"
                   />
                 </span>
               </p>

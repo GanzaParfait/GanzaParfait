@@ -779,9 +779,9 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
     trust: ["Practical discussion", "No obligation", "Response within 24 hours"],
   },
   seo: {
-    title: "Services & Capabilities | Prince Parfait GANZA",
+    title: "Services & Capabilities | Software Engineer & AI Builder in Kigali — Prince Parfait GANZA",
     description:
-      "Services from Prince Parfait GANZA in Kigali, Rwanda: digital products, websites, business systems, digital presence, data, practical AI, consulting, training and technical support.",
+      "Services from Prince Parfait GANZA — software engineer and AI builder in Kigali, Rwanda: digital products, websites, business systems, digital presence, data, practical AI, consulting, training and technical support.",
   },
 };
 

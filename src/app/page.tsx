@@ -5,8 +5,6 @@ import { buildGraph, buildItemListJsonLd, buildPersonJsonLd, buildWebPageJsonLd 
 import { JsonLd } from "@/components/seo/JsonLd";
 import HeroSection from "@/components/hero/HeroSection";
 import HomeJourney from "@/components/home/HomeJourney";
-import { getServerSiteSettings } from "@/lib/site-settings-server";
-import { heroImageFor } from "@/lib/hero";
 
 export const metadata: Metadata = buildPageMetadata({
   title: identity.pageTitle,
@@ -14,19 +12,14 @@ export const metadata: Metadata = buildPageMetadata({
   path: "/",
   absoluteTitle: true,
   keywords: siteConfig.keywords,
+  ogImageAlt: siteConfig.portraitAlt,
 });
 
 export default async function HomePage() {
   const featured = projects.filter((project) => project.featured).slice(0, 6);
-  const settings = await getServerSiteSettings();
-  const heroSrc = heroImageFor(settings, settings.bannerLayout || "full_centered_floating");
-  const preloadHero = heroSrc.startsWith("/") && !heroSrc.startsWith("//");
 
   return (
     <>
-      {preloadHero ? (
-        <link rel="preload" as="image" href={heroSrc} fetchPriority="high" />
-      ) : null}
       <JsonLd
         data={buildGraph([
           buildPersonJsonLd(),
@@ -38,7 +31,7 @@ export default async function HomePage() {
           buildItemListJsonLd(
             featured.length ? featured : projects.slice(0, 4),
             "/",
-            "Featured work by Prince Parfait GANZA",
+            "Featured work by Prince Parfait GANZA — software engineer and AI builder in Kigali",
           ),
         ])}
       />

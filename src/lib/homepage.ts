@@ -189,7 +189,7 @@ export const DEFAULT_HOMEPAGE: HomepageContent = {
   manifesto: {
     label: "The work",
     title: "I work where ideas, technology and execution meet.",
-    body: "From digital systems and client platforms to products and new ventures, the work is turning a complex need into something useful and dependable.",
+    body: "From digital systems and client platforms to products and new ventures in Kigali, Rwanda — the work is turning a complex need into something useful and dependable.",
     image: "/images/profile/hero-split-portrait.webp",
     points: [
       { title: "Think clearly", body: "Understand the real challenge.", tag: "Define" },
@@ -198,7 +198,7 @@ export const DEFAULT_HOMEPAGE: HomepageContent = {
     ],
     quote: "Ideas gain value when they are built and used by real people.",
     attribution: "Prince Parfait GANZA",
-    roles: "Founder · Entrepreneur · Technologist",
+    roles: "Founder · Entrepreneur · Technologist · Software Engineer · AI Builder",
     script: "Build What's Next",
     rail: ["Ideas", "Systems", "Impact"],
     chip: "Technology · People · Real impact",
@@ -206,12 +206,14 @@ export const DEFAULT_HOMEPAGE: HomepageContent = {
   work: {
     label: "03 / Selected work",
     title: "Real work. Real impact.",
-    intro: "Systems, products, and digital solutions built for organizations, businesses, and communities.",
+    intro:
+      "Systems, products, and digital solutions built in Kigali for organizations, businesses, and communities — by a software engineer and AI builder.",
     cta: "View all projects",
     flourish: "",
     moreLabel: "More projects",
     moreTitle: "Explore more of my work.",
-    moreBody: "Systems, web applications, data solutions, and ventures — each built to solve a real problem.",
+    moreBody:
+      "Systems, web applications, data solutions, and ventures from Kigali — each built to solve a real problem.",
     rail: ["Ideas", "Systems", "Impact"],
     stories: [
       story("caritas-systems", {

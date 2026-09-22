@@ -1,5 +1,6 @@
 import type { HeroLayoutCopy, HeroLayoutType, SiteSettings } from "@/lib/supabase";
 import { DEFAULT_SETTINGS } from "@/lib/supabase";
+import { siteConfig } from "@/data/site-data";
 
 export const HERO_LAYOUTS: {
   id: HeroLayoutType;
@@ -38,6 +39,13 @@ export function setting<K extends keyof SiteSettings>(settings: SiteSettings, ke
   const value = settings[key];
   if (value === undefined || value === "") return DEFAULT_SETTINGS[key] as NonNullable<SiteSettings[K]>;
   return value as NonNullable<SiteSettings[K]>;
+}
+
+/** Keyword-bearing portrait alt for crawlers — not just the display name. */
+export function heroPortraitAlt(settings: SiteSettings) {
+  const name = setting(settings, "siteTitle");
+  if (name === siteConfig.name || !name.trim()) return siteConfig.portraitAlt;
+  return `${name} — Rwandan founder, entrepreneur, technologist, software engineer and AI builder based in Kigali, Rwanda`;
 }
 
 export const LAYOUT_HERO_IMAGES: Record<HeroLayoutType, string> = {

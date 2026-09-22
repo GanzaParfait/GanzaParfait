@@ -8,13 +8,15 @@ export const identity = {
   roleLine: "Founder · Entrepreneur · Technologist · Software Engineer · AI Builder",
   positioning:
     "Building technology, products and ventures that turn ambitious ideas into real-world impact.",
-  pageTitle: "Prince Parfait GANZA | Founder, Entrepreneur & Technologist",
+  pageTitle: "Prince Parfait GANZA | Founder, Software Engineer & AI Builder in Kigali",
   description:
-    "Prince Parfait GANZA is a Rwandan founder, entrepreneur and technologist, and a software engineer and AI builder, based in Kigali.",
+    "Prince Parfait GANZA is a Rwandan founder, entrepreneur and technologist — a software engineer and AI builder based in Kigali. Founder and CEO of LERONY Ltd, building digital products, business systems and practical AI for real organizations.",
   shortBio:
     "Prince Parfait GANZA is a Rwandan founder, entrepreneur and technologist based in Kigali. He leads Lerony and works across technology, digital products and ventures that help organizations and ambitious ideas become reliable real-world solutions. His background combines software engineering, product delivery, data systems, client collaboration and technical training.",
   compactBio:
     "Rwandan founder, entrepreneur and technologist building technology, products and ventures from Kigali.",
+  portraitAlt:
+    "Prince Parfait GANZA — Rwandan founder, entrepreneur, technologist, software engineer and AI builder based in Kigali, Rwanda",
 } as const;
 
 export const siteConfig = {
@@ -25,16 +27,41 @@ export const siteConfig = {
   positioning: identity.roleLine,
   shortIntro: identity.shortBio,
   compactIntro: identity.compactBio,
+  portraitAlt: identity.portraitAlt,
   url: "https://www.princeparfait.com",
   ogImage: "/images/og/seo-share-image.jpg",
   locale: "en_US",
   keywords: [
     "Prince Parfait GANZA",
     "Prince Parfait Ganza",
+    "Prince Parfait",
     "Founder Entrepreneur Technologist",
     "Founder LERONY Ltd",
+    "LERONY founder",
+    "LERONY Ltd CEO",
     "Technology entrepreneur Rwanda",
+    "Tech founder Kigali",
+    "Tech founder Rwanda",
     "Software Engineer Rwanda",
+    "Software engineer Kigali",
+    "Software engineer in Rwanda",
+    "Software engineer in Kigali",
+    "AI builder Rwanda",
+    "AI builder Kigali",
+    "AI builder in Kigali",
+    "Rwandan technologist",
+    "Technologist Kigali",
+    "Technologist Rwanda",
+    "Software engineer and AI builder Kigali",
+    "Full-stack developer Kigali",
+    "Full-stack developer Rwanda",
+    "Digital products Kigali",
+    "Business systems Rwanda",
+    "Technology consulting Kigali",
+    "Practical AI Rwanda",
+    "AskField developer",
+    "StockPro inventory",
+    "Caritas Rwanda systems",
     "princeparfait.com",
   ],
   social: {

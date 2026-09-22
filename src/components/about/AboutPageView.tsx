@@ -29,6 +29,7 @@ import {
   type AboutValueIcon,
 } from "@/lib/about-page";
 import AnimatedSection from "@/components/ui/AnimatedSection";
+import { siteConfig } from "@/data/site-data";
 
 function FactIcon({ icon }: { icon: AboutFactIcon }) {
   if (icon === "briefcase") return <RiBriefcaseLine size={15} />;
@@ -72,7 +73,7 @@ export default function AboutPageView({
           <AnimatedSection direction="left" className="about-hero-visual">
             <div className="about-portrait-wrap">
               {page.hero.portrait ? (
-                <img src={page.hero.portrait} alt="" className="about-portrait" width={480} height={560} />
+                <img src={page.hero.portrait} alt={siteConfig.portraitAlt} className="about-portrait" width={480} height={560} />
               ) : null}
               <span className="about-portrait-place">
                 <RiMapPinLine size={12} /> Kigali, Rwanda

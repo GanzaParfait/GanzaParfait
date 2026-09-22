@@ -13,6 +13,7 @@ import {
 import { useState, useEffect } from "react";
 import { siteConfig } from "@/data/site-data";
 import { SiteSettings } from "@/lib/supabase";
+import { heroPortraitAlt } from "@/lib/hero";
 
 const primarySocials = [
   { href: siteConfig.social.whatsapp, label: "WhatsApp", icon: RiWhatsappLine },
@@ -98,7 +99,7 @@ export default function MinimalCenteredHero({ settings }: { settings: SiteSettin
           }}>
             <img
               src={settings?.heroImageUrl || "/images/profile/prince-parfait-ganza-kigali-rwanda.webp"}
-              alt={settings.siteTitle}
+              alt={heroPortraitAlt(settings)}
               className="w-full h-full object-cover object-top"
             />
           </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import {
   RiArrowRightLine,
@@ -10,6 +11,39 @@ import {
 } from "react-icons/ri";
 import type { Project } from "@/data/site-data";
 import { workCategoryLabel } from "@/components/work/work-media";
+
+function CoverImage({
+  cover,
+  title,
+  wide,
+}: {
+  cover: string;
+  title: string;
+  wide: boolean;
+}) {
+  const local = cover.startsWith("/") && !cover.startsWith("//");
+  const remote = /^https?:\/\//i.test(cover);
+  const sizes = wide
+    ? "(max-width: 900px) 92vw, (max-width: 1200px) 55vw, 646px"
+    : "(max-width: 900px) 92vw, (max-width: 1200px) 28vw, 320px";
+  const alt = `${title} — work by Prince Parfait GANZA`;
+
+  if (local || remote) {
+    return (
+      <Image
+        src={cover}
+        alt={alt}
+        width={1200}
+        height={750}
+        sizes={sizes}
+        loading="lazy"
+        className="selected-shot-img"
+      />
+    );
+  }
+
+  return <img src={cover} alt={alt} loading="lazy" decoding="async" width={1200} height={750} />;
+}
 
 export default function WorkProjectCard({
   project,
@@ -97,12 +131,12 @@ export default function WorkProjectCard({
         {cover ? (
           onPreview ? (
             <button type="button" className="selected-shot" onClick={onPreview} aria-label={`Preview ${title}`}>
-              <img src={cover} alt="" loading="lazy" decoding="async" width={1200} height={750} />
+              <CoverImage cover={cover} title={title} wide={wide} />
               {mediaCount > 1 ? <em>{mediaCount}</em> : null}
             </button>
           ) : (
             <Link href={href} className="selected-shot" aria-label={`Open ${title}`}>
-              <img src={cover} alt="" loading="lazy" decoding="async" width={1200} height={750} />
+              <CoverImage cover={cover} title={title} wide={wide} />
               {mediaCount > 1 ? <em>{mediaCount}</em> : null}
             </Link>
           )

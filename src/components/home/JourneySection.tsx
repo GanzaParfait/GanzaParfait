@@ -304,7 +304,7 @@ export default function JourneySection({
                       </div>
                       {item.logo ? (
                         <span className="journey-item-logo">
-                          <Image src={item.logo} alt="" width={40} height={40} />
+                          <Image src={item.logo} alt={`${item.organization} logo`} width={40} height={40} />
                         </span>
                       ) : null}
                     </div>
@@ -366,7 +366,7 @@ export default function JourneySection({
               {active.website ? (
                 <a className="journey-drawer-logo" href={active.website} target="_blank" rel="noopener noreferrer">
                   {active.logo ? (
-                    <Image src={active.logo} alt="" width={56} height={56} />
+                    <Image src={active.logo} alt={`${active.organization} logo`} width={56} height={56} />
                   ) : (
                     active.organization.split(" ")[0]
                   )}
@@ -374,7 +374,7 @@ export default function JourneySection({
               ) : (
                 <span className="journey-drawer-logo">
                   {active.logo ? (
-                    <Image src={active.logo} alt="" width={56} height={56} />
+                    <Image src={active.logo} alt={`${active.organization} logo`} width={56} height={56} />
                   ) : (
                     active.organization.split(" ")[0]
                   )}

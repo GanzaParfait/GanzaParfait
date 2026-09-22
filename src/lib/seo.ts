@@ -54,7 +54,7 @@ export function buildPageMetadata(input: PageSeoInput): Metadata {
           url: ogImage,
           width: 1200,
           height: 630,
-          alt: input.ogImageAlt || "Prince Parfait GANZA, founder, entrepreneur, technologist and software engineer in Kigali",
+          alt: input.ogImageAlt || "Prince Parfait GANZA — founder, entrepreneur, technologist, software engineer and AI builder in Kigali, Rwanda",
           type: ogType,
         },
       ],

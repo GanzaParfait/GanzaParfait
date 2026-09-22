@@ -43,16 +43,42 @@ Birth date is not in the verified record. Do not invent `birthDate` in schema.
 
 ## Page titles
 
-Unique, natural, not a role list:
+Unique, natural, and discovery-oriented — name plus verified roles and place:
 
 | Page | Title |
 |------|--------|
-| Home | Prince Parfait GANZA \| Founder, Entrepreneur & Technologist |
-| About | About Prince Parfait GANZA \| Founder, Entrepreneur & Technologist |
-| Work | Projects & Case Studies \| Prince Parfait GANZA |
-| Experience | Experience \| Prince Parfait GANZA |
-| Capabilities | Capabilities \| Prince Parfait GANZA |
-| Contact | Contact Prince Parfait GANZA |
+| Home | Prince Parfait GANZA \| Founder, Software Engineer & AI Builder in Kigali |
+| About | About Prince Parfait GANZA \| Software Engineer & AI Builder in Kigali |
+| Work | Work & Case Studies \| Software Engineer in Kigali — Prince Parfait GANZA |
+| Experience | Experience \| Software Engineer & AI Builder in Kigali — Prince Parfait GANZA |
+| Services | Services & Capabilities \| Software Engineer & AI Builder in Kigali — Prince Parfait GANZA |
+| Contact | Contact Prince Parfait GANZA \| Software Engineer & AI Builder Kigali |
+
+---
+
+## Discovery keywords (not exact-name only)
+
+Target collocated, verified phrases so the site can surface for role + place queries — not only “Prince Parfait”. Keep phrases factual; do not invent credentials.
+
+**Core clusters**
+
+- Software engineer Kigali / Software engineer Rwanda
+- AI builder Kigali / AI builder Rwanda
+- Tech founder Kigali / Technology entrepreneur Rwanda
+- LERONY founder / Founder LERONY Ltd / LERONY Ltd CEO
+- Rwandan technologist / Technologist Kigali
+- Software engineer and AI builder Kigali
+- Digital products Kigali / Business systems Rwanda / Technology consulting Kigali
+
+**Where they live**
+
+- `siteConfig.keywords` and per-page `keywords` in metadata
+- Meta titles and descriptions (home, about, experience, work, contact, services)
+- Person / WebSite JSON-LD (`jobTitle`, `knowsAbout`, `hasOccupation` with Kigali, image caption)
+- Portrait `alt` text (`siteConfig.portraitAlt` / `heroPortraitAlt`) — crawlers cannot read text in images
+- Visible role line and bio on the hero (not only the H1 name)
+
+Do not keyword-stuff body copy. Prefer natural sentences that already match the public biography.
 
 ---
 
@@ -96,7 +122,7 @@ The artwork is fitted inside that frame so the name, portrait, and corner marks 
 
 Portrait: `/images/profile/prince-parfait-ganza-kigali-rwanda.webp`
 
-Alt text for the portrait: `Prince Parfait GANZA`
+Alt text for the portrait: `Prince Parfait GANZA — Rwandan founder, entrepreneur, technologist, software engineer and AI builder based in Kigali, Rwanda`
 
 ---
 

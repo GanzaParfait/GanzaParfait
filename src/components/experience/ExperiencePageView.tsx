@@ -429,7 +429,7 @@ function ExperienceCard({ item, current }: { item: TimelineEntry; current?: bool
         </div>
         {item.logo ? (
           <span className="experience-card-logo">
-            <Image src={item.logo} alt="" width={56} height={56} />
+            <Image src={item.logo} alt={`${item.organization} logo`} width={56} height={56} />
           </span>
         ) : null}
       </div>

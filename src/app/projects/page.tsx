@@ -11,10 +11,10 @@ import {
 import { JsonLd } from "@/components/seo/JsonLd";
 
 const PAGE_DESCRIPTION =
-  "Selected systems and case studies by Prince Parfait GANZA in Kigali — reporting platforms, inventory operations, ticket accounting, and product builds for real organizations.";
+  "Selected systems and case studies by Prince Parfait GANZA — software engineer and AI builder in Kigali — including reporting platforms, inventory operations, ticket accounting, and product builds for real organizations.";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Work & Case Studies by Prince Parfait GANZA",
+  title: "Work & Case Studies | Software Engineer in Kigali — Prince Parfait GANZA",
   description: PAGE_DESCRIPTION,
   path: "/projects",
   absoluteTitle: true,
@@ -22,7 +22,11 @@ export const metadata: Metadata = buildPageMetadata({
     "Prince Parfait GANZA projects",
     "Prince Parfait GANZA case studies",
     "software systems Kigali",
+    "software engineer Kigali projects",
     "LERONY projects",
+    "AskField",
+    "Caritas Rwanda systems",
+    "business systems Rwanda",
   ],
 });
 

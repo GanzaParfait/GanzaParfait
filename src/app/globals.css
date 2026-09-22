@@ -761,23 +761,28 @@ code, pre {
   transform: translateY(-1px);
 }
 .hero-role-list.is-cycling li.is-idle {
-  opacity: 0.72;
+  opacity: 1;
   filter: none;
   transform: translateX(0);
-  color: color-mix(in srgb, var(--color-primary) 72%, var(--color-text-2));
+  /* Solid muted text — opacity on primary failed WCAG contrast in PSI */
+  color: var(--color-text-2);
 }
 .hero-role-list.is-cycling li.is-active {
   opacity: 1;
   filter: none;
   transform: translateX(0);
+  color: var(--color-primary);
+  font-weight: 800;
+}
+[data-theme="dark"] .hero-role-list.is-cycling li.is-idle {
+  color: #94a3b8;
+}
+[data-theme="dark"] .hero-role-list.is-cycling li.is-active {
+  color: #dbeafe;
 }
 @media (prefers-reduced-motion: reduce) {
   .hero-role-list li {
     transition: none;
-  }
-  .hero-role-list.is-cycling li.is-idle {
-    opacity: 0.8;
-    filter: none;
   }
 }
 
@@ -2317,12 +2322,14 @@ code, pre {
   gap: 1.2rem;
   margin: 0;
   padding: 0.15rem 0 0.15rem 1.45rem;
+  /* Dot top 0.45rem + half of 0.55rem */
+  --journey-marker-center: 0.725rem;
 }
 .journey-list::before {
   content: "";
   position: absolute;
   left: 0.28rem;
-  top: 0.35rem;
+  top: var(--journey-marker-center);
   bottom: 0.35rem;
   width: 2px;
   background: color-mix(in srgb, var(--color-primary) 22%, transparent);
@@ -2333,7 +2340,7 @@ code, pre {
 .journey-line {
   position: absolute;
   left: 0.28rem;
-  top: 0.35rem;
+  top: var(--journey-marker-center);
   bottom: 0.35rem;
   width: 2px;
   background: var(--color-primary);
@@ -3712,7 +3719,7 @@ code, pre {
   border-radius: 1.25rem;
 }
 .subscribe-widget-layer.is-sheet .subscribe-widget {
-  width: 100%;
+    width: 100%;
   border-radius: 1.25rem 1.25rem 0 0;
   padding: 0.55rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom, 0px));
   max-height: min(88dvh, 28rem);
@@ -4511,8 +4518,7 @@ code, pre {
   backdrop-filter: none;
 }
 
-[data-theme="dark"] .hero-centered-pill-title,
-[data-theme="dark"] .hero-role-list li {
+[data-theme="dark"] .hero-centered-pill-title {
   color: #dbeafe;
 }
 
@@ -8754,6 +8760,7 @@ code, pre {
   padding: 1rem;
 }
 .selected-shot img,
+.selected-shot-img,
 .selected-card img,
 .case-hero img,
 .case-gallery img {
@@ -13219,6 +13226,8 @@ button.case-hero-shot {
   padding: 0.15rem 0 0.15rem 1.45rem;
   list-style: none;
   scroll-margin-top: calc(var(--public-nav-offset, 4rem) + 0.85rem);
+  /* Marker sits at 1.05rem; radius 0.275rem → center at 1.325rem */
+  --journey-marker-center: 1.325rem;
 }
 
 .experience-timeline > li {
@@ -13228,6 +13237,12 @@ button.case-hero-shot {
 
 .experience-timeline > li::before {
   top: 1.05rem;
+}
+
+/* Track + progress must begin on the first marker, not the list top */
+.experience-timeline.journey-list::before,
+.experience-timeline .journey-line {
+  top: var(--journey-marker-center);
 }
 
 .experience-card-head {
