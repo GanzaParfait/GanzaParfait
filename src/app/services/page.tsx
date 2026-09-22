@@ -34,11 +34,12 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
       "Prince Parfait GANZA Kigali",
       "software engineering Rwanda",
       "software engineer Kigali",
-      "AI builder Kigali",
+      "research technology Rwanda",
+      "digital data collection Kigali",
+      "survey programming Rwanda",
+      "data systems Kigali",
       "business systems Kigali",
-      "digital presence Rwanda",
       "technology consulting Kigali",
-      "practical AI Rwanda",
     ],
   });
   // Focus query variants are UX filters; keep one indexable services URL.

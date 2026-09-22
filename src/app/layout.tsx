@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Caveat, Outfit, Source_Serif_4 } from "next/font/google";
-import Script from "next/script";
 import "./globals.css";
 import LayoutShell from "@/components/layout/LayoutShell";
+import ThemeInitScript from "@/components/providers/ThemeInitScript";
 import { SiteSettingsProvider } from "@/components/providers/SiteSettingsProvider";
 import { siteConfig } from "@/data/site-data";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -129,13 +129,7 @@ export default async function RootLayout({
         <meta name="msapplication-config" content="/browserconfig.xml" />
       </head>
       <body className={`${outfit.variable} ${sourceSerif.variable} ${caveat.variable} antialiased`} suppressHydrationWarning>
-        <Script
-          id="theme-init"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var d=localStorage.getItem('theme')==='dark';var c='#ffffff';document.documentElement.setAttribute('data-theme',d?'dark':'light');document.documentElement.style.colorScheme=d?'dark':'light';var m=document.querySelectorAll('meta[name="theme-color"]');if(!m.length){var n=document.createElement('meta');n.setAttribute('name','theme-color');n.setAttribute('content',c);document.head.appendChild(n);}else{m.forEach(function(el){el.setAttribute('content',c);});}}catch(e){}})();`,
-          }}
-        />
+        <ThemeInitScript />
         <SiteSettingsProvider initial={settings}>
           <LayoutShell>{children}</LayoutShell>
         </SiteSettingsProvider>

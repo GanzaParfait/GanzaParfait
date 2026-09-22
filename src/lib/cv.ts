@@ -12,6 +12,7 @@ import { DEFAULT_CV_ACCESS, normalizeCvAccess, type CvAccessConfig } from "@/lib
 import { siteUrl } from "@/lib/env";
 import { resolvedSocials } from "@/lib/socials";
 import type { SiteSettings } from "@/lib/supabase";
+import { IDENTITY_ROLE_LINE } from "@/lib/identity";
 
 function careerRoles(settings: SiteSettings): CareerRecord[] {
   return careerFrom(settings).records.filter((item) => item.kind === "role");
@@ -346,7 +347,7 @@ function defaultFormat(template: CvTemplateId): CvFormatConfig {
       label: TEMPLATE_LABELS.compact,
       isPublic: true,
       showInHero: true,
-      headline: "Founder · Software Engineer · Technologist",
+      headline: IDENTITY_ROLE_LINE,
       appearance: defaultAppearance("compact"),
       sections: sectionsFor([
         { id: "profile" },
@@ -430,7 +431,7 @@ function defaultFormat(template: CvTemplateId): CvFormatConfig {
     label: TEMPLATE_LABELS.professional,
     isPublic: true,
     showInHero: true,
-    headline: "Founder · Software Engineer · Technologist",
+    headline: IDENTITY_ROLE_LINE,
     appearance: defaultAppearance("professional"),
     sections: sectionsFor([
       { id: "profile" },
@@ -1136,7 +1137,7 @@ export function resolveCvDocument(
   const template = templateId || config.defaultTemplate;
   const format = config.formats[template];
   const name = settings.siteTitle?.trim() || "Prince Parfait GANZA";
-  const headline = format.headline?.trim() || "Founder · Software Engineer · Technologist";
+  const headline = format.headline?.trim() || IDENTITY_ROLE_LINE;
   const profile = normalizeText(format.profileOverride) || defaultProfile(template, settings);
   const appearance = format.appearance || defaultAppearance(template);
   const photoSource =

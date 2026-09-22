@@ -29,6 +29,7 @@ import {
   type AboutValueIcon,
 } from "@/lib/about-page";
 import AnimatedSection from "@/components/ui/AnimatedSection";
+import EngineeringToolkitSection from "@/components/about/EngineeringToolkitSection";
 import { siteConfig } from "@/data/site-data";
 
 function FactIcon({ icon }: { icon: AboutFactIcon }) {
@@ -56,6 +57,10 @@ function ValueIcon({ icon }: { icon: AboutValueIcon }) {
   return <RiDiamondLine size={18} />;
 }
 
+/**
+ * Public About order:
+ * who → specializations → path → evidence → engineering toolkit → principles → contact.
+ */
 export default function AboutPageView({
   content: contentOverride,
   embedded = false,
@@ -73,7 +78,15 @@ export default function AboutPageView({
           <AnimatedSection direction="left" className="about-hero-visual">
             <div className="about-portrait-wrap">
               {page.hero.portrait ? (
-                <img src={page.hero.portrait} alt={siteConfig.portraitAlt} className="about-portrait" width={480} height={560} />
+                <img
+                  src={page.hero.portrait}
+                  alt={siteConfig.portraitAlt}
+                  className="about-portrait"
+                  width={1200}
+                  height={1200}
+                  fetchPriority="high"
+                  decoding="async"
+                />
               ) : null}
               <span className="about-portrait-place">
                 <RiMapPinLine size={12} /> Kigali, Rwanda
@@ -123,7 +136,7 @@ export default function AboutPageView({
             <p className="section-label">{page.focus.label}</p>
             <h2>{page.focus.title}</h2>
           </div>
-          <div className="about-focus-grid">
+          <div className="about-focus-grid" data-count={page.focus.items.length}>
             {page.focus.items.map((item) => (
               <article key={item.title} className="about-focus-card">
                 <span className="about-focus-icon" aria-hidden>
@@ -137,43 +150,23 @@ export default function AboutPageView({
         </div>
       </section>
 
-      <section className="about-split" aria-label="Story and work">
-        <div className="container about-split-grid">
-          <AnimatedSection className="about-story">
-            <p className="section-label">{page.story.label}</p>
-            <h2>{page.story.title}</h2>
-            {page.story.paragraphs.map((paragraph) => (
-              <p key={paragraph.slice(0, 48)}>{paragraph}</p>
-            ))}
-            {page.story.quote ? (
-              <blockquote>
-                <p>“{page.story.quote}”</p>
-                <cite>— Prince Parfait GANZA</cite>
-              </blockquote>
-            ) : null}
-          </AnimatedSection>
-
-          <AnimatedSection delay={60} className="about-work">
-            <p className="section-label">{page.work.label}</p>
-            <h2>{page.work.title}</h2>
-            <ul>
-              {page.work.items.map((item) => (
-                <li key={item.title}>
-                  <span aria-hidden>
-                    <FocusIcon icon={item.icon} />
-                  </span>
-                  <div>
-                    <strong>{item.title}</strong>
-                    <p>{item.body}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </AnimatedSection>
+      <section className="about-band is-soft" aria-label={page.story.title}>
+        <div className="container about-story about-story-wide">
+          <p className="section-label">{page.story.label}</p>
+          <h2>{page.story.title}</h2>
+          {page.story.paragraphs.map((paragraph) => (
+            <p key={paragraph.slice(0, 48)}>{paragraph}</p>
+          ))}
+          {page.story.quote ? (
+            <blockquote>
+              <p>“{page.story.quote}”</p>
+              <cite>— Prince Parfait GANZA</cite>
+            </blockquote>
+          ) : null}
         </div>
       </section>
 
-      <section className="about-band is-soft" aria-label={page.facts.title}>
+      <section className="about-band" aria-label={page.facts.title}>
         <div className="container">
           <div className="about-band-head">
             <p className="section-label">{page.facts.label}</p>
@@ -215,13 +208,15 @@ export default function AboutPageView({
         </div>
       </section>
 
-      <section className="about-band" aria-label={page.values.title}>
+      {!embedded ? <EngineeringToolkitSection /> : null}
+
+      <section className="about-band is-soft" aria-label={page.values.title}>
         <div className="container">
           <div className="about-band-head">
             <p className="section-label">{page.values.label}</p>
             <h2>{page.values.title}</h2>
           </div>
-          <div className="about-values-grid">
+          <div className="about-values-grid" data-count={page.values.items.length}>
             {page.values.items.map((item) => (
               <article key={item.title} className="about-value-card">
                 <span aria-hidden>
@@ -235,23 +230,7 @@ export default function AboutPageView({
         </div>
       </section>
 
-      {page.strengths.items.length ? (
-        <section className="about-band is-soft" aria-label={page.strengths.title}>
-          <div className="container about-strengths">
-            <div className="about-band-head">
-              <p className="section-label">{page.strengths.label}</p>
-              <h2>{page.strengths.title}</h2>
-            </div>
-            <ul>
-              {page.strengths.items.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </div>
-        </section>
-      ) : null}
-
-      <section className="about-cta" aria-label="Next step">
+      <section className="about-cta" aria-label="Contact">
         <div className="container about-cta-inner">
           <div>
             <p className="section-label">{page.cta.label}</p>

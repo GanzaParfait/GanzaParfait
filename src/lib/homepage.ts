@@ -1,4 +1,5 @@
 import { projects, siteConfig, timeline } from "@/data/site-data";
+import { IDENTITY_ROLE_LINE } from "@/lib/identity";
 import {
   careerFrom,
   careerRecordToJourneyEntry,
@@ -189,7 +190,7 @@ export const DEFAULT_HOMEPAGE: HomepageContent = {
   manifesto: {
     label: "The work",
     title: "I work where ideas, technology and execution meet.",
-    body: "From digital systems and client platforms to products and new ventures in Kigali, Rwanda — the work is turning a complex need into something useful and dependable.",
+    body: "From digital systems and client platforms to products and new ventures in Kigali, Rwanda. The work is turning a complex need into something useful and dependable.",
     image: "/images/profile/hero-split-portrait.webp",
     points: [
       { title: "Think clearly", body: "Understand the real challenge.", tag: "Define" },
@@ -198,36 +199,38 @@ export const DEFAULT_HOMEPAGE: HomepageContent = {
     ],
     quote: "Ideas gain value when they are built and used by real people.",
     attribution: "Prince Parfait GANZA",
-    roles: "Founder · Entrepreneur · Technologist · Software Engineer · AI Builder",
+    roles: IDENTITY_ROLE_LINE,
     script: "Build What's Next",
-    rail: ["Ideas", "Systems", "Impact"],
-    chip: "Technology · People · Real impact",
+    rail: ["Software", "Research", "Data"],
+    chip: "Systems · Research · Decisions",
   },
   work: {
     label: "03 / Selected work",
     title: "Real work. Real impact.",
     intro:
-      "Systems, products, and digital solutions built in Kigali for organizations, businesses, and communities — by a software engineer and AI builder.",
+      "Software systems, research technology and organizational data tools built in Kigali for real operational needs.",
     cta: "View all projects",
     flourish: "",
     moreLabel: "More projects",
     moreTitle: "Explore more of my work.",
     moreBody:
-      "Systems, web applications, data solutions, and ventures from Kigali — each built to solve a real problem.",
-    rail: ["Ideas", "Systems", "Impact"],
+      "Platforms, business systems and research-oriented products, each built to solve a real operational problem.",
+    rail: ["Software", "Research", "Data"],
     stories: [
-      story("caritas-systems", {
-        line: "Organizational reporting, held in one dependable system.",
-        support: "Organizational digital systems for indicator tracking, reporting, and information management.",
-        tags: ["Systems", "Data"],
-        images: ["/images/projects/caritas-systems.webp"],
-      }),
       story("askfield", {
-        line: "Survey workflows, connected through the interface.",
-        support: "Frontend development and API integration for a survey and data-collection platform.",
-        tags: ["Product", "Data"],
+        line: "Research surveys, connected through a real collection platform.",
+        support:
+          "AskField: Frontend Integrator work expanding into survey programming, XLSForm, CAPI/CATI/CAWI and research-data workflows with Ethical Research Solutions.",
+        tags: ["Research", "Surveys", "XLSForm"],
         images: ["/images/projects/askfield.webp"],
         status: "Team contribution. No public metric is claimed.",
+      }),
+      story("caritas-systems", {
+        line: "Organizational reporting, held in one dependable system.",
+        support:
+          "Indicator management and decision-support systems for tracking, reporting and information management.",
+        tags: ["Indicators", "Data", "Systems"],
+        images: ["/images/projects/caritas-systems.webp"],
       }),
       story("stockpro", {
         line: "Inventory and sales, without a pile of separate records.",
@@ -247,9 +250,9 @@ export const DEFAULT_HOMEPAGE: HomepageContent = {
   knowledge: {
     label: "Knowledge",
     title: "Different challenges. Practical ways forward.",
-    body: "From building digital products to growing an online presence, improving operations or providing hands-on support.",
+    body: "From software systems and research technology to organizational data, digital presence and hands-on support.",
     script: "From ideas to impact",
-    rail: ["Build", "Grow", "Transform", "Support"],
+    rail: ["Build", "Research", "Data", "Support"],
     learnMore: "Learn more",
     items: [
       {
@@ -260,24 +263,24 @@ export const DEFAULT_HOMEPAGE: HomepageContent = {
         tags: ["Products", "Websites", "Software", "Commerce"],
       },
       {
-        title: "Grow a digital presence",
-        body: "Digital branding, social platforms, marketplace support, product publishing and stronger online business presence.",
-        href: "/services?focus=grow",
-        icon: "strategy",
-        tags: ["Social Media", "Marketplaces", "Branding", "E-commerce"],
+        title: "Research technology & data collection",
+        body: "Survey programming, XLSForm, CAPI/CATI/CAWI and field-oriented research workflows, evidenced through AskField.",
+        href: "/services?focus=transform",
+        icon: "data",
+        tags: ["Surveys", "XLSForm", "CAPI", "Research"],
       },
       {
         title: "Improve how work gets done",
-        body: "Business systems, data, integrations, automation and practical AI that improve everyday operations.",
+        body: "Business systems, indicators, reporting, integrations, automation and practical AI for everyday operations.",
         href: "/services?focus=transform",
         icon: "technology",
-        tags: ["Systems", "Data", "Automation", "AI"],
+        tags: ["Systems", "Indicators", "Automation", "AI"],
       },
       {
         title: "Support ideas and operations",
         body: "Technology guidance, international client assistance, Rwanda-based digital/process support, training and ongoing technical help.",
         href: "/services?focus=support",
-        icon: "data",
+        icon: "strategy",
         tags: ["Consulting", "International Support", "Training", "Technical Support"],
       },
     ],
@@ -299,7 +302,7 @@ export const DEFAULT_HOMEPAGE: HomepageContent = {
   journey: {
     label: "Journey",
     title: "A journey of continuous building.",
-    note: "From learning to leading — a timeline of the key places, roles, and milestones that shaped this work.",
+    note: "From learning to leading: a timeline of the key places, roles, and milestones that shaped this work.",
     cta: "Open full timeline",
     moreTitle: "Need more details?",
     moreBody: "View the complete record on Experience, including roles, education, and training with verified context.",
@@ -364,7 +367,7 @@ export const DEFAULT_HOMEPAGE: HomepageContent = {
     visualCaption: "Skills today. Opportunities tomorrow.",
     coverTitle: "What I cover",
     coverSubtitle: "Hands-on, practical, and focused on what people can apply.",
-    footQuote: "Good training doesn't just transfer information — it builds confidence to solve real problems.",
+    footQuote: "Good training doesn't just transfer information; it builds confidence to solve real problems.",
     stats: [
       { icon: "people", label: "~85 Trainees" },
       { icon: "book", label: "Data Systems Training Focus" },
@@ -458,7 +461,10 @@ export function homepageFrom(settings: SiteSettings): HomepageContent {
       ...saved.work,
       intro: (() => {
         const raw = saved.work?.intro?.trim() || DEFAULT_HOMEPAGE.work.intro;
-        return /contributed to\s*[—–-]\s*solving/i.test(raw) ? DEFAULT_HOMEPAGE.work.intro : raw;
+        if (/contributed to\s*[—–-]\s*solving/i.test(raw)) return DEFAULT_HOMEPAGE.work.intro;
+        if (/evidence first, titles second/i.test(raw)) return DEFAULT_HOMEPAGE.work.intro;
+        if (/public identity|canonical identity|fourth technical/i.test(raw)) return DEFAULT_HOMEPAGE.work.intro;
+        return raw;
       })(),
       cta: saved.work?.cta || DEFAULT_HOMEPAGE.work.cta,
       flourish: "",

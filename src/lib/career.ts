@@ -90,7 +90,7 @@ function seedRecords(): CareerRecord[] {
     relatedHref: item.relatedHref,
     relatedLabel: item.relatedLabel,
     showOnExperience: true,
-    showOnJourney: ["lerony", "psta"].includes(item.id),
+    showOnJourney: ["lerony", "goa-plus", "psta"].includes(item.id),
   }));
 
   const schools: CareerRecord[] = siteEducation.map((item) => ({
@@ -145,7 +145,7 @@ export const DEFAULT_CAREER: CareerContent = {
   page: {
     label: "Experience",
     title: "A journey of continuous building.",
-    body: "Roles, systems work, training, and education that shaped the founder, entrepreneur, and technologist — a record of progress, not just positions.",
+    body: "Roles, systems work, training, and education: a record of progress across software engineering, research technology and data systems.",
     asideLine: "Ideas · People · Systems · Impact",
     sideLabel: "From learning to leading",
     sideTitle: "Evidence behind the identity.",

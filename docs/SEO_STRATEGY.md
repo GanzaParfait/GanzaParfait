@@ -41,44 +41,81 @@ Birth date is not in the verified record. Do not invent `birthDate` in schema.
 
 ---
 
+## Identity hierarchy (for SEO and UI)
+
+Keep one clean public line. Do not dump every skill into the headline.
+
+| Layer | Public form |
+|-------|-------------|
+| Profession | Software Engineer |
+| Career direction | Technology Entrepreneur |
+| Company role | Founder & CEO, LERONY Ltd |
+
+Capability pillars (visible on About / Services / Work — not as equal titles):
+
+1. Software Engineering & Digital Systems  
+2. Research Technology & Digital Data Collection  
+3. Data Systems, Analytics & Decision Support  
+
+Tools (React, PHP, MySQL, …) stay in case studies and secondary tech lists.
+
+---
+
 ## Page titles
 
 Unique, natural, and discovery-oriented — name plus verified roles and place:
 
 | Page | Title |
 |------|--------|
-| Home | Prince Parfait GANZA \| Founder, Software Engineer & AI Builder in Kigali |
-| About | About Prince Parfait GANZA \| Software Engineer & AI Builder in Kigali |
+| Home | Prince Parfait GANZA \| Software Engineer & Technology Entrepreneur in Kigali |
+| About | About Prince Parfait GANZA \| Software Engineer & Technology Entrepreneur in Kigali |
 | Work | Work & Case Studies \| Software Engineer in Kigali — Prince Parfait GANZA |
-| Experience | Experience \| Software Engineer & AI Builder in Kigali — Prince Parfait GANZA |
-| Services | Services & Capabilities \| Software Engineer & AI Builder in Kigali — Prince Parfait GANZA |
-| Contact | Contact Prince Parfait GANZA \| Software Engineer & AI Builder Kigali |
+| Experience | Experience \| Software Engineer & Technology Entrepreneur in Kigali — Prince Parfait GANZA |
+| Services | Services & Capabilities \| Software Engineer & Technology Entrepreneur — Prince Parfait GANZA |
+| Contact | Contact Prince Parfait GANZA \| Software Engineer & Technology Entrepreneur Kigali |
 
 ---
 
 ## Discovery keywords (not exact-name only)
 
-Target collocated, verified phrases so the site can surface for role + place queries — not only “Prince Parfait”. Keep phrases factual; do not invent credentials.
+Target collocated, verified phrases so the site can surface for role + place + domain queries — not only “Prince Parfait”. Keep phrases factual; do not invent credentials.
 
 **Core clusters**
 
 - Software engineer Kigali / Software engineer Rwanda
-- AI builder Kigali / AI builder Rwanda
-- Tech founder Kigali / Technology entrepreneur Rwanda
+- Technology entrepreneur Rwanda / Tech founder Kigali
 - LERONY founder / Founder LERONY Ltd / LERONY Ltd CEO
-- Rwandan technologist / Technologist Kigali
-- Software engineer and AI builder Kigali
-- Digital products Kigali / Business systems Rwanda / Technology consulting Kigali
+- Research technology Rwanda / Digital data collection Kigali
+- Survey platforms / Research data systems
+- Data systems Kigali / Indicator management systems
+- Business systems Rwanda / Organizational reporting
 
 **Where they live**
 
 - `siteConfig.keywords` and per-page `keywords` in metadata
-- Meta titles and descriptions (home, about, experience, work, contact, services)
-- Person / WebSite JSON-LD (`jobTitle`, `knowsAbout`, `hasOccupation` with Kigali, image caption)
-- Portrait `alt` text (`siteConfig.portraitAlt` / `heroPortraitAlt`) — crawlers cannot read text in images
-- Visible role line and bio on the hero (not only the H1 name)
+- Meta titles and descriptions
+- Person / WebSite JSON-LD (`jobTitle`, `knowsAbout`, `hasOccupation` with Kigali)
+- Portrait `alt` text
+- Visible role line and bio (not only the H1 name)
+- Substantive Services copy + project case studies for research / data pillars
 
-Do not keyword-stuff body copy. Prefer natural sentences that already match the public biography.
+## Layers (do not flatten)
+
+| Layer | Example |
+|-------|---------|
+| Identity | Software Engineer · Technology Entrepreneur · Founder |
+| Company role | Founder & CEO, LERONY Ltd |
+| Specialization | Research Technology & Digital Data Collection |
+| Capability | Survey programming, field operations, indicator reporting |
+| Technology / method | XLSForm, CAPI, React, SQL |
+
+Evidence: AskField → research technology; CRNIS (Caritas) → data systems / decision support; broader portfolio → software engineering.
+
+**LinkedIn headline (approved)**
+
+`Software Engineer & Technology Entrepreneur | Research Technology & Data Systems | Founder & CEO, LERONY Ltd`
+
+Tools and methods belong in About / Experience / Projects / Skills — not in the headline.
 
 ---
 
@@ -116,13 +153,29 @@ FAQ schema is allowed only when the questions are visible on the page.
 
 ## Open Graph
 
-Default image: `/images/og/seo-share-image.jpg` (1200×630).
+Default share image: `/images/og/seo-share-image.jpg` (1200×630).
 
-The artwork is fitted inside that frame so the name, portrait, and corner marks are not cropped. JPEG is the share format because Facebook, LinkedIn, X, WhatsApp, Slack, and iMessage read `og:image`. Declare width, height, and `image/jpeg`.
+**Canonical Person portrait (entity / Lens consistency)**
 
-Portrait: `/images/profile/prince-parfait-ganza-kigali-rwanda.webp`
+| File | Role |
+|------|------|
+| `/images/profile/prince-parfait-ganza.jpg` | Primary Person `image` URL |
+| `/images/profile/prince-parfait-ganza-1x1.jpg` | 1:1 (1200×1200) |
+| `/images/profile/prince-parfait-ganza-4x3.jpg` | 4:3 (1200×900) |
+| `/images/profile/prince-parfait-ganza-16x9.jpg` | 16:9 (1600×900) |
+| `/images/profile/prince-parfait-ganza.webp` | Visible About/Contact display twin |
 
-Alt text for the portrait: `Prince Parfait GANZA — Rwandan founder, entrepreneur, technologist, software engineer and AI builder based in Kigali, Rwanda`
+Permanent filenames — never hashed CMS URLs in Person JSON-LD.
+
+Person `@id`: `https://www.princeparfait.com/#person`
+
+Alt text: `Prince Parfait GANZA — Software Engineer and Founder of LERONY Ltd`
+
+Hero layout art (split/centered/cinematic) may differ visually; they must not replace the Person image URL in structured data.
+
+Portrait: listed in `/image-sitemap.xml` against `/about` and `/`.
+
+Do not invent profiles in `sameAs`. Keep only verified LinkedIn, GitHub, X, YouTube, Instagram.
 
 ---
 

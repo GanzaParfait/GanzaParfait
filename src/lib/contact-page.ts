@@ -1,3 +1,4 @@
+import { DEFAULT_PORTRAIT_WEBP, IDENTITY_ROLE_LINE, PORTRAIT_PATHS } from "@/lib/identity";
 import type { SiteSettings } from "@/lib/supabase";
 
 export type ContactTopicIcon = "chat" | "bulb" | "handshake" | "plane";
@@ -62,8 +63,8 @@ export const DEFAULT_CONTACT_PAGE: ContactPageContent = {
     title: "Let's build something great together.",
     body: "Have a project, a partnership idea, or just want to say hello? I'd love to hear from you. Use the form, email, or any of the channels below.",
     script: "Let's connect!",
-    portrait: "/images/profile/prince-parfait-ganza-kigali-rwanda.webp",
-    roles: "Founder · Entrepreneur · Technologist",
+    portrait: DEFAULT_PORTRAIT_WEBP,
+    roles: IDENTITY_ROLE_LINE,
     topics: [
       { icon: "chat", label: "Project Collaboration" },
       { icon: "bulb", label: "Speaking Engagements" },
@@ -138,7 +139,17 @@ export function contactPageFrom(settings: SiteSettings): ContactPageContent {
       ...DEFAULT_CONTACT_PAGE.hero,
       ...saved.hero,
       topics: saved.hero?.topics?.length ? saved.hero.topics : DEFAULT_CONTACT_PAGE.hero.topics,
-      portrait: saved.hero?.portrait || DEFAULT_CONTACT_PAGE.hero.portrait,
+      portrait: (() => {
+        const raw = saved.hero?.portrait || DEFAULT_CONTACT_PAGE.hero.portrait;
+        if (
+          !raw ||
+          raw === "/images/profile/prince-parfait-ganza-kigali-rwanda.webp" ||
+          raw === "/images/profile/prince-parfait-ganza-kigali-rwanda.png"
+        ) {
+          return PORTRAIT_PATHS?.webp || DEFAULT_PORTRAIT_WEBP;
+        }
+        return raw;
+      })(),
       roles: saved.hero?.roles || settings.siteSubtitle?.split("·").slice(0, 3).join(" · ").trim() || DEFAULT_CONTACT_PAGE.hero.roles,
     },
     cards: {

@@ -72,15 +72,15 @@ export default function FullCenteredHero({
         </div>
         <div className="hero-centered-caption">
           <h1 className="hero-centered-name">{name}</h1>
-          <p className="sr-only">
-            Founder, entrepreneur, technologist, software engineer and AI builder based in Kigali, Rwanda.
-            Building digital products, business systems and practical AI with LERONY Ltd.
-          </p>
           <p className="hero-centered-invite">
             {setting(settings, "heroInviteLine")}{" "}
             <Link href={setting(settings, "heroInviteCtaHref")} className="hero-centered-invite-link">
               {setting(settings, "heroInviteCtaLabel")}
             </Link>
+          </p>
+          <p className="sr-only">
+            Software engineer and technology entrepreneur based in Kigali, Rwanda.
+            Builds software systems, research technology and data systems. Founder and CEO of LERONY Ltd.
           </p>
         </div>
       </div>

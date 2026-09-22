@@ -11,7 +11,7 @@ import {
 import { JsonLd } from "@/components/seo/JsonLd";
 
 const PAGE_DESCRIPTION =
-  "Selected systems and case studies by Prince Parfait GANZA — software engineer and AI builder in Kigali — including reporting platforms, inventory operations, ticket accounting, and product builds for real organizations.";
+  "Selected systems and case studies by Prince Parfait GANZA — software engineer and technology entrepreneur in Kigali — including research and survey platforms, indicator systems, inventory operations, ticket accounting, and product builds.";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Work & Case Studies | Software Engineer in Kigali — Prince Parfait GANZA",
@@ -22,8 +22,8 @@ export const metadata: Metadata = buildPageMetadata({
     "Prince Parfait GANZA projects",
     "Prince Parfait GANZA case studies",
     "software systems Kigali",
-    "software engineer Kigali projects",
-    "LERONY projects",
+    "research technology Rwanda",
+    "digital data collection Kigali",
     "AskField",
     "Caritas Rwanda systems",
     "business systems Rwanda",

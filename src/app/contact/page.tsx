@@ -5,10 +5,10 @@ import { buildBreadcrumbListJsonLd, buildGraph, buildWebPageJsonLd } from "@/lib
 import { JsonLd } from "@/components/seo/JsonLd";
 
 const PAGE_DESCRIPTION =
-  "Contact Prince Parfait GANZA in Kigali — founder, software engineer and AI builder — about a venture, product, or system that needs to exist. Email hello@princeparfait.com.";
+  "Contact Prince Parfait GANZA in Kigali — software engineer and technology entrepreneur — about software systems, research technology, data systems, or a venture that needs to exist. Email hello@princeparfait.com.";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Contact Prince Parfait GANZA | Software Engineer & AI Builder Kigali",
+  title: "Contact Prince Parfait GANZA | Software Engineer & Technology Entrepreneur Kigali",
   description: PAGE_DESCRIPTION,
   path: "/contact",
   absoluteTitle: true,
@@ -16,9 +16,9 @@ export const metadata: Metadata = buildPageMetadata({
     "Contact Prince Parfait GANZA",
     "Hire software engineer Kigali",
     "Software engineer Rwanda contact",
-    "AI builder Kigali",
+    "Research technology Rwanda",
     "LERONY Ltd contact",
-    "Technologist Kigali",
+    "Technology entrepreneur Kigali",
   ],
 });
 

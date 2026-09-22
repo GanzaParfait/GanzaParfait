@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { blogPosts } from "@/data/site-data";
-import { getPublicProjects } from "@/lib/projects";
+import { getIndexableProjects } from "@/lib/projects";
 import { canonicalUrl } from "@/lib/schema";
 import { sitemapLastModified } from "@/lib/seo";
 
@@ -9,7 +9,7 @@ export const revalidate = 60;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const revised = sitemapLastModified();
-  const projects = await getPublicProjects();
+  const projects = await getIndexableProjects();
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: canonicalUrl("/"), lastModified: revised, changeFrequency: "weekly", priority: 1 },

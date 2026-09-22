@@ -102,10 +102,10 @@ export function serviceFocusHref(focus: ServiceFocus | null | "all") {
 export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
   hero: {
     label: "Services",
-    title: "From ideas to real impact.",
-    body: "Digital products, presence, systems and hands-on support.",
-    rail: ["Ideas", "People", "Systems", "Impact"],
-    railNote: "Practical technology for a more connected Rwanda and beyond.",
+    title: "Software, research technology and data systems.",
+    body: "Engagements that match verified work: digital products, survey and research systems, organizational reporting, and hands-on support.",
+    rail: ["Software", "Research", "Data", "Delivery"],
+    railNote: "Practical technology for organizations in Rwanda and beyond.",
   },
   families: [
     {
@@ -130,7 +130,8 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
       id: "transform",
       label: "Transform",
       title: "Improve how work gets done",
-      summary: "Business systems, data, automation and practical AI for everyday operations.",
+      summary:
+        "Research technology, digital data collection, business systems, indicators and practical AI for everyday operations.",
       layout: "workflow",
       sortOrder: 3,
     },
@@ -153,7 +154,7 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
       category: "build",
       summary: "Production-oriented web applications designed around real workflows and users.",
       description:
-        "Design and development of reliable digital products for organizations and businesses — with authentication, roles, dashboards and maintainable delivery.",
+        "Design and development of reliable digital products for organizations and businesses, with authentication, roles, dashboards and maintainable delivery.",
       icon: "code",
       capabilities: [
         "Production web applications",
@@ -180,7 +181,7 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
       category: "build",
       summary: "Corporate, organization and personal-brand websites with clear structure and modern interfaces.",
       description:
-        "Content-driven websites, portals and responsive interfaces — including modernization work when an existing presence needs to perform better.",
+        "Content-driven websites, portals and responsive interfaces, including modernization work when an existing presence needs to perform better.",
       icon: "globe",
       capabilities: [
         "Corporate and organization websites",
@@ -207,7 +208,7 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
       category: "build",
       summary: "Operational software for workflows, records, inventory, reporting and administration.",
       description:
-        "Systems that turn day-to-day operations into reliable software — from inventory and reporting to indicator management and internal tools.",
+        "Systems that turn day-to-day operations into reliable software, from inventory and reporting to indicator management and internal tools.",
       icon: "puzzle",
       capabilities: [
         "Inventory and sales operations",
@@ -259,7 +260,7 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
       category: "build",
       summary: "Turn product ideas into usable interfaces, features and deployable releases.",
       description:
-        "Product architecture, feature implementation, MVP work and iteration — focused on what users and operators can actually run.",
+        "Product architecture, feature implementation, MVP work and iteration, focused on what users and operators can actually run.",
       icon: "box",
       capabilities: [
         "Product architecture",
@@ -286,7 +287,7 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
       category: "build",
       summary: "Digital storefronts, catalogs and marketplace-connected product experiences.",
       description:
-        "Interfaces and flows for product catalogs, e-commerce surfaces and business digital storefronts — without claiming ownership of third-party marketplaces.",
+        "Interfaces and flows for product catalogs, e-commerce surfaces and business digital storefronts, without claiming ownership of third-party marketplaces.",
       icon: "store",
       capabilities: [
         "E-commerce interfaces",
@@ -337,7 +338,7 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
       category: "grow",
       summary: "Practical support for account setup, publishing workflows and platform organization.",
       description:
-        "Help configuring social accounts, organizing publishing workflows and keeping product or brand content structured across platforms — where that support is actually provided.",
+        "Help configuring social accounts, organizing publishing workflows and keeping product or brand content structured across platforms, where that support is actually provided.",
       icon: "share",
       capabilities: [
         "Social account setup and configuration",
@@ -363,7 +364,7 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
       category: "grow",
       summary: "Onboarding, catalog organization and product publishing for digital commerce surfaces.",
       description:
-        "Support for marketplace-oriented workflows such as product listing, catalog structure and digital storefront readiness — without implying platform partnerships or ownership.",
+        "Support for marketplace-oriented workflows such as product listing, catalog structure and digital storefront readiness, without implying platform partnerships or ownership.",
       icon: "cart",
       capabilities: [
         "Marketplace onboarding support",
@@ -389,7 +390,7 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
       category: "grow",
       summary: "Keep website, profiles and digital assets consistent across channels.",
       description:
-        "Practical brand deployment online — profile presentation, asset implementation and consistency between website and social surfaces. Not positioned as traditional graphic design.",
+        "Practical brand deployment online: profile presentation, asset implementation and consistency between website and social surfaces. Not positioned as traditional graphic design.",
       icon: "palette",
       capabilities: [
         "Brand consistency across platforms",
@@ -415,7 +416,7 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
       category: "grow",
       summary: "Technical SEO, metadata and structured data that make pages machine-readable.",
       description:
-        "Implementation work around metadata, structured data, sitemaps, robots configuration and social sharing tags. No ranking promises — only solid discoverability foundations.",
+        "Implementation work around metadata, structured data, sitemaps, robots configuration and social sharing tags. No ranking promises; only solid discoverability foundations.",
       icon: "search",
       capabilities: [
         "Technical SEO foundations",
@@ -434,6 +435,72 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
       sortOrder: 5,
     },
     {
+      id: "research-data-collection",
+      slug: "research-data-collection",
+      title: "Research Technology & Digital Data Collection",
+      shortTitle: "Research technology",
+      category: "transform",
+      summary:
+        "Survey programming, multi-mode digital collection and research-data workflows, evidenced through AskField platform work.",
+      description:
+        "Capabilities in digital research and survey systems demonstrated through team work on AskField with Ethical Research Solutions: survey programming and questionnaire design, validation and skip logic, XLSForm, CAPI / CATI / CAWI collection modes, GPS/geolocation-based collection, enumerator assignment, field operations, response monitoring, data export and research data management. Presented as domain experience from team contribution, not as separate job titles or sole ownership of the platform.",
+      icon: "flow",
+      capabilities: [
+        "Survey programming and questionnaire design",
+        "Validation, skip logic and calculations",
+        "Digital data collection workflows",
+        "Field operations and enumerator assignment",
+        "Response monitoring and research-data export",
+        "Research data management",
+      ],
+      technologies: [
+        "XLSForm",
+        "CAPI",
+        "CATI",
+        "CAWI",
+        "GPS / geolocation",
+        "React",
+        "Redux",
+        "API integration",
+      ],
+      relatedProjects: ["askfield"],
+      relatedExperience: ["askfield"],
+      audiences: ["Research organizations", "NGOs", "Consultancies", "Public programmes"],
+      engagementType: ["Transform", "Build"],
+      featured: true,
+      published: true,
+      sortOrder: 1,
+      seoTitle: "Research Technology & Digital Data Collection | Prince Parfait GANZA",
+      seoDescription:
+        "Research technology and digital data collection in Kigali: survey programming, XLSForm, CAPI/CATI/CAWI and research-data systems. Evidence: AskField / Ethical Research Solutions.",
+    },
+    {
+      id: "data-reporting",
+      slug: "data-reporting",
+      title: "Data & Reporting Systems",
+      shortTitle: "Data",
+      category: "transform",
+      summary: "Indicators, databases, reporting workflows and dashboards for operational clarity.",
+      description:
+        "Structure organizational and research data into systems that support monitoring, reporting and decisions, from data models and collection paths to indicators, dashboards, exports and analytical reporting.",
+      icon: "chart",
+      capabilities: [
+        "Databases and data organization",
+        "Indicator and monitoring systems",
+        "Reporting workflows",
+        "Operational dashboards",
+        "Exports and management information",
+      ],
+      technologies: ["MySQL", "SQL", "Supabase", "Power BI"],
+      relatedProjects: ["caritas-systems", "psta-accounting", "stockpro"],
+      relatedExperience: ["eshuri", "askfield"],
+      audiences: ["Organizations", "Teams", "Businesses", "NGOs"],
+      engagementType: ["Transform"],
+      featured: true,
+      published: true,
+      sortOrder: 2,
+    },
+    {
       id: "process-digitization",
       slug: "process-digitization",
       title: "Business Process Digitization",
@@ -442,7 +509,7 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
       summary: "Translate manual workflows into digital systems people can actually run.",
       description:
         "Understand existing processes, design operational workflows and move administration into software that fits the organization.",
-      icon: "flow",
+      icon: "puzzle",
       capabilities: [
         "Understanding manual workflows",
         "Translating processes into digital systems",
@@ -456,33 +523,7 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
       engagementType: ["Transform"],
       featured: true,
       published: true,
-      sortOrder: 1,
-    },
-    {
-      id: "data-reporting",
-      slug: "data-reporting",
-      title: "Data & Reporting Systems",
-      shortTitle: "Data",
-      category: "transform",
-      summary: "Databases, reporting workflows and dashboards for operational clarity.",
-      description:
-        "Organize records, build reporting paths and surface management information so teams can see what is happening.",
-      icon: "chart",
-      capabilities: [
-        "Databases and data organization",
-        "Reporting workflows",
-        "Operational dashboards",
-        "Operational records",
-        "Management information systems",
-      ],
-      technologies: ["MySQL", "SQL", "Supabase", "Power BI"],
-      relatedProjects: ["caritas-systems", "psta-accounting", "stockpro"],
-      relatedExperience: ["eshuri", "psta"],
-      audiences: ["Organizations", "Teams", "Businesses"],
-      engagementType: ["Transform"],
-      featured: true,
-      published: true,
-      sortOrder: 2,
+      sortOrder: 3,
     },
     {
       id: "systems-integration",
@@ -507,7 +548,7 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
       engagementType: ["Transform", "Build"],
       featured: false,
       published: true,
-      sortOrder: 3,
+      sortOrder: 4,
     },
     {
       id: "automation",
@@ -539,11 +580,11 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
       id: "practical-ai",
       slug: "practical-ai",
       title: "Practical AI Integration",
-      shortTitle: "AI",
+      shortTitle: "Practical AI",
       category: "transform",
-      summary: "AI features and workflow assistance scoped to problems that can be substantiated.",
+      summary: "AI features scoped to real product problems, as a delivery capability rather than a standalone job title.",
       description:
-        "AI-assisted product features, intelligent interfaces and practical service integration — not research theatre.",
+        "Where projects support it: AI-assisted product features, intelligent interfaces and practical service integration. Not positioned as an identity label alongside Software Engineer or Founder.",
       icon: "brain",
       capabilities: [
         "AI-assisted product features",
@@ -552,11 +593,11 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
         "Practical AI service integration",
       ],
       technologies: ["APIs", "JavaScript", "TypeScript", "Python"],
-      relatedProjects: ["askfield"],
-      relatedExperience: ["askfield"],
+      relatedProjects: [],
+      relatedExperience: ["lerony"],
       audiences: ["Founders", "Organizations", "Teams"],
       engagementType: ["Transform", "Build"],
-      featured: true,
+      featured: false,
       published: true,
       sortOrder: 5,
     },
@@ -620,7 +661,7 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
       category: "support",
       summary: "Remote digital and process assistance for clients collaborating beyond Rwanda.",
       description:
-        "Practical help navigating digital workflows, account and process guidance, and coordination across online services. Based in Kigali, working with collaborators locally and internationally. This is digital/process support — not legal, accounting or immigration advice.",
+        "Practical help navigating digital workflows, account and process guidance, and coordination across online services. Based in Kigali, working with collaborators locally and internationally. This is digital and process support, not legal, accounting or immigration advice.",
       icon: "globe-people",
       capabilities: [
         "Remote technical assistance",
@@ -674,7 +715,7 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
       category: "support",
       summary: "Practical technical and data-systems instruction grounded in real delivery work.",
       description:
-        "Software, web and data-systems training — including documented knowledge-sharing with a cohort of approximately 85 trainees. No invented event names.",
+        "Software, web and data-systems training, including documented knowledge-sharing with a cohort of approximately 85 trainees. No invented event names.",
       icon: "book",
       capabilities: [
         "Software and web training",
@@ -779,9 +820,9 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
     trust: ["Practical discussion", "No obligation", "Response within 24 hours"],
   },
   seo: {
-    title: "Services & Capabilities | Software Engineer & AI Builder in Kigali — Prince Parfait GANZA",
+    title: "Services & Capabilities | Software Engineer & Technology Entrepreneur | Prince Parfait GANZA",
     description:
-      "Services from Prince Parfait GANZA — software engineer and AI builder in Kigali, Rwanda: digital products, websites, business systems, digital presence, data, practical AI, consulting, training and technical support.",
+      "Services from Prince Parfait GANZA in Kigali: software systems, research technology and digital data collection, organizational data and reporting, digital products, and hands-on technical support.",
   },
 };
 

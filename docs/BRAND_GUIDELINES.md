@@ -17,18 +17,22 @@
 
 ## Tagline
 
-> **"Building technology, products and ventures that turn ambitious ideas into real-world impact."**
+> **"I design and build software, research technology and data systems that help organizations collect information, run operations and make better decisions."**
 
 ## Identity
 
-> **Founder · Entrepreneur · Technologist · Software Engineer · AI Builder**
+> **Software Engineer · Technology Entrepreneur · Founder**
 
-Software engineering remains a capability and an employment record. It is not the public identity.
+Company role (LERONY Ltd only): **Founder & CEO**
 
-This tagline should appear on:
+Specializations (not titles): Software Engineering & Digital Systems · Research Technology & Digital Data Collection · Data Systems, Analytics & Decision Support
+
+Do not use “AI Builder” as an identity title.
+
+This identity line should appear on:
 - Homepage hero
 - Email signatures
-- Social media bios
+- Social media bios (LinkedIn uses the approved longer headline)
 - Media kit and press materials
 
 ---
@@ -150,13 +154,15 @@ This tagline should appear on:
 
 ### Social Media
 - Profile photo: Consistent across all platforms
-- Bio: "Founder · Entrepreneur · Technologist · Software Engineer · AI Builder. Building technology, products and ventures that turn ambitious ideas into real-world impact."
+- Bio line: "Software Engineer · Technology Entrepreneur · Founder"
+- LinkedIn headline: see `docs/DIGITAL_PRESENCE.md`
 - Use horizontal wordmark for profile banners/covers
 - Use icon variant for profile pictures if no photo is available
 
 ### Email Signature
 ```
 Prince Parfait GANZA
-Founder · Entrepreneur · Technologist · Software Engineer · AI Builder
+Software Engineer · Technology Entrepreneur · Founder
+Founder & CEO, LERONY Ltd
 hello@princeparfait.com | princeparfait.com
 ```

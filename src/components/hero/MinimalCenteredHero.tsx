@@ -14,6 +14,7 @@ import { useState, useEffect } from "react";
 import { siteConfig } from "@/data/site-data";
 import { SiteSettings } from "@/lib/supabase";
 import { heroPortraitAlt } from "@/lib/hero";
+import { IDENTITY_ROLE_LINE } from "@/lib/identity";
 
 const primarySocials = [
   { href: siteConfig.social.whatsapp, label: "WhatsApp", icon: RiWhatsappLine },
@@ -25,8 +26,8 @@ const primarySocials = [
 
 export default function MinimalCenteredHero({ settings }: { settings: SiteSettings }) {
   const roles = settings.siteSubtitle
-    ? settings.siteSubtitle.split(" • ")
-    : ["Founder · Entrepreneur · Technologist"];
+    ? settings.siteSubtitle.split(/\s*[•·]\s*/).filter(Boolean)
+    : IDENTITY_ROLE_LINE.split(/\s*·\s*/);
   const [currentRoleIndex, setCurrentRoleIndex] = useState(0);
   const [visible, setVisible] = useState(false);
 
@@ -98,7 +99,7 @@ export default function MinimalCenteredHero({ settings }: { settings: SiteSettin
             boxShadow: "0 0 30px rgba(14,82,168,0.2), 0 0 60px rgba(14,82,168,0.1)",
           }}>
             <img
-              src={settings?.heroImageUrl || "/images/profile/prince-parfait-ganza-kigali-rwanda.webp"}
+              src={settings?.heroImageUrl || "/images/profile/prince-parfait-ganza.webp"}
               alt={heroPortraitAlt(settings)}
               className="w-full h-full object-cover object-top"
             />

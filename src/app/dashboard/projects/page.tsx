@@ -8,12 +8,12 @@ import MediaManagerModal from "@/components/dashboard/MediaManagerModal";
 import { fetchRemoteSettings, getLocalSettings, saveLocalSettings } from "@/lib/supabase";
 import { useDashboardFeedback } from "@/components/dashboard/DashboardFeedback";
 import CustomSelect from "@/components/ui/CustomSelect";
+import { mergeProjectCatalog } from "@/lib/projects";
 
 const PAGE_SIZE = 5;
 
 function projectsFromSettings(): Project[] {
-  const remote = getLocalSettings().projectRecords;
-  return remote?.length ? remote : initialProjects;
+  return mergeProjectCatalog(getLocalSettings().projectRecords);
 }
 
 export default function ProjectsPage() {
@@ -31,7 +31,7 @@ export default function ProjectsPage() {
   useEffect(() => {
     setProjectsList(projectsFromSettings());
     void fetchRemoteSettings().then((remote) => {
-      if (remote?.projectRecords?.length) setProjectsList(remote.projectRecords);
+      if (remote) setProjectsList(mergeProjectCatalog(remote.projectRecords));
     });
   }, []);
 
@@ -51,9 +51,9 @@ export default function ProjectsPage() {
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
     return projectsList.filter((project) => {
-      const matchesQuery = !needle || [project.title, project.organization, project.description, project.technologies.join(" ")].join(" ").toLowerCase().includes(needle);
+      const matchesQuery = !needle || [project.title, project.organization, project.description, ...(project.technologies || [])].join(" ").toLowerCase().includes(needle);
       const matchesCategory = category === "all" || project.category === category;
-      const matchesStatus = status === "all" || project.status === status;
+      const matchesStatus = status === "all" || project.status === status || (status === "draft" && project.visibility === "draft");
       return matchesQuery && matchesCategory && matchesStatus;
     });
   }, [projectsList, query, category, status]);
@@ -110,8 +110,12 @@ export default function ProjectsPage() {
           options={[
             { value: "all", label: "All statuses" },
             { value: "live", label: "Live" },
+            { value: "staging", label: "Staging" },
+            { value: "completed", label: "Completed" },
+            { value: "ongoing", label: "Ongoing" },
             { value: "in-progress", label: "In progress" },
             { value: "archived", label: "Archived" },
+            { value: "draft", label: "Draft visibility" },
           ]}
           onChange={(value) => {
             setStatus(value);

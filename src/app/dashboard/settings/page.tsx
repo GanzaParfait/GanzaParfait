@@ -197,9 +197,16 @@ export default function SettingsPage() {
               <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>Location
                 <input style={{ ...inputStyle, marginTop: "0.3rem" }} value={settings.location} onChange={(e) => patch({ location: e.target.value })} />
               </label>
-              <label style={{ gridColumn: "1 / -1", fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>Roles (separated by ·)
-                <input style={{ ...inputStyle, marginTop: "0.3rem" }} value={settings.siteSubtitle} onChange={(e) => patch({ siteSubtitle: e.target.value })} />
-                <span style={{ display: "block", fontWeight: 500, color: "#94a3b8", marginTop: "0.3rem" }}>Used until a hero layout is saved with its own roles. After that, that layout keeps its own line.</span>
+              <label style={{ gridColumn: "1 / -1", fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>Identity roles (· separated)
+                <input
+                  style={{ ...inputStyle, marginTop: "0.3rem" }}
+                  value={settings.siteSubtitle}
+                  onChange={(e) => patch({ siteSubtitle: e.target.value })}
+                  placeholder="Software Engineer · Technology Entrepreneur · Founder"
+                />
+                <span style={{ display: "block", fontWeight: 500, color: "#94a3b8", marginTop: "0.3rem" }}>
+                  Public role line only. Default: Software Engineer · Technology Entrepreneur · Founder. Older multi-role lines are normalized on load/save.
+                </span>
               </label>
               <label style={{ gridColumn: "1 / -1", fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>Bio
                 <textarea rows={4} style={{ ...inputStyle, marginTop: "0.3rem", resize: "vertical" }} value={settings.bio} onChange={(e) => patch({ bio: e.target.value })} />

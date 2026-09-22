@@ -1,14 +1,21 @@
 import type { Metadata } from "next";
 import AboutPageView from "@/components/about/AboutPageView";
 import { buildPageMetadata } from "@/lib/seo";
-import { buildBreadcrumbListJsonLd, buildGraph, buildProfilePageJsonLd } from "@/lib/schema";
+import {
+  buildBreadcrumbListJsonLd,
+  buildGraph,
+  buildPersonJsonLd,
+  buildProfilePageJsonLd,
+  PORTRAIT_PATH,
+} from "@/lib/schema";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { IDENTITY_PORTRAIT_ALT } from "@/lib/identity";
 
 const PAGE_DESCRIPTION =
-  "About Prince Parfait GANZA — Rwandan founder, entrepreneur and technologist in Kigali. Software engineer and AI builder; Founder and CEO of LERONY Ltd, building technology, digital products and ventures.";
+  "About Prince Parfait GANZA — software engineer and technology entrepreneur in Kigali. Founder and CEO of LERONY Ltd. Builds software systems, research technology and organizational data systems.";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "About Prince Parfait GANZA | Software Engineer & AI Builder in Kigali",
+  title: "About Prince Parfait GANZA | Software Engineer & Technology Entrepreneur in Kigali",
   description: PAGE_DESCRIPTION,
   path: "/about",
   ogType: "profile",
@@ -17,13 +24,13 @@ export const metadata: Metadata = buildPageMetadata({
     "About Prince Parfait GANZA",
     "Prince Parfait GANZA Kigali",
     "Software engineer Kigali",
-    "AI builder Rwanda",
-    "Tech founder Kigali",
+    "Technology entrepreneur Rwanda",
+    "Research technology Kigali",
+    "Data systems Rwanda",
     "LERONY Ltd founder",
-    "Rwandan technologist",
   ],
-  ogImageAlt:
-    "Prince Parfait GANZA — Rwandan founder, entrepreneur, technologist, software engineer and AI builder in Kigali",
+  ogImage: PORTRAIT_PATH,
+  ogImageAlt: IDENTITY_PORTRAIT_ALT,
 });
 
 const breadcrumbItems = [
@@ -36,9 +43,10 @@ export default function AboutPage() {
     <>
       <JsonLd
         data={buildGraph([
+          buildPersonJsonLd(),
           buildProfilePageJsonLd({
             path: "/about",
-            name: "About Prince Parfait GANZA | Software Engineer & AI Builder in Kigali",
+            name: "About Prince Parfait GANZA | Software Engineer & Technology Entrepreneur in Kigali",
             description: PAGE_DESCRIPTION,
           }),
           buildBreadcrumbListJsonLd(breadcrumbItems, "/about"),

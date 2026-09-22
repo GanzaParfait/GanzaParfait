@@ -83,7 +83,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [profile, setProfile] = useState<AdminProfile>({
     name: "Prince Parfait GANZA",
     email: "ganzaparfait7@gmail.com",
-    avatarUrl: "/images/profile/prince-parfait-ganza-kigali-rwanda.webp",
+    avatarUrl: "/images/profile/prince-parfait-ganza.webp",
     role: "Super Admin",
   });
 

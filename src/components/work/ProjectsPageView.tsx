@@ -14,15 +14,16 @@ import { type Project } from "@/data/site-data";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { projectCover, workCategoryLabel } from "@/components/work/work-media";
-import { mergeProjectCatalog } from "@/lib/projects";
+import { listListedProjects } from "@/lib/projects";
 
 const FILTERS = [
   { id: "all", label: "All" },
-  { id: "web", label: "Web Apps" },
+  { id: "ventures", label: "Products / Ventures" },
+  { id: "client", label: "Client Systems" },
+  { id: "research", label: "Research & Data" },
+  { id: "web", label: "Web Platforms" },
   { id: "systems", label: "Data Systems" },
   { id: "product", label: "Platforms" },
-  { id: "tools", label: "Tools" },
-  { id: "saas", label: "Company" },
   { id: "technology", label: "Technology" },
   { id: "other", label: "Other" },
 ] as const;
@@ -38,8 +39,22 @@ const APPROACH = [
   { step: "03", title: "Improve", body: "Keep iterating with people who use the work." },
 ];
 
+function inferredWorkGroup(project: Project): NonNullable<Project["workGroup"]> {
+  if (project.workGroup) return project.workGroup;
+  if (project.id === "goa-plus" || project.id === "lerony" || project.independent || project.category === "technology") {
+    return "ventures";
+  }
+  if (project.id === "askfield" || project.id === "caritas-systems") return "research";
+  if (project.deliveredThrough === "LERONY Ltd" && project.contribution === "contributor") return "client";
+  if (project.category === "systems" || project.category === "product") return "client";
+  return "web";
+}
+
 function matchesFilter(project: Project, filter: FilterId) {
   if (filter === "all") return true;
+  if (filter === "ventures" || filter === "client" || filter === "research" || filter === "web") {
+    return inferredWorkGroup(project) === filter;
+  }
   if (filter === "tools") return TOOL_CATEGORIES.has(project.category);
   return project.category === filter;
 }
@@ -54,7 +69,7 @@ function tagTone(category: Project["category"]) {
 
 export default function ProjectsPageView() {
   const settings = useSiteSettings();
-  const list = useMemo(() => mergeProjectCatalog(settings.projectRecords), [settings.projectRecords]);
+  const list = useMemo(() => listListedProjects(settings.projectRecords), [settings.projectRecords]);
   const [filter, setFilter] = useState<FilterId>("all");
   const [query, setQuery] = useState("");
   const [pending, setPending] = useState(false);
@@ -62,12 +77,19 @@ export default function ProjectsPageView() {
   const location = settings.location || "Kigali, Rwanda";
   const company = list.find((item) => item.id === "lerony");
 
+  useEffect(() => {
+    const tech = new URLSearchParams(window.location.search).get("tech");
+    if (tech) setQuery(tech);
+  }, []);
+
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
     return list.filter((project) => {
       if (!matchesFilter(project, filter)) return false;
       if (!needle) return true;
-      return [project.title, project.description, project.organization, project.myRole, ...(project.technologies || [])]
+      const techHit = (project.technologies || []).some((item) => item.toLowerCase() === needle);
+      if (techHit) return true;
+      return [project.title, project.description, project.organization, project.myRole, project.domain, ...(project.technologies || []), ...(project.capabilities || [])]
         .filter(Boolean)
         .join(" ")
         .toLowerCase()

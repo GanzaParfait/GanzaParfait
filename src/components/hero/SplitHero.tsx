@@ -13,6 +13,7 @@ import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
 import { SiteSettings } from "@/lib/supabase";
 import { heroHighlights, heroImageFor, heroPortraitAlt, setting, splitDisplayName } from "@/lib/hero";
 import { socialIcon, heroSocialsFor } from "@/lib/socials";
+import { IDENTITY_ROLE_LINE } from "@/lib/identity";
 
 export default function SplitHero({
   settings,
@@ -25,7 +26,7 @@ export default function SplitHero({
   useHistoryBackClose(isMoreOpen && !isPreview, () => setIsMoreOpen(false));
   const roles = settings.siteSubtitle
     ? settings.siteSubtitle.split(/\s*[•·]\s*/).filter(Boolean)
-    : ["Founder", "Entrepreneur", "Technologist"];
+    : IDENTITY_ROLE_LINE.split(/\s*·\s*/);
   const [currentRoleIndex, setCurrentRoleIndex] = useState(0);
   const [visible, setVisible] = useState(false);
   const displayName = splitDisplayName(setting(settings, "siteTitle"));

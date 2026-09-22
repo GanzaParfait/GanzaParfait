@@ -3,6 +3,7 @@ import { createServerSupabase } from "@/lib/supabase-server";
 import { DEFAULT_SETTINGS, type SiteSettings } from "@/lib/supabase";
 import { DEFAULT_SOCIAL_LINKS } from "@/lib/socials";
 import { sanitizeWelcomeBody } from "@/lib/welcome-copy";
+import { canonicalizeIdentityFields } from "@/lib/identity";
 
 async function loadSiteSettings(): Promise<SiteSettings> {
   try {
@@ -16,7 +17,7 @@ async function loadSiteSettings(): Promise<SiteSettings> {
       .maybeSingle();
     if (error || !data) return DEFAULT_SETTINGS;
     const json = (data.settings_json || {}) as Partial<SiteSettings>;
-    return {
+    return canonicalizeIdentityFields({
       ...DEFAULT_SETTINGS,
       ...json,
       bannerLayout: (json.bannerLayout || data.banner_layout || DEFAULT_SETTINGS.bannerLayout) as SiteSettings["bannerLayout"],
@@ -33,7 +34,7 @@ async function loadSiteSettings(): Promise<SiteSettings> {
       footerQuote: json.footerQuote?.trim() || DEFAULT_SETTINGS.footerQuote,
       footerQuoteAttribution: json.footerQuoteAttribution?.trim() || DEFAULT_SETTINGS.footerQuoteAttribution,
       footerShowQuote: json.footerShowQuote !== false,
-    };
+    });
   } catch {
     return DEFAULT_SETTINGS;
   }

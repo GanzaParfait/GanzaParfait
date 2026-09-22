@@ -16,7 +16,9 @@ export const metadata: Metadata = buildPageMetadata({
 });
 
 export default async function HomePage() {
-  const featured = projects.filter((project) => project.featured).slice(0, 6);
+  const featured = projects
+    .filter((project) => project.featured && (project.visibility || "public") === "public")
+    .slice(0, 6);
 
   return (
     <>
@@ -31,7 +33,7 @@ export default async function HomePage() {
           buildItemListJsonLd(
             featured.length ? featured : projects.slice(0, 4),
             "/",
-            "Featured work by Prince Parfait GANZA — software engineer and AI builder in Kigali",
+            "Featured work by Prince Parfait GANZA — software engineer and technology entrepreneur in Kigali",
           ),
         ])}
       />

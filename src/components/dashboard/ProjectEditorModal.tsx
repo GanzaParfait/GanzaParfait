@@ -23,8 +23,8 @@ const TABS = [
   { id: "basics", label: "Basics" },
   { id: "overview", label: "Overview" },
   { id: "features", label: "Features" },
-  { id: "role", label: "My Role" },
-  { id: "stack", label: "Tech Stack" },
+  { id: "role", label: "Attribution" },
+  { id: "stack", label: "Tech & capabilities" },
   { id: "results", label: "Results" },
   { id: "gallery", label: "Media" },
   { id: "challenges", label: "Challenges" },
@@ -76,6 +76,7 @@ export default function ProjectEditorModal({
     technologies: ["React", "Next.js", "TypeScript"],
     featured: true,
     status: "live",
+    visibility: "public",
     links: { live: "", github: "" },
     image: "/images/projects/project-placeholder.png",
   });
@@ -95,6 +96,7 @@ export default function ProjectEditorModal({
         technologies: ["React", "Next.js", "TypeScript"],
         featured: true,
         status: "live",
+        visibility: "public",
         links: { live: "", github: "" },
         image: "/images/projects/project-placeholder.png",
       });
@@ -107,6 +109,12 @@ export default function ProjectEditorModal({
     e.preventDefault();
     if (!formData.title) return;
     const pinned = cleanLines(formData.pinnedMedia);
+    const collaborators = (formData.collaborators || [])
+      .map((item) => ({
+        name: (item.name || "").trim(),
+        role: (item.role || "").trim() || undefined,
+      }))
+      .filter((item) => item.name);
     onSave({
       ...(formData as Project),
       highlights: cleanLines(formData.highlights),
@@ -114,6 +122,22 @@ export default function ProjectEditorModal({
       screenshotCaptions: cleanLines(formData.screenshotCaptions),
       pinnedMedia: pinned.length ? pinned : undefined,
       technologies: (formData.technologies || []).map((item) => item.trim()).filter(Boolean),
+      capabilities: (formData.capabilities || []).map((item) => item.trim()).filter(Boolean),
+      collaborators: collaborators.length ? collaborators : undefined,
+      organizationUrl: (formData.organizationUrl || "").trim() || undefined,
+      deliveredThrough: (formData.deliveredThrough || "").trim() || undefined,
+      contributionSummary: (formData.contributionSummary || "").trim() || undefined,
+      domain: (formData.domain || "").trim() || undefined,
+      market: (formData.market || "").trim() || undefined,
+      workGroup: formData.workGroup,
+      seoTitle: (formData.seoTitle || "").trim() || undefined,
+      seoDescription: (formData.seoDescription || "").trim() || undefined,
+      visibility: formData.visibility || "public",
+      links: {
+        live: (formData.links?.live || "").trim() || undefined,
+        github: (formData.links?.github || "").trim() || undefined,
+        case_study: formData.links?.case_study,
+      },
     });
     onClose();
   };
@@ -200,19 +224,57 @@ export default function ProjectEditorModal({
                     value={formData.status || "live"}
                     options={[
                       { value: "live", label: "Live" },
+                      { value: "staging", label: "Staging" },
+                      { value: "completed", label: "Completed" },
+                      { value: "ongoing", label: "Ongoing" },
                       { value: "in-progress", label: "In progress" },
                       { value: "archived", label: "Archived" },
                     ]}
                     onChange={(value) => set("status", value as Project["status"])}
-              />
-            </div>
-            <div>
+                  />
+                </div>
+                <div>
+                  <label style={labelStyle}>Visibility</label>
+                  <CustomSelect
+                    value={formData.visibility || "public"}
+                    options={[
+                      { value: "public", label: "Public (listed + indexable when complete)" },
+                      { value: "unlisted", label: "Unlisted (URL only, noindex)" },
+                      { value: "draft", label: "Draft (dashboard only)" },
+                    ]}
+                    onChange={(value) => set("visibility", value as Project["visibility"])}
+                  />
+                </div>
+                <div>
                   <label style={labelStyle}>Client / organization</label>
                   <input type="text" placeholder="e.g. Caritas Rwanda" value={formData.organization || ""} onChange={(e) => set("organization", e.target.value)} style={fieldStyle} />
                 </div>
+              </div>
+              <div className="dash-form-grid" style={{ gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "0.875rem" }}>
                 <div>
                   <label style={labelStyle}>Duration</label>
                   <input type="text" placeholder="Only verified dates" value={formData.period || ""} onChange={(e) => set("period", e.target.value)} style={fieldStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Market / location</label>
+                  <input type="text" placeholder="e.g. Des Moines, Iowa, United States" value={formData.market || ""} onChange={(e) => set("market", e.target.value)} style={fieldStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Domain</label>
+                  <input type="text" placeholder="E-commerce / NGO / Research Technology…" value={formData.domain || ""} onChange={(e) => set("domain", e.target.value)} style={fieldStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Work group</label>
+                  <CustomSelect
+                    value={formData.workGroup || "web"}
+                    options={[
+                      { value: "ventures", label: "Products / Ventures" },
+                      { value: "client", label: "Client Systems" },
+                      { value: "research", label: "Research & Data" },
+                      { value: "web", label: "Web Platforms" },
+                    ]}
+                    onChange={(value) => set("workGroup", value as Project["workGroup"])}
+                  />
                 </div>
               </div>
               <div>
@@ -225,12 +287,26 @@ export default function ProjectEditorModal({
               </div>
               <div className="dash-form-grid" style={{ gap: "0.875rem" }}>
                 <div>
-                  <label style={labelStyle}>Live URL</label>
-                  <input type="url" placeholder="https://" value={formData.links?.live || ""} onChange={(e) => setFormData({ ...formData, links: { ...formData.links, live: e.target.value } })} style={fieldStyle} />
+                  <label style={labelStyle}>Live project URL</label>
+                  <input type="url" placeholder="https:// (no utm tracking params)" value={formData.links?.live || ""} onChange={(e) => setFormData({ ...formData, links: { ...formData.links, live: e.target.value } })} style={fieldStyle} />
                 </div>
                 <div>
-                  <label style={labelStyle}>GitHub URL</label>
-                  <input type="url" placeholder="https://github.com/…" value={formData.links?.github || ""} onChange={(e) => setFormData({ ...formData, links: { ...formData.links, github: e.target.value } })} style={fieldStyle} />
+                  <label style={labelStyle}>Organization URL</label>
+                  <input type="url" placeholder="https://client-or-org.example" value={formData.organizationUrl || ""} onChange={(e) => set("organizationUrl", e.target.value)} style={fieldStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Public repository URL</label>
+                  <input type="url" placeholder="Only intentionally public repos" value={formData.links?.github || ""} onChange={(e) => setFormData({ ...formData, links: { ...formData.links, github: e.target.value } })} style={fieldStyle} />
+                </div>
+              </div>
+              <div className="dash-form-grid" style={{ gap: "0.875rem" }}>
+                <div>
+                  <label style={labelStyle}>SEO title (optional)</label>
+                  <input type="text" placeholder="Overrides default page title when set" value={formData.seoTitle || ""} onChange={(e) => set("seoTitle", e.target.value)} style={fieldStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>SEO description (optional)</label>
+                  <textarea rows={2} placeholder="Overrides default meta description when set" value={formData.seoDescription || ""} onChange={(e) => set("seoDescription", e.target.value)} style={fieldStyle} />
                 </div>
               </div>
               <div>
@@ -344,28 +420,108 @@ export default function ProjectEditorModal({
 
           {tab === "role" && (
             <>
+              <div className="dash-form-grid" style={{ gridTemplateColumns: "1fr 1fr", gap: "0.875rem" }}>
+                <div>
+                  <label style={labelStyle}>My role</label>
+                  <input type="text" placeholder="Lead Developer / Technical Delivery & QA…" value={formData.myRole || ""} onChange={(e) => set("myRole", e.target.value)} style={fieldStyle} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Delivered through</label>
+                  <input type="text" placeholder="e.g. LERONY Ltd" value={formData.deliveredThrough || ""} onChange={(e) => set("deliveredThrough", e.target.value)} style={fieldStyle} />
+                </div>
+              </div>
               <div>
-                <label style={labelStyle}>My role</label>
-                <input type="text" placeholder="e.g. Lead engineer / Product owner" value={formData.myRole || ""} onChange={(e) => set("myRole", e.target.value)} style={fieldStyle} />
+                <label style={labelStyle}>Contribution summary</label>
+                <textarea
+                  rows={3}
+                  placeholder="Factual explanation of what Prince personally did — do not invent team work"
+                  value={formData.contributionSummary || ""}
+                  onChange={(e) => set("contributionSummary", e.target.value)}
+                  style={fieldStyle}
+                />
               </div>
               <div>
                 <label style={labelStyle}>What I built</label>
-                <textarea rows={5} placeholder="Concrete systems, flows, or modules you owned" value={formData.whatIBuilt || ""} onChange={(e) => set("whatIBuilt", e.target.value)} style={fieldStyle} />
+                <textarea rows={4} placeholder="Concrete systems, flows, or modules you owned" value={formData.whatIBuilt || ""} onChange={(e) => set("whatIBuilt", e.target.value)} style={fieldStyle} />
+              </div>
+              <div>
+                <label style={labelStyle}>Contribution type</label>
+                <CustomSelect
+                  value={formData.contribution || "creator"}
+                  options={[
+                    { value: "creator", label: "Creator / primary builder" },
+                    { value: "contributor", label: "Contributor / team delivery" },
+                  ]}
+                  onChange={(value) => set("contribution", value as Project["contribution"])}
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Collaborators (one per line: Name — Role)</label>
+                <textarea
+                  rows={3}
+                  placeholder={"Name — Role (optional; leave blank if not public)"}
+                  value={(formData.collaborators || [])
+                    .map((item) => (item.role ? `${item.name} — ${item.role}` : item.name))
+                    .join("\n")}
+                  onChange={(e) =>
+                    set(
+                      "collaborators",
+                      linesFromTextarea(e.target.value).map((line) => {
+                        const [name, ...roleParts] = line.split("—").map((part) => part.trim());
+                        return { name: name || line.trim(), role: roleParts.join(" — ") || undefined };
+                      }),
+                    )
+                  }
+                  style={fieldStyle}
+                />
               </div>
             </>
           )}
 
           {tab === "stack" && (
-          <div>
-              <label style={labelStyle}>Technologies, separated by commas</label>
-              <input
-                type="text"
-                placeholder="Next.js, PostgreSQL, Supabase…"
-                value={(formData.technologies || []).join(", ")}
-                onChange={(e) => set("technologies", e.target.value.split(",").map((item) => item.trim()).filter(Boolean))}
-                style={fieldStyle}
-              />
-            </div>
+            <>
+              <div>
+                <label style={labelStyle}>Technologies (comma-separated)</label>
+                <input
+                  type="text"
+                  placeholder="Next.js, PostgreSQL, Supabase…"
+                  value={(formData.technologies || []).join(", ")}
+                  onChange={(e) => set("technologies", e.target.value.split(",").map((item) => item.trim()).filter(Boolean))}
+                  style={fieldStyle}
+                />
+                <p style={{ margin: "0.35rem 0 0", fontSize: "0.72rem", color: "var(--color-text-3)" }}>
+                  Only list verified stack. These feed the Engineering Toolkit evidence map.
+                </p>
+              </div>
+              <div>
+                <label style={labelStyle}>Capabilities demonstrated (comma-separated)</label>
+                <input
+                  type="text"
+                  placeholder="E-commerce, Donation enablement, Deployment & hosting…"
+                  value={(formData.capabilities || []).join(", ")}
+                  onChange={(e) => set("capabilities", e.target.value.split(",").map((item) => item.trim()).filter(Boolean))}
+                  style={fieldStyle}
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Website technologies (optional company/product split)</label>
+                <input
+                  type="text"
+                  placeholder="Only when distinct from project technologies"
+                  value={(formData.websiteTechnologies || []).join(", ")}
+                  onChange={(e) =>
+                    set(
+                      "websiteTechnologies",
+                      e.target.value
+                        .split(",")
+                        .map((item) => item.trim())
+                        .filter(Boolean),
+                    )
+                  }
+                  style={fieldStyle}
+                />
+              </div>
+            </>
           )}
 
           {tab === "results" && (

@@ -54,7 +54,7 @@ export function buildSiteSearchIndex(): SiteSearchItem[] {
     {
       id: "quick-about",
       title: siteConfig.name,
-      subtitle: "About · founder, entrepreneur, technologist in Kigali",
+      subtitle: "About · software engineer and technology entrepreneur in Kigali",
       href: "/about",
       group: "Quick",
       keywords: [

@@ -87,38 +87,52 @@ to make the footer look full.
 
 ## Primary positioning
 
-Founder · Entrepreneur · Technologist · Software Engineer · AI Builder
+Software Engineer · Technology Entrepreneur · Founder
 
-Building technology, products and ventures that turn ambitious ideas into real-world impact.
+I design and build software, research technology and data systems that help
+organizations collect information, run operations and make better decisions.
 
-Software Engineer and AI Builder stay visible with that line. That is the work that brings projects. Founder & CEO is used only for LERONY Ltd.
+**Profession:** Software Engineer  
+**Career direction:** Technology Entrepreneur  
+**Company role:** Founder & CEO, LERONY Ltd (use only for Lerony)
+
+**LinkedIn headline (approved):**  
+Software Engineer & Technology Entrepreneur | Research Technology & Data Systems | Founder & CEO, LERONY Ltd
+
+Canonical code source: `src/lib/identity.ts` — keep UI, SEO, CV and settings defaults aligned with it.
+
+## Capability pillars (evidence, not job titles)
+
+1. Software Engineering & Digital Systems  
+2. Research Technology & Digital Data Collection  
+3. Data Systems, Analytics & Decision Support
 
 ## Short introduction
 
-Prince Parfait GANZA is a Rwandan founder, entrepreneur and technologist based
-in Kigali. He leads Lerony and works across technology, digital products and
-ventures that help organizations and ambitious ideas become reliable
-real-world solutions. His background combines software engineering, product
-delivery, data systems, client collaboration and technical training.
+Prince Parfait GANZA is a software engineer and technology entrepreneur based
+in Kigali. He leads Lerony and works across software systems, research
+technology, digital data collection and organizational reporting — turning
+operational problems into dependable tools.
 
 ## Expanded positioning
 
-The public identity is founder, entrepreneur, and technologist. Software
-engineering, systems, data, and practical AI sit underneath that identity as
-capabilities and evidence.
+The public identity leads with craft and career direction. Founder & CEO is
+the leadership role at LERONY Ltd. Software systems, research/survey
+technology, data and practical AI sit underneath as capabilities and evidence.
 
 He is Founder and CEO of LERONY Ltd, a technology and innovation company
-based in Kigali, Rwanda. Public LinkedIn uses Founder & CEO. Use that title
-only for Lerony, not for unrelated work.
+based in Kigali, Rwanda. Public LinkedIn should use Founder & CEO for Lerony,
+not as a substitute for the engineering profession.
 
 ## Positioning Principle
 
 The portfolio should communicate:
 
-PERSON → IDEAS → SYSTEMS → PRODUCTS → IMPACT
+PERSON → PROFESSION → PILLARS → EVIDENCE → ACTION
 
 Do not present Prince as only a software engineer, freelancer, or service
-provider. Do not present him as an ordinary practitioner whose ceiling is a
+provider who happens to know a few tools. Do not bury research technology
+and data systems under a generic Skills list. Do not present him as an ordinary practitioner whose ceiling is a
 job title. The words have weight:
 
 - Founder: he leads Lerony and decides what gets built.
@@ -150,10 +164,13 @@ Full-stack software development with experience across frontend,
 backend, databases, APIs, authentication, deployment, and production
 systems.
 
-## AI Builder
+## Practical AI (capability — not identity)
 
-AI should be positioned around practical integration and
-AI-enabled products.
+AI may appear as a capability or technology area where projects support it
+(practical integration, AI-enabled product features).
+
+Do **not** use “AI Builder” as a public identity title alongside Software
+Engineer, Technology Entrepreneur or Founder.
 
 Do NOT imply advanced AI research credentials, machine-learning
 research publications, or capabilities that cannot be substantiated.
@@ -306,16 +323,36 @@ Evidence level: VERIFIED
 
 ## Ethical Research Solutions / AskField
 
-Work associated with frontend development/integration for the
-AskField survey platform.
+Official role: **Frontend Integrator** on the AskField research technology
+platform.
 
-Relevant technologies include React, Redux and API integration.
+Contribution began in frontend development / API integration and expanded
+into hands-on research-technology practice. Public-safe capabilities
+demonstrated through this work:
+
+- survey programming / questionnaire design
+- questionnaire logic, validations, skip logic
+- XLSForm
+- CAPI, CATI, CAWI
+- GPS / geolocation-based data collection
+- enumerator assignment
+- field operations / workflows
+- response monitoring
+- data export and research data management
+
+Present these as capabilities and domain experience — not as separate job
+titles and not as claims of inventing or owning every part of AskField.
+
+Do not publish named study instruments (for example Tunga Taci),
+questionnaire contents, screenshots of confidential instruments, or
+respondent information unless Prince explicitly approves later. Generic
+capability language (XLSForm, multilingual survey programming, validation)
+may still be used without identifying that project.
 
 Avoid publishing compensation or internal employment information.
 
-Avoid claiming ownership of the entire product.
-
-Evidence level: CONFIRMED
+Evidence level: CONFIRMED for Frontend Integrator title and the capability
+list above; PRIVATE for named confidential studies.
 
 ## PSTA
 
@@ -456,15 +493,23 @@ Evidence level: CONFIRMED for product capabilities; PRIVATE for client names
 
 ## AskField
 
-Survey/data-collection platform work.
+Survey / digital data-collection platform at Ethical Research Solutions.
 
-Prince's work includes frontend development and API integration using
-technologies including React and Redux.
+Official employment title: Frontend Integrator.
 
-Avoid claiming ownership of the entire product when work was performed
-as part of another organization/team.
+Public case study leads with Research Technology & Digital Data Collection.
+Capabilities (not titles): survey programming, XLSForm, CAPI / CATI / CAWI,
+GPS/geolocation collection, enumerator assignment, field operations,
+monitoring, export and research data management — demonstrated through team
+platform work.
 
-Evidence level: CONFIRMED for contribution scope
+Engineering stack (tools, not identity): React, Redux, API integration.
+
+Avoid claiming ownership of the entire product.
+
+Do not name private study instruments (e.g. Tunga Taci) on the public site.
+
+Evidence level: CONFIRMED for title + capabilities; PRIVATE for confidential studies.
 
 ---
 

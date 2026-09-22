@@ -13,10 +13,10 @@ import {
 import { JsonLd } from "@/components/seo/JsonLd";
 
 const PAGE_DESCRIPTION =
-  "Experience of Prince Parfait GANZA in Kigali: Founder and CEO of LERONY Ltd, software engineer and AI builder, with client systems, training, education, and verified ALX certifications as evidence.";
+  "Experience of Prince Parfait GANZA in Kigali: Founder and CEO of LERONY Ltd, software engineer and technology entrepreneur, with research technology, client systems, training, education, and verified ALX certifications as evidence.";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Experience | Software Engineer & AI Builder in Kigali — Prince Parfait GANZA",
+  title: "Experience | Software Engineer & Technology Entrepreneur in Kigali — Prince Parfait GANZA",
   description: PAGE_DESCRIPTION,
   path: "/experience",
   absoluteTitle: true,
@@ -25,8 +25,8 @@ export const metadata: Metadata = buildPageMetadata({
     "LERONY Ltd founder",
     "LERONY founder",
     "software engineer Kigali",
-    "software engineer Rwanda",
-    "AI builder Kigali",
+    "technology entrepreneur Rwanda",
+    "research technology Kigali",
     "ALX Africa certificates",
     "AskField",
     "PSTA",

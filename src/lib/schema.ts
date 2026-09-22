@@ -8,6 +8,7 @@ import {
   type ExperienceItem,
   type Project,
 } from "@/data/site-data";
+import { IDENTITY_PORTRAIT_ALT, PORTRAIT_PATHS } from "@/lib/identity";
 
 /** Production canonical origin. Always used for JSON-LD @id values. */
 export const CANONICAL_ORIGIN =
@@ -19,8 +20,15 @@ export const PERSON_IMAGE_ID = `${CANONICAL_ORIGIN}/#person-image`;
 export const WEBSITE_ID = `${CANONICAL_ORIGIN}/#website`;
 export const LERONY_ORG_ID = "https://lerony.com/#organization";
 
-/** Stable Person image URL for Google. Never point JSON-LD at a CMS/media URL. Replace this file in place if the portrait changes. */
-export const PORTRAIT_PATH = "/images/profile/prince-parfait-ganza-kigali-rwanda.webp";
+/**
+ * Stable Person image URL for Google.
+ * Permanent filename under /images/profile/ — never point JSON-LD at a CMS/media URL.
+ * Replace files in place (same paths) if the portrait changes.
+ */
+export const PORTRAIT_PATH = PORTRAIT_PATHS.canonical;
+export const PORTRAIT_PATH_1X1 = PORTRAIT_PATHS.ratio1x1;
+export const PORTRAIT_PATH_4X3 = PORTRAIT_PATHS.ratio4x3;
+export const PORTRAIT_PATH_16X9 = PORTRAIT_PATHS.ratio16x9;
 export const OG_IMAGE_PATH = "/images/og/seo-share-image.jpg";
 
 /** Date the public factual content was last revised. Do not stamp deploy time. */
@@ -59,8 +67,61 @@ export function leronyRef() {
 }
 
 const PORTRAIT_URL = absoluteAssetUrl(PORTRAIT_PATH);
+const PORTRAIT_1X1_URL = absoluteAssetUrl(PORTRAIT_PATH_1X1);
+const PORTRAIT_4X3_URL = absoluteAssetUrl(PORTRAIT_PATH_4X3);
+const PORTRAIT_16X9_URL = absoluteAssetUrl(PORTRAIT_PATH_16X9);
+
+/** Google-recommended Person profile images: 1:1, 4:3, 16:9 (min 50k pixels each). */
+export function buildPersonImageObjects() {
+  const caption = IDENTITY_PORTRAIT_ALT;
+  return [
+    {
+      "@type": "ImageObject",
+      "@id": PERSON_IMAGE_ID,
+      url: PORTRAIT_URL,
+      contentUrl: PORTRAIT_URL,
+      width: 1600,
+      height: 1436,
+      encodingFormat: "image/jpeg",
+      caption,
+      name: caption,
+      representativeOfPage: true,
+    },
+    {
+      "@type": "ImageObject",
+      url: PORTRAIT_1X1_URL,
+      contentUrl: PORTRAIT_1X1_URL,
+      width: 1200,
+      height: 1200,
+      encodingFormat: "image/jpeg",
+      caption,
+      name: `${caption} (1:1)`,
+    },
+    {
+      "@type": "ImageObject",
+      url: PORTRAIT_4X3_URL,
+      contentUrl: PORTRAIT_4X3_URL,
+      width: 1200,
+      height: 900,
+      encodingFormat: "image/jpeg",
+      caption,
+      name: `${caption} (4:3)`,
+    },
+    {
+      "@type": "ImageObject",
+      url: PORTRAIT_16X9_URL,
+      contentUrl: PORTRAIT_16X9_URL,
+      width: 1600,
+      height: 900,
+      encodingFormat: "image/jpeg",
+      caption,
+      name: `${caption} (16:9)`,
+    },
+  ];
+}
 
 export function buildPersonJsonLd() {
+  const images = buildPersonImageObjects();
   return {
     "@type": "Person",
     "@id": PERSON_ID,
@@ -72,37 +133,37 @@ export function buildPersonJsonLd() {
     url: `${CANONICAL_ORIGIN}/`,
     description: siteConfig.description,
     disambiguatingDescription:
-      "Rwandan founder, entrepreneur and technologist based in Kigali. Software engineer and AI builder. Founder and CEO of LERONY Ltd.",
-    image: {
-      "@type": "ImageObject",
-      "@id": PERSON_IMAGE_ID,
-      url: PORTRAIT_URL,
-      contentUrl: PORTRAIT_URL,
-      width: 1024,
-      height: 919,
-      encodingFormat: "image/webp",
-      caption: siteConfig.portraitAlt,
-      name: siteConfig.portraitAlt,
-    },
-    jobTitle: ["Founder", "Entrepreneur", "Technologist", "Software Engineer", "AI Builder"],
+      "Software engineer and technology entrepreneur based in Kigali. Founder and CEO of LERONY Ltd. Builds software systems, research technology and organizational data systems.",
+    image: images,
+    jobTitle: ["Software Engineer", "Technology Entrepreneur", "Founder"],
     hasOccupation: [
       {
         "@type": "Occupation",
-        name: "Founder",
-        occupationLocation: { "@type": "City", name: "Kigali", address: { "@type": "PostalAddress", addressLocality: "Kigali", addressCountry: "RW" } },
-      },
-      {
-        "@type": "Occupation",
         name: "Software Engineer",
-        occupationLocation: { "@type": "City", name: "Kigali", address: { "@type": "PostalAddress", addressLocality: "Kigali", addressCountry: "RW" } },
+        occupationLocation: {
+          "@type": "City",
+          name: "Kigali",
+          address: { "@type": "PostalAddress", addressLocality: "Kigali", addressCountry: "RW" },
+        },
       },
       {
         "@type": "Occupation",
-        name: "AI Builder",
-        occupationLocation: { "@type": "City", name: "Kigali", address: { "@type": "PostalAddress", addressLocality: "Kigali", addressCountry: "RW" } },
+        name: "Technology Entrepreneur",
+        occupationLocation: {
+          "@type": "City",
+          name: "Kigali",
+          address: { "@type": "PostalAddress", addressLocality: "Kigali", addressCountry: "RW" },
+        },
       },
-      { "@type": "Occupation", name: "Entrepreneur" },
-      { "@type": "Occupation", name: "Technologist" },
+      {
+        "@type": "Occupation",
+        name: "Founder",
+        occupationLocation: {
+          "@type": "City",
+          name: "Kigali",
+          address: { "@type": "PostalAddress", addressLocality: "Kigali", addressCountry: "RW" },
+        },
+      },
     ],
     worksFor: leronyRef(),
     brand: {
@@ -148,31 +209,29 @@ export function buildPersonJsonLd() {
       siteConfig.social.twitter,
       siteConfig.social.youtube,
       siteConfig.social.instagram,
-      siteConfig.social.tiktok,
-      siteConfig.social.threads,
-      siteConfig.social.luma,
     ],
     knowsAbout: [
       "Software engineering",
       "Software engineering in Rwanda",
       "Software engineering in Kigali",
-      "Software engineer Kigali",
       "Full-stack development",
-      "AI builder",
-      "AI builder in Kigali",
-      "Practical AI integration",
-      "Business systems",
-      "Digital product development",
-      "Digital products Kigali",
-      "Digital presence",
-      "Data and reporting systems",
-      "Technology consulting",
-      "Technology consulting Kigali",
-      "Technical training",
       "Technology entrepreneurship",
       "Tech founder Kigali",
-      "Tech founder",
       "Founder of LERONY Ltd",
+      "Research technology",
+      "Digital data collection",
+      "Survey programming",
+      "XLSForm",
+      "CAPI",
+      "CATI",
+      "CAWI",
+      "Research data systems",
+      "Data systems",
+      "Indicator management systems",
+      "Organizational reporting",
+      "Business systems",
+      "Digital product development",
+      "Practical AI integration",
       "AskField",
       "StockPro",
       "Caritas Rwanda information systems",
@@ -219,7 +278,7 @@ export function buildWebSiteJsonLd() {
     alternateName: [
       "Prince Parfait",
       "Prince Parfait Ganza",
-      "Software engineer and AI builder in Kigali",
+      "Software engineer and technology entrepreneur in Kigali",
       "Tech founder Kigali",
       "LERONY founder",
     ],
@@ -480,7 +539,28 @@ export function buildCreativeWorkJsonLd(project: Project) {
           about: {
             "@type": "Organization",
             name: project.organization,
+            ...(project.organizationUrl || project.links.live
+              ? { url: project.organizationUrl || project.links.live }
+              : {}),
           },
+        }
+      : {}),
+    ...(project.deliveredThrough
+      ? {
+          provider: {
+            "@type": "Organization",
+            name: project.deliveredThrough,
+            url: "https://lerony.com",
+          },
+        }
+      : {}),
+    ...(project.collaborators?.length
+      ? {
+          contributor: project.collaborators.map((person) => ({
+            "@type": "Person",
+            name: person.name,
+            ...(person.role ? { jobTitle: person.role } : {}),
+          })),
         }
       : {}),
     ...(isSoftware

@@ -6,6 +6,11 @@ import type { AboutPageContent } from "@/lib/about-page";
 import type { ServicesPageContent } from "@/lib/services-page";
 import type { Project } from "@/data/site-data";
 import { sanitizeWelcomeBody } from "@/lib/welcome-copy";
+import {
+  canonicalizeIdentityFields,
+  IDENTITY_COMPACT_BIO,
+  IDENTITY_ROLE_LINE,
+} from "@/lib/identity";
 
 export type AnnouncementSharePlatform = "linkedin" | "twitter" | "facebook" | "whatsapp" | "link";
 export type AnnouncementBarPosition = "top" | "bottom";
@@ -221,13 +226,13 @@ export type HeroLayoutCopy = {
 export const DEFAULT_SETTINGS: SiteSettings = {
   bannerLayout: "split_portrait",
   navbarStyle: "pill",
-  heroImageUrl: "/images/profile/prince-parfait-ganza-kigali-rwanda.webp",
+  heroImageUrl: "/images/profile/prince-parfait-ganza.webp",
   heroImageSplit: "/images/profile/hero-split-portrait.webp",
   heroImageCentered: "/images/profile/hero-centered-portrait.webp",
   heroImageOverlay: "/images/profile/hero-cinematic-overlay.webp",
   siteTitle: "Prince Parfait GANZA",
-  siteSubtitle: "Founder · Entrepreneur · Technologist · Software Engineer · AI Builder",
-  bio: "Rwandan founder, entrepreneur and technologist. Software engineer and AI builder working from Kigali.",
+  siteSubtitle: IDENTITY_ROLE_LINE,
+  bio: IDENTITY_COMPACT_BIO,
   heroCarouselEnabled: false,
   heroCarouselMode: "all",
   heroCarouselLayouts: ["split_portrait", "full_centered_floating", "featured_overlay"],
@@ -320,7 +325,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   emailContactTip: "Quick tip: Reply directly to this email or use the Control Center to manage this conversation, add notes, or convert it to a project.",
   emailPreferencesUrl: "/contact",
   emailUnsubscribeUrl: "/unsubscribe",
-  emailPortraitUrl: "/images/profile/prince-parfait-ganza-kigali-rwanda.webp",
+  emailPortraitUrl: "/images/profile/prince-parfait-ganza.webp",
   heroGreeting: "Hi there, I'm",
   heroAvailableText: "Available for new projects",
   heroHeadline: "Building technology, products and ventures that turn ambitious ideas into real-world impact.",
@@ -481,10 +486,28 @@ export function getLocalSettings(): SiteSettings {
         parsed.identityRevision = 4;
         localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(parsed));
       }
+      if ((parsed.identityRevision ?? 0) < 5) {
+        const roleV4 = "Founder · Entrepreneur · Technologist · Software Engineer · AI Builder";
+        const bioV4a = "Rwandan founder, entrepreneur and technologist. Software engineer and AI builder working from Kigali.";
+        const bioV4b = "Rwandan founder, entrepreneur and technologist building technology, products and ventures from Kigali.";
+        if (!parsed.siteSubtitle || parsed.siteSubtitle === roleV4) {
+          parsed.siteSubtitle = DEFAULT_SETTINGS.siteSubtitle;
+        }
+        if (!parsed.bio || parsed.bio === bioV4a || parsed.bio === bioV4b) {
+          parsed.bio = DEFAULT_SETTINGS.bio;
+        }
+        parsed.identityRevision = 5;
+        localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(parsed));
+      }
+      if ((parsed.identityRevision ?? 0) < 6) {
+        Object.assign(parsed, canonicalizeIdentityFields(parsed));
+        parsed.identityRevision = 6;
+        localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(parsed));
+      }
       if (!parsed.socialLinks?.length) parsed.socialLinks = DEFAULT_SOCIAL_LINKS;
       const hadBlob = SETTINGS_IMAGE_KEYS.some((key) => typeof parsed[key] === "string" && parsed[key].startsWith("blob:"));
       const cleaned = stripSettingsBlobs(parsed);
-      const merged = { ...DEFAULT_SETTINGS, ...cleaned };
+      const merged = canonicalizeIdentityFields({ ...DEFAULT_SETTINGS, ...cleaned });
       merged.emailWelcomeBody = sanitizeWelcomeBody(merged.emailWelcomeBody);
       if (!merged.footerQuote?.trim()) merged.footerQuote = DEFAULT_SETTINGS.footerQuote;
       if (!merged.footerQuoteAttribution?.trim()) {

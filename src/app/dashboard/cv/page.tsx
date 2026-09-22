@@ -433,7 +433,7 @@ export default function DashboardCvPage() {
                     style={{ ...inputStyle, marginTop: "0.3rem" }}
                     value={format.headline || ""}
                     onChange={(e) => patchFormat({ headline: e.target.value })}
-                    placeholder="Founder · Software Engineer · Technologist"
+                    placeholder="Software Engineer · Technology Entrepreneur · Founder"
                   />
                 </label>
                 <label style={{ display: "block", fontSize: "0.72rem", fontWeight: 700, color: "#334155" }}>

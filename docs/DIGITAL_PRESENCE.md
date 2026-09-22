@@ -1,53 +1,28 @@
-# SEO
+# Digital presence
 
-## Primary Keywords
+Canonical identity (all channels):
 
-Prince Parfait GANZA
+**Software Engineer · Technology Entrepreneur · Founder**
 
-Founder Entrepreneur Technologist
+Company role (LERONY Ltd): **Founder & CEO**
 
-Founder Lerony
+## LinkedIn
 
-Technology entrepreneur Rwanda
+Approved headline:
 
----
+`Software Engineer & Technology Entrepreneur | Research Technology & Data Systems | Founder & CEO, LERONY Ltd`
 
-## Metadata
+Keep the headline concise. Put CAPI, CATI, CAWI, XLSForm, React, PHP, SQL and similar terms in About, Experience, Projects and Skills — not in the headline.
 
-Homepage
+## Primary discovery phrases
 
-About
+- Prince Parfait GANZA
+- Software engineer Kigali / Rwanda
+- Technology entrepreneur Rwanda
+- Founder LERONY Ltd
+- Research technology / digital data collection
+- Data systems / indicator systems
 
-Projects
+## Metadata & structured data
 
-Blog
-
----
-
-## Open Graph
-
-Title
-
-Description
-
-Image
-
----
-
-## Structured Data
-
-Person
-
-Website
-
-Organization
-
-Article
-
----
-
-## Sitemap
-
----
-
-## Robots
+Follow `docs/SEO_STRATEGY.md` and `src/lib/identity.ts`. Do not maintain a second conflicting identity string in channel bios.

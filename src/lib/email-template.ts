@@ -4,6 +4,7 @@ import { socialsFor, type SocialLink } from "@/lib/socials";
 import type { EmailHeaderLayout, SiteSettings } from "@/lib/supabase";
 import { DEFAULT_SETTINGS } from "@/lib/supabase";
 import { sanitizeWelcomeBody } from "@/lib/welcome-copy";
+import { IDENTITY_ROLE_LINE } from "@/lib/identity";
 
 /** System stack only — web-font <link>s hurt inbox placement. */
 const FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif';
@@ -147,7 +148,7 @@ export function emailBrandFromSettings(settings?: Partial<SiteSettings> | null):
     origin,
     title: s.siteTitle || DEFAULT_SETTINGS.siteTitle,
     subtitle,
-    roles: roles || "Founder · Entrepreneur · Technologist",
+    roles: roles || IDENTITY_ROLE_LINE,
     location: s.location || DEFAULT_SETTINGS.location,
     phone: s.phoneNumber || "",
     contactEmail: s.contactEmail || DEFAULT_SETTINGS.contactEmail,

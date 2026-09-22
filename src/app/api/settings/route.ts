@@ -4,6 +4,7 @@ import { getServerSiteSettings } from "@/lib/site-settings-server";
 import { createServerSupabase, hasServiceRoleKey } from "@/lib/supabase-server";
 import { DEFAULT_SOCIAL_LINKS } from "@/lib/socials";
 import type { SiteSettings } from "@/lib/supabase";
+import { canonicalizeIdentityFields } from "@/lib/identity";
 
 const PUBLIC_PATHS = ["/", "/projects", "/about", "/contact", "/experience", "/services", "/cv"] as const;
 
@@ -45,7 +46,7 @@ export async function PUT(request: NextRequest) {
 
   let settings: SiteSettings;
   try {
-    settings = (await request.json()) as SiteSettings;
+    settings = canonicalizeIdentityFields((await request.json()) as SiteSettings);
   } catch {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }

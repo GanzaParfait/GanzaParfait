@@ -9,7 +9,7 @@
 
 **Official personal portfolio of Prince Parfait GANZA**
 
-Founder · Entrepreneur · Technologist
+Software Engineer · Technology Entrepreneur · Founder
 
 [Website](https://www.princeparfait.com) · [LinkedIn](https://www.linkedin.com/in/prince-parfait-ganza) · [GitHub](https://github.com/GanzaParfait)
 
@@ -19,13 +19,13 @@ Founder · Entrepreneur · Technologist
 
 ## About
 
-This repository is the source for **[www.princeparfait.com](https://www.princeparfait.com)** — the personal website of **Prince Parfait GANZA**, a Rwandan founder, entrepreneur and technologist based in Kigali.
+This repository is the source for **[www.princeparfait.com](https://www.princeparfait.com)** — the personal website of **Prince Parfait GANZA**, a software engineer and technology entrepreneur based in Kigali.
 
-The site presents a founder-led identity. Software engineering, product delivery, systems work, and AI building are evidence — not the ceiling.
+Public identity: **Software Engineer · Technology Entrepreneur · Founder**. Founder & CEO applies to **[LERONY Ltd](https://lerony.com)**. Specializations include software systems, research technology & digital data collection, and data systems for decision support.
 
-> Building technology, products and ventures that turn ambitious ideas into real-world impact.
+> I design and build software, research technology and data systems that help organizations collect information, run operations and make better decisions.
 
-He is also Founder & CEO of **[LERONY Ltd](https://lerony.com)**. This personal site is not lerony.com.
+This personal site is not lerony.com.
 
 ## Purpose
 
@@ -138,7 +138,7 @@ Do not use **PPG** as a public brand abbreviation. Do not claim the ULK Bachelor
 | Domain | www.princeparfait.com |
 | Location | Kigali, Rwanda |
 | Direction | Blue, clean, modern, human |
-| Role line | Founder · Entrepreneur · Technologist |
+| Role line | Software Engineer · Technology Entrepreneur · Founder |
 
 ---
 

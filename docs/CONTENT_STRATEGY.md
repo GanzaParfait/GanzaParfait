@@ -25,7 +25,7 @@ Avoid: tech genius, visionary, world-class, revolutionary, leading African entre
 
 Prefer:
 
-> Prince builds software systems for organizations and businesses, with work spanning data platforms, business operations and digital services.
+> Prince builds software systems, research technology and organizational data tools for real operations — as a software engineer and technology entrepreneur based in Kigali.
 
 ---
 
@@ -61,9 +61,9 @@ Do not add Education, Certifications, Media, or Uses as top-level items until ea
 Answer, in order:
 
 1. Who — Prince Parfait GANZA
-2. What — Founder and software engineer building practical digital products
+2. What — Software engineer and technology entrepreneur; Founder & CEO of LERONY Ltd
 3. Where — Kigali, Rwanda
-4. Proof — named organizations and real systems
+4. Proof — named organizations and real systems (software, research technology, data)
 5. Action — View work / Contact
 
 Do not lead with animation, badge walls, or invented metrics.

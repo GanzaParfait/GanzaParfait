@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ProjectCaseStudyClient from "@/components/projects/ProjectCaseStudyClient";
-import { getPublicProject, getPublicProjects } from "@/lib/projects";
+import { getPublicProject, getPublicProjects, isProjectIndexable } from "@/lib/projects";
 import { buildPageMetadata } from "@/lib/seo";
 import {
   buildBreadcrumbListJsonLd,
@@ -28,14 +28,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const project = await getPublicProject(id);
   if (!project) return { title: "Project Not Found", robots: { index: false, follow: true } };
 
+  const title = project.seoTitle || `${project.title} | Prince Parfait GANZA`;
+  const description = project.seoDescription || project.description;
+  const indexable = isProjectIndexable(project);
+
   return buildPageMetadata({
-    title: `${project.title} | Prince Parfait GANZA`,
-    description: project.description,
+    title,
+    description,
     path: `/projects/${project.id}`,
     absoluteTitle: true,
     keywords: [project.title, project.organization || "", "Prince Parfait GANZA", ...project.technologies].filter(Boolean),
     ogImage: project.image,
     ogImageAlt: `${project.title} — case study by Prince Parfait GANZA`,
+    noIndex: !indexable,
   });
 }
 
@@ -56,8 +61,8 @@ export default async function ProjectPage({ params }: Props) {
         data={buildGraph([
           buildWebPageJsonLd({
             path: `/projects/${project.id}`,
-            name: `${project.title} | Case study`,
-            description: project.description,
+            name: project.seoTitle || `${project.title} | Case study`,
+            description: project.seoDescription || project.description,
             includePersonImage: false,
           }),
           buildCreativeWorkJsonLd(project),

@@ -45,7 +45,7 @@ export function setting<K extends keyof SiteSettings>(settings: SiteSettings, ke
 export function heroPortraitAlt(settings: SiteSettings) {
   const name = setting(settings, "siteTitle");
   if (name === siteConfig.name || !name.trim()) return siteConfig.portraitAlt;
-  return `${name} — Rwandan founder, entrepreneur, technologist, software engineer and AI builder based in Kigali, Rwanda`;
+  return siteConfig.portraitAlt;
 }
 
 export const LAYOUT_HERO_IMAGES: Record<HeroLayoutType, string> = {

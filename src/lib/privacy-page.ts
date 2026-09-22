@@ -41,11 +41,11 @@ export const DEFAULT_PRIVACY_PAGE: PrivacyPageContent = {
   title: "Privacy Policy",
   subtitle: "Clear, simple and transparent.",
   lead:
-    "This page explains what information princeparfait.com collects, why it is collected, and how to reach Prince Parfait GANZA about it. It is written for a personal portfolio — not as a substitute for formal legal advice.",
+    "This page explains what information princeparfait.com collects, why it is collected, and how to reach Prince Parfait GANZA about it. It is written for a personal portfolio, not as a substitute for formal legal advice.",
   updatedLabel: "Last updated",
   updatedDate: "19 September 2026",
   asideTitle: "Your privacy matters",
-  asideBody: "I only collect what is needed to respond, improve this site, and keep it secure — never to sell your data.",
+  asideBody: "I only collect what is needed to respond, improve this site, and keep it secure. I never sell your data.",
   promises: [
     { icon: "lock", text: "I don't sell your data." },
     { icon: "user", text: "I only collect what is necessary." },

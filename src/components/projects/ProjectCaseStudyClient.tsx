@@ -27,7 +27,7 @@ import { type Project } from "@/data/site-data";
 import ShareActions from "@/components/ui/ShareActions";
 import MediaPreview, { type PreviewItem } from "@/components/ui/MediaPreview";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
-import { isVideoUrl, mergeProjectCatalog } from "@/lib/projects";
+import { isVideoUrl, listListedProjects } from "@/lib/projects";
 
 function PosterVideo({ src, poster, title }: { src: string; poster?: string; title: string }) {
   const [ready, setReady] = useState(false);
@@ -54,7 +54,14 @@ function PosterVideo({ src, poster, title }: { src: string; poster?: string; tit
   );
 }
 
-const STATUS = { live: "Live", "in-progress": "In progress", archived: "Archived" };
+const STATUS: Record<Project["status"], string> = {
+  live: "Live",
+  "in-progress": "In progress",
+  archived: "Archived",
+  staging: "Staging",
+  completed: "Completed",
+  ongoing: "Ongoing",
+};
 const CATEGORY: Record<string, string> = {
   web: "Web app",
   mobile: "Mobile",
@@ -113,7 +120,7 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
       : seed;
   }, [seed, settings.projectRecords]);
 
-  const list = useMemo(() => mergeProjectCatalog(settings.projectRecords), [settings.projectRecords]);
+  const list = useMemo(() => listListedProjects(settings.projectRecords), [settings.projectRecords]);
   const index = list.findIndex((item) => item.id === project.id);
   const previous = index > 0 ? list[index - 1] : null;
   const next = index >= 0 && index < list.length - 1 ? list[index + 1] : null;
@@ -156,7 +163,7 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
       show: Boolean(project.longDescription || project.description || project.context || project.highlights?.length),
     },
     { id: "challenges", label: "Challenge", show: Boolean(project.challenge || project.problem) },
-    { id: "role", label: "My role", show: Boolean(project.myRole || project.whatIBuilt) },
+    { id: "role", label: "My role", show: Boolean(project.myRole || project.whatIBuilt || project.contributionSummary) },
     { id: "features", label: "Process", show: Boolean(project.features?.length || project.solution) },
     { id: "stack", label: "Architecture", show: Boolean(project.technologies?.length || project.capabilities?.length || project.websiteTechnologies?.length) },
     { id: "media", label: "Screens", show: mediaItems.length > 0 },
@@ -222,8 +229,14 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
             <p className="case-hero-lead">{project.tagline || project.description}</p>
             <div className="case-actions">
               {project.links?.live ? (
-                <a className="btn btn-primary" href={project.links.live} target="_blank" rel="noopener noreferrer">
-                  Visit live site <RiExternalLinkLine size={16} />
+                <a
+                  className="btn btn-primary"
+                  href={project.links.live}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Visit live project for ${project.title} (opens in a new tab)`}
+                >
+                  Visit live project <RiExternalLinkLine size={16} aria-hidden />
                 </a>
               ) : null}
               {project.links?.github ? (
@@ -251,8 +264,17 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
         </header>
 
         <dl className="case-meta" data-page-section>
+          {project.deliveredThrough ? (
+            <MetaItem icon={<RiBuilding2Line size={18} />} label="Delivered through" value={project.deliveredThrough} />
+          ) : null}
           {project.myRole ? (
             <MetaItem icon={<RiUser3Line size={18} />} label="My role" value={project.myRole} />
+          ) : null}
+          {project.domain ? (
+            <MetaItem icon={<RiStackLine size={18} />} label="Domain" value={project.domain} />
+          ) : null}
+          {project.market ? (
+            <MetaItem icon={<RiBuilding2Line size={18} />} label="Market" value={project.market} />
           ) : null}
           {project.period || project.year ? (
             <MetaItem icon={<RiCalendarLine size={18} />} label="Duration" value={String(project.period || project.year)} />
@@ -264,17 +286,34 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
           {project.technologies?.length ? (
             <MetaItem
               icon={<RiCodeBoxLine size={18} />}
-              label="Tech stack"
-              value={project.technologies.slice(0, 4).join(", ")}
+              label="Technology"
+              value={project.technologies.slice(0, 5).join(", ")}
             />
           ) : null}
           <MetaItem
             icon={<RiCheckboxCircleLine size={18} />}
             label="Status"
-            value={STATUS[project.status]}
+            value={STATUS[project.status] || project.status}
             live={project.status === "live"}
           />
         </dl>
+
+        {project.contributionSummary || project.collaborators?.length ? (
+          <section className="case-contribution" data-page-section aria-label="Contribution">
+            <h2 className="case-contribution-title">Contribution</h2>
+            {project.contributionSummary ? <p>{project.contributionSummary}</p> : null}
+            {project.collaborators?.length ? (
+              <ul className="case-collaborators">
+                {project.collaborators.map((person) => (
+                  <li key={`${person.name}-${person.role || ""}`}>
+                    <strong>{person.name}</strong>
+                    {person.role ? <span>{person.role}</span> : null}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </section>
+        ) : null}
 
         <div className="case-layout" data-page-section>
           <div className="case-main">
@@ -356,7 +395,23 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
                 <>
                   <h2>My responsibility</h2>
                   {project.myRole ? <p className="case-role-title">{project.myRole}</p> : null}
+                  {project.contributionSummary ? <p>{project.contributionSummary}</p> : null}
                   {project.whatIBuilt ? <p>{project.whatIBuilt}</p> : null}
+                  {project.collaborators?.length ? (
+                    <div className="case-context">
+                      <h3>Collaborators</h3>
+                      <ul className="case-list">
+                        {project.collaborators.map((person) => (
+                          <li key={`${person.name}-${person.role || ""}`}>
+                            <span>
+                              <strong>{person.name}</strong>
+                              {person.role ? ` — ${person.role}` : ""}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
                 </>
               )}
               {tab === "stack" && (

@@ -1,22 +1,36 @@
 // ============================================================
 // Site Data — Prince Parfait GANZA
 // Source of truth for public copy: docs/PORTFOLIO_CONTEXT.md
+// Canonical identity: src/lib/identity.ts
 // Do not invent clients, results, titles, dates, or testimonials.
 // ============================================================
 
+import {
+  CANONICAL_NAME,
+  COMPANY_ROLE,
+  IDENTITY_COMPACT_BIO,
+  IDENTITY_DESCRIPTION,
+  IDENTITY_PAGE_TITLE,
+  IDENTITY_PORTRAIT_ALT,
+  IDENTITY_POSITIONING,
+  IDENTITY_ROLE_LINE,
+  IDENTITY_SHORT_BIO,
+  LINKEDIN_HEADLINE,
+  SPECIALIZATIONS,
+} from "@/lib/identity";
+
 export const identity = {
-  roleLine: "Founder · Entrepreneur · Technologist · Software Engineer · AI Builder",
-  positioning:
-    "Building technology, products and ventures that turn ambitious ideas into real-world impact.",
-  pageTitle: "Prince Parfait GANZA | Founder, Software Engineer & AI Builder in Kigali",
-  description:
-    "Prince Parfait GANZA is a Rwandan founder, entrepreneur and technologist — a software engineer and AI builder based in Kigali. Founder and CEO of LERONY Ltd, building digital products, business systems and practical AI for real organizations.",
-  shortBio:
-    "Prince Parfait GANZA is a Rwandan founder, entrepreneur and technologist based in Kigali. He leads Lerony and works across technology, digital products and ventures that help organizations and ambitious ideas become reliable real-world solutions. His background combines software engineering, product delivery, data systems, client collaboration and technical training.",
-  compactBio:
-    "Rwandan founder, entrepreneur and technologist building technology, products and ventures from Kigali.",
-  portraitAlt:
-    "Prince Parfait GANZA — Rwandan founder, entrepreneur, technologist, software engineer and AI builder based in Kigali, Rwanda",
+  name: CANONICAL_NAME,
+  roleLine: IDENTITY_ROLE_LINE,
+  companyRole: COMPANY_ROLE,
+  linkedInHeadline: LINKEDIN_HEADLINE,
+  positioning: IDENTITY_POSITIONING,
+  pageTitle: IDENTITY_PAGE_TITLE,
+  description: IDENTITY_DESCRIPTION,
+  shortBio: IDENTITY_SHORT_BIO,
+  compactBio: IDENTITY_COMPACT_BIO,
+  portraitAlt: IDENTITY_PORTRAIT_ALT,
+  specializations: SPECIALIZATIONS,
 } as const;
 
 export const siteConfig = {
@@ -35,32 +49,26 @@ export const siteConfig = {
     "Prince Parfait GANZA",
     "Prince Parfait Ganza",
     "Prince Parfait",
-    "Founder Entrepreneur Technologist",
+    "Software Engineer Kigali",
+    "Software engineer Rwanda",
+    "Software engineer in Kigali",
+    "Technology entrepreneur Rwanda",
+    "Tech founder Kigali",
     "Founder LERONY Ltd",
     "LERONY founder",
     "LERONY Ltd CEO",
-    "Technology entrepreneur Rwanda",
-    "Tech founder Kigali",
-    "Tech founder Rwanda",
-    "Software Engineer Rwanda",
-    "Software engineer Kigali",
-    "Software engineer in Rwanda",
-    "Software engineer in Kigali",
-    "AI builder Rwanda",
-    "AI builder Kigali",
-    "AI builder in Kigali",
-    "Rwandan technologist",
-    "Technologist Kigali",
-    "Technologist Rwanda",
-    "Software engineer and AI builder Kigali",
-    "Full-stack developer Kigali",
-    "Full-stack developer Rwanda",
-    "Digital products Kigali",
+    "Research technology Rwanda",
+    "Digital data collection Kigali",
+    "Survey programming Rwanda",
+    "XLSForm Rwanda",
+    "Digital data collection Kigali",
+    "CAPI survey Rwanda",
+    "Data systems Kigali",
+    "Indicator management systems",
     "Business systems Rwanda",
-    "Technology consulting Kigali",
-    "Practical AI Rwanda",
-    "AskField developer",
-    "StockPro inventory",
+    "Full-stack developer Kigali",
+    "Organizational reporting systems",
+    "AskField survey platform",
     "Caritas Rwanda systems",
     "princeparfait.com",
   ],
@@ -119,10 +127,19 @@ export const defaultFooterQuote = {
   attribution: "Prince Parfait GANZA",
 } as const;
 
+export type ProjectCollaborator = {
+  name: string;
+  role?: string;
+};
+
+export type ProjectVisibility = "public" | "unlisted" | "draft";
+
 export type Project = {
   id: string;
   title: string;
   organization?: string;
+  /** Public organization / client site when distinct from the product live URL. */
+  organizationUrl?: string;
   description: string;
   longDescription?: string;
   context?: string;
@@ -131,24 +148,42 @@ export type Project = {
   problem?: string;
   whatIBuilt?: string;
   technologies: string[];
-  /** Company-level capabilities (for technology/company records). Distinct from website stack. */
+  /** Capability labels demonstrated by this evidence (not identity titles). */
   capabilities?: string[];
   /** Tech stack for the company website or a specific software product — not the company identity. */
   websiteTechnologies?: string[];
   myRole?: string;
+  /** Capability domain for evidence pages (e.g. Research Technology) — not a job title. */
+  domain?: string;
+  /** Commercial / delivery vehicle (e.g. LERONY Ltd) when distinct from the client. */
+  deliveredThrough?: string;
+  /** Concise factual explanation of Prince's personal contribution. */
+  contributionSummary?: string;
+  collaborators?: ProjectCollaborator[];
+  /** Client / market geography when useful (e.g. Des Moines, Iowa, United States). */
+  market?: string;
   outcome?: string;
   result?: string;
   screenshots?: string[];
   category: "web" | "mobile" | "ai" | "saas" | "technology" | "open-source" | "systems" | "product" | "other";
   categoryNote?: string;
-  status: "live" | "in-progress" | "archived";
+  /** Delivery status of the product/system. */
+  status: "live" | "in-progress" | "archived" | "staging" | "completed" | "ongoing";
+  /** Portfolio visibility. Draft/unlisted stay out of public indexes. Defaults to public. */
+  visibility?: ProjectVisibility;
+  /** Work-page evidence group (not a job title). */
+  workGroup?: "ventures" | "client" | "research" | "web";
   featured: boolean;
   independent?: boolean;
   links: {
+    /** Canonical public product/client URL (no tracking params). */
     live?: string;
+    /** Public repository only — never private repos. */
     github?: string;
     case_study?: string;
   };
+  seoTitle?: string;
+  seoDescription?: string;
   image?: string;
   logo?: string;
   /** Prefer these media URLs (images and/or videos) for homepage + card previews. Aim for ≥3. */
@@ -210,6 +245,7 @@ export const projects: Project[] = [
     websiteTechnologies: ["Next.js", "TypeScript", "React", "Node.js", "Supabase"],
     technologies: ["Next.js", "TypeScript", "React", "Node.js", "Supabase"],
     category: "technology",
+    workGroup: "ventures",
     status: "live",
     featured: true,
     period: "2025–Present",
@@ -234,22 +270,28 @@ export const projects: Project[] = [
     title: "Caritas Rwanda Information Systems",
     organization: "Caritas Rwanda",
     description:
-      "Organizational digital systems for indicator tracking, reporting, and information management.",
+      "Organization-wide indicator management and decision-support systems for reporting, dashboards and information management.",
     longDescription:
-      "Work for Caritas Rwanda on internal digital systems used for organizational reporting and information management. The systems support role-based access, dashboards, data management, exports, and administrative workflows.",
-    context: "Caritas Rwanda needed digital systems for organizational indicator and information management.",
+      "Work for Caritas Rwanda on internal digital systems used for organizational indicators, reporting and information management. The systems support role-based access, dashboards, data management, exports and administrative workflows, helping programme and operations teams see what is happening and report reliably.",
+    context: "Caritas Rwanda needed digital systems for organizational indicator tracking and decision-oriented reporting.",
     challenge:
-      "Humanitarian and organizational reporting depends on reliable data, controlled access, and repeatable administrative workflows.",
+      "Humanitarian and organizational reporting depends on reliable indicators, controlled access, disaggregated views and repeatable administrative workflows.",
     solution:
-      "Information-management functionality including dashboards, role-based access, reporting, exports, and administration.",
+      "Indicator and information-management functionality including dashboards, role-based access, reporting, exports and administration.",
     problem:
-      "Organizational indicator and information-management work required structured digital systems.",
+      "Organizational indicator and information-management work required structured digital systems rather than fragmented records.",
     whatIBuilt:
-      "Digital systems covering role-based access, dashboards, reporting, data management, exports, and administrative workflows.",
+      "Digital systems covering role-based access, indicator tracking, dashboards, reporting, data management, exports and administrative workflows.",
     myRole: "Software engineer",
-    technologies: ["Web platforms", "Dashboards", "Role-based access", "Reporting"],
+    domain: "Data Systems, Analytics & Decision Support",
+    deliveredThrough: "Engagement work",
+    contributionSummary:
+      "Software engineering contribution to organization-wide indicator management and decision-support systems (CRNIS).",
+    technologies: ["Web platforms", "Indicators", "Dashboards", "Reporting", "Role-based access"],
     category: "systems",
+    workGroup: "research",
     status: "live",
+    visibility: "public",
     featured: true,
     wide: true,
     cardSpan: "full",
@@ -271,7 +313,7 @@ export const projects: Project[] = [
       "Administrative configuration and user management",
     ],
     learned:
-      "Operational systems succeed when access control, reporting, and day-to-day data entry are designed as one workflow—not as separate tools.",
+      "Operational systems succeed when access control, reporting, and day-to-day data entry are designed as one workflow, not as separate tools.",
     period: "Engagement work for Caritas Rwanda",
     logo: "/images/projects/logos/caritas-rwanda.png",
     image: "/images/projects/caritas-systems.webp",
@@ -292,7 +334,9 @@ export const projects: Project[] = [
       "Indicators workspace",
       "Administration",
     ],
-    links: {},
+    links: {
+      live: "https://crnis.caritasrwanda.org/",
+    },
   },
   {
     id: "stockpro",
@@ -314,6 +358,7 @@ export const projects: Project[] = [
     myRole: "Software engineer",
     technologies: ["Web application", "MySQL", "Business workflows", "Reporting"],
     category: "product",
+    workGroup: "client",
     status: "live",
     featured: true,
     wide: true,
@@ -378,6 +423,7 @@ export const projects: Project[] = [
     myRole: "Software engineer",
     technologies: ["Web application", "Authentication", "Reporting", "Operational records"],
     category: "systems",
+    workGroup: "client",
     status: "live",
     featured: true,
     period: "Associated with 2023–2024 PSTA work",
@@ -392,50 +438,82 @@ export const projects: Project[] = [
   },
   {
     id: "caritas-website",
-    title: "Caritas Rwanda Website",
+    title: "Caritas Rwanda Website Revamp",
     organization: "Caritas Rwanda",
     description:
       "Website revamp and public digital presence work for Caritas Rwanda.",
     longDescription:
-      "Public-facing website work for Caritas Rwanda, treated separately from the internal indicator and information-management systems.",
+      "Public-facing website work for Caritas Rwanda, treated separately from the internal indicator and information-management systems (CRNIS).",
     context: "Caritas Rwanda needed a renewed public website alongside its internal systems work.",
     challenge: "The public website and internal information systems serve different audiences and should not be conflated.",
     solution: "Website revamp / digital work for the public-facing Caritas Rwanda presence.",
     problem: "The public digital presence required a website revamp distinct from internal systems.",
     whatIBuilt: "Website revamp and related public digital work.",
     myRole: "Software engineer",
+    domain: "Software Engineering & Digital Systems",
+    deliveredThrough: "Engagement work",
+    contributionSummary: "Software engineering contribution to the public website revamp, kept separate from CRNIS internal systems work.",
     technologies: ["Web", "Content", "Frontend"],
     category: "web",
+    workGroup: "web",
     status: "live",
+    visibility: "public",
     featured: false,
     image: "/images/projects/caritas-website.webp",
     screenshots: ["/images/projects/caritas-website.webp"],
-    links: {},
+    links: {
+      live: "https://new.caritasrwanda.org/",
+    },
   },
   {
     id: "askfield",
     title: "AskField",
     organization: "Ethical Research Solutions / AskField",
     description:
-      "Frontend development and API integration for a survey and data-collection platform.",
+      "Research technology platform for digital surveys and data collection. Frontend integration expanding into broader research workflows.",
     longDescription:
-      "Contribution to the AskField survey platform through frontend development and API integration, using React and Redux. This was team/organizational work, not sole product ownership.",
+      "Team contribution to AskField, Ethical Research Solutions’ survey and digital data-collection platform. Official role: Frontend Integrator. The work grew from frontend and API integration into hands-on research-technology practice across survey programming, questionnaire logic and validations, XLSForm, CAPI / CATI / CAWI collection modes, GPS/geolocation-based collection, enumerator assignment, field operations, response monitoring, data export and research data management. This describes capabilities demonstrated through the platform, not sole product ownership or invention of every AskField feature.",
     context:
-      "AskField is a survey and data-collection platform. Work was performed as part of Ethical Research Solutions / the product team.",
+      "AskField supports organizations that need structured digital surveys and reliable research data collection. Work was performed as part of Ethical Research Solutions / the product team.",
     challenge:
-      "The product needed frontend interfaces connected to existing APIs for survey and data-collection workflows.",
+      "Research programmes need production workflows that connect questionnaire design, multi-mode collection (field, phone, web), monitoring and usable research data, not only a static form UI.",
     solution:
-      "Frontend development and API integration using React and Redux.",
+      "Frontend and API-backed product work alongside deeper survey programming and research-data workflows used in production collection environments.",
     problem:
-      "The survey platform required frontend work and API integration.",
+      "The survey platform required strong product interfaces connected to real research-collection workflows.",
     whatIBuilt:
-      "Frontend interfaces and API integration for survey/data-collection workflows.",
-    myRole: "Frontend development and API integration (team contribution)",
-    technologies: ["React", "Redux", "API integration"],
+      "Frontend interfaces and API integration, plus support for survey programming, digital collection operations and research-data handling on the platform.",
+    myRole: "Frontend Integrator (Research Technology Platform, team contribution)",
+    domain: "Research Technology & Digital Data Collection",
+    technologies: [
+      "React",
+      "Redux",
+      "API integration",
+      "XLSForm",
+      "CAPI",
+      "CATI",
+      "CAWI",
+      "GPS / geolocation",
+    ],
     category: "web",
+    workGroup: "research",
     status: "live",
-    featured: false,
+    featured: true,
     contribution: "contributor",
+    highlights: [
+      "Survey programming and questionnaire logic",
+      "Validations, skip logic and structured forms",
+      "CAPI, CATI and CAWI collection workflows",
+      "GPS-enabled collection and enumerator assignment",
+      "Field operations, monitoring and data export",
+    ],
+    features: [
+      "Digital survey and research-collection UI",
+      "API-backed frontend integration",
+      "XLSForm and questionnaire implementation practice",
+      "Multi-mode collection workflows (CAPI / CATI / CAWI)",
+      "Field operations and research-data management support",
+    ],
     logo: "/images/projects/logos/askfield.webp",
     image: "/images/projects/askfield.webp",
     screenshots: [
@@ -443,7 +521,7 @@ export const projects: Project[] = [
       "/images/projects/askfield.webp",
       "/images/projects/askfield.webp",
     ],
-    screenshotCaptions: ["Survey workspace", "Data collection", "API-backed UI"],
+    screenshotCaptions: ["Survey workspace", "Data collection", "Research workflows"],
     links: {},
   },
   {
@@ -466,6 +544,7 @@ export const projects: Project[] = [
     myRole: "Independent product development",
     technologies: ["React", "PHP", "MySQL", "Content management"],
     category: "web",
+    workGroup: "ventures",
     status: "in-progress",
     featured: false,
     independent: true,
@@ -478,6 +557,341 @@ export const projects: Project[] = [
     ],
     screenshotCaptions: ["Publishing workspace", "Articles", "Media engagement"],
     links: {},
+  },
+  {
+    id: "apn-african-marketplace",
+    title: "APN African Marketplace",
+    organization: "APN African Marketplace",
+    organizationUrl: "https://apnafricanmarket.com/",
+    description:
+      "E-commerce web platform for African heritage and fashion products: catalog, accounts and checkout workflows.",
+    longDescription:
+      "Client e-commerce platform for APN African Marketplace. The public site presents authentic African heritage and fashion products with shop, account, wishlist and cart experiences. Delivered commercially through LERONY Ltd. Prince Parfait GANZA’s contribution was direct design and development of the web platform.",
+    context:
+      "A United States–based client (Des Moines, Iowa) needed a production marketplace experience for African heritage and fashion goods.",
+    challenge:
+      "Marketplace buyers need a reliable catalog, account flows and payment-capable checkout across an international client relationship.",
+    solution:
+      "A React/Next.js web platform with product catalog experiences, cloud media, backend/data services, API integrations and international payment workflows.",
+    whatIBuilt:
+      "Direct design and development of the web platform, with the engagement delivered commercially through LERONY Ltd.",
+    myRole: "Lead Developer",
+    domain: "E-commerce",
+    deliveredThrough: "LERONY Ltd",
+    contributionSummary: "Direct design/development and technical delivery of the web platform.",
+    contribution: "creator",
+    market: "Des Moines, Iowa, United States",
+    capabilities: [
+      "E-commerce / web engineering",
+      "Product catalog experiences",
+      "Cloud media",
+      "Backend & data services",
+      "API integrations",
+      "International payment workflows",
+    ],
+    technologies: ["React", "Next.js", "Supabase", "Cloudinary", "REST APIs", "Stripe"],
+    category: "web",
+    workGroup: "web",
+    status: "live",
+    visibility: "public",
+    featured: true,
+    year: 2025,
+    highlights: [
+      "Product catalog and shop experience",
+      "Account, wishlist and cart flows",
+      "Cloud media for product imagery",
+      "International payment integration",
+    ],
+    features: [
+      "Public marketplace storefront",
+      "Product browsing and cart",
+      "Customer account entry points",
+      "Cloud-hosted product media",
+      "Payment-capable checkout integration",
+    ],
+    outcome:
+      "A live marketplace at apnafricanmarket.com presenting catalog, account and cart experiences for the client’s audience.",
+    links: {
+      live: "https://apnafricanmarket.com/",
+    },
+  },
+  {
+    id: "wakow-general",
+    title: "WAKOW General Ltd",
+    organization: "WAKOW General Ltd",
+    organizationUrl: "https://wakowgeneral.com/en",
+    description:
+      "Digital presence for WAKOW General Ltd spanning brand/logo work, website implementation, SEO and Google Business Profile setup.",
+    longDescription:
+      "Client engagement delivered through LERONY Ltd covering brand identity (logo), website implementation, search visibility foundations and Google Business Profile setup: one coherent digital delivery path rather than a single brochure page.",
+    context: "WAKOW General Ltd needed a coherent public digital presence spanning brand and website.",
+    challenge:
+      "Brand, website, local discovery and basic SEO often launch as disconnected pieces; this engagement kept them in one delivery path.",
+    solution:
+      "Brand/logo work, website implementation, SEO foundations and Google Business Profile setup as one engagement.",
+    whatIBuilt:
+      "Branding/logo work, website implementation, SEO and Google Business Profile setup.",
+    myRole: "Developer / Digital Delivery",
+    domain: "Corporate Web",
+    deliveredThrough: "LERONY Ltd",
+    contributionSummary:
+      "Branding/logo work, website implementation, SEO and Google Business Profile setup.",
+    contribution: "creator",
+    capabilities: [
+      "Brand & logo",
+      "Website implementation",
+      "SEO foundations",
+      "Google Business Profile setup",
+    ],
+    technologies: ["Web", "SEO", "Google Business Profile"],
+    category: "web",
+    workGroup: "web",
+    status: "live",
+    visibility: "public",
+    featured: false,
+    highlights: [
+      "Brand/logo through to live website",
+      "SEO foundations for discovery",
+      "Google Business Profile setup",
+    ],
+    features: [
+      "Public multilingual website presence",
+      "Brand identity assets",
+      "On-site SEO foundations",
+      "Google Business Profile configuration",
+    ],
+    outcome: "Live public presence at wakowgeneral.com with brand and discovery foundations in place.",
+    links: {
+      live: "https://wakowgeneral.com/en",
+    },
+  },
+  {
+    id: "ngazi-construction",
+    title: "NGAZI Construction",
+    organization: "NGAZI Construction",
+    organizationUrl: "https://www.ngaziconstruction.com/",
+    description:
+      "Corporate website for NGAZI Construction, delivered through LERONY Ltd. Prince supported technical delivery through testing, deployment, hosting and bug review.",
+    longDescription:
+      "Client website engagement delivered through LERONY Ltd for NGAZI Construction. Prince Parfait GANZA’s verified contribution is technical delivery support: testing, deployment, hosting configuration and technical/bug review. This record does not claim that he personally built the complete application.",
+    context: "NGAZI Construction needed a public corporate web presence delivered through LERONY Ltd.",
+    challenge:
+      "Team-delivered websites need clear boundaries between commercial delivery and individual contribution.",
+    solution:
+      "Supported technical delivery for a live corporate site (deployment, hosting, testing and review) without presenting personal authorship of the full build.",
+    whatIBuilt:
+      "Testing, deployment, hosting configuration and technical/bug review for the NGAZI Construction website.",
+    myRole: "Technical Delivery",
+    domain: "Corporate Web",
+    deliveredThrough: "LERONY Ltd",
+    contributionSummary:
+      "Supported technical delivery through deployment, hosting configuration, testing and bug review.",
+    contribution: "contributor",
+    capabilities: ["Deployment & hosting", "Testing", "Technical / bug review"],
+    technologies: ["Web", "Hosting"],
+    category: "web",
+    workGroup: "client",
+    status: "live",
+    visibility: "public",
+    featured: false,
+    highlights: [
+      "Deployment and hosting configuration",
+      "Testing and technical review",
+      "Delivered through LERONY Ltd",
+    ],
+    outcome: "Live corporate site at ngaziconstruction.com.",
+    links: {
+      live: "https://www.ngaziconstruction.com/",
+    },
+  },
+  {
+    id: "julia-foundation",
+    title: "Julia Foundation",
+    organization: "Julia Foundation",
+    organizationUrl: "https://juliafoundation.org/",
+    description:
+      "NGO website and digital presence with donation enablement for an emerging Rwandan foundation.",
+    longDescription:
+      "Website/platform developed for Julia Foundation (emerging NGO / nonprofit digital infrastructure). Includes public storytelling for programmes and donation workflows that support relevant Rwanda payment channels such as MTN Mobile Money, Airtel Money and card/banking options where implemented. No private account numbers, merchant secrets or credentials are published here.",
+    context: "An emerging NGO needed a public platform and donation pathways supporters can actually use.",
+    challenge:
+      "Nonprofit sites fail when storytelling is disconnected from practical local payment options supporters trust.",
+    solution:
+      "A public foundation website with programme storytelling and donation enablement for Rwanda-relevant payment channels.",
+    whatIBuilt:
+      "Direct website/platform development and donation/payment enablement for local mobile-money and card/banking channels where implemented.",
+    myRole: "Lead Developer",
+    domain: "NGO / Nonprofit Digital Infrastructure",
+    deliveredThrough: "LERONY Ltd",
+    contributionSummary:
+      "Direct website/platform development and donation/payment enablement.",
+    contribution: "creator",
+    market: "Rwanda",
+    capabilities: [
+      "NGO / nonprofit websites",
+      "Donation enablement",
+      "Rwanda mobile-money payment support",
+      "Programme storytelling",
+    ],
+    technologies: ["Web", "Frontend", "Donation payments", "MTN Mobile Money", "Airtel Money"],
+    category: "web",
+    workGroup: "web",
+    status: "live",
+    visibility: "public",
+    featured: true,
+    highlights: [
+      "Nonprofit public platform",
+      "Donation workflows with local payment channels",
+      "Programme and community storytelling",
+    ],
+    features: [
+      "Public foundation website",
+      "Programme pages and storytelling",
+      "Donation entry points",
+      "Support for MTN Mobile Money, Airtel Money and card/banking where implemented",
+    ],
+    outcome: "Live foundation presence at juliafoundation.org with donation pathways for supporters.",
+    links: {
+      live: "https://juliafoundation.org/",
+    },
+  },
+  {
+    id: "la-fontaine",
+    title: "La Fontaine",
+    organization: "La Fontaine",
+    organizationUrl: "https://fontaine03.org/index.php",
+    description:
+      "Client website delivered through LERONY Ltd. Prince supported testing, deployment, hosting and technical review.",
+    longDescription:
+      "Client website engagement delivered through LERONY Ltd. Prince Parfait GANZA’s verified contribution covers testing, deployment, hosting and technical/bug review. The portfolio does not claim personal authorship of the complete site.",
+    context: "Client needed a public website delivered through LERONY Ltd.",
+    challenge:
+      "Commercial delivery through a company team must stay distinct from personal full-build claims.",
+    solution:
+      "Technical delivery support on hosting, deployment, testing and review for the live public site.",
+    whatIBuilt:
+      "Testing, deployment, hosting and technical/bug review for the La Fontaine website.",
+    myRole: "Technical Delivery",
+    domain: "Corporate Web",
+    deliveredThrough: "LERONY Ltd",
+    contributionSummary:
+      "Testing, deployment, hosting and technical review for the live website.",
+    contribution: "contributor",
+    capabilities: ["Deployment & hosting", "Testing", "Technical review"],
+    technologies: ["Web", "Hosting", "PHP"],
+    category: "web",
+    workGroup: "client",
+    status: "live",
+    visibility: "public",
+    featured: false,
+    highlights: [
+      "Deployment and hosting support",
+      "Testing and technical review",
+      "Delivered through LERONY Ltd",
+    ],
+    outcome: "Public site referenced at fontaine03.org.",
+    links: {
+      live: "https://fontaine03.org/index.php",
+    },
+  },
+  {
+    id: "kt-computer-supplying",
+    title: "KT Computer Supplying Ltd",
+    organization: "KT Computer Supplying Ltd",
+    organizationUrl: "https://www.ktcomputersupplying.com/",
+    description:
+      "E-commerce catalog site for KT Computer Supplying Ltd, delivered through LERONY Ltd. Prince contributed testing, deployment, hosting and technical review.",
+    longDescription:
+      "Client e-commerce engagement delivered through LERONY Ltd. The public site presents computer-supply catalog/storefront functionality. Prince Parfait GANZA’s verified contribution is testing, deployment, hosting and technical/bug review, not a claim that he personally developed the complete e-commerce application.",
+    context: "KT Computer Supplying Ltd needed an online catalog/storefront delivered through LERONY Ltd.",
+    challenge:
+      "E-commerce delivery through a company engagement requires honest contribution boundaries.",
+    solution:
+      "Technical delivery support (testing, deployment, hosting and review) on a live catalog/storefront.",
+    whatIBuilt:
+      "Testing, deployment, hosting and technical/bug review for the KT Computer Supplying catalog site.",
+    myRole: "Technical Delivery",
+    domain: "E-commerce",
+    deliveredThrough: "LERONY Ltd",
+    contributionSummary:
+      "Testing, deployment, hosting and technical review on the catalog/storefront engagement.",
+    contribution: "contributor",
+    capabilities: ["Deployment & hosting", "Testing", "Technical review"],
+    technologies: ["Web", "E-commerce", "Hosting"],
+    category: "web",
+    workGroup: "client",
+    status: "live",
+    visibility: "public",
+    featured: false,
+    highlights: [
+      "Catalog / storefront presence",
+      "Testing, deployment and hosting support",
+      "Delivered through LERONY Ltd",
+    ],
+    features: [
+      "Public product catalog / storefront",
+      "Client e-commerce presence",
+    ],
+    outcome: "Live storefront at ktcomputersupplying.com.",
+    links: {
+      live: "https://www.ktcomputersupplying.com/",
+    },
+  },
+  {
+    id: "goa-plus",
+    title: "GOA+",
+    organization: "GOA+",
+    organizationUrl: "https://goapluss.com/",
+    description:
+      "VR education platform for African schools. Prince Parfait GANZA serves as Co-Founder & CTO.",
+    longDescription:
+      "GOA+ (Go A+) is a VR education venture focused on immersive learning experiences for African schools, spanning nursery through university and TVET contexts on its public positioning. Prince Parfait GANZA is Co-Founder & CTO. The public record centres on technology leadership, technical direction and product/system oversight rather than unverified hands-on implementation claims for every product surface.",
+    context:
+      "African education programmes need immersive learning tools that can reach learners across school levels.",
+    challenge:
+      "Building an education technology venture requires sustained technical direction alongside product and organizational leadership.",
+    solution:
+      "A public VR education platform for African schools, with Prince contributing as Co-Founder & CTO on technology leadership and technical direction.",
+    whatIBuilt:
+      "Technology leadership and technical direction as Co-Founder & CTO, including product/system oversight for the GOA+ venture. Specific module-level implementation details are only stated where separately verified.",
+    myRole: "Co-Founder & CTO",
+    domain: "Education Technology / Products & Ventures",
+    deliveredThrough: undefined,
+    contributionSummary:
+      "Co-Founder & CTO: technology leadership, technical direction and product/system oversight.",
+    contribution: "creator",
+    market: "Africa · based in Kigali, Rwanda",
+    capabilities: [
+      "Technology leadership",
+      "Technical direction",
+      "Product / system oversight",
+      "Education technology venture",
+    ],
+    technologies: [],
+    category: "product",
+    workGroup: "ventures",
+    status: "live",
+    visibility: "public",
+    featured: true,
+    independent: false,
+    period: "Ongoing",
+    year: 2025,
+    highlights: [
+      "Co-Founder & CTO of GOA+",
+      "VR education platform for African schools",
+      "Technology leadership and technical direction",
+    ],
+    features: [
+      "Public VR education platform presence",
+      "Positioned for nursery, primary, secondary, TVET and university contexts",
+    ],
+    outcome: "Live venture presence at goapluss.com.",
+    seoTitle: "GOA+ | Co-Founder & CTO | Prince Parfait GANZA",
+    seoDescription:
+      "Prince Parfait GANZA is Co-Founder & CTO of GOA+, a VR education platform for African schools. Technology leadership and technical direction from Kigali.",
+    links: {
+      live: "https://goapluss.com/",
+    },
   },
 ];
 
@@ -582,7 +996,7 @@ export const timeline: TimelineItem[] = [
     type: "education",
     location: "Kigali, Rwanda",
     summary:
-      "Bachelor of Computer Science in Software Engineering at ULK. Degree in progress — not presented as complete.",
+      "Bachelor of Computer Science in Software Engineering at ULK. Degree in progress; not presented as complete.",
     highlights: [
       "Bachelor of Computer Science in Software Engineering",
       "Degree in progress",
@@ -671,19 +1085,50 @@ export const experience: ExperienceItem[] = [
     sortYear: 2025,
   },
   {
+    id: "goa-plus",
+    organization: "GOA+",
+    role: "Co-Founder & CTO",
+    period: "Ongoing",
+    location: "Kigali, Rwanda",
+    summary:
+      "Co-Founder and CTO of GOA+, a VR education platform for African schools. The role covers technology leadership, technical direction and product/system oversight for the venture.",
+    highlights: [
+      "Co-Founder & CTO",
+      "Technology leadership and technical direction",
+      "VR education platform for African schools",
+    ],
+    skills: ["Technology leadership", "Technical direction", "Education technology"],
+    type: "work",
+    category: "leadership",
+    website: "https://goapluss.com/",
+    relatedHref: "/projects/goa-plus",
+    relatedLabel: "View GOA+ case study",
+    sortYear: 2025,
+  },
+  {
     id: "askfield",
     organization: "Ethical Research Solutions / AskField",
-    role: "Frontend development & API integration",
+    role: "Frontend Integrator",
     period: "Selected engagement",
     location: "Rwanda",
     summary:
-      "Frontend development and API integration for the AskField survey and data-collection platform, using React and Redux. Contribution as part of a team — not sole product ownership.",
+      "Frontend Integrator on the AskField research technology platform. Started with frontend and API integration and expanded into hands-on research-technology work: survey programming, questionnaire logic and validations, XLSForm, CAPI / CATI / CAWI workflows, GPS-enabled collection, enumerator assignment, field operations, response monitoring, data export and research data management. Team contribution, not sole product ownership.",
     highlights: [
-      "React frontend development",
-      "Redux state management",
-      "REST API integration",
+      "Frontend and API integration for a research platform",
+      "Survey programming, logic and validations",
+      "XLSForm and digital questionnaire implementation",
+      "CAPI, CATI and CAWI collection workflows",
+      "GPS/geolocation collection and enumerator assignment",
+      "Field operations, monitoring and research-data export",
     ],
-    skills: ["React", "Redux", "API integration"],
+    skills: [
+      "Frontend integration",
+      "Survey programming",
+      "XLSForm",
+      "Digital data collection",
+      "Research technology",
+      "API integration",
+    ],
     type: "work",
     category: "work",
     relatedHref: "/projects/askfield",
@@ -883,7 +1328,7 @@ export const services: Service[] = [
     id: "ai-integration",
     title: "AI Integration",
     description:
-      "Practical AI functionality inside digital products and organizational workflows — not research theatre.",
+      "Practical AI functionality inside digital products and organizational workflows, focused on real operational problems.",
     features: [
       "AI-enabled product features",
       "Workflow support inside existing systems",
