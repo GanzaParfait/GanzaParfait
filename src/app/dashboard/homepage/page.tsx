@@ -35,9 +35,11 @@ import {
   type PrincipleIcon,
   type WorkStory,
 } from "@/lib/homepage";
+import { careerFrom } from "@/lib/career";
 import { getLocalSettings, saveLocalSettings, fetchRemoteSettings } from "@/lib/supabase";
 import CustomSelect from "@/components/ui/CustomSelect";
 import { useSectionHash } from "@/hooks/useSectionHash";
+import Link from "next/link";
 
 type SectionId = "manifesto" | "work" | "knowledge" | "journey" | "principles" | "speaking" | "booking";
 type EditorTab = "content" | "style" | "display";
@@ -75,6 +77,7 @@ export default function HomepageEditorPage() {
   const [focusIndex, setFocusIndex] = useState(0);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [mediaOpen, setMediaOpen] = useState(false);
+  const [mediaTarget, setMediaTarget] = useState<"manifesto" | "speaking" | `journey:${string}` | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const { runSave, saving } = useDashboardFeedback();
   const selectSection = useSectionHash(SECTIONS, setSection);
@@ -349,78 +352,114 @@ export default function HomepageEditorPage() {
                 <Field label="More card body" value={content.journey.moreBody} area onChange={(moreBody) => setContent({ ...content, journey: { ...content.journey, moreBody } })} />
                 <Field label="Timeline CTA" value={content.journey.moreCta} onChange={(moreCta) => setContent({ ...content, journey: { ...content.journey, moreCta, cta: moreCta } })} hint="Used by the Need more details card and timeline footer. Links to /experience." />
                 <div className="hp-list-head">
-                  <p>Timeline entries</p>
-                  <span>{content.journey.entries.length}</span>
+                  <p>Show on Journey</p>
+                  <span>{(content.journey.selectedIds || []).length}</span>
                 </div>
-                {content.journey.entries.map((entry, index) => (
-                  <div key={entry.id} className="hp-mini-card">
-                    <Field
-                      label="Title"
-                      value={entry.title}
-                      onChange={(title) => {
-                        const entries = content.journey.entries.map((item, itemIndex) => (itemIndex === index ? { ...item, title } : item));
-                        setContent({ ...content, journey: { ...content.journey, entries } });
-                      }}
-                    />
-                    <Field
-                      label="Year"
-                      value={entry.year}
-                      onChange={(year) => {
-                        const entries = content.journey.entries.map((item, itemIndex) => (itemIndex === index ? { ...item, year } : item));
-                        setContent({ ...content, journey: { ...content.journey, entries } });
-                      }}
-                    />
-                    <Field
-                      label="Organization"
-                      value={entry.organization}
-                      onChange={(organization) => {
-                        const entries = content.journey.entries.map((item, itemIndex) => (itemIndex === index ? { ...item, organization } : item));
-                        setContent({ ...content, journey: { ...content.journey, entries } });
-                      }}
-                    />
-                    <Field
-                      label="Short description"
-                      value={entry.description}
-                      area
-                      onChange={(description) => {
-                        const entries = content.journey.entries.map((item, itemIndex) => (itemIndex === index ? { ...item, description } : item));
-                        setContent({ ...content, journey: { ...content.journey, entries } });
-                      }}
-                    />
-                    <Field
-                      label="Detail summary"
-                      value={entry.summary || ""}
-                      area
-                      onChange={(summary) => {
-                        const entries = content.journey.entries.map((item, itemIndex) => (itemIndex === index ? { ...item, summary } : item));
-                        setContent({ ...content, journey: { ...content.journey, entries } });
-                      }}
-                    />
-                    <label className="hp-toggle">
-                      <input
-                        type="checkbox"
-                        checked={entry.showDetails}
-                        onChange={(event) => {
-                          const entries = content.journey.entries.map((item, itemIndex) => (itemIndex === index ? { ...item, showDetails: event.target.checked } : item));
-                          setContent({ ...content, journey: { ...content.journey, entries } });
-                        }}
-                      />
-                      <span>Show further details link</span>
-                    </label>
-                    <label className="hp-toggle">
-                      <input
-                        type="checkbox"
-                        checked={entry.detailsBlocked}
-                        onChange={(event) => {
-                          const entries = content.journey.entries.map((item, itemIndex) => (itemIndex === index ? { ...item, detailsBlocked: event.target.checked } : item));
-                          setContent({ ...content, journey: { ...content.journey, entries } });
-                        }}
-                      />
-                      <span>Block view details for visitors</span>
-                    </label>
+                <p className="hp-note">
+                  Pick any records from{" "}
+                  <Link href="/dashboard/experience" style={{ color: "#0e52a8", fontWeight: 700 }}>
+                    Pages → Experience
+                  </Link>
+                  . Order follows the checklist order below (top = first).
+                </p>
+                <div style={{ display: "grid", gap: "0.3rem" }}>
+                  {careerFrom(getLocalSettings()).records.map((record) => {
+                    const selected = (content.journey.selectedIds || []).includes(record.id);
+                    return (
+                      <label key={record.id} className="hp-toggle" style={{ alignItems: "flex-start" }}>
+                        <input
+                          type="checkbox"
+                          checked={selected}
+                          onChange={(event) => {
+                            const current = content.journey.selectedIds || [];
+                            const selectedIds = event.target.checked
+                              ? [...current, record.id]
+                              : current.filter((id) => id !== record.id);
+                            setContent({
+                              ...content,
+                              journey: {
+                                ...content.journey,
+                                selectedIds,
+                                entries: homepageFrom({
+                                  ...getLocalSettings(),
+                                  homepage: { ...content, journey: { ...content.journey, selectedIds } },
+                                }).journey.entries,
+                              },
+                            });
+                          }}
+                        />
+                        <span>
+                          <strong style={{ display: "block", fontSize: "0.78rem" }}>{record.title}</strong>
+                          <em style={{ display: "block", fontStyle: "normal", fontSize: "0.66rem", color: "#64748b" }}>
+                            {record.organization} · {record.kind} · {record.period}
+                          </em>
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+                {(content.journey.selectedIds || []).length ? (
+                  <div style={{ marginTop: "0.65rem" }}>
+                    <p className="hp-note" style={{ marginBottom: "0.35rem" }}>
+                      Display order (move up/down):
+                    </p>
+                    {(content.journey.selectedIds || []).map((id, index) => {
+                      const record = careerFrom(getLocalSettings()).records.find((item) => item.id === id);
+                      if (!record) return null;
+                      return (
+                        <div key={id} className="hp-mini-card" style={{ marginBottom: "0.35rem" }}>
+                          <strong style={{ fontSize: "0.78rem" }}>{record.title}</strong>
+                          <div style={{ display: "flex", gap: "0.25rem", marginTop: "0.35rem" }}>
+                            <button
+                              type="button"
+                              className="btn btn-ghost btn-sm"
+                              disabled={index === 0}
+                              onClick={() => {
+                                const selectedIds = [...(content.journey.selectedIds || [])];
+                                [selectedIds[index - 1], selectedIds[index]] = [selectedIds[index], selectedIds[index - 1]];
+                                setContent({
+                                  ...content,
+                                  journey: {
+                                    ...content.journey,
+                                    selectedIds,
+                                    entries: homepageFrom({
+                                      ...getLocalSettings(),
+                                      homepage: { ...content, journey: { ...content.journey, selectedIds } },
+                                    }).journey.entries,
+                                  },
+                                });
+                              }}
+                            >
+                              Up
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-ghost btn-sm"
+                              disabled={index === (content.journey.selectedIds || []).length - 1}
+                              onClick={() => {
+                                const selectedIds = [...(content.journey.selectedIds || [])];
+                                [selectedIds[index + 1], selectedIds[index]] = [selectedIds[index], selectedIds[index + 1]];
+                                setContent({
+                                  ...content,
+                                  journey: {
+                                    ...content.journey,
+                                    selectedIds,
+                                    entries: homepageFrom({
+                                      ...getLocalSettings(),
+                                      homepage: { ...content, journey: { ...content.journey, selectedIds } },
+                                    }).journey.entries,
+                                  },
+                                });
+                              }}
+                            >
+                              Down
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                ))}
-                <p className="hp-note">Do not invent employers, dates, or results. Keep entries aligned with the verified Experience record.</p>
+                ) : null}
               </>
             )}
 
@@ -488,10 +527,12 @@ export default function HomepageEditorPage() {
                 storyIndex={storyIndex}
                 setStoryIndex={setStoryIndex}
                 patchStory={patchStory}
-                onMedia={() => setMediaOpen(true)}
+                onMedia={() => {
+                  setMediaTarget(section === "speaking" ? "speaking" : "manifesto");
+                  setMediaOpen(true);
+                }}
               />
             )}
-
             {section !== "knowledge" && section !== "journey" && tab !== "content" && (
               <p className="hp-note">
                 {tab === "style"
@@ -551,12 +592,25 @@ export default function HomepageEditorPage() {
 
       <MediaManagerModal
         isOpen={mediaOpen}
-        onClose={() => setMediaOpen(false)}
+        onClose={() => {
+          setMediaOpen(false);
+          setMediaTarget(null);
+        }}
         onSelect={(url) => {
           if (url.startsWith("blob:")) return;
-          if (section === "manifesto") setContent({ ...content, manifesto: { ...content.manifesto, image: url } });
-          else if (section === "speaking") setContent({ ...content, speaking: { ...content.speaking, image: url } });
+          if (mediaTarget === "manifesto") {
+            setContent({ ...content, manifesto: { ...content.manifesto, image: url } });
+          } else if (mediaTarget === "speaking") {
+            setContent({ ...content, speaking: { ...content.speaking, image: url } });
+          } else if (mediaTarget?.startsWith("journey:")) {
+            const entryId = mediaTarget.slice("journey:".length);
+            const entries = content.journey.entries.map((item) =>
+              item.id === entryId ? { ...item, logo: url } : item,
+            );
+            setContent({ ...content, journey: { ...content.journey, entries } });
+          }
           setMediaOpen(false);
+          setMediaTarget(null);
         }}
       />
             </div>

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Caveat, Outfit } from "next/font/google";
+import { Caveat, Outfit, Source_Serif_4 } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import LayoutShell from "@/components/layout/LayoutShell";
@@ -13,6 +13,15 @@ const outfit = Outfit({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-outfit",
+});
+
+const sourceSerif = Source_Serif_4({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-cv-serif",
+  weight: ["400", "600", "700"],
+  style: ["normal", "italic"],
+  preload: false,
 });
 
 const caveat = Caveat({
@@ -117,8 +126,10 @@ export default async function RootLayout({
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=20260919b" />
         <meta name="msapplication-TileColor" content="#ffffff" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
+        <link rel="dns-prefetch" href="https://edhuizzkjdziurqnidks.supabase.co" />
+        <link rel="preconnect" href="https://edhuizzkjdziurqnidks.supabase.co" crossOrigin="" />
       </head>
-      <body className={`${outfit.variable} ${caveat.variable} antialiased`} suppressHydrationWarning>
+      <body className={`${outfit.variable} ${sourceSerif.variable} ${caveat.variable} antialiased`} suppressHydrationWarning>
         <Script
           id="theme-init"
           strategy="beforeInteractive"

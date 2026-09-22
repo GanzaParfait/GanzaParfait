@@ -93,10 +93,10 @@ export default function KnowledgeSection({
                 ) : null}
                 <div className="knowledge-card-foot">
                   <Link href={href} className="knowledge-more">
-                    {knowledge.learnMore} <RiArrowRightLine size={14} />
+                    {knowledge.learnMore} about {item.title} <RiArrowRightLine size={14} />
                   </Link>
                   {display.showGo ? (
-                    <Link href={href} className="knowledge-go" aria-label={`${knowledge.learnMore}: ${item.title}`}>
+                    <Link href={href} className="knowledge-go" aria-label={`${knowledge.learnMore} about ${item.title}`}>
                       <RiArrowRightUpLine size={16} />
                     </Link>
                   ) : null}

@@ -7,9 +7,23 @@ import {
   speakingEngagements,
   timeline,
 } from "@/data/site-data";
+import { careerFrom, type CareerRecord } from "@/lib/career";
 import { DEFAULT_CV_ACCESS, normalizeCvAccess, type CvAccessConfig } from "@/lib/cv-access";
+import { siteUrl } from "@/lib/env";
 import { resolvedSocials } from "@/lib/socials";
 import type { SiteSettings } from "@/lib/supabase";
+
+function careerRoles(settings: SiteSettings): CareerRecord[] {
+  return careerFrom(settings).records.filter((item) => item.kind === "role");
+}
+
+function careerEducation(settings: SiteSettings): CareerRecord[] {
+  return careerFrom(settings).records.filter((item) => item.kind === "education");
+}
+
+function careerCertifications(settings: SiteSettings): CareerRecord[] {
+  return careerFrom(settings).records.filter((item) => item.kind === "certification");
+}
 
 export type CvTemplateId = "professional" | "compact" | "executive";
 
@@ -43,6 +57,23 @@ export type CvItemOverride = {
   highlights?: string[];
 };
 
+/** Admin-authored rows that are not in site portfolio data. */
+export type CvCustomEntry = {
+  id: string;
+  sectionId: Extract<
+    CvSectionId,
+    "experience" | "leadership" | "projects" | "education" | "training" | "achievements" | "certifications"
+  >;
+  title: string;
+  subtitle?: string;
+  period?: string;
+  location?: string;
+  summary?: string;
+  highlights?: string[];
+  meta?: string;
+  order?: number;
+};
+
 export type CvLanguage = {
   id: string;
   name: string;
@@ -59,6 +90,22 @@ export type CvExpertiseItem = {
   order: number;
 };
 
+export type CvHeaderStyle = "split" | "centered" | "banner" | "classic";
+export type CvFooterStyle = "paged" | "centered" | "minimal" | "none";
+export type CvPhotoShape = "circle" | "rounded" | "square";
+
+/** Per-format document chrome — independent of website About/Hero imagery. */
+export type CvAppearance = {
+  headerStyle: CvHeaderStyle;
+  footerStyle: CvFooterStyle;
+  showPhoto: boolean;
+  /** Media library or /images path; empty uses site hero portrait when showPhoto is on */
+  photoUrl: string;
+  photoShape: CvPhotoShape;
+  /** Pull-quote / right-rail line (Professional split & Executive banner) */
+  tagline: string;
+};
+
 export type CvFormatConfig = {
   template: CvTemplateId;
   label: string;
@@ -68,6 +115,7 @@ export type CvFormatConfig = {
   /** Per-format positioning line under the name */
   headline: string;
   profileOverride?: string;
+  appearance: CvAppearance;
   sections: CvSectionConfig[];
   itemIncludes: Record<string, boolean>;
   itemOrder: Record<string, number>;
@@ -78,6 +126,8 @@ export type CvFormatConfig = {
   /** Social/link ids: website, linkedin, github, … */
   linkIncludes: Record<string, boolean>;
   referencesText?: string;
+  /** Extra positions / entries authored in the dashboard */
+  customEntries?: CvCustomEntry[];
 };
 
 export type CvConfig = {
@@ -109,6 +159,7 @@ export type CvResolvedDocument = {
   name: string;
   headline: string;
   profile: string;
+  appearance: CvAppearance & { resolvedPhotoUrl?: string };
   contact: {
     email?: string;
     phone?: string;
@@ -127,7 +178,72 @@ export type CvResolvedDocument = {
   }[];
 };
 
-export const CV_CONFIG_REVISION = 2;
+export const CV_CONFIG_REVISION = 5;
+
+export const CV_HEADER_STYLE_OPTIONS: { id: CvHeaderStyle; label: string; hint: string }[] = [
+  { id: "split", label: "Split editorial", hint: "Name left, tagline right — Professional reference" },
+  { id: "centered", label: "Centered", hint: "Name and contact centered — Compact reference" },
+  { id: "banner", label: "Navy banner", hint: "Dark identity band — Executive reference" },
+  { id: "classic", label: "Classic bar", hint: "Simple left-aligned name with rule" },
+];
+
+export const CV_FOOTER_STYLE_OPTIONS: { id: CvFooterStyle; label: string }[] = [
+  { id: "paged", label: "Name · URL + page numbers" },
+  { id: "centered", label: "Centered name · URL" },
+  { id: "minimal", label: "Page number only" },
+  { id: "none", label: "No footer" },
+];
+
+export const CV_PHOTO_SHAPE_OPTIONS: { id: CvPhotoShape; label: string }[] = [
+  { id: "circle", label: "Circle" },
+  { id: "rounded", label: "Rounded" },
+  { id: "square", label: "Square" },
+];
+
+export function defaultAppearance(template: CvTemplateId): CvAppearance {
+  if (template === "compact") {
+    return {
+      headerStyle: "centered",
+      footerStyle: "centered",
+      showPhoto: false,
+      photoUrl: "",
+      photoShape: "circle",
+      tagline: "",
+    };
+  }
+  if (template === "executive") {
+    return {
+      headerStyle: "banner",
+      footerStyle: "paged",
+      showPhoto: false,
+      photoUrl: "",
+      photoShape: "rounded",
+      tagline: "Practical technology for people and progress.",
+    };
+  }
+  return {
+    headerStyle: "split",
+    footerStyle: "paged",
+    showPhoto: false,
+    photoUrl: "",
+    photoShape: "circle",
+    tagline: "Technology for people. Practical solutions for real impact.",
+  };
+}
+
+export function splitDisplayName(name: string): { given: string; family: string } {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length < 2) return { given: name.trim(), family: "" };
+  return { given: parts.slice(0, -1).join(" "), family: parts[parts.length - 1] };
+}
+
+export function absolutizeCvMedia(url: string | undefined, origin: string): string | undefined {
+  const value = (url || "").trim();
+  if (!value) return undefined;
+  if (/^https?:\/\//i.test(value) || value.startsWith("data:")) return value;
+  const base = origin.replace(/\/+$/, "");
+  return `${base}${value.startsWith("/") ? "" : "/"}${value}`;
+}
 
 const SECTION_TITLES: Record<CvSectionId, string> = {
   profile: "Professional Profile",
@@ -231,6 +347,7 @@ function defaultFormat(template: CvTemplateId): CvFormatConfig {
       isPublic: true,
       showInHero: true,
       headline: "Founder · Software Engineer · Technologist",
+      appearance: defaultAppearance("compact"),
       sections: sectionsFor([
         { id: "profile" },
         { id: "expertise" },
@@ -268,6 +385,7 @@ function defaultFormat(template: CvTemplateId): CvFormatConfig {
       isPublic: true,
       showInHero: true,
       headline: "Founder & CEO · Technology & Innovation",
+      appearance: defaultAppearance("executive"),
       sections: sectionsFor([
         { id: "profile" },
         { id: "leadership" },
@@ -313,30 +431,32 @@ function defaultFormat(template: CvTemplateId): CvFormatConfig {
     isPublic: true,
     showInHero: true,
     headline: "Founder · Software Engineer · Technologist",
+    appearance: defaultAppearance("professional"),
     sections: sectionsFor([
       { id: "profile" },
-      { id: "expertise" },
       { id: "experience" },
       { id: "projects", maxItems: 5 },
-      { id: "leadership" },
       { id: "education" },
+      { id: "training", titleOverride: "Training & Knowledge Sharing" },
       { id: "skills" },
       { id: "languages" },
-      { id: "training" },
-      { id: "certifications" },
+      { id: "links", titleOverride: "Selected Links" },
+      { id: "expertise", included: false },
+      { id: "leadership", included: false },
+      { id: "certifications", included: false },
       { id: "achievements", included: false },
-      { id: "links" },
       { id: "references", included: false },
     ]),
     itemIncludes: {
-      // Roles in experience; LERONY only under leadership; no company duplicate in projects
+      // Reference Professional CV: LERONY leads experience; AskField + eShuri follow
       ...includesMap(allExp, [
+        "experience:lerony",
         "experience:askfield",
-        "experience:psta",
         "experience:eshuri",
       ]),
-      "experience:lerony": false,
-      "leadership:lerony": true,
+      "experience:psta": false,
+      "leadership:lerony": false,
+      "training:eshuri": false,
       ...includesMap(allProj, [
         "projects:caritas-systems",
         "projects:askfield",
@@ -434,6 +554,26 @@ function mergeFormat(base: CvFormatConfig, saved?: Partial<CvFormatConfig> & { o
       saved.referencesText ??
       legacy.overrides?.references ??
       base.referencesText,
+    appearance: {
+      ...defaultAppearance(base.template),
+      ...(base.appearance || {}),
+      ...(saved.appearance || {}),
+      photoUrl: saved.appearance?.photoUrl ?? base.appearance?.photoUrl ?? "",
+      tagline: saved.appearance?.tagline ?? base.appearance?.tagline ?? defaultAppearance(base.template).tagline,
+      showPhoto: saved.appearance?.showPhoto ?? base.appearance?.showPhoto ?? false,
+      headerStyle:
+        saved.appearance?.headerStyle ||
+        base.appearance?.headerStyle ||
+        defaultAppearance(base.template).headerStyle,
+      footerStyle:
+        saved.appearance?.footerStyle ||
+        base.appearance?.footerStyle ||
+        defaultAppearance(base.template).footerStyle,
+      photoShape:
+        saved.appearance?.photoShape ||
+        base.appearance?.photoShape ||
+        defaultAppearance(base.template).photoShape,
+    },
     sections: mergeSectionLists(base.sections, migratedSections.length ? migratedSections : saved.sections),
     itemIncludes: { ...base.itemIncludes, ...(saved.itemIncludes || {}) },
     itemOrder: { ...base.itemOrder, ...(saved.itemOrder || {}) },
@@ -446,6 +586,22 @@ function mergeFormat(base: CvFormatConfig, saved?: Partial<CvFormatConfig> & { o
     skillGroupIncludes: { ...base.skillGroupIncludes, ...(saved.skillGroupIncludes || {}) },
     languageIncludes: { ...base.languageIncludes, ...(saved.languageIncludes || {}) },
     linkIncludes: { ...base.linkIncludes, ...(saved.linkIncludes || {}) },
+    customEntries: Array.isArray(saved.customEntries)
+      ? saved.customEntries
+          .filter((row) => row && typeof row.id === "string" && typeof row.title === "string")
+          .map((row, index) => ({
+            id: row.id,
+            sectionId: row.sectionId,
+            title: row.title.trim(),
+            subtitle: row.subtitle?.trim() || undefined,
+            period: row.period?.trim() || undefined,
+            location: row.location?.trim() || undefined,
+            summary: row.summary?.trim() || undefined,
+            highlights: row.highlights?.filter(Boolean),
+            meta: row.meta?.trim() || undefined,
+            order: row.order ?? index,
+          }))
+      : base.customEntries || [],
   };
 }
 
@@ -471,8 +627,9 @@ export function getCvConfig(settings: SiteSettings | null | undefined): CvConfig
         }))
       : DEFAULT_EXPERTISE;
 
-  // Revision < 2 used a website-export IA. Rebuild format shells from current defaults
-  // while preserving admin headlines, public flags, and record toggles.
+  // Revision < 3 used older IA (e.g. trailing links section causing orphan pages).
+  // Rebuild format shells from current defaults while preserving admin headlines,
+  // public flags, and record toggles.
   const stale = !saved || (saved.revision ?? 0) < CV_CONFIG_REVISION;
 
   const formats = (["professional", "compact", "executive"] as CvTemplateId[]).reduce(
@@ -487,6 +644,10 @@ export function getCvConfig(settings: SiteSettings | null | undefined): CvConfig
           referencesText: prev?.referencesText,
           isPublic: prev?.isPublic ?? base.isPublic,
           showInHero: prev?.showInHero ?? base.showInHero,
+          appearance: {
+            ...base.appearance,
+            ...(prev?.appearance || {}),
+          },
           itemIncludes: { ...base.itemIncludes, ...(prev?.itemIncludes || {}) },
           itemOrder: { ...base.itemOrder, ...(prev?.itemOrder || {}) },
           itemOverrides: { ...base.itemOverrides, ...(prev?.itemOverrides || {}) },
@@ -494,6 +655,7 @@ export function getCvConfig(settings: SiteSettings | null | undefined): CvConfig
           skillGroupIncludes: { ...base.skillGroupIncludes, ...(prev?.skillGroupIncludes || {}) },
           languageIncludes: { ...base.languageIncludes, ...(prev?.languageIncludes || {}) },
           linkIncludes: { ...base.linkIncludes, ...(prev?.linkIncludes || {}) },
+          customEntries: prev?.customEntries?.length ? prev.customEntries : base.customEntries || [],
         };
       } else {
         acc[id] = mergeFormat(base, prev);
@@ -519,8 +681,8 @@ export function isCvTemplateId(value: string | null | undefined): value is CvTem
 
 export function cvPdfFilename(template: CvTemplateId): string {
   if (template === "compact") return "Prince-Parfait-GANZA-Resume.pdf";
-  if (template === "executive") return "Prince-Parfait-GANZA-Executive-CV.pdf";
-  return "Prince-Parfait-GANZA-CV.pdf";
+  if (template === "executive") return "Prince-Parfait-GANZA-Executive-Profile.pdf";
+  return "Prince-Parfait-GANZA-Professional-CV.pdf";
 }
 
 export function canAccessCvTemplate(
@@ -579,6 +741,40 @@ function orgKeyFrom(name?: string): string | undefined {
   return t.replace(/[^a-z0-9]+/g, "-");
 }
 
+/** Split date ranges from engagement labels used in site experience rows. */
+function periodAndMeta(
+  period?: string,
+  opts?: { type?: string; category?: string }
+): { period?: string; meta?: string } {
+  const raw = period?.trim();
+  const looksLikeDate = Boolean(raw && /(?:present|\d{4})/i.test(raw));
+  if (raw && looksLikeDate) {
+    const normalized = raw.replace(/\s*[–—-]\s*/g, " – ");
+    if (opts?.type === "training") return { period: normalized, meta: "Training engagement" };
+    return { period: normalized };
+  }
+  if (raw) return { meta: raw };
+  if (opts?.type === "training") return { meta: "Training engagement" };
+  if (opts?.category === "leadership") return { meta: "Selected engagement" };
+  return {};
+}
+
+function projectCategoryLabel(category?: string): string | undefined {
+  if (!category) return undefined;
+  const map: Record<string, string> = {
+    systems: "Business system",
+    product: "Independent product",
+    web: "Engagement work",
+    technology: "Technology venture",
+    saas: "Product platform",
+    mobile: "Mobile product",
+    ai: "AI system",
+    "open-source": "Open source",
+    other: "Selected work",
+  };
+  return map[category] || "Selected work";
+}
+
 /** Deduplicate: once an org or shared record id appears, skip clones later. */
 function filterDedupe(
   items: CvResolvedItem[],
@@ -602,41 +798,47 @@ function filterDedupe(
 function experienceItems(
   format: CvFormatConfig,
   template: CvTemplateId,
-  claimed: Set<string>
+  claimed: Set<string>,
+  settings: SiteSettings
 ): CvResolvedItem[] {
   const dense = template === "compact";
-  const rows = siteExperience
+  const rows = careerRoles(settings)
     .filter((item) => itemIncluded(format, `experience:${item.id}`, true))
-    .map((item) =>
-      applyItemOverride(
+    .map((item) => {
+      const { period, meta } = periodAndMeta(item.period, {
+        type: item.roleType || "work",
+        category: item.category,
+      });
+      return applyItemOverride(
         {
           key: `experience:${item.id}`,
-          title: item.role,
+          title: item.title,
           subtitle: item.organization,
-          period: item.period,
+          period,
           location: item.location,
           summary: dense
             ? normalizeText(item.summary)?.split(/(?<=\.)\s+/)[0]
             : normalizeText(item.summary),
           highlights: dense ? undefined : item.highlights?.filter(Boolean).slice(0, 4),
+          meta,
           href: normalizeUrl(item.website || item.relatedHref),
           orgKey: orgKeyFrom(item.organization) || item.id,
         },
         format
-      )
-    );
+      );
+    });
   return filterDedupe(sortByOrder(rows, format), claimed, true);
 }
 
-function leadershipItems(format: CvFormatConfig, claimed: Set<string>): CvResolvedItem[] {
-  const fromExp = siteExperience
+function leadershipItems(format: CvFormatConfig, claimed: Set<string>, settings: SiteSettings): CvResolvedItem[] {
+  const fromExp = careerRoles(settings)
     .filter((item) => item.category === "leadership" || item.id === "lerony")
     .filter((item) => itemIncluded(format, `leadership:${item.id}`, item.id === "lerony"))
     .map((item) =>
       applyItemOverride(
         {
           key: `leadership:${item.id}`,
-          title: item.role,
+          title: item.title,
           subtitle: item.organization,
           period: item.period,
           location: item.location,
@@ -673,40 +875,51 @@ function leadershipItems(format: CvFormatConfig, claimed: Set<string>): CvResolv
   return filterDedupe(sortByOrder([...fromExp, ...fromTimeline], format), claimed, true);
 }
 
-function educationItems(format: CvFormatConfig): CvResolvedItem[] {
-  const rows = siteEducation
-    .filter((item) => itemIncluded(format, `education:${item.id}`, true))
-    .map((item) =>
-      applyItemOverride(
+function educationItems(format: CvFormatConfig, settings: SiteSettings): CvResolvedItem[] {
+  const rows = careerEducation(settings)
+    .filter((item) => {
+      const rawId = item.id.startsWith("edu-") ? item.id.slice(4) : item.id;
+      return itemIncluded(format, `education:${rawId}`, true) || itemIncluded(format, `education:${item.id}`, true);
+    })
+    .map((item) => {
+      const rawId = item.id.startsWith("edu-") ? item.id.slice(4) : item.id;
+      return applyItemOverride(
         {
-          key: `education:${item.id}`,
-          title: item.program,
-          subtitle: item.institution,
+          key: `education:${rawId}`,
+          title: item.title,
+          subtitle: item.organization,
           period: item.period,
-          summary: [item.status, item.note].filter(Boolean).join(". "),
+          summary: [item.status, item.note || item.summary].filter(Boolean).join(". "),
         },
         format
-      )
-    );
+      );
+    });
   return sortByOrder(rows, format);
 }
 
-function certificationItems(format: CvFormatConfig): CvResolvedItem[] {
-  const rows = siteCertifications
-    .filter((item) => itemIncluded(format, `certifications:${item.id}`, true))
-    .map((item) =>
-      applyItemOverride(
+function certificationItems(format: CvFormatConfig, settings: SiteSettings): CvResolvedItem[] {
+  const rows = careerCertifications(settings)
+    .filter((item) => {
+      const rawId = item.id.startsWith("cert-") ? item.id.slice(5) : item.id;
+      return (
+        itemIncluded(format, `certifications:${rawId}`, true) ||
+        itemIncluded(format, `certifications:${item.id}`, true)
+      );
+    })
+    .map((item) => {
+      const rawId = item.id.startsWith("cert-") ? item.id.slice(5) : item.id;
+      return applyItemOverride(
         {
-          key: `certifications:${item.id}`,
+          key: `certifications:${rawId}`,
           title: item.title,
-          subtitle: item.issuer,
+          subtitle: item.organization,
           period: item.period,
-          summary: `${item.program}. Completed ${item.completedOn}.`,
-          href: normalizeUrl(item.verifyUrl),
+          summary: `${item.summary}${item.completedOn ? `. Completed ${item.completedOn}.` : ""}`,
+          href: normalizeUrl(item.verifyUrl || item.relatedHref),
         },
         format
-      )
-    );
+      );
+    });
   return sortByOrder(rows, format);
 }
 
@@ -727,7 +940,10 @@ function projectItems(
           period: item.period,
           summary: normalizeText(item.description),
           highlights: dense ? undefined : item.highlights?.filter(Boolean).slice(0, 3),
-          meta: item.technologies?.slice(0, 6).join(" · "),
+          meta:
+            template === "professional"
+              ? projectCategoryLabel(item.category)
+              : item.technologies?.slice(0, 6).join(" · "),
           href: normalizeUrl(item.links.live || item.links.case_study),
           orgKey: orgKeyFrom(item.organization) || item.id,
         },
@@ -757,15 +973,15 @@ function achievementItems(format: CvFormatConfig): CvResolvedItem[] {
   return sortByOrder(rows, format);
 }
 
-function trainingItems(format: CvFormatConfig): CvResolvedItem[] {
-  const fromExp = siteExperience
-    .filter((item) => item.type === "training")
+function trainingItems(format: CvFormatConfig, settings: SiteSettings): CvResolvedItem[] {
+  const fromExp = careerRoles(settings)
+    .filter((item) => item.roleType === "training")
     .filter((item) => itemIncluded(format, `training:${item.id}`, true))
     .map((item) =>
       applyItemOverride(
         {
           key: `training:${item.id}`,
-          title: item.role,
+          title: item.title,
           subtitle: item.organization,
           period: item.period,
           location: item.location,
@@ -780,7 +996,6 @@ function trainingItems(format: CvFormatConfig): CvResolvedItem[] {
     .filter((_, index) => itemIncluded(format, `training:speak-${index}`, true))
     .filter((item) => {
       const org = orgKeyFrom(item.event || item.location);
-      // Avoid repeating the same training engagement already listed from experience
       return !fromExp.some((row) => row.orgKey && org && row.orgKey === org);
     })
     .map((item, index) =>
@@ -870,6 +1085,39 @@ function takeMax<T>(items: T[], max?: number): T[] {
   return items;
 }
 
+function customEntriesFor(
+  format: CvFormatConfig,
+  sectionId: CvCustomEntry["sectionId"]
+): CvResolvedItem[] {
+  const rows = (format.customEntries || [])
+    .filter((row) => row.sectionId === sectionId && row.title.trim())
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  return rows.map((row) =>
+    applyItemOverride(
+      {
+        key: `custom:${row.id}`,
+        title: row.title.trim(),
+        subtitle: row.subtitle?.trim() || undefined,
+        period: row.period?.trim() || undefined,
+        location: row.location?.trim() || undefined,
+        summary: normalizeText(row.summary),
+        highlights: row.highlights?.filter(Boolean),
+        meta: row.meta?.trim() || undefined,
+      },
+      format
+    )
+  );
+}
+
+function withCustoms(
+  items: CvResolvedItem[],
+  format: CvFormatConfig,
+  sectionId: CvCustomEntry["sectionId"],
+  maxItems?: number
+): CvResolvedItem[] {
+  return takeMax([...items, ...customEntriesFor(format, sectionId)], maxItems);
+}
+
 function defaultProfile(template: CvTemplateId, settings: SiteSettings): string {
   const bio = settings.bio?.trim() || "";
   if (!bio) return "";
@@ -881,7 +1129,8 @@ function defaultProfile(template: CvTemplateId, settings: SiteSettings): string 
 
 export function resolveCvDocument(
   settings: SiteSettings,
-  templateId?: CvTemplateId
+  templateId?: CvTemplateId,
+  options?: { origin?: string }
 ): CvResolvedDocument {
   const config = getCvConfig(settings);
   const template = templateId || config.defaultTemplate;
@@ -889,6 +1138,15 @@ export function resolveCvDocument(
   const name = settings.siteTitle?.trim() || "Prince Parfait GANZA";
   const headline = format.headline?.trim() || "Founder · Software Engineer · Technologist";
   const profile = normalizeText(format.profileOverride) || defaultProfile(template, settings);
+  const appearance = format.appearance || defaultAppearance(template);
+  const photoSource =
+    appearance.showPhoto
+      ? appearance.photoUrl?.trim() || settings.heroImageUrl || settings.emailPortraitUrl || ""
+      : "";
+  const origin = options?.origin || siteUrl();
+  const resolvedPhotoUrl = appearance.showPhoto
+    ? absolutizeCvMedia(photoSource, origin)
+    : undefined;
 
   const orderedSections = [...format.sections]
     .filter((s) => s.included)
@@ -905,7 +1163,7 @@ export function resolveCvDocument(
 
   if (leadershipFirst) {
     const cfg = orderedSections.find((s) => s.id === "leadership")!;
-    const items = takeMax(leadershipItems(format, claimedOrgs), cfg.maxItems);
+    const items = takeMax(leadershipItems(format, claimedOrgs, settings), cfg.maxItems);
     if (items.length) {
       built.set("leadership", {
         id: "leadership",
@@ -943,7 +1201,12 @@ export function resolveCvDocument(
     }
     if (section.id === "leadership") {
       if (!built.has("leadership")) {
-        const items = takeMax(leadershipItems(format, claimedOrgs), section.maxItems);
+        const items = withCustoms(
+          leadershipItems(format, claimedOrgs, settings),
+          format,
+          "leadership",
+          section.maxItems
+        );
         if (items.length) {
           built.set("leadership", {
             id: "leadership",
@@ -955,7 +1218,12 @@ export function resolveCvDocument(
       continue;
     }
     if (section.id === "experience") {
-      const items = takeMax(experienceItems(format, template, claimedOrgs), section.maxItems);
+      const items = withCustoms(
+        experienceItems(format, template, claimedOrgs, settings),
+        format,
+        "experience",
+        section.maxItems
+      );
       if (items.length) {
         built.set("experience", {
           id: "experience",
@@ -966,7 +1234,12 @@ export function resolveCvDocument(
       continue;
     }
     if (section.id === "projects") {
-      const items = takeMax(projectItems(format, template, claimedOrgs), section.maxItems);
+      const items = withCustoms(
+        projectItems(format, template, claimedOrgs),
+        format,
+        "projects",
+        section.maxItems
+      );
       if (items.length) {
         built.set("projects", {
           id: "projects",
@@ -977,7 +1250,7 @@ export function resolveCvDocument(
       continue;
     }
     if (section.id === "education") {
-      const items = takeMax(educationItems(format), section.maxItems);
+      const items = withCustoms(educationItems(format, settings), format, "education", section.maxItems);
       if (items.length) {
         built.set("education", {
           id: "education",
@@ -1020,7 +1293,7 @@ export function resolveCvDocument(
       continue;
     }
     if (section.id === "achievements") {
-      const items = takeMax(achievementItems(format), section.maxItems);
+      const items = withCustoms(achievementItems(format), format, "achievements", section.maxItems);
       if (items.length) {
         built.set("achievements", {
           id: "achievements",
@@ -1031,7 +1304,7 @@ export function resolveCvDocument(
       continue;
     }
     if (section.id === "training") {
-      const items = takeMax(trainingItems(format), section.maxItems);
+      const items = withCustoms(trainingItems(format, settings), format, "training", section.maxItems);
       if (items.length) {
         built.set("training", {
           id: "training",
@@ -1042,7 +1315,7 @@ export function resolveCvDocument(
       continue;
     }
     if (section.id === "certifications") {
-      const items = takeMax(certificationItems(format), section.maxItems);
+      const items = withCustoms(certificationItems(format, settings), format, "certifications", section.maxItems);
       const legacyNote = format.itemOverrides["certifications:note"]?.summary?.trim();
       if (items.length || legacyNote) {
         built.set("certifications", {
@@ -1100,6 +1373,11 @@ export function resolveCvDocument(
     name,
     headline,
     profile,
+    appearance: {
+      ...appearance,
+      photoUrl: photoSource,
+      resolvedPhotoUrl,
+    },
     contact: {
       email: normalizeText(settings.contactEmail),
       phone: normalizeText(settings.phoneNumber),
@@ -1111,7 +1389,7 @@ export function resolveCvDocument(
   };
 }
 
-export function cvCatalogItems(): {
+export function cvCatalogItems(settings?: SiteSettings): {
   key: string;
   label: string;
   group: "Experience" | "Leadership" | "Projects" | "Education" | "Certifications" | "Training" | "Achievements";
@@ -1122,38 +1400,42 @@ export function cvCatalogItems(): {
     group: "Experience" | "Leadership" | "Projects" | "Education" | "Certifications" | "Training" | "Achievements";
   }[] = [];
 
-  for (const item of siteExperience) {
+  const career = careerFrom(settings);
+
+  for (const item of career.records.filter((row) => row.kind === "role")) {
     items.push({
       key: `experience:${item.id}`,
-      label: `${item.role} — ${item.organization}`,
+      label: `${item.title} — ${item.organization}`,
       group: "Experience",
     });
     if (item.category === "leadership" || item.id === "lerony") {
       items.push({
         key: `leadership:${item.id}`,
-        label: `${item.role} — ${item.organization}`,
+        label: `${item.title} — ${item.organization}`,
         group: "Leadership",
       });
     }
-    if (item.type === "training") {
+    if (item.roleType === "training") {
       items.push({
         key: `training:${item.id}`,
-        label: `${item.role} — ${item.organization}`,
+        label: `${item.title} — ${item.organization}`,
         group: "Training",
       });
     }
   }
-  for (const item of siteEducation) {
+  for (const item of career.records.filter((row) => row.kind === "education")) {
+    const rawId = item.id.startsWith("edu-") ? item.id.slice(4) : item.id;
     items.push({
-      key: `education:${item.id}`,
-      label: `${item.program} — ${item.institution}`,
+      key: `education:${rawId}`,
+      label: `${item.title} — ${item.organization}`,
       group: "Education",
     });
   }
-  for (const item of siteCertifications) {
+  for (const item of career.records.filter((row) => row.kind === "certification")) {
+    const rawId = item.id.startsWith("cert-") ? item.id.slice(5) : item.id;
     items.push({
-      key: `certifications:${item.id}`,
-      label: `${item.title} — ${item.issuer}`,
+      key: `certifications:${rawId}`,
+      label: `${item.title} — ${item.organization}`,
       group: "Certifications",
     });
   }

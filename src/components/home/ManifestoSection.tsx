@@ -17,7 +17,17 @@ export default function ManifestoSection({ manifesto, embedded = false }: { mani
         <div className="manifesto-figure">
           <div className="manifesto-portrait">
             <div className="manifesto-halo" aria-hidden="true" />
-            {manifesto.image ? <img src={manifesto.image} alt="" className="manifesto-photo" width={1024} height={1536} /> : null}
+            {manifesto.image ? (
+              <img
+                src={manifesto.image}
+                alt=""
+                className="manifesto-photo"
+                width={800}
+                height={1200}
+                loading="lazy"
+                decoding="async"
+              />
+            ) : null}
             {manifesto.chip ? (
               <p className="manifesto-chip">
                 <span className="manifesto-chip-text">
@@ -27,10 +37,12 @@ export default function ManifestoSection({ manifesto, embedded = false }: { mani
                 </span>
                 <span className="manifesto-chip-mark" aria-hidden="true">
                   <img
-                    src="/brand/icons/favicon/web-app-manifest-192x192.png"
+                    src="/brand/icons/favicon/mark-64.webp"
                     alt=""
-                    width={192}
-                    height={192}
+                    width={40}
+                    height={40}
+                    loading="lazy"
+                    decoding="async"
                   />
                 </span>
               </p>

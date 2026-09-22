@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, type CSSProperties, type FormEvent } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { RiArrowRightLine, RiLoader4Line, RiMailLine, RiMapPinLine, RiPhoneLine } from "react-icons/ri";
 import { defaultFooterQuote, footerNav } from "@/data/site-data";
@@ -126,8 +127,8 @@ export function FooterCompanyBand({
       objectPosition: `${focus.x}% ${focus.y}%`,
       transform: whole ? undefined : `scale(${focus.zoom / 100})`,
       transformOrigin: `${focus.x}% ${focus.y}%`,
-      opacity: mediaType === "carousel" ? (index === active ? 1 : 0) : 1,
-      transition: mediaType === "carousel" ? "opacity 0.7s ease" : undefined,
+      opacity: 1,
+      transition: undefined,
       pointerEvents: "none",
       userSelect: "none",
     } as CSSProperties;
@@ -165,8 +166,11 @@ export function FooterCompanyBand({
         overflow: "hidden",
       }}
     >
-      {items.map((src, index) =>
-        mediaType === "video" || isVideoUrl(src) ? (
+      {items.map((src, index) => {
+        const isActive = mediaType !== "carousel" || index === active;
+        // Skip inactive carousel slides so browsers do not download multi-MB media up front.
+        if (mediaType === "carousel" && !isActive) return null;
+        return mediaType === "video" || isVideoUrl(src) ? (
           <video
             key={src}
             src={src}
@@ -174,7 +178,21 @@ export function FooterCompanyBand({
             muted
             loop
             playsInline
+            preload="metadata"
             draggable={false}
+            style={mediaStyle(index)}
+          />
+        ) : src.startsWith("http") ? (
+          <Image
+            key={src}
+            src={src}
+            alt=""
+            fill
+            sizes="(max-width: 768px) 100vw, 1200px"
+            quality={70}
+            loading="lazy"
+            draggable={false}
+            onDragStart={(event) => event.preventDefault()}
             style={mediaStyle(index)}
           />
         ) : (
@@ -182,12 +200,14 @@ export function FooterCompanyBand({
             key={src}
             src={src}
             alt=""
+            loading="lazy"
+            decoding="async"
             draggable={false}
             onDragStart={(event) => event.preventDefault()}
             style={mediaStyle(index)}
           />
-        ),
-      )}
+        );
+      })}
       {hasOverlay ? <div className="footer-band-shade" aria-hidden="true" /> : null}
       {overlay}
       {showGrid ? (
@@ -323,11 +343,19 @@ export default function Footer() {
                   src="/brand/logos/logo-horizontal-blue.webp"
                   alt={setting(settings, "siteTitle")}
                   className="footer-logo-dark"
+                  width={352}
+                  height={88}
+                  loading="lazy"
+                  decoding="async"
                 />
                 <img
                   src="/brand/logos/logo-horizontal-light.webp"
                   alt={setting(settings, "siteTitle")}
                   className="footer-logo-light"
+                  width={352}
+                  height={88}
+                  loading="lazy"
+                  decoding="async"
                 />
               </Link>
 

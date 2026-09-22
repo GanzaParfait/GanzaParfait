@@ -21,14 +21,16 @@ export async function GET(request: NextRequest) {
     const settings = await getServerSiteSettings();
     const raw = request.nextUrl.searchParams.get("template");
     const template = isCvTemplateId(raw) ? raw : undefined;
-    const doc = resolveCvDocument(settings, template);
+    const doc = resolveCvDocument(settings, template, { origin: request.nextUrl.origin });
     const admin = isAdmin(request);
 
     if (!canAccessCvTemplate(settings, doc.template, admin)) {
       return NextResponse.json({ error: "This CV format is not public." }, { status: 403 });
     }
 
-    const buffer = await renderToBuffer(<CvPdfDocument doc={doc} />);
+    const buffer = await renderToBuffer(
+      <CvPdfDocument doc={doc} origin={request.nextUrl.origin} />
+    );
     const filename = cvPdfFilename(doc.template);
     const bytes = new Uint8Array(buffer);
     const forceDownload = request.nextUrl.searchParams.get("download") === "1";

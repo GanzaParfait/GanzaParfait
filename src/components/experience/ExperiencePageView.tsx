@@ -1,7 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   RiArrowRightLine,
   RiBriefcaseLine,
@@ -12,16 +13,21 @@ import {
   RiLineChartLine,
   RiGraduationCapLine,
 } from "react-icons/ri";
-import { certifications, education, experience } from "@/data/site-data";
+import {
+  careerFrom,
+  experienceTimelineRecords,
+  type CareerRecord,
+} from "@/lib/career";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import CustomSelect from "@/components/ui/CustomSelect";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 type FilterId = "all" | "leadership" | "work" | "education" | "other";
 type SortId = "latest" | "oldest";
 
 type TimelineEntry = {
   id: string;
-  kind: "experience" | "education" | "certification";
+  kind: CareerRecord["kind"];
   category: FilterId;
   period: string;
   location?: string;
@@ -35,62 +41,44 @@ type TimelineEntry = {
   external?: boolean;
   sortYear: number;
   badge: string;
+  logo?: string;
 };
 
-function toTimeline(): TimelineEntry[] {
-  const roles: TimelineEntry[] = experience.map((item) => ({
+function recordToEntry(item: CareerRecord): TimelineEntry {
+  const category: FilterId =
+    item.category === "leadership" || item.category === "work" || item.category === "education" || item.category === "other"
+      ? item.category
+      : "other";
+
+  let badge = "Work";
+  if (item.kind === "education") badge = "Education";
+  else if (item.kind === "certification") badge = "Certificate";
+  else if (item.category === "leadership") badge = "Leadership";
+  else if (item.roleType === "training") badge = "Training";
+
+  const href = item.verifyUrl || item.relatedHref || item.website;
+  const external = Boolean(
+    item.verifyUrl || (item.website && !item.relatedHref?.startsWith("/")) || item.relatedHref?.startsWith("http"),
+  );
+
+  return {
     id: item.id,
-    kind: "experience",
-    category: item.category,
+    kind: item.kind,
+    category,
     period: item.period,
     location: item.location,
-    title: item.role,
-    organization: item.organization,
-    summary: item.summary,
-    highlights: item.highlights,
-    skills: item.skills || [],
-    href: item.relatedHref || item.website,
-    hrefLabel: item.relatedLabel || (item.website ? "Visit website" : undefined),
-    external: Boolean(item.website && !item.relatedHref?.startsWith("/")),
-    sortYear: item.sortYear,
-    badge: item.category === "leadership" ? "Leadership" : item.type === "training" ? "Training" : "Work",
-  }));
-
-  const schools: TimelineEntry[] = education.map((item) => ({
-    id: `edu-${item.id}`,
-    kind: "education",
-    category: "education",
-    period: item.period,
-    title: item.program,
-    organization: item.institution,
-    summary: item.note || item.status,
-    highlights: [item.status],
-    skills:
-      item.id === "ulk"
-        ? ["Bachelor of Computer Science in Software Engineering"]
-        : ["Software Development (SOD)"],
-    sortYear: item.sortYear,
-    badge: "Education",
-  }));
-
-  const credentials: TimelineEntry[] = certifications.map((item) => ({
-    id: `cert-${item.id}`,
-    kind: "certification",
-    category: "education",
-    period: item.period,
     title: item.title,
-    organization: item.issuer,
-    summary: item.program,
-    highlights: [`Completed ${item.completedOn}`, `Issued ${item.issuedOn}`],
-    skills: ["Verified certificate"],
-    href: item.verifyUrl,
-    hrefLabel: "Verify certificate",
-    external: true,
+    organization: item.organization,
+    summary: item.summary || item.description,
+    highlights: item.highlights || [],
+    skills: item.skills || [],
+    href,
+    hrefLabel: item.relatedLabel || (item.verifyUrl ? "Verify certificate" : item.website ? "Visit website" : undefined),
+    external,
     sortYear: item.sortYear,
-    badge: "Certificate",
-  }));
-
-  return [...roles, ...schools, ...credentials];
+    badge,
+    logo: item.logo,
+  };
 }
 
 const FILTERS: { id: FilterId; label: string }[] = [
@@ -108,12 +96,29 @@ function matchesYear(item: TimelineEntry, year: string | null) {
   return tokens.includes(year) || String(item.sortYear) === year;
 }
 
+function scrollToTimeline() {
+  const node = document.getElementById("experience-timeline");
+  if (!node) return;
+  const nav = Number.parseFloat(
+    getComputedStyle(document.documentElement).getPropertyValue("--public-nav-offset") || "64",
+  );
+  const top = node.getBoundingClientRect().top + window.scrollY - (Number.isFinite(nav) ? nav + 12 : 76);
+  window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+}
+
 export default function ExperiencePageView() {
+  const settings = useSiteSettings();
+  const career = useMemo(() => careerFrom(settings), [settings]);
   const [filter, setFilter] = useState<FilterId>("all");
   const [sort, setSort] = useState<SortId>("latest");
   const [yearFocus, setYearFocus] = useState<string | null>(null);
   const [yearHover, setYearHover] = useState<string | null>(null);
-  const all = useMemo(() => toTimeline(), []);
+  const [progress, setProgress] = useState(0);
+
+  const all = useMemo(
+    () => experienceTimelineRecords(career).map(recordToEntry),
+    [career],
+  );
 
   const yearRail = useMemo(() => {
     const years = new Set<string>();
@@ -148,30 +153,63 @@ export default function ExperiencePageView() {
     return all.find((item) => matchesYear(item, activeYear)) || null;
   }, [all, activeYear]);
 
-  const orgCount = new Set(experience.map((item) => item.organization)).size;
+  const roleCount = career.records.filter((item) => item.kind === "role").length;
+  const orgCount = new Set(career.records.map((item) => item.organization)).size;
+
+  useEffect(() => {
+    const node = document.getElementById("experience-board");
+    if (!node) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const update = () => {
+      const rect = node.getBoundingClientRect();
+      const total = rect.height - window.innerHeight * 0.35;
+      const seen = Math.min(Math.max(-rect.top + window.innerHeight * 0.2, 0), Math.max(total, 1));
+      setProgress(total <= 0 ? 1 : seen / total);
+    };
+    update();
+    if (reduce) {
+      setProgress(1);
+      return;
+    }
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [visible.length, filter, sort, yearFocus]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.location.hash !== "#experience-timeline") return;
+    const frame = window.requestAnimationFrame(() => scrollToTimeline());
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
+
+  const { page, stats } = career;
 
   return (
     <div className="experience-page">
       <section className="experience-hero" data-page-section aria-label="Experience header">
         <div className="container experience-hero-grid">
           <AnimatedSection>
-            <p className="section-label">Experience</p>
-            <h1>A journey of continuous building.</h1>
-            <p>
-              Roles, systems work, training, and education that shaped the founder, entrepreneur, and technologist
-              path — kept as a record of progress, not just positions.
-            </p>
+            <p className="section-label">{page.label}</p>
+            <h1>{page.title}</h1>
+            <p>{page.body}</p>
           </AnimatedSection>
           <AnimatedSection delay={80} className="experience-hero-aside" aria-label="Experience principles">
             <p className="experience-hero-aside-line">
-              {["Ideas", "People", "Systems", "Impact"].map((item, index) => (
-                <span key={item}>
-                  {index > 0 ? <i className="experience-hero-aside-dot" aria-hidden="true">·</i> : null}
-                  <strong>{item}</strong>
+              {page.asideLine.split("·").map((part, index) => (
+                <span key={part.trim()}>
+                  {index > 0 ? (
+                    <i className="experience-hero-aside-dot" aria-hidden="true">
+                      ·
+                    </i>
+                  ) : null}
+                  <strong>{part.trim()}</strong>
                 </span>
               ))}
             </p>
-            <p className="experience-hero-aside-note">A record of progress, not just positions.</p>
           </AnimatedSection>
         </div>
       </section>
@@ -227,7 +265,7 @@ export default function ExperiencePageView() {
                 </ul>
               </div>
               {yearPreview ? (
-                <p className="journey-rail-preview">
+                <p className="journey-rail-preview experience-year-preview">
                   <strong>{yearPreview.title}</strong>
                   <em>{yearPreview.organization}</em>
                 </p>
@@ -235,8 +273,8 @@ export default function ExperiencePageView() {
             </div>
           ) : null}
 
-          <div className="experience-toolbar">
-            <div className="experience-filters" role="tablist" aria-label="Experience categories">
+          <div className="journey-toolbar experience-toolbar">
+            <div className="journey-filters experience-filters" role="tablist" aria-label="Experience categories">
               {FILTERS.map((item) => (
                 <button
                   key={item.id}
@@ -250,72 +288,93 @@ export default function ExperiencePageView() {
                 </button>
               ))}
             </div>
-            <CustomSelect
-              value={sort}
-              aria-label="Sort experience"
-              options={[
-                { value: "latest", label: "Latest first" },
-                { value: "oldest", label: "Oldest first" },
-              ]}
-              onChange={(value) => setSort(value as SortId)}
-              className="dash-cselect experience-sort"
-            />
+            <label className="journey-sort">
+              <span className="sr-only">Sort</span>
+              <CustomSelect
+                aria-label="Sort"
+                value={sort}
+                options={[
+                  { value: "latest", label: "Latest first" },
+                  { value: "oldest", label: "Oldest first" },
+                ]}
+                onChange={(value) => setSort(value as SortId)}
+              />
+            </label>
           </div>
         </div>
       </section>
 
-      <section className="experience-board-section" data-page-section aria-label="Experience timeline">
+      <section
+        className="experience-board-section"
+        id="experience-board"
+        data-page-section
+        aria-label="Experience timeline"
+      >
         <div className="container experience-board">
           <aside className="experience-side">
-            <AnimatedSection>
-              <p className="section-label">From learning to leading</p>
-              <h2>Evidence behind the identity.</h2>
-              <p>
-                Leadership at LERONY Ltd leads the public story. Engineering, operations, training, and education stay
-                as verified supporting record.
-              </p>
+            <AnimatedSection className="experience-side-intro">
+              <p className="section-label">{page.sideLabel}</p>
+              <h2>{page.sideTitle}</h2>
+              <p className="experience-side-copy">{page.sideBody}</p>
             </AnimatedSection>
             <div className="experience-stats">
-              <article>
-                <RiBriefcaseLine size={18} aria-hidden="true" />
-                <strong>{experience.length}+</strong>
-                <span>Roles &amp; experiences</span>
-              </article>
-              <article>
-                <RiBuilding2Line size={18} aria-hidden="true" />
-                <strong>{orgCount}</strong>
-                <span>Organizations</span>
-              </article>
-              <article>
-                <RiCalendarLine size={18} aria-hidden="true" />
-                <strong>2021</strong>
-                <span>Journey started</span>
-              </article>
-              <article>
-                <RiLineChartLine size={18} aria-hidden="true" />
-                <strong>Ongoing</strong>
-                <span>Building and learning</span>
-              </article>
+              {(stats.length
+                ? stats
+                : [
+                    { value: `${roleCount}+`, label: "Roles & experiences" },
+                    { value: String(orgCount), label: "Organizations" },
+                    { value: "2021", label: "Journey started" },
+                    { value: "Ongoing", label: "Building and learning" },
+                  ]
+              ).map((stat, index) => {
+                const Icon =
+                  index === 0
+                    ? RiBriefcaseLine
+                    : index === 1
+                      ? RiBuilding2Line
+                      : index === 2
+                        ? RiCalendarLine
+                        : RiLineChartLine;
+                return (
+                  <article key={`${stat.value}-${stat.label}`}>
+                    <Icon size={18} aria-hidden="true" />
+                    <strong>{stat.value}</strong>
+                    <span>{stat.label}</span>
+                  </article>
+                );
+              })}
             </div>
             <div className="experience-side-cta">
               <p>Want the full story?</p>
-              <Link href="#experience-timeline" className="btn btn-primary">
-                View full timeline <RiArrowRightLine size={14} />
-              </Link>
+              <a
+                href="#experience-timeline"
+                className="btn btn-primary"
+                onClick={(event) => {
+                  event.preventDefault();
+                  const url = `${window.location.pathname}${window.location.search}#experience-timeline`;
+                  window.history.replaceState(null, "", url);
+                  scrollToTimeline();
+                }}
+              >
+                {page.sideCta} <RiArrowRightLine size={14} />
+              </a>
             </div>
           </aside>
 
-          <div className="experience-timeline" id="experience-timeline">
+          <ol className="journey-list experience-timeline" id="experience-timeline">
+            <span className="journey-line" style={{ transform: `scaleY(${progress})` }} aria-hidden="true" />
             {visible.length ? (
               visible.map((item, index) => (
-                <AnimatedSection key={item.id} delay={Math.min(index, 8) * 35}>
+                <li key={item.id} className={index === 0 && sort === "latest" ? "is-current" : undefined}>
                   <ExperienceCard item={item} current={index === 0 && sort === "latest"} />
-                </AnimatedSection>
+                </li>
               ))
             ) : (
-              <p className="experience-empty">No entries match this filter.</p>
+              <li className="experience-empty-wrap">
+                <p className="experience-empty">No entries match this filter.</p>
+              </li>
             )}
-          </div>
+          </ol>
         </div>
       </section>
 
@@ -358,13 +417,22 @@ function ExperienceCard({ item, current }: { item: TimelineEntry; current?: bool
           <span />
         )}
       </div>
-      <h3>
-        {item.kind === "education" || item.kind === "certification" ? (
-          <RiGraduationCapLine size={18} aria-hidden="true" />
+      <div className="experience-card-head">
+        <div className="experience-card-titles">
+          <h3>
+            {item.kind === "education" || item.kind === "certification" ? (
+              <RiGraduationCapLine size={18} aria-hidden="true" />
+            ) : null}
+            {item.title}
+          </h3>
+          <p className="experience-card-org">{item.organization}</p>
+        </div>
+        {item.logo ? (
+          <span className="experience-card-logo">
+            <Image src={item.logo} alt="" width={56} height={56} />
+          </span>
         ) : null}
-        {item.title}
-      </h3>
-      <p className="experience-card-org">{item.organization}</p>
+      </div>
       <p className="experience-card-summary">{item.summary}</p>
       {item.highlights.length ? (
         <ul>

@@ -14,6 +14,7 @@ import {
   RiCloseLine,
 } from "react-icons/ri";
 import CvAccessDialog from "@/components/cv/CvAccessDialog";
+import { CvDocumentSheet } from "@/components/cv/CvDocumentSheet";
 import { useHistoryBackClose, dismissOnBackdrop } from "@/hooks/useHistoryBackClose";
 import type { SiteSettings } from "@/lib/supabase";
 import {
@@ -109,7 +110,6 @@ function FullPreview({
   downloading: boolean;
 }) {
   useHistoryBackClose(true, onClose);
-  const doc = useMemo(() => resolveCvDocument(settings, template), [settings, template]);
   const label = getCvConfig(settings).formats[template].label;
 
   useEffect(() => {
@@ -145,50 +145,7 @@ function FullPreview({
           </div>
         </div>
         <div className="cv-a4-frame">
-          <article className="cv-sheet is-public" data-template={doc.template}>
-            <header className="cv-sheet-head">
-              <h1>{doc.name}</h1>
-              <p className="cv-sheet-headline">{doc.headline}</p>
-              <p className="cv-sheet-meta">
-                {[doc.contact.location, doc.contact.email, doc.contact.phone]
-                  .filter(Boolean)
-                  .join(" · ")}
-              </p>
-            </header>
-            {doc.sections.map((section) => (
-              <section key={section.id} className="cv-sheet-section">
-                <h2>{section.title}</h2>
-                {section.body ? <p>{section.body}</p> : null}
-                {section.chips?.length ? (
-                  <p className="cv-sheet-chips">{section.chips.join(" · ")}</p>
-                ) : null}
-                {section.skillsByCategory?.map((group) => (
-                  <p key={group.category} className="cv-sheet-skill">
-                    <strong>{group.category}:</strong> {group.names.join(", ")}
-                  </p>
-                ))}
-                {section.languages?.map((lang) => (
-                  <p key={lang.name} className="cv-sheet-skill">
-                    <strong>{lang.name}</strong>
-                    {lang.proficiency ? ` — ${lang.proficiency}` : ""}
-                  </p>
-                ))}
-                {section.items.map((item) => (
-                  <div key={item.key} className="cv-sheet-item">
-                    <div className="cv-sheet-item-head">
-                      <h3>{item.title}</h3>
-                      {item.period ? <span>{item.period}</span> : null}
-                    </div>
-                    {item.subtitle ? <p className="cv-sheet-sub">{item.subtitle}</p> : null}
-                    {section.id !== "links" && item.summary ? <p>{item.summary}</p> : null}
-                    {section.id === "links" && item.href ? (
-                      <p className="cv-sheet-sub">{item.href.replace(/^https?:\/\//, "")}</p>
-                    ) : null}
-                  </div>
-                ))}
-              </section>
-            ))}
-          </article>
+          <CvDocumentSheet settings={settings} template={template} className="is-public" />
         </div>
       </div>
     </div>

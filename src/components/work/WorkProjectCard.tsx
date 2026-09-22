@@ -97,12 +97,12 @@ export default function WorkProjectCard({
         {cover ? (
           onPreview ? (
             <button type="button" className="selected-shot" onClick={onPreview} aria-label={`Preview ${title}`}>
-              <img src={cover} alt="" loading="lazy" decoding="async" />
+              <img src={cover} alt="" loading="lazy" decoding="async" width={1200} height={750} />
               {mediaCount > 1 ? <em>{mediaCount}</em> : null}
             </button>
           ) : (
             <Link href={href} className="selected-shot" aria-label={`Open ${title}`}>
-              <img src={cover} alt="" loading="lazy" decoding="async" />
+              <img src={cover} alt="" loading="lazy" decoding="async" width={1200} height={750} />
               {mediaCount > 1 ? <em>{mediaCount}</em> : null}
             </Link>
           )

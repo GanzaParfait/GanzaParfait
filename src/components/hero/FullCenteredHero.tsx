@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { SiteSettings } from "@/lib/supabase";
@@ -21,6 +22,7 @@ export default function FullCenteredHero({
   const socials = heroSocialsFor(settings);
   const highlights = heroHighlights(settings);
   const [roleIndex, setRoleIndex] = useState(0);
+  const isStatic = image.startsWith("/") && !image.startsWith("//");
 
   useEffect(() => {
     if (roles.length <= 1) return;
@@ -46,7 +48,27 @@ export default function FullCenteredHero({
           <div className="hero-centered-floor" />
         </div>
         <div className="hero-centered-figure">
-          <img src={image} alt={name} className="hero-centered-photo" />
+          {isStatic ? (
+            <Image
+              src={image}
+              alt={name}
+              width={900}
+              height={1200}
+              priority={!isPreview}
+              fetchPriority={isPreview ? undefined : "high"}
+              sizes="(max-width: 767px) 72vw, (max-width: 1100px) 58vw, 32rem"
+              className="hero-centered-photo"
+              unoptimized
+            />
+          ) : (
+            <img
+              src={image}
+              alt={name}
+              className="hero-centered-photo"
+              fetchPriority={isPreview ? undefined : "high"}
+              decoding="async"
+            />
+          )}
         </div>
         <div className="hero-centered-caption">
           <h1 className="hero-centered-name">{name}</h1>

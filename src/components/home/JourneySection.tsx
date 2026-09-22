@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   RiArrowLeftLine,
@@ -12,7 +13,6 @@ import {
   RiGroupLine,
   RiLineChartLine,
   RiMapPinLine,
-  RiLayoutGridLine,
   RiLinkM,
 } from "react-icons/ri";
 import type { HomepageContent, JourneyEntry, JourneyType } from "@/lib/homepage";
@@ -186,7 +186,7 @@ export default function JourneySection({
                 <div className="journey-more-copy">
                   <strong>{journey.moreTitle}</strong>
                   <p>{journey.moreBody}</p>
-                  <Link href="/experience" className="btn btn-primary btn-sm">
+                  <Link href="/experience#experience-timeline" className="btn btn-primary btn-sm">
                     {journey.moreCta || "Open full timeline"} <RiArrowRightLine size={14} />
                   </Link>
                 </div>
@@ -297,8 +297,17 @@ export default function JourneySection({
                       <p className="journey-year">{item.year}</p>
                       <span className={`journey-tag is-${item.type}`}>{typeLabel(item.type)}</span>
                     </div>
-                    <h3>{item.title}</h3>
-                    <p className="journey-org">{item.organization}</p>
+                    <div className="journey-item-head">
+                      <div>
+                        <h3>{item.title}</h3>
+                        <p className="journey-org">{item.organization}</p>
+                      </div>
+                      {item.logo ? (
+                        <span className="journey-item-logo">
+                          <Image src={item.logo} alt="" width={40} height={40} />
+                        </span>
+                      ) : null}
+                    </div>
                     <p>{item.description}</p>
                     {canOpen ? (
                       <button type="button" className="journey-details" onClick={() => openDetails(item)}>
@@ -310,16 +319,13 @@ export default function JourneySection({
               })}
             </ol>
 
-            <div className="journey-foot">
-              <p>
-                Showing {visible.length} of {entries.length} experiences
-              </p>
-              {!journey.display.showMoreCard ? (
-                <Link href="/experience" className="btn btn-outline btn-sm">
-                  <RiLayoutGridLine size={14} /> {journey.moreCta || "Open full timeline"}
+            {!journey.display.showMoreCard ? (
+              <div className="journey-foot">
+                <Link href="/experience#experience-timeline" className="btn btn-outline btn-sm">
+                  {journey.moreCta || "Open full timeline"} <RiArrowRightLine size={14} />
                 </Link>
-              ) : null}
-            </div>
+              </div>
+            ) : null}
           </div>
         </div>
       </Tag>
@@ -359,10 +365,20 @@ export default function JourneySection({
               </div>
               {active.website ? (
                 <a className="journey-drawer-logo" href={active.website} target="_blank" rel="noopener noreferrer">
-                  {active.organization.split(" ")[0]}
+                  {active.logo ? (
+                    <Image src={active.logo} alt="" width={56} height={56} />
+                  ) : (
+                    active.organization.split(" ")[0]
+                  )}
                 </a>
               ) : (
-                <span className="journey-drawer-logo">{active.organization.split(" ")[0]}</span>
+                <span className="journey-drawer-logo">
+                  {active.logo ? (
+                    <Image src={active.logo} alt="" width={56} height={56} />
+                  ) : (
+                    active.organization.split(" ")[0]
+                  )}
+                </span>
               )}
             </div>
 

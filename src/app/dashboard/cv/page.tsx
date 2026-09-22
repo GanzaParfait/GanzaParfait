@@ -8,19 +8,28 @@ import {
   RiDeleteBinLine,
   RiDownloadLine,
   RiEyeLine,
+  RiImageAddLine,
   RiLoader4Line,
+  RiMore2Fill,
   RiSaveLine,
 } from "react-icons/ri";
 import { useDashboardFeedback } from "@/components/dashboard/DashboardFeedback";
+import MediaManagerModal from "@/components/dashboard/MediaManagerModal";
+import { CvDocumentSheet } from "@/components/cv/CvDocumentSheet";
 import {
+  CV_FOOTER_STYLE_OPTIONS,
+  CV_HEADER_STYLE_OPTIONS,
+  CV_PHOTO_SHAPE_OPTIONS,
   CV_SECTION_OPTIONS,
   CV_TEMPLATE_OPTIONS,
   cvCatalogItems,
   cvPdfFilename,
+  defaultAppearance,
   getCvConfig,
-  resolveCvDocument,
   skillGroupOptions,
+  type CvAppearance,
   type CvConfig,
+  type CvCustomEntry,
   type CvFormatConfig,
   type CvLanguage,
   type CvSectionId,
@@ -83,61 +92,6 @@ const TABS: { id: DashTab; label: string }[] = [
   { id: "download", label: "Download" },
 ];
 
-function DocumentPreview({ settings, template }: { settings: SiteSettings; template: CvTemplateId }) {
-  const doc = useMemo(() => resolveCvDocument(settings, template), [settings, template]);
-  return (
-    <article className="cv-sheet" data-template={doc.template}>
-      <header className="cv-sheet-head">
-        <h1>{doc.name}</h1>
-        <p className="cv-sheet-headline">{doc.headline}</p>
-        <p className="cv-sheet-meta">
-          {[doc.contact.location, doc.contact.email, doc.contact.phone, doc.contact.website?.replace(/^https?:\/\//, "")]
-            .filter(Boolean)
-            .join(" · ")}
-        </p>
-        {doc.contact.links.length ? (
-          <p className="cv-sheet-meta">
-            {doc.contact.links.map((l) => l.label).join(" · ")}
-          </p>
-        ) : null}
-      </header>
-      {doc.sections.map((section) => (
-        <section key={section.id} className="cv-sheet-section">
-          <h2>{section.title}</h2>
-          {section.body ? <p>{section.body}</p> : null}
-          {section.chips?.length ? (
-            <p className="cv-sheet-chips">{section.chips.join(" · ")}</p>
-          ) : null}
-          {section.skillsByCategory?.map((group) => (
-            <p key={group.category} className="cv-sheet-skill">
-              <strong>{group.category}:</strong> {group.names.join(", ")}
-            </p>
-          ))}
-          {section.languages?.map((lang) => (
-            <p key={lang.name} className="cv-sheet-skill">
-              <strong>{lang.name}</strong>
-              {lang.proficiency ? ` — ${lang.proficiency}` : ""}
-            </p>
-          ))}
-      {section.items.map((item) => (
-            <div key={item.key} className="cv-sheet-item">
-              <div className="cv-sheet-item-head">
-                <h3>{item.title}</h3>
-                {item.period ? <span>{item.period}</span> : null}
-              </div>
-              {item.subtitle ? <p className="cv-sheet-sub">{item.subtitle}</p> : null}
-              {section.id !== "links" && item.summary ? <p>{item.summary}</p> : null}
-              {section.id === "links" && item.href ? (
-                <p className="cv-sheet-sub">{item.href.replace(/^https?:\/\//, "")}</p>
-              ) : null}
-            </div>
-          ))}
-        </section>
-      ))}
-    </article>
-  );
-}
-
 export default function DashboardCvPage() {
   const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
   const [template, setTemplate] = useState<CvTemplateId>("professional");
@@ -157,7 +111,37 @@ export default function DashboardCvPage() {
   const [leadsLoading, setLeadsLoading] = useState(false);
   const [selectedLead, setSelectedLead] = useState<LeadRow | null>(null);
   const [docPreviewOpen, setDocPreviewOpen] = useState(false);
+  const [photoPickerOpen, setPhotoPickerOpen] = useState(false);
+  const [formatMenuOpen, setFormatMenuOpen] = useState(false);
+  const [customDraft, setCustomDraft] = useState<{
+    sectionId: CvCustomEntry["sectionId"];
+    title: string;
+    subtitle: string;
+    period: string;
+    location: string;
+    summary: string;
+    meta: string;
+  }>({
+    sectionId: "experience",
+    title: "",
+    subtitle: "",
+    period: "",
+    location: "",
+    summary: "",
+    meta: "",
+  });
   const { runSave, saving } = useDashboardFeedback();
+
+  useEffect(() => {
+    if (!formatMenuOpen) return;
+    const onDoc = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (target?.closest(".cv-dash-more")) return;
+      setFormatMenuOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [formatMenuOpen]);
 
   useEffect(() => {
     let cancelled = false;
@@ -210,7 +194,7 @@ export default function DashboardCvPage() {
   const config = getCvConfig(settings);
   const access = config.access;
   const format = config.formats[template];
-  const catalog = useMemo(() => cvCatalogItems(), []);
+  const catalog = useMemo(() => cvCatalogItems(settings), [settings]);
   const skillGroups = useMemo(() => skillGroupOptions(), []);
 
   const patchConfig = (next: CvConfig) => setSettings((prev) => ({ ...prev, cvConfig: next }));
@@ -226,6 +210,14 @@ export default function DashboardCvPage() {
     patchConfig({
       ...config,
       formats: { ...config.formats, [template]: { ...format, ...partial } },
+    });
+  };
+
+  const appearance = format.appearance || defaultAppearance(template);
+
+  const patchAppearance = (partial: Partial<CvAppearance>) => {
+    patchFormat({
+      appearance: { ...appearance, ...partial },
     });
   };
 
@@ -303,117 +295,153 @@ export default function DashboardCvPage() {
     });
   };
 
-  const sectionChips = [...format.sections]
-    .sort((a, b) => a.order - b.order)
-    .filter((s) => s.included)
-    .map((s) => CV_SECTION_OPTIONS.find((o) => o.id === s.id)?.label || s.id);
+  const customEntries = format.customEntries || [];
+
+  const addCustomEntry = () => {
+    if (!customDraft.title.trim()) return;
+    const id = `custom-${Date.now()}`;
+    patchFormat({
+      customEntries: [
+        ...customEntries,
+        {
+          id,
+          sectionId: customDraft.sectionId,
+          title: customDraft.title.trim(),
+          subtitle: customDraft.subtitle.trim() || undefined,
+          period: customDraft.period.trim() || undefined,
+          location: customDraft.location.trim() || undefined,
+          summary: customDraft.summary.trim() || undefined,
+          meta: customDraft.meta.trim() || undefined,
+          order: customEntries.length,
+        },
+      ],
+    });
+    setCustomDraft({
+      sectionId: customDraft.sectionId,
+      title: "",
+      subtitle: "",
+      period: "",
+      location: "",
+      summary: "",
+      meta: "",
+    });
+  };
+
+  const removeCustomEntry = (id: string) => {
+    patchFormat({ customEntries: customEntries.filter((row) => row.id !== id) });
+  };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, height: "100%", gap: "0.85rem" }}>
-      <div className="dash-page-head">
-        <div>
-          <p style={{ fontSize: "0.7rem", fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "#0e52a8" }}>
-            Control center
-          </p>
-          <h1 style={{ fontSize: "1.2rem", fontWeight: 800, color: "#0b192c" }}>CV / Resume</h1>
-          <p style={{ fontSize: "0.8rem", color: "#64748b", maxWidth: "42rem" }}>
-            Format-specific documents with independent headlines, sections, records, and languages.
-            CV overrides never change website copy.
-          </p>
+    <div className="cv-dash-shell">
+      <div className="cv-dash-left">
+        <div className="cv-dash-toolbar">
+          <div className="cv-dash-toolbar-title">
+            <h1>CV / Resume</h1>
+            <span className="cv-dash-format-pill">{format.label}</span>
+          </div>
+          <div className="cv-dash-toolbar-actions">
+            <button type="button" className="btn btn-outline btn-sm hp-mobile-preview-btn" onClick={() => setDocPreviewOpen(true)}>
+              <RiEyeLine size={15} /> Preview
+            </button>
+            <button type="button" className="btn btn-primary btn-sm" onClick={() => void persist()} disabled={saving}>
+              <RiSaveLine size={15} /> {saving ? "Saving…" : "Save"}
+            </button>
+            <div className="cv-dash-more">
+              <button
+                type="button"
+                className="btn btn-outline btn-sm cv-dash-more-btn"
+                aria-label="More actions"
+                aria-expanded={formatMenuOpen}
+                onClick={() => setFormatMenuOpen((open) => !open)}
+              >
+                <RiMore2Fill size={18} />
+              </button>
+              {formatMenuOpen ? (
+                <div className="cv-dash-more-menu" role="menu">
+                  <p className="cv-dash-more-label">Format</p>
+                  {CV_TEMPLATE_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      role="menuitem"
+                      className={template === opt.id ? "is-active" : undefined}
+                      onClick={() => {
+                        setTemplate(opt.id);
+                        setFormatMenuOpen(false);
+                      }}
+                    >
+                      {opt.label}
+                      {config.defaultTemplate === opt.id ? " · Default" : ""}
+                    </button>
+                  ))}
+                  <hr />
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      previewPdf();
+                      setFormatMenuOpen(false);
+                    }}
+                  >
+                    <RiEyeLine size={14} /> Preview PDF
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    disabled={downloading}
+                    onClick={() => {
+                      void downloadPdf();
+                      setFormatMenuOpen(false);
+                    }}
+                  >
+                    {downloading ? <RiLoader4Line size={14} className="cv-spin" /> : <RiDownloadLine size={14} />}
+                    Download PDF
+                  </button>
+                </div>
+              ) : null}
+            </div>
+          </div>
         </div>
-        <div className="dash-page-head-actions">
-          <button type="button" className="btn btn-outline hp-mobile-preview-btn" onClick={() => setDocPreviewOpen(true)}>
-            <RiEyeLine size={16} /> Live doc
-          </button>
-          <button type="button" className="btn btn-outline" onClick={previewPdf}>
-            <RiEyeLine size={16} /> Preview PDF
-          </button>
-          <button type="button" className="btn btn-outline" onClick={() => void downloadPdf()} disabled={downloading}>
-            {downloading ? <RiLoader4Line size={16} className="cv-spin" /> : <RiDownloadLine size={16} />}
-            Download PDF
-          </button>
-          <button type="button" className="btn btn-primary" onClick={() => void persist()} disabled={saving}>
-            <RiSaveLine size={16} /> {saving ? "Saving..." : "Save"}
-          </button>
+
+        {pdfError ? (
+          <p role="alert" style={{ color: "#b91c1c", fontSize: "0.78rem", margin: 0 }}>
+            {pdfError}
+          </p>
+        ) : null}
+
+        <div className="cv-dash-tabs dash-hscroll">
+          {TABS.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => setTab(item.id)}
+              className={tab === item.id ? "is-active" : undefined}
+            >
+              {item.label}
+            </button>
+          ))}
         </div>
-      </div>
 
-      {pdfError ? (
-        <p role="alert" style={{ color: "#b91c1c", fontSize: "0.82rem", margin: 0 }}>
-          {pdfError}
-        </p>
-      ) : null}
-
-      <div style={{ display: "flex", flexWrap: "nowrap", gap: "0.4rem" }} className="dash-hscroll">
-        {CV_TEMPLATE_OPTIONS.map((opt) => (
-          <button
-            key={opt.id}
-            type="button"
-            onClick={() => setTemplate(opt.id)}
-            style={{
-              border: template === opt.id ? "1px solid #0e52a8" : "1px solid #cbd5e1",
-              background: template === opt.id ? "#eff6ff" : "#fff",
-              color: "#0f172a",
-              borderRadius: "999px",
-              padding: "0.45rem 0.85rem",
-              fontSize: "0.75rem",
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
-          >
-            {opt.label}
-            {config.defaultTemplate === opt.id ? " · Default" : ""}
-          </button>
-        ))}
-      </div>
-
-      <p style={{ margin: 0, fontSize: "0.75rem", color: "#64748b" }}>
-        {format.label}: {sectionChips.join(" · ") || "No sections enabled"}
-      </p>
-
-      <div className="dash-hscroll" style={{ gap: "0.35rem", borderBottom: "1px solid #e2e8f0", paddingBottom: "0.35rem" }}>
-        {TABS.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => setTab(item.id)}
-            style={{
-              border: 0,
-              background: tab === item.id ? "#0e52a8" : "transparent",
-              color: tab === item.id ? "#fff" : "#475569",
-              borderRadius: "0.5rem",
-              padding: "0.4rem 0.75rem",
-              fontSize: "0.75rem",
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
-
-      <div className={docPreviewOpen ? "dash-cv-responsive dash-split is-preview-open" : "dash-cv-responsive dash-split"} style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.05fr) minmax(18rem, 0.95fr)", gap: "0.85rem", flex: 1, minHeight: 0 }}>
-        <div className="dash-split-main" style={{ overflowY: "auto", display: "flex", flexDirection: "column", gap: "0.75rem", paddingBottom: "1rem" }}>
+        <div className="cv-dash-editor dash-split-main">
           {tab === "content" ? (
             <>
               <section style={panelStyle}>
-                <h2 style={{ fontSize: "0.85rem", fontWeight: 800, margin: "0 0 0.65rem" }}>Identity for this format</h2>
-                <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.65rem" }}>
-                  Headline (per format — not the website subtitle)
+                <h2 style={{ fontSize: "0.82rem", fontWeight: 800, margin: "0 0 0.55rem" }}>Identity</h2>
+                <label style={{ display: "block", fontSize: "0.72rem", fontWeight: 700, color: "#334155", marginBottom: "0.55rem" }}>
+                  Headline
                   <input
-                    style={{ ...inputStyle, marginTop: "0.35rem" }}
+                    style={{ ...inputStyle, marginTop: "0.3rem" }}
                     value={format.headline || ""}
                     onChange={(e) => patchFormat({ headline: e.target.value })}
                     placeholder="Founder · Software Engineer · Technologist"
                   />
                 </label>
-                <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>
-                  Profile override (CV only)
+                <label style={{ display: "block", fontSize: "0.72rem", fontWeight: 700, color: "#334155" }}>
+                  Profile override
                   <textarea
-                    style={{ ...inputStyle, marginTop: "0.35rem", minHeight: "5.5rem", resize: "vertical" }}
+                    style={{ ...inputStyle, marginTop: "0.3rem", minHeight: "4.5rem", resize: "vertical" }}
                     value={format.profileOverride || ""}
-                    placeholder="Leave empty to use a format-aware default from site bio"
+                    placeholder="Empty = site bio default"
                     onChange={(e) => patchFormat({ profileOverride: e.target.value })}
                   />
                 </label>
@@ -569,6 +597,30 @@ export default function DashboardCvPage() {
                               })
                             }
                           />
+                          {section.included ? (
+                            <p style={{ margin: "0.35rem 0 0", fontSize: "0.68rem", color: "#64748b", lineHeight: 1.35 }}>
+                              {section.id === "certifications" ||
+                              section.id === "experience" ||
+                              section.id === "education" ||
+                              section.id === "leadership" ||
+                              section.id === "training" ||
+                              section.id === "achievements"
+                                ? "Fill items in Records (tick portfolio rows or add a custom entry). Empty sections stay hidden on the CV."
+                                : section.id === "expertise" || section.id === "languages"
+                                  ? "Add details in the Content tab for this format."
+                                  : section.id === "projects"
+                                    ? "Tick projects in Records."
+                                    : section.id === "skills"
+                                      ? "Toggle skill groups in Records."
+                                      : section.id === "links"
+                                        ? "Toggle header links in Records."
+                                        : section.id === "profile"
+                                          ? "Edit headline and profile in the Content tab."
+                                          : section.id === "references"
+                                            ? "Edit reference note in Appearance / Content."
+                                            : "Add content in Records or Content."}
+                            </p>
+                          ) : null}
                         </div>
                         <span style={{ display: "inline-flex", gap: "0.15rem" }}>
                           <button type="button" className="dash-icon-btn" aria-label="Move up" onClick={() => moveSection(section.id, -1)}>
@@ -588,19 +640,32 @@ export default function DashboardCvPage() {
           {tab === "records" ? (
             <>
               <section style={panelStyle}>
-                <h2 style={{ fontSize: "0.85rem", fontWeight: 800, margin: "0 0 0.35rem" }}>Record selection</h2>
-                <p style={{ fontSize: "0.72rem", color: "#64748b", margin: "0 0 0.65rem" }}>
-                  Choose which portfolio records appear in this format. LERONY should usually appear once — under Leadership or Experience, not both, and not again as a project.
+                <h2 style={{ fontSize: "0.82rem", fontWeight: 800, margin: "0 0 0.35rem" }}>Positions & records</h2>
+                <p style={{ fontSize: "0.7rem", color: "#64748b", margin: "0 0 0.55rem" }}>
+                  Tick roles to include. A CV can show a single position — uncheck the rest.
                 </p>
-                {(["Experience", "Leadership", "Projects", "Education", "Training", "Achievements"] as const).map((group) => {
+                {(["Experience", "Leadership", "Projects", "Education", "Training", "Certifications", "Achievements"] as const).map((group) => {
                   const rows = catalog.filter((item) => item.group === group);
-                  if (!rows.length) return null;
+                  if (!rows.length) {
+                    return (
+                      <div key={group} style={{ marginBottom: "0.75rem" }}>
+                        <h3 style={{ fontSize: "0.72rem", fontWeight: 800, color: "#0e52a8", margin: "0 0 0.35rem" }}>{group}</h3>
+                        <p style={{ fontSize: "0.7rem", color: "#64748b", margin: 0 }}>
+                          No portfolio records in this group yet. Add them under{" "}
+                          <a href="/dashboard/experience" style={{ color: "#0e52a8", fontWeight: 700 }}>
+                            Pages → Experience
+                          </a>
+                          , or create a custom entry below.
+                        </p>
+                      </div>
+                    );
+                  }
                   return (
-                    <div key={group} style={{ marginBottom: "0.85rem" }}>
-                      <h3 style={{ fontSize: "0.78rem", fontWeight: 800, color: "#0e52a8", margin: "0 0 0.4rem" }}>{group}</h3>
-                      <div style={{ display: "grid", gap: "0.3rem" }}>
+                    <div key={group} style={{ marginBottom: "0.75rem" }}>
+                      <h3 style={{ fontSize: "0.72rem", fontWeight: 800, color: "#0e52a8", margin: "0 0 0.35rem" }}>{group}</h3>
+                      <div style={{ display: "grid", gap: "0.25rem" }}>
                         {rows.map((item) => (
-                          <label key={item.key} style={{ display: "flex", gap: "0.5rem", alignItems: "flex-start", fontSize: "0.78rem", fontWeight: 600 }}>
+                          <label key={item.key} style={{ display: "flex", gap: "0.45rem", alignItems: "flex-start", fontSize: "0.75rem", fontWeight: 600 }}>
                             <input
                               type="checkbox"
                               checked={format.itemIncludes[item.key] !== false}
@@ -620,7 +685,108 @@ export default function DashboardCvPage() {
               </section>
 
               <section style={panelStyle}>
-                <h2 style={{ fontSize: "0.85rem", fontWeight: 800, margin: "0 0 0.65rem" }}>Skill groups</h2>
+                <h2 style={{ fontSize: "0.82rem", fontWeight: 800, margin: "0 0 0.35rem" }}>Custom entries</h2>
+                <p style={{ fontSize: "0.7rem", color: "#64748b", margin: "0 0 0.55rem" }}>
+                  Add a position that is not in the portfolio list.
+                </p>
+                {customEntries.length ? (
+                  <div style={{ display: "grid", gap: "0.4rem", marginBottom: "0.75rem" }}>
+                    {customEntries.map((row) => (
+                      <div
+                        key={row.id}
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          gap: "0.5rem",
+                          alignItems: "flex-start",
+                          border: "1px solid #e2e8f0",
+                          borderRadius: "0.55rem",
+                          padding: "0.5rem 0.65rem",
+                        }}
+                      >
+                        <div style={{ minWidth: 0 }}>
+                          <strong style={{ fontSize: "0.78rem" }}>{row.title}</strong>
+                          <div style={{ fontSize: "0.68rem", color: "#64748b" }}>
+                            {row.sectionId}
+                            {row.subtitle ? ` · ${row.subtitle}` : ""}
+                            {row.period ? ` · ${row.period}` : ""}
+                          </div>
+                        </div>
+                        <button type="button" className="dash-icon-btn" aria-label="Remove custom entry" onClick={() => removeCustomEntry(row.id)}>
+                          <RiDeleteBinLine size={15} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+                <div style={{ display: "grid", gap: "0.4rem" }}>
+                  <label style={{ fontSize: "0.7rem", fontWeight: 700, color: "#334155" }}>
+                    Section
+                    <select
+                      style={{ ...inputStyle, marginTop: "0.25rem" }}
+                      value={customDraft.sectionId}
+                      onChange={(e) =>
+                        setCustomDraft((prev) => ({
+                          ...prev,
+                          sectionId: e.target.value as CvCustomEntry["sectionId"],
+                        }))
+                      }
+                    >
+                      <option value="experience">Experience</option>
+                      <option value="leadership">Leadership</option>
+                      <option value="projects">Projects</option>
+                      <option value="education">Education</option>
+                      <option value="training">Training</option>
+                      <option value="achievements">Achievements</option>
+                      <option value="certifications">Certifications</option>
+                    </select>
+                  </label>
+                  <input
+                    style={inputStyle}
+                    placeholder="Title / role *"
+                    value={customDraft.title}
+                    onChange={(e) => setCustomDraft((prev) => ({ ...prev, title: e.target.value }))}
+                  />
+                  <input
+                    style={inputStyle}
+                    placeholder="Organization"
+                    value={customDraft.subtitle}
+                    onChange={(e) => setCustomDraft((prev) => ({ ...prev, subtitle: e.target.value }))}
+                  />
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.4rem" }}>
+                    <input
+                      style={inputStyle}
+                      placeholder="Period"
+                      value={customDraft.period}
+                      onChange={(e) => setCustomDraft((prev) => ({ ...prev, period: e.target.value }))}
+                    />
+                    <input
+                      style={inputStyle}
+                      placeholder="Location"
+                      value={customDraft.location}
+                      onChange={(e) => setCustomDraft((prev) => ({ ...prev, location: e.target.value }))}
+                    />
+                  </div>
+                  <input
+                    style={inputStyle}
+                    placeholder="Tag (e.g. Selected engagement)"
+                    value={customDraft.meta}
+                    onChange={(e) => setCustomDraft((prev) => ({ ...prev, meta: e.target.value }))}
+                  />
+                  <textarea
+                    style={{ ...inputStyle, minHeight: "3.2rem", resize: "vertical" }}
+                    placeholder="Summary"
+                    value={customDraft.summary}
+                    onChange={(e) => setCustomDraft((prev) => ({ ...prev, summary: e.target.value }))}
+                  />
+                  <button type="button" className="btn btn-outline btn-sm" onClick={addCustomEntry} disabled={!customDraft.title.trim()}>
+                    <RiAddLine size={15} /> Add custom entry
+                  </button>
+                </div>
+              </section>
+
+              <section style={panelStyle}>
+                <h2 style={{ fontSize: "0.82rem", fontWeight: 800, margin: "0 0 0.55rem" }}>Skill groups</h2>
                 {skillGroups.map((group) => (
                   <label key={group.id} style={{ display: "flex", gap: "0.5rem", alignItems: "center", fontSize: "0.8rem", fontWeight: 600, marginBottom: "0.35rem" }}>
                     <input
@@ -664,106 +830,284 @@ export default function DashboardCvPage() {
           ) : null}
 
           {tab === "appearance" ? (
-            <section style={panelStyle}>
-              <h2 style={{ fontSize: "0.85rem", fontWeight: 800, margin: "0 0 0.35rem" }}>Formats on /cv</h2>
-              <p style={{ fontSize: "0.72rem", color: "#64748b", margin: "0 0 0.75rem" }}>
-                Toggle formats off to hide them on the website without deleting configuration. Default always stays available for cards.
-              </p>
-              <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.75rem" }}>
-                Default public format
-                <select
-                  style={{ ...inputStyle, marginTop: "0.35rem" }}
-                  value={config.defaultTemplate}
-                  onChange={(e) =>
-                    patchConfig({ ...config, defaultTemplate: e.target.value as CvTemplateId })
-                  }
-                >
-                  {CV_TEMPLATE_OPTIONS.map((opt) => (
-                    <option key={opt.id} value={opt.id}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
+            <>
+              <section style={panelStyle}>
+                <h2 style={{ fontSize: "0.85rem", fontWeight: 800, margin: "0 0 0.35rem" }}>
+                  Layout for {format.label}
+                </h2>
+                <p style={{ fontSize: "0.72rem", color: "#64748b", margin: "0 0 0.85rem" }}>
+                  Three document layouts match the reference designs. Header, footer, and photo are saved per format and apply to PDF, live preview, and the public /cv page after Save.
+                </p>
 
-              <div style={{ display: "grid", gap: "0.55rem" }}>
-                {CV_TEMPLATE_OPTIONS.map((opt) => {
-                  const fmt = config.formats[opt.id];
-                  const isDefault = opt.id === config.defaultTemplate;
-                  return (
-                    <div
-                      key={opt.id}
-                      style={{
-                        border: "1px solid #e2e8f0",
-                        borderRadius: "0.75rem",
-                        padding: "0.7rem 0.8rem",
-                        background: isDefault ? "#eff6ff" : "#fff",
-                      }}
-                    >
-                      <div style={{ display: "flex", justifyContent: "space-between", gap: "0.5rem", marginBottom: "0.45rem" }}>
-                        <strong style={{ fontSize: "0.82rem" }}>
-                          {opt.label}
-                          {isDefault ? " · Default" : ""}
-                        </strong>
-                        {!isDefault ? (
-                          <button
-                            type="button"
-                            className="btn btn-outline"
-                            style={{ padding: "0.2rem 0.55rem", fontSize: "0.68rem" }}
-                            onClick={() => patchConfig({ ...config, defaultTemplate: opt.id })}
-                          >
-                            Make default
-                          </button>
+                <div style={{ display: "grid", gap: "0.55rem", marginBottom: "0.9rem" }}>
+                  {CV_TEMPLATE_OPTIONS.map((opt) => {
+                    const isActive = opt.id === template;
+                    return (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => setTemplate(opt.id)}
+                        style={{
+                          textAlign: "left",
+                          border: isActive ? "1.5px solid #0e52a8" : "1px solid #e2e8f0",
+                          background: isActive ? "#eff6ff" : "#fff",
+                          borderRadius: "0.75rem",
+                          padding: "0.7rem 0.85rem",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <strong style={{ fontSize: "0.82rem", color: "#0f172a" }}>{opt.label}</strong>
+                        <span style={{ display: "block", fontSize: "0.7rem", color: "#64748b", marginTop: "0.2rem" }}>
+                          {opt.id === "professional"
+                            ? "Editorial split header · detailed 1–2 pages"
+                            : opt.id === "compact"
+                              ? "Centered header · concise one-page resume"
+                              : "Navy identity band · leadership / impact focus"}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.75rem" }}>
+                  Header style
+                  <select
+                    style={{ ...inputStyle, marginTop: "0.35rem" }}
+                    value={appearance.headerStyle}
+                    onChange={(e) =>
+                      patchAppearance({ headerStyle: e.target.value as CvAppearance["headerStyle"] })
+                    }
+                  >
+                    {CV_HEADER_STYLE_OPTIONS.map((opt) => (
+                      <option key={opt.id} value={opt.id}>
+                        {opt.label} — {opt.hint}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.75rem" }}>
+                  Footer style
+                  <select
+                    style={{ ...inputStyle, marginTop: "0.35rem" }}
+                    value={appearance.footerStyle}
+                    onChange={(e) =>
+                      patchAppearance({ footerStyle: e.target.value as CvAppearance["footerStyle"] })
+                    }
+                  >
+                    {CV_FOOTER_STYLE_OPTIONS.map((opt) => (
+                      <option key={opt.id} value={opt.id}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.75rem" }}>
+                  Tagline / pull quote
+                  <input
+                    style={{ ...inputStyle, marginTop: "0.35rem" }}
+                    value={appearance.tagline || ""}
+                    onChange={(e) => patchAppearance({ tagline: e.target.value })}
+                    placeholder="Technology for people, real solutions for real impact."
+                  />
+                </label>
+
+                <div
+                  style={{
+                    border: "1px solid #e2e8f0",
+                    borderRadius: "0.75rem",
+                    padding: "0.75rem 0.85rem",
+                    background: "#f8fafc",
+                    marginBottom: "0.75rem",
+                  }}
+                >
+                  <label className="ann-check" style={{ marginBottom: "0.55rem" }}>
+                    <input
+                      type="checkbox"
+                      checked={appearance.showPhoto}
+                      onChange={(e) => patchAppearance({ showPhoto: e.target.checked })}
+                    />
+                    Show profile picture on this CV
+                  </label>
+
+                  {appearance.showPhoto ? (
+                    <div style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start", flexWrap: "wrap" }}>
+                      <div
+                        style={{
+                          width: "4.5rem",
+                          height: "4.5rem",
+                          borderRadius:
+                            appearance.photoShape === "circle"
+                              ? "999px"
+                              : appearance.photoShape === "rounded"
+                                ? "0.65rem"
+                                : "0.2rem",
+                          overflow: "hidden",
+                          background: "#e2e8f0",
+                          border: "1px solid #cbd5e1",
+                          flexShrink: 0,
+                        }}
+                      >
+                        {appearance.photoUrl || settings.heroImageUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={appearance.photoUrl || settings.heroImageUrl || ""}
+                            alt=""
+                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                          />
                         ) : null}
                       </div>
-                      <label className="ann-check" style={{ marginBottom: "0.3rem" }}>
-                        <input
-                          type="checkbox"
-                          checked={fmt.isPublic || isDefault}
-                          disabled={isDefault}
-                          onChange={(e) =>
-                            patchConfig({
-                              ...config,
-                              formats: {
-                                ...config.formats,
-                                [opt.id]: { ...fmt, isPublic: e.target.checked },
-                              },
-                            })
-                          }
-                        />
-                        Show card on /cv
-                      </label>
-                      <label className="ann-check">
-                        <input
-                          type="checkbox"
-                          checked={fmt.showInHero !== false}
-                          onChange={(e) =>
-                            patchConfig({
-                              ...config,
-                              formats: {
-                                ...config.formats,
-                                [opt.id]: { ...fmt, showInHero: e.target.checked },
-                              },
-                            })
-                          }
-                        />
-                        Show paper in hero stack
-                      </label>
+                      <div style={{ flex: 1, minWidth: "12rem" }}>
+                        <label style={{ display: "block", fontSize: "0.72rem", fontWeight: 700, color: "#334155", marginBottom: "0.45rem" }}>
+                          Photo shape
+                          <select
+                            style={{ ...inputStyle, marginTop: "0.3rem" }}
+                            value={appearance.photoShape}
+                            onChange={(e) =>
+                              patchAppearance({ photoShape: e.target.value as CvAppearance["photoShape"] })
+                            }
+                          >
+                            {CV_PHOTO_SHAPE_OPTIONS.map((opt) => (
+                              <option key={opt.id} value={opt.id}>
+                                {opt.label}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
+                          <button type="button" className="btn btn-outline" onClick={() => setPhotoPickerOpen(true)}>
+                            <RiImageAddLine size={15} /> Choose from media
+                          </button>
+                          {appearance.photoUrl ? (
+                            <button
+                              type="button"
+                              className="btn btn-ghost"
+                              onClick={() => patchAppearance({ photoUrl: "" })}
+                            >
+                              Use site portrait
+                            </button>
+                          ) : null}
+                        </div>
+                        <p style={{ fontSize: "0.68rem", color: "#64748b", margin: "0.4rem 0 0" }}>
+                          Empty photo uses the site hero portrait when enabled.
+                        </p>
+                      </div>
                     </div>
-                  );
-                })}
-              </div>
+                  ) : null}
+                </div>
 
-              <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginTop: "0.85rem" }}>
-                References text (current format, if section enabled)
-                <textarea
-                  style={{ ...inputStyle, marginTop: "0.35rem", minHeight: "3rem", resize: "vertical" }}
-                  value={format.referencesText || ""}
-                  placeholder="References available on request."
-                  onChange={(e) => patchFormat({ referencesText: e.target.value })}
-                />
-              </label>
-            </section>
+                <button
+                  type="button"
+                  className="btn btn-ghost"
+                  style={{ fontSize: "0.75rem" }}
+                  onClick={() => patchAppearance(defaultAppearance(template))}
+                >
+                  Reset chrome to layout defaults
+                </button>
+              </section>
+
+              <section style={panelStyle}>
+                <h2 style={{ fontSize: "0.85rem", fontWeight: 800, margin: "0 0 0.35rem" }}>Formats on /cv</h2>
+                <p style={{ fontSize: "0.72rem", color: "#64748b", margin: "0 0 0.75rem" }}>
+                  Choose which layout the website displays by default, and which format cards appear on /cv. Save to publish.
+                </p>
+                <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginBottom: "0.75rem" }}>
+                  Default public format
+                  <select
+                    style={{ ...inputStyle, marginTop: "0.35rem" }}
+                    value={config.defaultTemplate}
+                    onChange={(e) =>
+                      patchConfig({ ...config, defaultTemplate: e.target.value as CvTemplateId })
+                    }
+                  >
+                    {CV_TEMPLATE_OPTIONS.map((opt) => (
+                      <option key={opt.id} value={opt.id}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <div style={{ display: "grid", gap: "0.55rem" }}>
+                  {CV_TEMPLATE_OPTIONS.map((opt) => {
+                    const fmt = config.formats[opt.id];
+                    const isDefault = opt.id === config.defaultTemplate;
+                    return (
+                      <div
+                        key={opt.id}
+                        style={{
+                          border: "1px solid #e2e8f0",
+                          borderRadius: "0.75rem",
+                          padding: "0.7rem 0.8rem",
+                          background: isDefault ? "#eff6ff" : "#fff",
+                        }}
+                      >
+                        <div style={{ display: "flex", justifyContent: "space-between", gap: "0.5rem", marginBottom: "0.45rem" }}>
+                          <strong style={{ fontSize: "0.82rem" }}>
+                            {opt.label}
+                            {isDefault ? " · Default" : ""}
+                          </strong>
+                          {!isDefault ? (
+                            <button
+                              type="button"
+                              className="btn btn-outline"
+                              style={{ padding: "0.2rem 0.55rem", fontSize: "0.68rem" }}
+                              onClick={() => patchConfig({ ...config, defaultTemplate: opt.id })}
+                            >
+                              Make default
+                            </button>
+                          ) : null}
+                        </div>
+                        <label className="ann-check" style={{ marginBottom: "0.3rem" }}>
+                          <input
+                            type="checkbox"
+                            checked={fmt.isPublic || isDefault}
+                            disabled={isDefault}
+                            onChange={(e) =>
+                              patchConfig({
+                                ...config,
+                                formats: {
+                                  ...config.formats,
+                                  [opt.id]: { ...fmt, isPublic: e.target.checked },
+                                },
+                              })
+                            }
+                          />
+                          Show card on /cv
+                        </label>
+                        <label className="ann-check">
+                          <input
+                            type="checkbox"
+                            checked={fmt.showInHero !== false}
+                            onChange={(e) =>
+                              patchConfig({
+                                ...config,
+                                formats: {
+                                  ...config.formats,
+                                  [opt.id]: { ...fmt, showInHero: e.target.checked },
+                                },
+                              })
+                            }
+                          />
+                          Show paper in hero stack
+                        </label>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "#334155", marginTop: "0.85rem" }}>
+                  References text (current format, if section enabled)
+                  <textarea
+                    style={{ ...inputStyle, marginTop: "0.35rem", minHeight: "3rem", resize: "vertical" }}
+                    value={format.referencesText || ""}
+                    placeholder="References available on request."
+                    onChange={(e) => patchFormat({ referencesText: e.target.value })}
+                  />
+                </label>
+              </section>
+            </>
           ) : null}
 
           {tab === "access" ? (
@@ -1082,24 +1426,41 @@ export default function DashboardCvPage() {
             </section>
           ) : null}
         </div>
+      </div>
 
-        <aside className="dash-split-preview" style={{ ...panelStyle, overflow: "auto", minHeight: 0 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
-            <h2 style={{ fontSize: "0.85rem", fontWeight: 800, margin: 0, display: "inline-flex", gap: "0.4rem", alignItems: "center" }}>
-              <RiEyeLine size={16} /> Live document
+        <aside className={`cv-dash-preview ${docPreviewOpen ? "is-open" : ""}`}>
+          <div className="cv-live-doc-bar">
+            <h2>
+              <RiEyeLine size={15} /> {format.label}
             </h2>
-            <div style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
-              <span style={{ fontSize: "0.72rem", color: "#64748b", fontWeight: 700 }}>{format.label}</span>
+            <div className="cv-live-doc-actions">
+              <button type="button" className="btn btn-outline btn-sm" onClick={previewPdf}>
+                <RiEyeLine size={14} /> PDF
+              </button>
+              <button type="button" className="btn btn-outline btn-sm" onClick={() => void downloadPdf()} disabled={downloading}>
+                {downloading ? <RiLoader4Line size={14} className="cv-spin" /> : <RiDownloadLine size={14} />}
+                Download
+              </button>
               <button type="button" className="btn btn-ghost btn-sm hp-preview-close" onClick={() => setDocPreviewOpen(false)}>
                 Close
               </button>
             </div>
           </div>
-          <div id="cv-dash-print">
-            <DocumentPreview settings={{ ...settings, cvConfig: config }} template={template} />
+          <div id="cv-dash-print" className="cv-dash-preview-scroll">
+            <CvDocumentSheet settings={{ ...settings, cvConfig: config }} template={template} />
           </div>
         </aside>
-      </div>
+
+      <MediaManagerModal
+        isOpen={photoPickerOpen}
+        onClose={() => setPhotoPickerOpen(false)}
+        onSelect={(url) => {
+          patchAppearance({ photoUrl: url, showPhoto: true });
+          setPhotoPickerOpen(false);
+        }}
+        pickerMode="image"
+        title="Choose CV profile photo"
+      />
     </div>
   );
 }

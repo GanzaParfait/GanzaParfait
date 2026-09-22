@@ -1,4 +1,9 @@
 import { projects, siteConfig, timeline } from "@/data/site-data";
+import {
+  careerFrom,
+  careerRecordToJourneyEntry,
+  journeySelectedRecords,
+} from "@/lib/career";
 import type { SiteSettings } from "@/lib/supabase";
 
 export type HomePoint = { title: string; body: string; tag?: string };
@@ -31,6 +36,7 @@ export type JourneyEntry = {
   team?: string;
   status?: string;
   relatedHref?: string;
+  logo?: string;
   showDetails: boolean;
   detailsBlocked: boolean;
 };
@@ -106,6 +112,8 @@ export type HomepageContent = {
     moreBody: string;
     moreCta: string;
     stats: KnowledgeStat[];
+    /** Career record ids to show on homepage Journey. Empty = records with showOnJourney. */
+    selectedIds: string[];
     entries: JourneyEntry[];
     display: {
       showStats: boolean;
@@ -289,7 +297,7 @@ export const DEFAULT_HOMEPAGE: HomepageContent = {
   journey: {
     label: "Journey",
     title: "A journey of continuous building.",
-    note: "From learning to leading — a timeline of the key places, roles, and milestones that shaped the path.",
+    note: "From learning to leading — a timeline of the key places, roles, and milestones that shaped this work.",
     cta: "Open full timeline",
     moreTitle: "Need more details?",
     moreBody: "View the complete record on Experience, including roles, education, and training with verified context.",
@@ -300,24 +308,8 @@ export const DEFAULT_HOMEPAGE: HomepageContent = {
       { value: "2021", label: "Started" },
       { value: "Ongoing", label: "Building" },
     ],
-    entries: timeline.map((item) => ({
-      id: item.id,
-      year: item.year,
-      title: item.title,
-      organization: item.organization,
-      description: item.description,
-      type: item.type,
-      location: item.location,
-      summary: item.summary,
-      highlights: item.highlights,
-      website: item.website,
-      industry: item.industry,
-      team: item.team,
-      status: item.status,
-      relatedHref: item.relatedHref || "/experience",
-      showDetails: true,
-      detailsBlocked: false,
-    })),
+    selectedIds: ["lerony", "edu-ulk", "psta", "edu-sjitc"],
+    entries: [],
     display: {
       showStats: true,
       showMoreCard: true,
@@ -430,8 +422,22 @@ export function imagesForStory(story: WorkStory, records?: { id: string; image?:
 }
 
 export function homepageFrom(settings: SiteSettings): HomepageContent {
+  const career = careerFrom(settings);
+  const buildJourneyEntries = (selectedIds?: string[]) =>
+    journeySelectedRecords(career, selectedIds?.length ? selectedIds : DEFAULT_HOMEPAGE.journey.selectedIds).map(
+      careerRecordToJourneyEntry,
+    );
+
   const saved = settings.homepage;
-  if (!saved) return DEFAULT_HOMEPAGE;
+  if (!saved) {
+    return {
+      ...DEFAULT_HOMEPAGE,
+      journey: {
+        ...DEFAULT_HOMEPAGE.journey,
+        entries: buildJourneyEntries(DEFAULT_HOMEPAGE.journey.selectedIds),
+      },
+    };
+  }
   return {
     ...DEFAULT_HOMEPAGE,
     ...saved,
@@ -501,23 +507,22 @@ export function homepageFrom(settings: SiteSettings): HomepageContent {
         }),
       };
     })(),
-    journey: {
-      ...DEFAULT_HOMEPAGE.journey,
-      ...saved.journey,
-      stats: saved.journey?.stats?.length ? saved.journey.stats : DEFAULT_HOMEPAGE.journey.stats,
-      display: { ...DEFAULT_HOMEPAGE.journey.display, ...saved.journey?.display },
-      entries: (saved.journey?.entries?.length ? saved.journey.entries : DEFAULT_HOMEPAGE.journey.entries).map((entry) => {
-        const fallback = DEFAULT_HOMEPAGE.journey.entries.find((item) => item.id === entry.id);
-        return {
-          ...fallback,
-          ...entry,
-          type: entry.type || fallback?.type || "work",
-          highlights: entry.highlights?.length ? entry.highlights : fallback?.highlights || [],
-          showDetails: entry.showDetails ?? fallback?.showDetails ?? true,
-          detailsBlocked: entry.detailsBlocked ?? fallback?.detailsBlocked ?? false,
-        };
-      }),
-    },
+    journey: (() => {
+      const selectedIds =
+        saved.journey?.selectedIds?.length
+          ? saved.journey.selectedIds
+          : DEFAULT_HOMEPAGE.journey.selectedIds;
+      const entries = buildJourneyEntries(selectedIds);
+
+      return {
+        ...DEFAULT_HOMEPAGE.journey,
+        ...saved.journey,
+        selectedIds,
+        stats: saved.journey?.stats?.length ? saved.journey.stats : DEFAULT_HOMEPAGE.journey.stats,
+        display: { ...DEFAULT_HOMEPAGE.journey.display, ...saved.journey?.display },
+        entries,
+      };
+    })(),
     principles: {
       ...DEFAULT_HOMEPAGE.principles,
       ...saved.principles,

@@ -25,6 +25,7 @@ import {
   RiFileTextLine,
   RiSparklingLine,
   RiShieldCheckLine,
+  RiBriefcaseLine,
 } from "react-icons/ri";
 
 import {
@@ -301,6 +302,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 type="button"
                 className={
                   pathname.startsWith("/dashboard/homepage") ||
+                  pathname.startsWith("/dashboard/experience") ||
                   pathname.startsWith("/dashboard/contact") ||
                   pathname.startsWith("/dashboard/about") ||
                   pathname.startsWith("/dashboard/services") ||
@@ -321,6 +323,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <div className="dash-nav-sub" hidden={!pagesOpen && showNavLabels}>
                   {[
                     { id: "homepage", path: "/dashboard/homepage", label: "Homepage", icon: RiHome5Line },
+                    { id: "experience", path: "/dashboard/experience", label: "Experience", icon: RiBriefcaseLine },
                     { id: "intro", path: "/dashboard/intro", label: "Intro Experience", icon: RiSparklingLine },
                     { id: "about", path: "/dashboard/about", label: "About", icon: RiUser3Line },
                     { id: "services", path: "/dashboard/services", label: "Services", icon: RiLayoutGridLine },

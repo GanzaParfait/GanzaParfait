@@ -180,6 +180,8 @@ export interface SiteSettings {
   identityRevision?: number;
   /** CV / Resume formats, public default, and CV-only overrides (stored in settings_json). */
   cvConfig?: import("@/lib/cv").CvConfig;
+  /** Canonical experience / education / certification records (Experience page + Journey + CV). */
+  career?: import("@/lib/career").CareerContent;
   /** Homepage multilingual opening sequence (stored in settings_json). */
   introExperience?: import("@/lib/intro-experience").IntroExperience;
 }

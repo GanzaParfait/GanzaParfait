@@ -517,6 +517,7 @@ export type TimelineItem = {
   team?: string;
   status?: string;
   relatedHref?: string;
+  logo?: string;
 };
 
 export const timeline: TimelineItem[] = [
@@ -542,6 +543,7 @@ export const timeline: TimelineItem[] = [
     team: "Solo / partners / contractors as needed",
     status: "Ongoing",
     relatedHref: "https://lerony.com",
+    logo: "/images/projects/logos/lerony.webp",
   },
   {
     id: "ulk",
@@ -560,6 +562,7 @@ export const timeline: TimelineItem[] = [
     ],
     status: "In progress",
     relatedHref: "/experience",
+    logo: "/images/projects/logos/ulk.webp",
   },
   {
     id: "psta",
@@ -579,6 +582,7 @@ export const timeline: TimelineItem[] = [
     ],
     status: "Completed",
     relatedHref: "/projects/psta-accounting",
+    logo: "/images/projects/logos/psta.webp",
   },
   {
     id: "sjitc",
@@ -593,6 +597,7 @@ export const timeline: TimelineItem[] = [
     highlights: ["Software Development (SOD)", "Graduated with distinction in 2024"],
     status: "Completed",
     relatedHref: "/experience",
+    logo: "/images/projects/logos/sjitc.webp",
   },
 ];
 
@@ -610,6 +615,7 @@ export type ExperienceItem = {
   website?: string;
   relatedHref?: string;
   relatedLabel?: string;
+  logo?: string;
   sortYear: number;
 };
 
@@ -634,6 +640,7 @@ export const experience: ExperienceItem[] = [
     website: "https://lerony.com",
     relatedHref: "https://lerony.com",
     relatedLabel: "Visit lerony.com",
+    logo: "/images/projects/logos/lerony.webp",
     sortYear: 2025,
   },
   {
@@ -674,6 +681,7 @@ export const experience: ExperienceItem[] = [
     category: "work",
     relatedHref: "/projects/psta-accounting",
     relatedLabel: "Related software work",
+    logo: "/images/projects/logos/psta.webp",
     sortYear: 2023,
   },
   {
@@ -691,6 +699,7 @@ export const experience: ExperienceItem[] = [
     skills: ["Training", "Data systems"],
     type: "training",
     category: "other",
+    logo: "/images/projects/logos/data-systems.webp",
     sortYear: 2023,
   },
 ];
@@ -702,6 +711,7 @@ export type EducationItem = {
   period: string;
   status: string;
   note?: string;
+  logo?: string;
   sortYear: number;
 };
 
@@ -713,6 +723,7 @@ export const education: EducationItem[] = [
     period: "2025–Present",
     status: "Ongoing",
     note: "Degree not yet completed.",
+    logo: "/images/projects/logos/ulk.webp",
     sortYear: 2025,
   },
   {
@@ -721,6 +732,7 @@ export const education: EducationItem[] = [
     program: "Software Development (SOD)",
     period: "2021–2024",
     status: "Graduated with distinction",
+    logo: "/images/projects/logos/sjitc.webp",
     sortYear: 2021,
   },
 ];
@@ -735,6 +747,7 @@ export type CertificationItem = {
   issuedOn: string;
   verifyUrl: string;
   image?: string;
+  logo?: string;
   sortYear: number;
 };
 
@@ -751,6 +764,7 @@ export const certifications: CertificationItem[] = [
     issuedOn: "27 August 2025",
     verifyUrl: "https://savanna.alxafrica.com/certificates/XSrPTHhxM6",
     image: "/images/certificates/alx-data-analytics.webp",
+    logo: "/images/projects/logos/alx.webp",
     sortYear: 2025,
   },
   {
@@ -763,6 +777,7 @@ export const certifications: CertificationItem[] = [
     issuedOn: "27 June 2025",
     verifyUrl: "https://savanna.alxafrica.com/certificates/RXYG7PrL6F",
     image: "/images/certificates/alx-founder-academy.webp",
+    logo: "/images/projects/logos/alx.webp",
     sortYear: 2025,
   },
   {
@@ -775,6 +790,7 @@ export const certifications: CertificationItem[] = [
     issuedOn: "15 April 2025",
     verifyUrl: "https://savanna.alxafrica.com/certificates/5hxpC7P3YS",
     image: "/images/certificates/alx-professional-foundations.webp",
+    logo: "/images/projects/logos/alx.webp",
     sortYear: 2025,
   },
 ];

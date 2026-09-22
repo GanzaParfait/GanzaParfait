@@ -1,0 +1,484 @@
+https://pagespeed.web.dev/analysis/https-www-princeparfait-com/kv5hm61qet?form_factor=mobile
+
+PageSpeed Insights logo
+PageSpeed Insights
+Report from Sep 22, 2026, 8:12:35 AM
+https://www.princeparfait.com/
+Enter a valid URL
+
+
+smartphone
+Mobile
+
+computer
+Desktop
+
+Discover what your real users are experiencing
+No Data
+
+Diagnose performance issues
+61
+Performance
+97
+Accessibility
+100
+Best Practices
+92
+SEO
+2/2
+Agentic Browsing
+61
+FCP
++6
+LCP
++0
+TBT
++30
+CLS
++25
+SI
++0
+Performance
+Values are estimated and may vary. The performance score is calculated directly from these metrics.See calculator.
+0–49
+50–89
+90–100
+Final Screenshot
+
+Metrics
+Expand view
+First Contentful Paint
+2.8 s
+Largest Contentful Paint
+15.8 s
+Total Blocking Time
+10 ms
+Cumulative Layout Shift
+0
+Speed Index
+15.9 s
+Captured at Sep 22, 2026, 8:12 AM GMT+2
+Emulated Moto G Power with Lighthouse 13.5.0
+Single page session
+Initial page load
+Slow 4G throttling
+Using HeadlessChromium 153.0.8010.36 with lr
+View Treemap
+Screenshot
+Screenshot
+Screenshot
+Screenshot
+Screenshot
+Screenshot
+Screenshot
+Screenshot
+Show audits relevant to:
+
+All
+
+FCP
+
+LCP
+
+TBT
+
+CLS
+Insights
+Render-blocking requests Est savings of 820 ms
+Requests are blocking the page's initial render, which may delay LCP. Deferring or inlining can move these network requests out of the critical path.LCPFCPUnscored
+URL
+Transfer Size
+Duration
+princeparfait.com 1st party
+62.9 KiB	2,680 ms
+…chunks/3bl-f-_6zp0yr.css(www.princeparfait.com)
+61.4 KiB
+2,470 ms
+…chunks/09whbi7bvspll.css(www.princeparfait.com)
+1.5 KiB
+210 ms
+Legacy JavaScript Est savings of 14 KiB
+Polyfills and transforms enable older browsers to use new JavaScript features. However, many aren't necessary for modern browsers. Consider modifying your JavaScript build process to not transpile Baseline features, unless you know you must support older browsers. Learn why most sites can deploy ES6+ code without transpilingLCPFCPUnscored
+URL
+Wasted bytes
+princeparfait.com 1st party
+13.8 KiB
+…chunks/3j80h2i7c4mtc.js(www.princeparfait.com)
+13.8 KiB
+…chunks/3j80h2i7c4mtc.js:1:1116(www.princeparfait.com)
+Array.prototype.at
+…chunks/3j80h2i7c4mtc.js:1:504(www.princeparfait.com)
+Array.prototype.flat
+…chunks/3j80h2i7c4mtc.js:1:617(www.princeparfait.com)
+Array.prototype.flatMap
+…chunks/3j80h2i7c4mtc.js:1:993(www.princeparfait.com)
+Object.fromEntries
+…chunks/3j80h2i7c4mtc.js:1:1251(www.princeparfait.com)
+Object.hasOwn
+…chunks/3j80h2i7c4mtc.js:1:246(www.princeparfait.com)
+String.prototype.trimEnd
+…chunks/3j80h2i7c4mtc.js:1:161(www.princeparfait.com)
+String.prototype.trimStart
+Forced reflow
+A forced reflow occurs when JavaScript queries geometric properties (such as offsetWidth) after styles have been invalidated by a change to the DOM state. This can result in poor performance. Learn more about forced reflows and possible mitigations.Unscored
+Top function call
+Total reflow time
+…chunks/3j80h2i7c4mtc.js:2:3117(www.princeparfait.com)
+88 ms
+Source
+Total reflow time
+…chunks/24l2196hjhfpn.js:1:17931(www.princeparfait.com)
+71 ms
+…chunks/0n9r8j7zz3s9e.js:1:727(www.princeparfait.com)
+17 ms
+LCP breakdown
+Each subpart has specific improvement strategies. Ideally, most of the LCP time should be spent on loading the resources, not within delays.LCPUnscored
+Subpart
+Duration
+Time to first byte
+10 ms
+Resource load delay
+390 ms
+Resource load duration
+310 ms
+Element render delay
+1,830 ms
+Prince Parfait GANZA
+<img src="/images/profile/hero-centered-portrait.webp" alt="Prince Parfait GANZA" class="hero-centered-photo">
+LCP request discovery
+Optimize LCP by making the LCP image discoverable from the HTML immediately, and avoiding lazy-loadingLCPUnscored
+LCP resources should not use loading=lazy
+fetchpriority=high should be applied to the image preload request
+Request is discoverable in initial document
+Prince Parfait GANZA
+<img src="/images/profile/hero-centered-portrait.webp" alt="Prince Parfait GANZA" class="hero-centered-photo">
+Network dependency tree
+Avoid chaining critical requests by reducing the length of chains, reducing the download size of resources, or deferring the download of unnecessary resources to improve page load.LCPUnscored
+Maximum critical path latency: 1,081 ms
+Initial Navigation
+https://www.princeparfait.com - 406 ms, 42.11 KiB
+…chunks/09whbi7bvspll.css(www.princeparfait.com) - 586 ms, 1.52 KiB
+…media/a85fe842…-s.00hx3ibfyf9qx.woff2(www.princeparfait.com) - 1,081 ms, 73.64 KiB
+…chunks/3bl-f-_6zp0yr.css(www.princeparfait.com) - 735 ms, 61.37 KiB
+Preconnected origins
+preconnect hints help the browser establish a connection earlier in the page load, saving time when the first request for that origin is made. The following are the origins that the page preconnected to.
+no origins were preconnected
+Preconnect candidates
+Add preconnect hints to your most important origins, but try to use no more than 4.
+Origin
+Est LCP savings
+https://vercel.live
+310 ms
+Use efficient cache lifetimes Est savings of 2,764 KiB
+A long cache lifetime can speed up repeat visits to your page. Learn more about caching.LCPFCPUnscored
+Request
+Cache TTL
+Transfer Size
+supabase.co
+3,455 KiB
+…library/8931d5c9-….png(edhuizzkjdziurqnidks.supabase.co)
+1h
+1,971 KiB
+…library/8dbb9561-….png(edhuizzkjdziurqnidks.supabase.co)
+1h
+1,314 KiB
+…library/05106b36-90f1-42cd-8ea3-2ab58d3286e6-imported-asset.bin(edhuizzkjdziurqnidks.supabase.co)
+1h
+170 KiB
+Improve image delivery Est savings of 395 KiB
+Reducing the download time of images can improve the perceived load time of the page and LCP. Learn more about optimizing image sizeLCPFCPUnscored
+URL
+Resource Size
+Est Savings
+princeparfait.com 1st party
+535.1 KiB	395.3 KiB
+article.selected-card > div.selected-visual > button.selected-shot > img
+<img src="/images/projects/askfield.webp" alt="" loading="lazy" decoding="async">
+…projects/askfield.webp(www.princeparfait.com)
+129.9 KiB
+124.1 KiB
+This image file is larger than it needs to be (2880x1800) for its displayed dimensions (610x382). Use responsive images to reduce the image download size.
+124.1 KiB
+div.container > div.manifesto-figure > div.manifesto-portrait > img.manifesto-photo
+<img src="/images/profile/hero-split-portrait.webp" alt="" class="manifesto-photo" width="1024" height="1536">
+…profile/hero-split-portrait.webp(www.princeparfait.com)
+139.7 KiB
+110.7 KiB
+This image file is larger than it needs to be (1024x1536) for its displayed dimensions (466x699). Use responsive images to reduce the image download size.
+110.7 KiB
+article.selected-card > div.selected-visual > button.selected-shot > img
+<img src="/images/projects/caritas-systems.webp" alt="" loading="lazy" decoding="async">
+…projects/caritas-systems.webp(www.princeparfait.com)
+106.1 KiB
+101.4 KiB
+This image file is larger than it needs to be (2880x1800) for its displayed dimensions (610x382). Use responsive images to reduce the image download size.
+101.4 KiB
+Prince Parfait GANZA
+<img src="/images/profile/hero-centered-portrait.webp" alt="Prince Parfait GANZA" class="hero-centered-photo">
+…profile/hero-centered-portrait.webp(www.princeparfait.com)
+139.7 KiB
+39.7 KiB
+This image file is larger than it needs to be (1024x1064) for its displayed dimensions (721x1082). Use responsive images to reduce the image download size.
+39.7 KiB
+div.manifesto-portrait > p.manifesto-chip > span.manifesto-chip-mark > img
+<img src="/brand/icons/favicon/web-app-manifest-192x192.png" alt="" width="192" height="192">
+…favicon/web-app-manifest-192x192.png(www.princeparfait.com)
+19.7 KiB
+19.5 KiB
+Using a modern image format (WebP, AVIF) or increasing the image compression could improve this image's download size.
+13.7 KiB
+This image file is larger than it needs to be (192x192) for its displayed dimensions (40x40). Use responsive images to reduce the image download size.
+18.9 KiB
+Optimize DOM size
+3rd parties
+These insights are also available in the Chrome DevTools Performance Panel - record a trace to view more detailed information.
+Diagnostics
+Reduce unused JavaScript Est savings of 78 KiB
+Reduce unused JavaScript and defer loading scripts until they are required to decrease bytes consumed by network activity. Learn how to reduce unused JavaScript.LCPFCPUnscored
+URL
+Transfer Size
+Est Savings
+princeparfait.com 1st party
+136.9 KiB	78.2 KiB
+…chunks/1oke6-kxr-o6x.js(www.princeparfait.com)
+66.0 KiB
+53.6 KiB
+…chunks/3j80h2i7c4mtc.js(www.princeparfait.com)
+71.0 KiB
+24.6 KiB
+Reduce unused CSS Est savings of 23 KiB
+Reduce unused rules from stylesheets and defer CSS not used for above-the-fold content to decrease bytes consumed by network activity. Learn how to reduce unused CSS.LCPFCPUnscored
+URL
+Transfer Size
+Est Savings
+princeparfait.com 1st party
+60.6 KiB	23.4 KiB
+…chunks/3bl-f-_6zp0yr.css(www.princeparfait.com)
+60.6 KiB
+23.4 KiB
+Avoid enormous network payloads Total size was 5,903 KiB
+Large network payloads cost users real money and are highly correlated with long load times. Learn how to reduce payload sizes.Unscored
+URL
+Transfer Size
+supabase.co
+3,455.2 KiB
+…library/8931d5c9-….png(edhuizzkjdziurqnidks.supabase.co)
+1,971.1 KiB
+…library/8dbb9561-….png(edhuizzkjdziurqnidks.supabase.co)
+1,313.8 KiB
+…library/05106b36-90f1-42cd-8ea3-2ab58d3286e6-imported-asset.bin(edhuizzkjdziurqnidks.supabase.co)
+170.3 KiB
+princeparfait.com 1st party
+1,794.7 KiB
+…logos/logo-horizontal-blue.webp(www.princeparfait.com)
+627.5 KiB
+…logos/logo-horizontal-light.webp(www.princeparfait.com)
+562.5 KiB
+…profile/hero-centered-portrait.webp(www.princeparfait.com)
+140.4 KiB
+…profile/hero-split-portrait.webp(www.princeparfait.com)
+140.4 KiB
+…projects/askfield.webp(www.princeparfait.com)
+130.6 KiB
+…projects/caritas-systems.webp(www.princeparfait.com)
+106.9 KiB
+…profile/prince-parfait-ganza-kigali-casual.webp(www.princeparfait.com)
+86.3 KiB
+Avoid non-composited animations 1 animated element found
+Avoid long main-thread tasks 1 long task found
+More information about the performance of your application. These numbers don't directly affect the Performance score.
+Passed audits (12)
+Show
+97
+Accessibility
+These checks highlight opportunities to improve the accessibility of your web app. Automatic detection can only detect a subset of issues and does not guarantee the accessibility of your web app, so manual testing is also encouraged.
+Contrast
+Background and foreground colors do not have a sufficient contrast ratio.
+Low-contrast text is difficult or impossible for many users to read. Learn how to provide sufficient color contrast.
+Failing Elements
+Founder
+<li class="is-idle">
+Prince Parfait GANZA Do you have a project? Let’s Talk Founder Entrepreneur T…
+<section class="hero-centered">
+Entrepreneur
+<li class="is-idle">
+Prince Parfait GANZA Do you have a project? Let’s Talk Founder Entrepreneur T…
+<section class="hero-centered">
+Software Engineer
+<li class="is-idle">
+Prince Parfait GANZA Do you have a project? Let’s Talk Founder Entrepreneur T…
+<section class="hero-centered">
+AI Builder
+<li class="is-idle">
+Prince Parfait GANZA Do you have a project? Let’s Talk Founder Entrepreneur T…
+<section class="hero-centered">
+DEFINE
+<small>
+01 Think clearly Understand the real challenge. DEFINE
+<article class="manifesto-card is-active" style="--deck-offset:0">
+My role
+<span>
+01 Systems Featured Caritas Rwanda Information Systems Organizational reportin…
+<article class="selected-card is-wide" data-advance-item="true" data-advance-label="Caritas Rwanda Information Systems">
+Duration
+<span>
+01 Systems Featured Caritas Rwanda Information Systems Organizational reportin…
+<article class="selected-card is-wide" data-advance-item="true" data-advance-label="Caritas Rwanda Information Systems">
+Client
+<span>
+01 Systems Featured Caritas Rwanda Information Systems Organizational reportin…
+<article class="selected-card is-wide" data-advance-item="true" data-advance-label="Caritas Rwanda Information Systems">
+My role
+<span>
+02 Web app AskField Survey workflows, connected through the interface. Fronte…
+<article class="selected-card" data-advance-item="true" data-advance-label="AskField">
+Client
+<span>
+02 Web app AskField Survey workflows, connected through the interface. Fronte…
+<article class="selected-card" data-advance-item="true" data-advance-label="AskField">
+My role
+<span>
+03 Product Featured StockPro Inventory and sales, without a pile of separate r…
+<article class="selected-card" data-advance-item="true" data-advance-label="StockPro">
+Client
+<span>
+03 Product Featured StockPro Inventory and sales, without a pile of separate r…
+<article class="selected-card" data-advance-item="true" data-advance-label="StockPro">
+My role
+<span>
+04 Web app GotAllNews An independent publishing product, still in progress. I…
+<article class="selected-card is-wide" data-advance-item="true" data-advance-label="GotAllNews">
+Client
+<span>
+04 Web app GotAllNews An independent publishing product, still in progress. I…
+<article class="selected-card is-wide" data-advance-item="true" data-advance-label="GotAllNews">
+Products · Websites · Software · Commerce
+<p class="knowledge-tags">
+Build digital products Software, websites, digital platforms, e-commerce exper…
+<article class="knowledge-card is-on is-product">
+Social Media · Marketplaces · Branding · E-commerce
+<p class="knowledge-tags">
+Grow a digital presence Digital branding, social platforms, marketplace suppor…
+<article class="knowledge-card is-strategy">
+Systems · Data · Automation · AI
+<p class="knowledge-tags">
+Improve how work gets done Business systems, data, integrations, automation an…
+<article class="knowledge-card is-technology">
+Consulting · International Support · Training · Technical Support
+<p class="knowledge-tags">
+Support ideas and operations Technology guidance, international client assista…
+<article class="knowledge-card is-data">
+— Prince Parfait GANZA
+<cite>
+PRINCIPLES How the work is actually done. Three principles guide how I choose…
+<section class="principles" aria-label="Working principles" id="principles" data-page-section="true" data-section-label="Principles">
+01
+<span class="principles-n">
+PRINCIPLES How the work is actually done. Three principles guide how I choose…
+<section class="principles" aria-label="Working principles" id="principles" data-page-section="true" data-section-label="Principles">
+02
+<span class="principles-n">
+PRINCIPLES How the work is actually done. Three principles guide how I choose…
+<section class="principles" aria-label="Working principles" id="principles" data-page-section="true" data-section-label="Principles">
+03
+<span class="principles-n">
+PRINCIPLES How the work is actually done. Three principles guide how I choose…
+<section class="principles" aria-label="Working principles" id="principles" data-page-section="true" data-section-label="Principles">
+Learn. Practice. Apply.
+<span>
+SPEAKING AND TRAINING Practical knowledge for real-world impact. I deliver ha…
+<section class="speaking-band" aria-label="Speaking and training" id="speaking" data-page-section="true" data-section-label="Speaking">
+Learn. Practice. Apply.
+<span>
+“Good training doesn't just transfer information — it builds confidence to solv…
+<div class="speaking-foot">
+— Prince Parfait GANZA
+<cite>
+Rwandan founder, entrepreneur and technologist. Software engineer and AI builde…
+<footer role="contentinfo" class="site-footer">
+© 2026 Prince Parfait GANZA. All rights reserved.
+<p>
+Rwandan founder, entrepreneur and technologist. Software engineer and AI builde…
+<footer role="contentinfo" class="site-footer">
+Privacy
+<a href="/privacy">
+Rwandan founder, entrepreneur and technologist. Software engineer and AI builde…
+<footer role="contentinfo" class="site-footer">
+Sitemap
+<a href="/sitemap.xml">
+Rwandan founder, entrepreneur and technologist. Software engineer and AI builde…
+<footer role="contentinfo" class="site-footer">
+These are opportunities to improve the legibility of your content.
+Best practices
+Identical links have the same purpose.
+These items highlight common accessibility best practices.
+Additional items to manually check (10)
+Show
+These items address areas which an automated testing tool cannot cover. Learn more in our guide on conducting an accessibility review.
+Passed audits (30)
+Show
+Not applicable (31)
+Show
+100
+Best Practices
+Trust and Safety
+Ensure CSP is effective against XSS attacks
+Use a strong HSTS policy
+Ensure proper origin isolation with COOP
+Mitigate DOM-based XSS with Trusted Types
+Browser Compatibility
+Baseline Features
+Passed audits (13)
+Show
+Not applicable (3)
+Show
+92
+SEO
+These checks ensure that your page is following basic search engine optimization advice. There are many additional factors Lighthouse does not score here that may affect your search ranking, including performance on Core Web Vitals. Learn more about Google Search Essentials.
+Content Best Practices
+Links do not have descriptive text 4 links found
+Descriptive link text helps search engines understand your content. Learn how to make links more accessible.
+Link destination
+Link Text
+princeparfait.com 1st party
+/services?focus=build(www.princeparfait.com)
+Learn more
+/services?focus=grow(www.princeparfait.com)
+Learn more
+/services?focus=transform(www.princeparfait.com)
+Learn more
+/services?focus=support(www.princeparfait.com)
+Learn more
+Format your HTML in a way that enables crawlers to better understand your app’s content.
+Additional items to manually check (1)
+Show
+Run these additional validators on your site to check additional SEO best practices.
+Passed audits (9)
+Show
+2/2
+Agentic Browsing
+These checks ensure high-quality, browsable websites for AI agents and validate the correctness of WebMCP integrations. This category is still under development and subject to change.
+Passed audits (2)
+Show
+Not applicable (5)
+Show
+More on PageSpeed Insights
+What's new
+Documentation
+Learn about Web Performance
+Ask questions on Stack Overflow
+Mailing list
+Related Content
+Updates
+Web Fundamentals
+Case Studies
+Podcasts
+Connect
+Twitter
+Youtube
+Google Developers Logo
+Chrome
+Firebase
+All products
+Terms and Privacy Policy
+For details, see the Google Developers Site Policies.
