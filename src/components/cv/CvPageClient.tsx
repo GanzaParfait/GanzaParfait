@@ -25,6 +25,15 @@ import {
   type CvResolvedDocument,
   type CvTemplateId,
 } from "@/lib/cv";
+import { resolveLibraryDocument } from "@/lib/cv-document-resolve";
+import {
+  cvDocumentFilename,
+  cvLayoutLabel,
+  defaultPublicCvDocument,
+  getCvLibrary,
+  publicCvDocuments,
+  type CvDocument,
+} from "@/lib/cv-library";
 import {
   cvAccessFormatLabel,
   isCvActionGated,
@@ -51,7 +60,12 @@ function MiniDoc({
   doc: CvResolvedDocument;
   layer: "back" | "mid" | "front";
 }) {
-  const contactLine = [doc.contact.location, doc.contact.email, doc.contact.phone]
+  const contactLine = [
+    doc.contact.location,
+    doc.contact.email,
+    doc.contact.emailSecondary,
+    doc.contact.phone,
+  ]
     .filter(Boolean)
     .join("  |  ");
   const isFront = layer === "front";
@@ -97,20 +111,19 @@ function MiniDoc({
 }
 
 function FullPreview({
-  settings,
-  template,
+  resolved,
+  label,
   onClose,
   onDownload,
   downloading,
 }: {
-  settings: SiteSettings;
-  template: CvTemplateId;
+  resolved: CvResolvedDocument;
+  label: string;
   onClose: () => void;
   onDownload: () => void;
   downloading: boolean;
 }) {
   useHistoryBackClose(true, onClose);
-  const label = getCvConfig(settings).formats[template].label;
 
   useEffect(() => {
     const previous = document.body.style.overflow;
@@ -145,35 +158,61 @@ function FullPreview({
           </div>
         </div>
         <div className="cv-a4-frame">
-          <CvDocumentSheet settings={settings} template={template} className="is-public" />
+          <CvDocumentSheet resolved={resolved} className="is-public" />
         </div>
       </div>
     </div>
   );
 }
 
+type PublicCard =
+  | { mode: "library"; doc: CvDocument; resolved: CvResolvedDocument; isDefault: boolean }
+  | { mode: "legacy"; template: CvTemplateId; resolved: CvResolvedDocument; isDefault: boolean; label: string; description: string; tags: string[]; viewLabel: string; headline: string };
+
 export default function CvPageClient({ settings }: { settings: SiteSettings }) {
   const searchParams = useSearchParams();
   const config = getCvConfig(settings);
-  const access = config.access;
-  const publicFormats = useMemo(
-    () =>
-      CV_TEMPLATE_OPTIONS.filter(
-        (opt) => opt.id === config.defaultTemplate || config.formats[opt.id].isPublic
-      ),
-    [config]
+  const library = useMemo(() => getCvLibrary(settings), [settings]);
+  const libraryPublic = useMemo(() => publicCvDocuments(library), [library]);
+  const useLibrary = libraryPublic.length > 0;
+  const access = library.access || config.access;
+
+  const cards: PublicCard[] = useMemo(() => {
+    if (useLibrary) {
+      const preferred = defaultPublicCvDocument(library);
+      return libraryPublic.map((doc) => ({
+        mode: "library" as const,
+        doc,
+        resolved: resolveLibraryDocument(doc),
+        isDefault: preferred?.id === doc.id,
+      }));
+    }
+    return CV_TEMPLATE_OPTIONS.filter(
+      (opt) => opt.id === config.defaultTemplate || config.formats[opt.id].isPublic,
+    ).map((opt) => ({
+      mode: "legacy" as const,
+      template: opt.id,
+      resolved: resolveCvDocument(settings, opt.id),
+      isDefault: opt.id === config.defaultTemplate,
+      label: opt.label,
+      description: opt.description,
+      tags: opt.tags,
+      viewLabel: opt.viewLabel,
+      headline: config.formats[opt.id].headline,
+    }));
+  }, [useLibrary, library, libraryPublic, config, settings]);
+
+  const [activeKey, setActiveKey] = useState(() =>
+    cards[0]?.mode === "library" ? cards[0].doc.id : cards[0]?.mode === "legacy" ? cards[0].template : "",
   );
-  const [active, setActive] = useState<CvTemplateId>(config.defaultTemplate);
   const [viewing, setViewing] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState("");
   const [unlocked, setUnlocked] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
-  const [pending, setPending] = useState<{ template: CvTemplateId; action: CvAccessAction } | null>(
-    null
-  );
+  const [pending, setPending] = useState<{ key: string; action: CvAccessAction } | null>(null);
   const [toast, setToast] = useState("");
-  const pendingRef = useRef<{ template: CvTemplateId; action: CvAccessAction } | null>(null);
+  const pendingRef = useRef<{ key: string; action: CvAccessAction } | null>(null);
 
   const source: CvAccessSource = useMemo(() => {
     const raw = searchParams.get("source");
@@ -192,50 +231,42 @@ export default function CvPageClient({ settings }: { settings: SiteSettings }) {
     return () => window.clearTimeout(t);
   }, [toast]);
 
-  const stackOrder = useMemo(() => {
-    const preferred = [
-      config.defaultTemplate,
-      ...(["professional", "compact", "executive"] as CvTemplateId[]).filter(
-        (id) => id !== config.defaultTemplate
-      ),
-    ];
-    return preferred
-      .filter((id) => {
-        const format = config.formats[id];
-        if (!format) return false;
-        // Hero papers: showInHero (default true). Still keep format in dashboard when off.
-        if (format.showInHero === false) return false;
-        return true;
-      })
-      .slice(0, 3) as CvTemplateId[];
-  }, [config]);
+  const activeCard = cards.find((card) =>
+    card.mode === "library" ? card.doc.id === activeKey : card.template === activeKey,
+  ) || cards[0];
 
-  const stackDocs = useMemo(
-    () => stackOrder.map((id) => resolveCvDocument(settings, id)),
-    [settings, stackOrder]
-  );
+  const stackDocs = useMemo(() => {
+    const list = cards.map((card) => card.resolved).slice(0, 3);
+    return list.length ? list : [resolveCvDocument(settings, config.defaultTemplate)];
+  }, [cards, settings, config.defaultTemplate]);
 
-  const frontDoc = stackDocs[0] || resolveCvDocument(settings, config.defaultTemplate);
+  const frontDoc = stackDocs[0];
 
-  const runDownload = async (template: CvTemplateId) => {
+  const runDownload = async (card: PublicCard) => {
     setError("");
     setDownloading(true);
-    setActive(template);
+    const key = card.mode === "library" ? card.doc.id : card.template;
+    setActiveKey(key);
     try {
-      const res = await fetch(`/api/cv/pdf?template=${template}&download=1`);
+      const url =
+        card.mode === "library"
+          ? `/api/cv/pdf?doc=${encodeURIComponent(card.doc.id)}&download=1`
+          : `/api/cv/pdf?template=${card.template}&download=1`;
+      const res = await fetch(url);
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || "Download failed.");
       }
       const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
+      const objectUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url;
-      a.download = cvPdfFilename(template);
+      a.href = objectUrl;
+      a.download =
+        card.mode === "library" ? cvDocumentFilename(card.doc) : cvPdfFilename(card.template);
       document.body.appendChild(a);
       a.click();
       a.remove();
-      URL.revokeObjectURL(url);
+      URL.revokeObjectURL(objectUrl);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Download failed.");
     } finally {
@@ -243,19 +274,20 @@ export default function CvPageClient({ settings }: { settings: SiteSettings }) {
     }
   };
 
-  const runView = (template: CvTemplateId) => {
-    setActive(template);
+  const runView = (card: PublicCard) => {
+    setActiveKey(card.mode === "library" ? card.doc.id : card.template);
     setViewing(true);
   };
 
-  const requestAccess = (template: CvTemplateId, action: CvAccessAction) => {
-    setActive(template);
+  const requestAccess = (card: PublicCard, action: CvAccessAction) => {
+    const key = card.mode === "library" ? card.doc.id : card.template;
+    setActiveKey(key);
     if (!isCvActionGated(access, action) || unlocked) {
-      if (action === "view") runView(template);
-      else void runDownload(template);
+      if (action === "view") runView(card);
+      else void runDownload(card);
       return;
     }
-    const next = { template, action };
+    const next = { key, action };
     pendingRef.current = next;
     setPending(next);
     setGateOpen(true);
@@ -268,11 +300,19 @@ export default function CvPageClient({ settings }: { settings: SiteSettings }) {
     setPending(null);
     pendingRef.current = null;
     if (!next) return;
+    const card = cards.find((row) =>
+      row.mode === "library" ? row.doc.id === next.key : row.template === next.key,
+    );
+    if (!card) return;
     if (!skipped) {
-      setToast(`You're in. ${cvAccessFormatLabel(next.template, config.formats[next.template].label)} unlocked.`);
+      const label =
+        card.mode === "library"
+          ? card.doc.targetRole || card.doc.name
+          : cvAccessFormatLabel(card.template, card.label);
+      setToast(`You're in. ${label} unlocked.`);
     }
-    if (next.action === "view") runView(next.template);
-    else void runDownload(next.template);
+    if (next.action === "view") runView(card);
+    else void runDownload(card);
   };
 
   return (
@@ -333,41 +373,55 @@ export default function CvPageClient({ settings }: { settings: SiteSettings }) {
       <section className="cv-formats-section">
         <div className="container">
           <div className="cv-format-cards">
-            {publicFormats.map((opt) => {
-              const isDefault = opt.id === config.defaultTemplate;
-              const headline = config.formats[opt.id].headline;
+            {cards.map((card) => {
+              const key = card.mode === "library" ? card.doc.id : card.template;
+              const title =
+                card.mode === "library"
+                  ? card.doc.targetRole || card.doc.name
+                  : card.label;
+              const description =
+                card.mode === "library"
+                  ? `${cvLayoutLabel(card.doc.layoutId)} · ${card.doc.pageSize.toUpperCase()}`
+                  : card.description;
+              const headline =
+                card.mode === "library" ? card.resolved.headline : card.headline;
+              const tags =
+                card.mode === "library"
+                  ? [cvLayoutLabel(card.doc.layoutId), card.doc.pageSize.toUpperCase()]
+                  : card.tags;
+              const viewLabel = card.mode === "library" ? "Preview" : card.viewLabel;
               return (
                 <article
-                  key={opt.id}
-                  className={isDefault ? "cv-format-card is-recommended" : "cv-format-card"}
+                  key={key}
+                  className={card.isDefault ? "cv-format-card is-recommended" : "cv-format-card"}
                 >
-                  {isDefault ? <span className="cv-format-badge">Recommended</span> : null}
+                  {card.isDefault ? <span className="cv-format-badge">Recommended</span> : null}
                   <div className="cv-format-icon" aria-hidden="true">
                     <RiFileTextLine size={22} />
                   </div>
-                  <h2>{opt.label}</h2>
-                  <p className="cv-format-desc">{opt.description}</p>
+                  <h2>{title}</h2>
+                  <p className="cv-format-desc">{description}</p>
                   <p className="cv-format-headline">{headline}</p>
                   <div className="cv-format-tags">
-                    {opt.tags.map((tag) => (
+                    {tags.map((tag) => (
                       <span key={tag}>{tag}</span>
                     ))}
                   </div>
                   <div className="cv-format-card-actions">
                     <button
                       type="button"
-                      className={isDefault ? "btn btn-primary" : "btn btn-outline"}
-                      onClick={() => requestAccess(opt.id, "view")}
+                      className={card.isDefault ? "btn btn-primary" : "btn btn-outline"}
+                      onClick={() => requestAccess(card, "view")}
                     >
-                      <RiEyeLine size={16} /> {opt.viewLabel}
+                      <RiEyeLine size={16} /> {viewLabel}
                     </button>
                     <button
                       type="button"
                       className="btn btn-outline"
                       disabled={downloading}
-                      onClick={() => requestAccess(opt.id, "download")}
+                      onClick={() => requestAccess(card, "download")}
                     >
-                      {downloading && active === opt.id ? (
+                      {downloading && activeKey === key ? (
                         <RiLoader4Line size={16} className="cv-spin" />
                       ) : (
                         <RiDownloadLine size={16} />
@@ -433,12 +487,16 @@ export default function CvPageClient({ settings }: { settings: SiteSettings }) {
         </div>
       </section>
 
-      {viewing ? (
+      {viewing && activeCard ? (
         <FullPreview
-          settings={settings}
-          template={active}
+          resolved={activeCard.resolved}
+          label={
+            activeCard.mode === "library"
+              ? activeCard.doc.targetRole || activeCard.doc.name
+              : activeCard.label
+          }
           onClose={() => setViewing(false)}
-          onDownload={() => requestAccess(active, "download")}
+          onDownload={() => requestAccess(activeCard, "download")}
           downloading={downloading}
         />
       ) : null}
@@ -447,8 +505,20 @@ export default function CvPageClient({ settings }: { settings: SiteSettings }) {
         <CvAccessDialog
           open={gateOpen}
           access={access}
-          template={pending.template}
-          formatLabel={config.formats[pending.template].label}
+          template={(() => {
+            const card = cards.find((row) =>
+              row.mode === "library" ? row.doc.id === pending.key : row.template === pending.key,
+            );
+            if (!card) return config.defaultTemplate;
+            return card.mode === "legacy" ? card.template : card.resolved.template;
+          })()}
+          formatLabel={(() => {
+            const card = cards.find((row) =>
+              row.mode === "library" ? row.doc.id === pending.key : row.template === pending.key,
+            );
+            if (!card) return "CV";
+            return card.mode === "library" ? card.doc.targetRole || card.doc.name : card.label;
+          })()}
           action={pending.action}
           source={source}
           onClose={() => {

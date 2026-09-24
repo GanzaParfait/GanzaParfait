@@ -9,6 +9,11 @@ import {
   blogPosts,
   siteConfig,
 } from "@/data/site-data";
+import {
+  bookingOptionMeta,
+  primaryBookingOption,
+  type BookingSettingsSlice,
+} from "@/lib/booking";
 
 export type SiteSearchGroup =
   | "Quick"
@@ -28,7 +33,7 @@ export type SiteSearchItem = {
   href: string;
   group: SiteSearchGroup;
   keywords: string;
-  action?: "navigate" | "mailto" | "tel" | "external";
+  action?: "navigate" | "mailto" | "tel" | "external" | "booking";
 };
 
 function normalize(value: string) {
@@ -45,10 +50,12 @@ function reverseWords(value: string) {
   return value.split(/\s+/).reverse().join(" ");
 }
 
-export function buildSiteSearchIndex(): SiteSearchItem[] {
+export function buildSiteSearchIndex(bookingSettings?: BookingSettingsSlice | null): SiteSearchItem[] {
   const email = siteConfig.contact.email;
+  const emailSecondary = siteConfig.contact.emailSecondary || "";
   const phone = "+250 792 054 846";
   const phoneDigits = "250792054846";
+  const booking = bookingSettings ? primaryBookingOption(bookingSettings) : null;
 
   const items: SiteSearchItem[] = [
     {
@@ -81,8 +88,21 @@ export function buildSiteSearchIndex(): SiteSearchItem[] {
       href: `mailto:${email}`,
       group: "Quick",
       action: "mailto",
-      keywords: `email mail hello info contact ${email} hello@princeparfait.com info@princeparfait.com`,
+      keywords: `email mail hello contact ${email}`,
     },
+    ...(emailSecondary
+      ? [
+          {
+            id: "quick-email-secondary",
+            title: emailSecondary,
+            subtitle: "Secondary professional email",
+            href: `mailto:${emailSecondary}`,
+            group: "Quick" as const,
+            action: "mailto" as const,
+            keywords: `email mail gmail secondary contact ${emailSecondary}`,
+          },
+        ]
+      : []),
     {
       id: "quick-phone",
       title: phone,
@@ -100,6 +120,35 @@ export function buildSiteSearchIndex(): SiteSearchItem[] {
       group: "Quick",
       keywords: "contact reach out message book meeting conversation hello hi",
     },
+  ];
+
+  if (booking) {
+    items.push({
+      id: "quick-booking",
+      title: "Book a meeting",
+      subtitle: `${booking.durationMinutes}-minute ${booking.meetingType} with Prince Parfait GANZA`,
+      href: booking.url,
+      group: "Quick",
+      action: "booking",
+      keywords: [
+        "book",
+        "booking",
+        "meeting",
+        "meet",
+        "calendar",
+        "appointment",
+        "call",
+        "google meet",
+        "schedule",
+        "schedule a conversation",
+        "video meeting",
+        booking.label,
+        bookingOptionMeta(booking),
+      ].join(" "),
+    });
+  }
+
+  items.push(
     {
       id: "quick-cv",
       title: "CV / Resume",
@@ -148,7 +197,7 @@ export function buildSiteSearchIndex(): SiteSearchItem[] {
       group: "Writing",
       keywords: "blog insights articles writing",
     },
-  ];
+  );
 
   for (const project of projects) {
     items.push({
@@ -240,11 +289,17 @@ export function buildSiteSearchIndex(): SiteSearchItem[] {
   return items;
 }
 
-export function searchSiteIndex(query: string, limit = 12): SiteSearchItem[] {
+export function searchSiteIndex(
+  query: string,
+  limit = 12,
+  bookingSettings?: BookingSettingsSlice | null,
+): SiteSearchItem[] {
   const needle = normalize(query);
-  const index = buildSiteSearchIndex();
+  const index = buildSiteSearchIndex(bookingSettings);
   if (!needle) {
-    return index.filter((item) => item.group === "Quick" || item.group === "Navigate" || item.group === "Work").slice(0, limit);
+    return index
+      .filter((item) => item.group === "Quick" || item.group === "Navigate" || item.group === "Work")
+      .slice(0, limit);
   }
 
   const scored = index
@@ -259,7 +314,6 @@ export function searchSiteIndex(query: string, limit = 12): SiteSearchItem[] {
       for (const part of needle.split(" ")) {
         if (part.length >= 2 && hay.includes(part)) score += 10;
       }
-      // Digits-only phone fragments
       if (/^\+?\d[\d\s-]{3,}$/.test(query.trim()) && hay.replace(/\s/g, "").includes(needle.replace(/\s/g, ""))) {
         score += 50;
       }

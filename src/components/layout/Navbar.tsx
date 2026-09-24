@@ -19,6 +19,8 @@ import {
   RiCloseLine,
   RiMore2Line,
   RiSearchLine,
+  RiLink,
+  RiArrowRightSLine,
 } from "react-icons/ri";
 import { siteConfig, primaryNav } from "@/data/site-data";
 import ThemeToggle from "@/components/ui/ThemeToggle";
@@ -27,8 +29,19 @@ import { socialIcon, socialsFor } from "@/lib/socials";
 import AnnouncementBar from "@/components/layout/AnnouncementBar";
 import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
 import { openSiteSearch } from "@/components/ui/CommandPalette";
+import LetsTalkChooser from "@/components/ui/LetsTalkChooser";
+import { CANONICAL_NAME } from "@/lib/identity";
 
 const navLinks = primaryNav;
+
+function shareDisplayUrl(href: string) {
+  try {
+    const url = new URL(href);
+    return `${url.host.replace(/^www\./, "")}${url.pathname === "/" ? "" : url.pathname}`;
+  } catch {
+    return href;
+  }
+}
 
 export default function Navbar() {
   const pathname   = usePathname();
@@ -172,12 +185,18 @@ export default function Navbar() {
   const shareOptions = !shareOpen || typeof window === "undefined" ? [] : (() => {
     const { encodedUrl, encodedTitle } = getShareDetails();
     return [
-      { label: "WhatsApp", icon: RiWhatsappLine, href: `https://wa.me/?text=${encodedTitle}%20${encodedUrl}` },
-      { label: "LinkedIn", icon: RiLinkedinFill, href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}` },
-      { label: "X", icon: RiTwitterXFill, href: `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}` },
-      { label: "Facebook", icon: RiFacebookFill, href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}` },
+      { label: "WhatsApp", icon: RiWhatsappLine, href: `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`, brand: "whatsapp" as const },
+      { label: "LinkedIn", icon: RiLinkedinFill, href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`, brand: "linkedin" as const },
+      { label: "X", icon: RiTwitterXFill, href: `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`, brand: "x" as const },
+      { label: "Facebook", icon: RiFacebookFill, href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`, brand: "facebook" as const },
     ];
   })();
+
+  const sharePageUrl = shareOpen && typeof window !== "undefined" ? getShareDetails().url : "";
+  const sharePageDisplay = sharePageUrl ? shareDisplayUrl(sharePageUrl) : "";
+  const shareNameParts = CANONICAL_NAME.split(" ");
+  const shareNameLast = shareNameParts[shareNameParts.length - 1] || "GANZA";
+  const shareNameFirst = shareNameParts.slice(0, -1).join(" ");
 
   return (
     <>
@@ -317,9 +336,7 @@ export default function Navbar() {
               <ThemeToggle />
             </span>
 
-            <Link href="/contact" className="btn btn-primary nav-talk" style={{ fontWeight: 700, letterSpacing: "-0.01em", padding: "0.48rem 1.05rem", fontSize: "0.84rem" }}>
-              Let&apos;s Talk
-            </Link>
+            <LetsTalkChooser />
 
             {settings.siteSearch?.enabled !== false ? (
               <button
@@ -387,35 +404,71 @@ export default function Navbar() {
             onMouseDown={(event) => event.stopPropagation()}
           >
             <div className="share-panel-handle" aria-hidden="true" />
-            <div className="share-panel-header">
-              <div>
-                <p className="section-label">Spread the word</p>
-                <h2 id="share-dialog-title">Share this page</h2>
+
+            <div className="share-panel-top">
+              <div className="share-panel-brand">
+                <Image
+                  src={isDark ? "/brand/logos/logo-horizontal-light.webp" : "/brand/logos/logo-horizontal-blue.webp"}
+                  alt=""
+                  width={148}
+                  height={36}
+                  className="share-panel-logo"
+                />
+                <p className="share-panel-kicker">
+                  <RiLink size={14} aria-hidden />
+                  Share page
+                </p>
               </div>
-              <button type="button" className="navbar-icon-button" onClick={() => setShareOpen(false)} aria-label="Close share options">
-                <RiCloseLine size={19} />
+              <button
+                type="button"
+                className="share-panel-close"
+                onClick={() => setShareOpen(false)}
+                aria-label="Close share options"
+              >
+                <RiCloseLine size={18} />
               </button>
             </div>
 
+            <div className="share-panel-intro">
+              <h2 id="share-dialog-title">
+                Share {shareNameFirst} <span>{shareNameLast}</span>
+              </h2>
+              <p>Send this page to someone or copy the link.</p>
+            </div>
+
             <div className="share-social-grid">
-              {shareOptions.map(({ label, icon: Icon, href }) => (
-                <a key={label} href={href} target="_blank" rel="noopener noreferrer" className="share-social-option">
-                  <span><Icon size={22} /></span>
+              {shareOptions.map(({ label, icon: Icon, href, brand }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`share-social-option is-${brand}`}
+                >
+                  <span>
+                    <Icon size={22} />
+                  </span>
                   {label}
                 </a>
               ))}
             </div>
 
-            <div className="share-native-actions">
-              <button type="button" className="btn btn-primary" onClick={openNativeShare}>
-                <RiShareLine size={17} />
-                More sharing options
-              </button>
-              <button type="button" className="btn btn-outline" onClick={copyPageLink}>
-                {copied ? <RiCheckLine size={17} /> : <RiFileCopyLine size={17} />}
-                {copied ? "Link copied" : "Copy link"}
+            <div className="share-copy-row">
+              <div className="share-copy-url" title={sharePageUrl}>
+                <RiLink size={15} aria-hidden />
+                <span>{sharePageDisplay}</span>
+              </div>
+              <button type="button" className="share-copy-btn" onClick={copyPageLink}>
+                {copied ? <RiCheckLine size={16} /> : <RiFileCopyLine size={16} />}
+                {copied ? "Copied" : "Copy"}
               </button>
             </div>
+
+            <button type="button" className="share-more-bar" onClick={openNativeShare}>
+              <RiShareLine size={16} aria-hidden />
+              <span>More sharing options</span>
+              <RiArrowRightSLine size={18} aria-hidden />
+            </button>
           </section>
         </div>
       )}

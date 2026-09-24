@@ -10,6 +10,7 @@ import CommandPalette from "@/components/ui/CommandPalette";
 import PageViewTracker from "@/components/analytics/PageViewTracker";
 import UtmCapture from "@/components/analytics/UtmCapture";
 import SiteIntroOverlay from "@/components/intro/SiteIntroOverlay";
+import TestimonialShareViewer from "@/components/testimonials/TestimonialShareViewer";
 
 export default function LayoutShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -40,6 +41,7 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
       <PageFloaters />
       <CommandPalette />
       <SubscribeWidget />
+      <TestimonialShareViewer />
       <Suspense fallback={null}>
         <UtmCapture />
         <PageViewTracker />

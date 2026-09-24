@@ -1,9 +1,22 @@
 import { DEFAULT_PORTRAIT_WEBP, IDENTITY_ROLE_LINE, PORTRAIT_PATHS, SPECIALIZATIONS } from "@/lib/identity";
 import type { SiteSettings } from "@/lib/supabase";
 
-export type AboutFactIcon = "pin" | "briefcase" | "grad" | "bolt" | "target" | "globe";
+export type AboutFactIcon = "pin" | "briefcase" | "building" | "grad" | "bolt" | "sparkle" | "target" | "globe";
 export type AboutFocusIcon = "code" | "data" | "bulb" | "people" | "rocket" | "book";
 export type AboutValueIcon = "diamond" | "gear" | "person" | "chart";
+
+export type AboutJourneyItem = {
+  year: string;
+  title: string;
+  body: string;
+  org: string;
+};
+
+export type AboutImpactStat = {
+  value: string;
+  label: string;
+  detail: string;
+};
 
 export type AboutFact = {
   icon: AboutFactIcon;
@@ -74,6 +87,16 @@ export type AboutPageContent = {
     title: string;
     items: string[];
   };
+  journey: {
+    label: string;
+    title: string;
+    body: string;
+    items: AboutJourneyItem[];
+  };
+  impact: {
+    label: string;
+    items: AboutImpactStat[];
+  };
   cta: {
     label: string;
     title: string;
@@ -86,7 +109,7 @@ export type AboutPageContent = {
 };
 
 /**
- * About page order: who → specializations → path → evidence → toolkit → principles → contact.
+ * About page order: who → specializations → journey → evidence → contact.
  * Identity line only: Software Engineer · Technology Entrepreneur · Founder.
  * Exactly three specializations — entrepreneurship belongs in the founder story, not as a fourth card.
  */
@@ -94,7 +117,7 @@ export const DEFAULT_ABOUT_PAGE: AboutPageContent = {
   hero: {
     label: "About me",
     title: "Software engineer and technology entrepreneur.",
-    body: "Prince Parfait GANZA is a software engineer and technology entrepreneur based in Kigali, Rwanda. He designs and develops software systems, research technology and data platforms for organizations and businesses. He is also the Founder & CEO of LERONY Ltd.",
+    body: "I am Prince Parfait GANZA, a software engineer and technology entrepreneur based in Kigali, Rwanda. I design and build software systems, research technology and data platforms for organizations and businesses. I am also the Founder & CEO of LERONY Ltd.",
     // DEFAULT_PORTRAIT_WEBP is a string binding — safe under circular module init.
     portrait: DEFAULT_PORTRAIT_WEBP,
     roles: IDENTITY_ROLE_LINE,
@@ -104,18 +127,17 @@ export const DEFAULT_ABOUT_PAGE: AboutPageContent = {
     secondaryCtaHref: "/projects",
     facts: [
       { icon: "pin", label: "Location", value: "Kigali, Rwanda" },
-      { icon: "briefcase", label: "Company role", value: "Founder & CEO, LERONY Ltd · 2025–Present" },
+      { icon: "briefcase", label: "Company role", value: "Founder & CEO, LERONY Ltd\n2025–Present" },
       {
         icon: "grad",
         label: "Education",
-        value: "Bachelor of Computer Science in Software Engineering, ULK · ongoing",
+        value: "Bachelor of Computer Science in Software Engineering, ULK\nOngoing",
       },
       {
-        icon: "bolt",
+        icon: "sparkle",
         label: "Specializations",
         value: "Software Engineering · Research Technology · Data Systems",
       },
-      { icon: "target", label: "Status", value: "Open to collaborations & opportunities" },
     ],
   },
   focus: {
@@ -239,6 +261,52 @@ export const DEFAULT_ABOUT_PAGE: AboutPageContent = {
     title: "Engineering toolkit",
     items: [],
   },
+  journey: {
+    label: "My journey",
+    title: "A journey shaped by building, learning and operating.",
+    body: "From software foundations to real-world impact — a continuous story of learning, building and creating value through technology.",
+    items: [
+      {
+        year: "2021",
+        title: "Software foundations",
+        body: "Completed Software Development (SOD) at SJITC Nyamirambo, graduating with distinction.",
+        org: "SJITC Nyamirambo",
+      },
+      {
+        year: "2023",
+        title: "From people into operations",
+        body: "Worked in airline reservation and ticketing operations at PSTA, gaining client support and operational experience.",
+        org: "PSTA",
+      },
+      {
+        year: "2024",
+        title: "Research technology",
+        body: "Frontend Integrator on AskField at Ethical Research Solutions — survey programming, digital collection workflows and research-data handling.",
+        org: "AskField",
+      },
+      {
+        year: "2025",
+        title: "Entrepreneurship & company building",
+        body: "Founded LERONY Ltd in Kigali to deliver practical technology with organizations and businesses.",
+        org: "LERONY Ltd",
+      },
+      {
+        year: "Now",
+        title: "Engineering, products and organizational systems",
+        body: "Building and supporting digital systems across research, NGOs, businesses and operations.",
+        org: "LERONY Ltd",
+      },
+    ],
+  },
+  impact: {
+    label: "Impact & evidence",
+    items: [
+      { value: "85+", label: "People trained", detail: "Data systems training" },
+      { value: "2025", label: "LERONY Ltd founded", detail: "Technology & innovation" },
+      { value: "Multiple sectors", label: "Research · NGOs · Commerce · Operations", detail: "Real-world digital solutions" },
+      { value: "Selected systems", label: "Caritas · AskField · StockPro", detail: "Web platforms · reporting · integrations" },
+    ],
+  },
   cta: {
     label: "Contact",
     title: "Start a conversation",
@@ -334,6 +402,7 @@ const LEGACY_HERO_BODY_SNIPPETS = [
   /public identity is founder, entrepreneur, and technologist/i,
   /founder, entrepreneur and technologist based in Kigali/i,
   /^Software engineer and technology entrepreneur based in Kigali\. I design and build/i,
+  /Prince Parfait GANZA is a software engineer and technology entrepreneur based in Kigali, Rwanda\. He designs/i,
   /His work spans software systems, research technology, digital data collection and data-driven platforms/i,
   /where he works with organizations and businesses on practical technology solutions/i,
   /company role, not a fourth/i,
@@ -426,6 +495,49 @@ function isLegacyStoryParagraphs(paragraphs: string[] | undefined): boolean {
   );
 }
 
+function normalizeHeroFacts(facts: AboutFact[] | undefined): AboutFact[] {
+  const source = facts?.length ? facts : DEFAULT_ABOUT_PAGE.hero.facts;
+  const cleaned = source
+    .filter((fact) => fact.label !== "Status")
+    .map((fact) => {
+      if (fact.label === "Focus" && /AI|Impact/i.test(fact.value) && !/Research/i.test(fact.value)) {
+        return DEFAULT_ABOUT_PAGE.hero.facts.find((item) => item.label === "Specializations") || fact;
+      }
+      if (fact.label === "Current role") {
+        fact = { ...fact, label: "Company role" };
+      }
+      if (fact.label === "Company role") {
+        const value =
+          /LERONY/i.test(fact.value) && /2025/.test(fact.value)
+            ? DEFAULT_ABOUT_PAGE.hero.facts.find((item) => item.label === "Company role")!.value
+            : fact.value;
+        return { ...fact, icon: "briefcase" as const, value };
+      }
+      if (fact.label === "Education") {
+        return {
+          ...fact,
+          icon: "grad" as const,
+          value: /ULK/i.test(fact.value)
+            ? DEFAULT_ABOUT_PAGE.hero.facts.find((item) => item.label === "Education")!.value
+            : fact.value,
+        };
+      }
+      if (fact.label === "Specializations") {
+        return { ...fact, icon: "sparkle" as const };
+      }
+      if (fact.label === "Location") {
+        return { ...fact, icon: "pin" as const };
+      }
+      return fact;
+    });
+  const order = ["Location", "Company role", "Education", "Specializations"];
+  const ordered = order
+    .map((label) => cleaned.find((fact) => fact.label === label))
+    .filter((fact): fact is AboutFact => Boolean(fact));
+  if (ordered.length === 4) return ordered;
+  return cleaned.length ? cleaned.slice(0, 4) : DEFAULT_ABOUT_PAGE.hero.facts;
+}
+
 function needsFocusReset(items: AboutFocus[] | undefined): boolean {
   if (!items?.length) return true;
   if (items.length !== 3) return true;
@@ -452,18 +564,7 @@ function upgradeAboutIdentity(content: AboutPageContent): AboutPageContent {
       next.hero.label === "About me" || next.hero.label === "About" || !next.hero.label
         ? DEFAULT_ABOUT_PAGE.hero.label
         : next.hero.label,
-    facts: (() => {
-      const facts = next.hero.facts?.length ? next.hero.facts : DEFAULT_ABOUT_PAGE.hero.facts;
-      return facts.map((fact) => {
-        if (fact.label === "Focus" && /AI|Impact/i.test(fact.value) && !/Research/i.test(fact.value)) {
-          return DEFAULT_ABOUT_PAGE.hero.facts.find((f) => f.label === "Specializations") || fact;
-        }
-        if (fact.label === "Current role") {
-          return { ...fact, label: "Company role" };
-        }
-        return fact;
-      });
-    })(),
+    facts: normalizeHeroFacts(next.hero.facts),
   };
 
   next.focus = {
@@ -563,12 +664,46 @@ function upgradeAboutIdentity(content: AboutPageContent): AboutPageContent {
 
   next.cta = {
     ...next.cta,
-    label: next.cta.label === "Next step" ? DEFAULT_ABOUT_PAGE.cta.label : next.cta.label,
+    label:
+      next.cta.label === "Next step" || next.cta.label === "Next" || !next.cta.label
+        ? DEFAULT_ABOUT_PAGE.cta.label
+        : next.cta.label,
     title:
-      next.cta.title === "See the work, or start a conversation."
+      next.cta.title === "See the work, or start a conversation." ||
+      next.cta.title === "Let’s work together" ||
+      next.cta.title === "Let's work together" ||
+      !next.cta.title
         ? DEFAULT_ABOUT_PAGE.cta.title
         : next.cta.title,
+    body:
+      !next.cta.body && DEFAULT_ABOUT_PAGE.cta.body
+        ? DEFAULT_ABOUT_PAGE.cta.body
+        : next.cta.body,
+    primaryCtaLabel:
+      next.cta.primaryCtaLabel === "Let’s work together" ||
+      next.cta.primaryCtaLabel === "Let's work together"
+        ? DEFAULT_ABOUT_PAGE.cta.primaryCtaLabel
+        : next.cta.primaryCtaLabel,
   };
+
+  if (!next.journey?.items?.length) {
+    next.journey = DEFAULT_ABOUT_PAGE.journey;
+  } else if (
+    next.journey.items.some(
+      (item) =>
+        item.year === "2024" &&
+        /Eshuri/i.test(item.body || "") &&
+        /AskField/i.test(item.body || ""),
+    )
+  ) {
+    next.journey = {
+      ...next.journey,
+      items: DEFAULT_ABOUT_PAGE.journey.items,
+    };
+  }
+  if (!next.impact?.items?.length) {
+    next.impact = DEFAULT_ABOUT_PAGE.impact;
+  }
 
   return next;
 }
@@ -629,6 +764,16 @@ export function aboutPageFrom(settings: SiteSettings): AboutPageContent {
       ...DEFAULT_ABOUT_PAGE.strengths,
       ...saved.strengths,
       items: mergeList(saved.strengths?.items, DEFAULT_ABOUT_PAGE.strengths.items),
+    },
+    journey: {
+      ...DEFAULT_ABOUT_PAGE.journey,
+      ...saved.journey,
+      items: mergeList(saved.journey?.items, DEFAULT_ABOUT_PAGE.journey.items),
+    },
+    impact: {
+      ...DEFAULT_ABOUT_PAGE.impact,
+      ...saved.impact,
+      items: mergeList(saved.impact?.items, DEFAULT_ABOUT_PAGE.impact.items),
     },
     cta: { ...DEFAULT_ABOUT_PAGE.cta, ...saved.cta },
   };

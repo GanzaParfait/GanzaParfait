@@ -5,16 +5,12 @@ import {
   RiArrowRightLine,
   RiMapPinLine,
   RiBriefcaseLine,
+  RiBuildingLine,
   RiGraduationCapLine,
   RiFlashlightLine,
+  RiSparklingLine,
   RiFocus3Line,
   RiGlobalLine,
-  RiCodeSSlashLine,
-  RiDatabase2Line,
-  RiLightbulbFlashLine,
-  RiTeamLine,
-  RiRocketLine,
-  RiBookOpenLine,
   RiDiamondLine,
   RiSettings3Line,
   RiUserHeartLine,
@@ -24,7 +20,6 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 import {
   aboutPageFrom,
   type AboutFactIcon,
-  type AboutFocusIcon,
   type AboutPageContent,
   type AboutValueIcon,
 } from "@/lib/about-page";
@@ -33,21 +28,14 @@ import EngineeringToolkitSection from "@/components/about/EngineeringToolkitSect
 import { siteConfig } from "@/data/site-data";
 
 function FactIcon({ icon }: { icon: AboutFactIcon }) {
-  if (icon === "briefcase") return <RiBriefcaseLine size={15} />;
-  if (icon === "grad") return <RiGraduationCapLine size={15} />;
-  if (icon === "bolt") return <RiFlashlightLine size={15} />;
-  if (icon === "target") return <RiFocus3Line size={15} />;
-  if (icon === "globe") return <RiGlobalLine size={15} />;
-  return <RiMapPinLine size={15} />;
-}
-
-function FocusIcon({ icon }: { icon: AboutFocusIcon }) {
-  if (icon === "data") return <RiDatabase2Line size={20} />;
-  if (icon === "bulb") return <RiLightbulbFlashLine size={20} />;
-  if (icon === "people") return <RiTeamLine size={20} />;
-  if (icon === "rocket") return <RiRocketLine size={20} />;
-  if (icon === "book") return <RiBookOpenLine size={20} />;
-  return <RiCodeSSlashLine size={20} />;
+  if (icon === "briefcase") return <RiBriefcaseLine size={16} />;
+  if (icon === "building") return <RiBuildingLine size={16} />;
+  if (icon === "grad") return <RiGraduationCapLine size={16} />;
+  if (icon === "bolt") return <RiFlashlightLine size={16} />;
+  if (icon === "sparkle") return <RiSparklingLine size={16} />;
+  if (icon === "target") return <RiFocus3Line size={16} />;
+  if (icon === "globe") return <RiGlobalLine size={16} />;
+  return <RiMapPinLine size={16} />;
 }
 
 function ValueIcon({ icon }: { icon: AboutValueIcon }) {
@@ -59,7 +47,8 @@ function ValueIcon({ icon }: { icon: AboutValueIcon }) {
 
 /**
  * Public About order:
- * who → specializations → path → evidence → engineering toolkit → principles → contact.
+ * who → specializations → selected evidence → toolkit → principles → contact.
+ * Journey lives on the homepage — not duplicated here.
  */
 export default function AboutPageView({
   content: contentOverride,
@@ -70,12 +59,15 @@ export default function AboutPageView({
 } = {}) {
   const settings = useSiteSettings();
   const page = contentOverride || aboutPageFrom(settings);
+  const locationFact = page.hero.facts.find((fact) => fact.label === "Location");
+  const location = locationFact?.value.replace(/\n/g, " ") || "Kigali, Rwanda";
 
   return (
     <div className={embedded ? "about-page about-embedded" : "about-page"}>
       <section className="about-hero" aria-label="About introduction">
         <div className="container about-hero-grid">
           <AnimatedSection direction="left" className="about-hero-visual">
+            <span className="about-portrait-aura" aria-hidden />
             <div className="about-portrait-wrap">
               {page.hero.portrait ? (
                 <img
@@ -89,7 +81,7 @@ export default function AboutPageView({
                 />
               ) : null}
               <span className="about-portrait-place">
-                <RiMapPinLine size={12} /> Kigali, Rwanda
+                <RiMapPinLine size={12} /> {location}
               </span>
             </div>
           </AnimatedSection>
@@ -97,7 +89,6 @@ export default function AboutPageView({
           <AnimatedSection className="about-hero-copy">
             <p className="section-label">{page.hero.label}</p>
             <h1>{page.hero.title}</h1>
-            <p className="about-roles">{page.hero.roles}</p>
             <p className="about-lead">{page.hero.body}</p>
             <div className="about-actions">
               <Link href={page.hero.primaryCtaHref} className="btn btn-primary">
@@ -106,8 +97,8 @@ export default function AboutPageView({
               <Link href={page.hero.secondaryCtaHref} className="btn btn-outline">
                 {page.hero.secondaryCtaLabel}
               </Link>
-              <Link href="/cv?source=about" className="btn btn-ghost">
-                View CV
+              <Link href="/cv?source=about" className="btn btn-outline about-cv-btn">
+                View CV <RiArrowRightLine size={15} />
               </Link>
             </div>
           </AnimatedSection>
@@ -136,114 +127,104 @@ export default function AboutPageView({
             <p className="section-label">{page.focus.label}</p>
             <h2>{page.focus.title}</h2>
           </div>
-          <div className="about-focus-grid" data-count={page.focus.items.length}>
-            {page.focus.items.map((item) => (
-              <article key={item.title} className="about-focus-card">
-                <span className="about-focus-icon" aria-hidden>
-                  <FocusIcon icon={item.icon} />
+          <ol className="about-spec-grid">
+            {page.focus.items.map((item, index) => (
+              <li key={item.title} className="about-spec-item">
+                <span className="about-spec-num" aria-hidden>
+                  {String(index + 1).padStart(2, "0")}
                 </span>
                 <h3>{item.title}</h3>
                 <p>{item.body}</p>
-              </article>
+              </li>
             ))}
-          </div>
+          </ol>
         </div>
       </section>
 
-      <section className="about-band is-soft" aria-label={page.story.title}>
-        <div className="container about-story about-story-wide">
-          <p className="section-label">{page.story.label}</p>
-          <h2>{page.story.title}</h2>
-          {page.story.paragraphs.map((paragraph) => (
-            <p key={paragraph.slice(0, 48)}>{paragraph}</p>
-          ))}
-          {page.story.quote ? (
-            <blockquote>
-              <p>“{page.story.quote}”</p>
-              <cite>— Prince Parfait GANZA</cite>
-            </blockquote>
-          ) : null}
-        </div>
-      </section>
-
-      <section className="about-band" aria-label={page.facts.title}>
-        <div className="container">
-          <div className="about-band-head">
-            <p className="section-label">{page.facts.label}</p>
-            <h2>{page.facts.title}</h2>
-          </div>
-          <div className="about-key-grid" data-count={page.facts.items.length}>
-            {page.facts.items.map((item) => {
-              const external = /^https?:\/\//i.test(item.href);
-              if (external) {
+      {page.facts.items.length ? (
+        <section className="about-band" aria-label={page.facts.title}>
+          <div className="container">
+            <div className="about-band-head">
+              <p className="section-label">{page.facts.label}</p>
+              <h2>{page.facts.title}</h2>
+            </div>
+            <div className="about-key-grid" data-count={page.facts.items.length}>
+              {page.facts.items.map((item) => {
+                const external = /^https?:\/\//i.test(item.href);
+                if (external) {
+                  return (
+                    <a
+                      key={item.title}
+                      href={item.href}
+                      className="about-key-card"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <strong>{item.title}</strong>
+                      <span>{item.subtitle}</span>
+                      <em>{item.meta}</em>
+                      <i aria-hidden>
+                        <RiArrowRightLine size={14} />
+                      </i>
+                    </a>
+                  );
+                }
                 return (
-                  <a
-                    key={item.title}
-                    href={item.href}
-                    className="about-key-card"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
+                  <Link key={item.title} href={item.href} className="about-key-card">
                     <strong>{item.title}</strong>
                     <span>{item.subtitle}</span>
                     <em>{item.meta}</em>
                     <i aria-hidden>
                       <RiArrowRightLine size={14} />
                     </i>
-                  </a>
+                  </Link>
                 );
-              }
-              return (
-                <Link key={item.title} href={item.href} className="about-key-card">
-                  <strong>{item.title}</strong>
-                  <span>{item.subtitle}</span>
-                  <em>{item.meta}</em>
-                  <i aria-hidden>
-                    <RiArrowRightLine size={14} />
-                  </i>
-                </Link>
-              );
-            })}
+              })}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
       {!embedded ? <EngineeringToolkitSection /> : null}
 
-      <section className="about-band is-soft" aria-label={page.values.title}>
-        <div className="container">
-          <div className="about-band-head">
-            <p className="section-label">{page.values.label}</p>
-            <h2>{page.values.title}</h2>
+      {page.values.items.length ? (
+        <section className="about-band is-soft" aria-label={page.values.title}>
+          <div className="container">
+            <div className="about-band-head">
+              <p className="section-label">{page.values.label}</p>
+              <h2>{page.values.title}</h2>
+            </div>
+            <div className="about-values-grid" data-count={page.values.items.length}>
+              {page.values.items.map((item) => (
+                <article key={item.title} className="about-value-card">
+                  <span aria-hidden>
+                    <ValueIcon icon={item.icon} />
+                  </span>
+                  <h3>{item.title}</h3>
+                  <p>{item.body}</p>
+                </article>
+              ))}
+            </div>
           </div>
-          <div className="about-values-grid" data-count={page.values.items.length}>
-            {page.values.items.map((item) => (
-              <article key={item.title} className="about-value-card">
-                <span aria-hidden>
-                  <ValueIcon icon={item.icon} />
-                </span>
-                <h3>{item.title}</h3>
-                <p>{item.body}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
       <section className="about-cta" aria-label="Contact">
-        <div className="container about-cta-inner">
-          <div>
-            <p className="section-label">{page.cta.label}</p>
-            <h2>{page.cta.title}</h2>
-            <p>{page.cta.body}</p>
-          </div>
-          <div className="about-actions">
-            <Link href={page.cta.primaryCtaHref} className="btn btn-primary">
-              {page.cta.primaryCtaLabel} <RiArrowRightLine size={15} />
-            </Link>
-            <Link href={page.cta.secondaryCtaHref} className="btn btn-outline">
-              {page.cta.secondaryCtaLabel}
-            </Link>
+        <div className="container">
+          <div className="about-cta-panel">
+            <div>
+              <p className="section-label">{page.cta.label}</p>
+              <h2>{page.cta.title}</h2>
+              {page.cta.body ? <p>{page.cta.body}</p> : null}
+            </div>
+            <div className="about-actions">
+              <Link href={page.cta.primaryCtaHref} className="btn btn-primary">
+                {page.cta.primaryCtaLabel} <RiArrowRightLine size={15} />
+              </Link>
+              <Link href={page.cta.secondaryCtaHref} className="btn btn-outline">
+                {page.cta.secondaryCtaLabel}
+              </Link>
+            </div>
           </div>
         </div>
       </section>

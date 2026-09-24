@@ -13,7 +13,9 @@ import {
 } from "@react-pdf/renderer";
 import {
   absolutizeCvMedia,
+  resolvedSectionKey,
   splitDisplayName,
+  splitResolvedSections,
   type CvResolvedDocument,
   type CvResolvedItem,
   type CvSectionId,
@@ -228,6 +230,19 @@ const styles = StyleSheet.create({
   colRight: {
     width: "42%",
   },
+  chipGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginTop: 2,
+  },
+  chipCell: {
+    width: "50%",
+    paddingRight: 8,
+    paddingBottom: 3,
+    fontSize: 8.5,
+    color: bodyColor,
+    fontFamily: "Helvetica",
+  },
   skillRow: {
     flexDirection: "row",
     marginBottom: 4,
@@ -418,6 +433,14 @@ function ContactBar({ doc }: { doc: CvResolvedDocument }) {
             </Link>
           </View>
         ) : null}
+        {doc.contact.emailSecondary ? (
+          <View style={styles.contactItem}>
+            <IconMail />
+            <Link src={`mailto:${doc.contact.emailSecondary}`} style={styles.contactLink}>
+              {doc.contact.emailSecondary}
+            </Link>
+          </View>
+        ) : null}
         {doc.contact.phone ? (
           <View style={styles.contactItem}>
             <IconPhone />
@@ -584,9 +607,29 @@ function LinksBlock({ items }: { items: CvResolvedItem[] }) {
   );
 }
 
+function ChipsBlock({ chips }: { chips: string[] }) {
+  return (
+    <View style={styles.chipGrid}>
+      {chips.map((chip) => (
+        <Text key={chip} style={styles.chipCell}>
+          ·  {chip}
+        </Text>
+      ))}
+    </View>
+  );
+}
+
 function renderSectionBody(section: CvResolvedDocument["sections"][number]) {
   if (section.id === "profile" && section.body) {
     return <Text style={styles.body}>{section.body}</Text>;
+  }
+  if (section.chips?.length) {
+    return (
+      <View>
+        {section.body ? <Text style={styles.body}>{section.body}</Text> : null}
+        <ChipsBlock chips={section.chips} />
+      </View>
+    );
   }
   if (section.id === "skills" && section.skillsByCategory?.length) {
     return <SkillsBlock groups={section.skillsByCategory} />;
@@ -642,22 +685,18 @@ function PageFooter({ doc }: { doc: CvResolvedDocument }) {
 export function ProfessionalCvPdf({
   doc,
   origin = siteUrl(),
+  size = "A4",
 }: {
   doc: CvResolvedDocument;
   origin?: string;
+  size?: "A4" | "LETTER";
 }) {
-  const byId = new Map(doc.sections.map((s) => [s.id, s]));
-  const fullSections = FULL_FLOW.map((id) => byId.get(id)).filter(
-    Boolean
-  ) as CvResolvedDocument["sections"];
-  const leftSections = LEFT_COL.map((id) => byId.get(id)).filter(
-    Boolean
-  ) as CvResolvedDocument["sections"];
-  const rightSections = RIGHT_COL.map((id) => byId.get(id)).filter(
-    Boolean
-  ) as CvResolvedDocument["sections"];
-  const placed = new Set([...FULL_FLOW, ...LEFT_COL, ...RIGHT_COL]);
-  const extras = doc.sections.filter((s) => !placed.has(s.id));
+  const {
+    full: fullSections,
+    left: leftSections,
+    right: rightSections,
+    extras,
+  } = splitResolvedSections(doc.sections, { full: FULL_FLOW, left: LEFT_COL, right: RIGHT_COL });
 
   return (
     <Document
@@ -668,18 +707,18 @@ export function ProfessionalCvPdf({
       creator="princeparfait.com"
       producer="princeparfait.com"
     >
-      <Page size="A4" style={styles.page} wrap>
+      <Page size={size} style={styles.page} wrap>
         <Header doc={doc} origin={origin} />
 
         {fullSections.map((section) => (
-          <View key={section.id} style={styles.section} wrap>
+          <View key={resolvedSectionKey(section)} style={styles.section} wrap>
             <SectionTitle title={section.title} />
             {renderSectionBody(section)}
           </View>
         ))}
 
         {extras.map((section) => (
-          <View key={section.id} style={styles.section} wrap>
+          <View key={resolvedSectionKey(section)} style={styles.section} wrap>
             <SectionTitle title={section.title} />
             {renderSectionBody(section)}
           </View>
@@ -689,12 +728,12 @@ export function ProfessionalCvPdf({
           <View style={styles.twoCol}>
             <View style={styles.colLeft}>
               {leftSections.map((section) => (
-                <ColumnSection key={section.id} section={section} />
+                <ColumnSection key={resolvedSectionKey(section)} section={section} />
               ))}
             </View>
             <View style={styles.colRight}>
               {rightSections.map((section) => (
-                <ColumnSection key={section.id} section={section} />
+                <ColumnSection key={resolvedSectionKey(section)} section={section} />
               ))}
             </View>
           </View>

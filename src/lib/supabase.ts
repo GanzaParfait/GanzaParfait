@@ -11,6 +11,11 @@ import {
   IDENTITY_COMPACT_BIO,
   IDENTITY_ROLE_LINE,
 } from "@/lib/identity";
+import {
+  DEFAULT_BOOKING_OPTION,
+  normalizeBookingSettings,
+  type BookingOption,
+} from "@/lib/booking";
 
 export type AnnouncementSharePlatform = "linkedin" | "twitter" | "facebook" | "whatsapp" | "link";
 export type AnnouncementBarPosition = "top" | "bottom";
@@ -51,6 +56,8 @@ export interface SiteSettings {
   bio: string;
   location: string;
   contactEmail: string;
+  /** Optional secondary professional email (e.g. Gmail). Not keyword-stuffed in page copy. */
+  contactEmailSecondary?: string;
   whatsappNumber: string;
   phoneNumber?: string;
   headerSocialLimit: number;
@@ -91,7 +98,15 @@ export interface SiteSettings {
   footerFeaturedCtaLabel?: string;
   footerShowPrivacy?: boolean;
   footerShowSitemap?: boolean;
+  /** Master switch for public Google Calendar meeting booking. */
+  bookingEnabled?: boolean;
+  /**
+   * Legacy single appointment URL — kept in sync with the featured booking option.
+   * Prefer `bookingOptions` for new UI; readers should use `normalizeBookingSettings`.
+   */
   bookingCalendarUrl?: string;
+  /** Up to three public Google Calendar appointment schedules. */
+  bookingOptions?: BookingOption[];
   announcementText?: string;
   announcementLink?: string;
   announcementCtaLabel?: string;
@@ -183,8 +198,10 @@ export interface SiteSettings {
   heroCarouselLayouts?: HeroLayoutType[];
   heroCarouselInterval?: number;
   identityRevision?: number;
-  /** CV / Resume formats, public default, and CV-only overrides (stored in settings_json). */
+  /** Legacy CV formats (3 fixed templates). Kept readable for rollback after migration. */
   cvConfig?: import("@/lib/cv").CvConfig;
+  /** Independently editable CV / Resume documents (stored in settings_json). */
+  cvLibrary?: import("@/lib/cv-library").CvLibrary;
   /** Canonical experience / education / certification records (Experience page + Journey + CV). */
   career?: import("@/lib/career").CareerContent;
   /** Homepage multilingual opening sequence (stored in settings_json). */
@@ -239,6 +256,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   heroCarouselInterval: 8,
   location: "Kigali, Rwanda",
   contactEmail: "hello@princeparfait.com",
+  contactEmailSecondary: "ganzaparfait7@gmail.com",
   whatsappNumber: "250792054846",
   phoneNumber: "+250 792 054 846",
   headerSocialLimit: 2,
@@ -275,7 +293,9 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   footerFeaturedCtaLabel: "Follow the journey",
   footerShowPrivacy: true,
   footerShowSitemap: true,
+  bookingEnabled: true,
   bookingCalendarUrl: "",
+  bookingOptions: [{ ...DEFAULT_BOOKING_OPTION }],
   announcementIsActive: true,
   announcementText: "New Achievement... Event to be held at Kigali Marriott Hotel.!",
   announcementLink: "/contact",
@@ -507,7 +527,9 @@ export function getLocalSettings(): SiteSettings {
       if (!parsed.socialLinks?.length) parsed.socialLinks = DEFAULT_SOCIAL_LINKS;
       const hadBlob = SETTINGS_IMAGE_KEYS.some((key) => typeof parsed[key] === "string" && parsed[key].startsWith("blob:"));
       const cleaned = stripSettingsBlobs(parsed);
-      const merged = canonicalizeIdentityFields({ ...DEFAULT_SETTINGS, ...cleaned });
+      const merged = normalizeBookingSettings(
+        canonicalizeIdentityFields({ ...DEFAULT_SETTINGS, ...cleaned }),
+      );
       merged.emailWelcomeBody = sanitizeWelcomeBody(merged.emailWelcomeBody);
       if (!merged.footerQuote?.trim()) merged.footerQuote = DEFAULT_SETTINGS.footerQuote;
       if (!merged.footerQuoteAttribution?.trim()) {
@@ -549,7 +571,7 @@ export function clearLocalSettingsCache() {
  */
 export async function saveLocalSettings(settings: Partial<SiteSettings>): Promise<SiteSettings> {
   const current = getLocalSettings();
-  const updated = stripSettingsBlobs({ ...current, ...settings });
+  const updated = normalizeBookingSettings(stripSettingsBlobs({ ...current, ...settings }));
   if (typeof window !== "undefined") {
     try {
       localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(updated));
@@ -578,14 +600,13 @@ export async function persistSettingsRemote(settings: SiteSettings) {
 export async function fetchRemoteSettings(): Promise<SiteSettings | null> {
   try {
     const res = await fetch("/api/settings", {
-      cache: "no-store",
+      // Prefer HTTP/CDN cache when present; SSR initial already hydrates the provider.
       credentials: "same-origin",
-      headers: { "Cache-Control": "no-cache" },
     });
     if (!res.ok) return null;
-    const remote = (await res.json()) as SiteSettings;
-    cacheLocalSettings({ ...DEFAULT_SETTINGS, ...remote });
-    return { ...DEFAULT_SETTINGS, ...remote };
+    const remote = normalizeBookingSettings({ ...DEFAULT_SETTINGS, ...(await res.json()) as SiteSettings });
+    cacheLocalSettings(remote);
+    return remote;
   } catch {
     return null;
   }

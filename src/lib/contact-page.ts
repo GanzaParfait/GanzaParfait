@@ -75,7 +75,7 @@ export const DEFAULT_CONTACT_PAGE: ContactPageContent = {
   cards: {
     emailNote: "I usually reply within 24–48 hours.",
     phoneLabel: "Phone",
-    phoneNote: "Mon – Fri, 8AM – 5PM (EAT)",
+    phoneNote: "General contact availability · Mon–Fri, 8AM–5PM (EAT)",
     locationNote: "Available for remote & on-site meetings.",
     followNote: "Let's stay connected.",
     showPhone: true,
@@ -155,6 +155,13 @@ export function contactPageFrom(settings: SiteSettings): ContactPageContent {
     cards: {
       ...DEFAULT_CONTACT_PAGE.cards,
       ...saved.cards,
+      phoneNote: (() => {
+        const note = (saved.cards?.phoneNote || "").trim();
+        if (!note || /^Mon\s*[–-]\s*Fri,?\s*8AM\s*[–-]\s*5PM\s*\(EAT\)$/i.test(note)) {
+          return DEFAULT_CONTACT_PAGE.cards.phoneNote;
+        }
+        return note;
+      })(),
       followSocialIds: Array.isArray(saved.cards?.followSocialIds)
         ? saved.cards.followSocialIds.slice(0, 6)
         : DEFAULT_CONTACT_PAGE.cards.followSocialIds,

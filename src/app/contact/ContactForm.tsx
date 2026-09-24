@@ -20,12 +20,21 @@ import {
   RiLightbulbFlashLine,
   RiHandHeartLine,
   RiLoader4Line,
+  RiCalendarEventLine,
+  RiArrowRightLine,
 } from "react-icons/ri";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { setting } from "@/lib/hero";
+import { contactEmailsFrom } from "@/lib/contact-emails";
+import { whatsappContactUrl } from "@/lib/whatsapp";
 import { resolvedSocials, socialIcon, socialsFor } from "@/lib/socials";
 import { contactPageFrom, type ContactPageContent, type ContactTopicIcon } from "@/lib/contact-page";
 import { plainTextFromClipboard } from "@/lib/paste-plain-text";
+import {
+  bookingOptionMeta,
+  openBookingLink,
+  primaryBookingOption,
+} from "@/lib/booking";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import CustomSelect from "@/components/ui/CustomSelect";
 import { siteConfig } from "@/data/site-data";
@@ -77,11 +86,14 @@ export default function ContactPageClient({
 } = {}) {
   const settings = useSiteSettings();
   const page = contentOverride || contactPageFrom(settings);
-  const email = setting(settings, "contactEmail");
+  const booking = primaryBookingOption(settings);
+  const emails = contactEmailsFrom(settings);
+  const email = emails.primary;
+  const secondaryEmail = emails.secondary;
   const location = setting(settings, "location");
   const phone = settings.phoneNumber || "";
-  const whatsappDigits = (settings.whatsappNumber || "").replace(/\D/g, "");
-  const whatsappHref = whatsappDigits ? `https://wa.me/${whatsappDigits}` : undefined;
+  const whatsappDigits = (settings.whatsappNumber || phone || "").replace(/\D/g, "");
+  const whatsappHref = whatsappContactUrl(whatsappDigits);
 
   const contactSocials = useMemo(() => {
     const all = resolvedSocials(settings).filter((link) => link.enabled && link.url);
@@ -254,19 +266,31 @@ export default function ContactPageClient({
 
       <section className="contact-cards-band" aria-label="Contact channels">
         <div className="container contact-cards">
-          <a href={`mailto:${email}`} className="contact-card">
+          <div className="contact-card contact-card-emails">
             <span className="contact-card-icon">
               <RiMailLine size={16} />
             </span>
             <div className="contact-card-body">
               <small>Email</small>
-              <strong>{email}</strong>
+              <a href={`mailto:${email}`} className="contact-email-line">
+                <strong>{email}</strong>
+              </a>
+              {secondaryEmail ? (
+                <a href={`mailto:${secondaryEmail}`} className="contact-email-line is-secondary">
+                  <strong>{secondaryEmail}</strong>
+                </a>
+              ) : null}
               <em>{page.cards.emailNote}</em>
             </div>
-          </a>
+          </div>
 
           {page.cards.showPhone && (phone || whatsappHref) ? (
-            <a href={whatsappHref || `tel:${phone.replace(/\s/g, "")}`} className="contact-card" target="_blank" rel="noopener noreferrer">
+            <a
+              href={whatsappHref || `tel:${phone.replace(/\s/g, "")}`}
+              className="contact-card"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <span className="contact-card-icon">
                 <RiPhoneLine size={16} />
               </span>
@@ -294,7 +318,7 @@ export default function ContactPageClient({
               <RiShareForwardLine size={16} />
             </span>
             <div className="contact-card-body">
-              <small>[Follow Me]</small>
+              <small>Follow me</small>
               <div className="contact-card-socials">
                 {contactSocials.map((link) => {
                   const Icon = socialIcon(link.platform);
@@ -305,7 +329,7 @@ export default function ContactPageClient({
                   );
                 })}
               </div>
-              <em>[{page.cards.followNote}]</em>
+              <em>{page.cards.followNote}</em>
             </div>
           </div>
         </div>
@@ -505,6 +529,28 @@ export default function ContactPageClient({
 
       <section id="faq" className="contact-faq" aria-label="Frequently asked questions">
         <div className="container">
+          {booking ? (
+            <aside className="contact-booking contact-booking-wide" aria-label="Book a meeting">
+              <div className="contact-booking-copy">
+                <p className="section-label">Prefer a conversation?</p>
+                <h2>Schedule a {booking.durationMinutes}-minute video meeting at a time that works for you.</h2>
+                <p className="contact-booking-lead">
+                  Book a meeting with Prince Parfait GANZA when you prefer a live conversation over email.
+                </p>
+                <p className="contact-booking-meta">{bookingOptionMeta(booking)}</p>
+              </div>
+              <button
+                type="button"
+                className="btn btn-primary contact-booking-cta"
+                onClick={() => openBookingLink(booking.url, "contact")}
+              >
+                <RiCalendarEventLine size={16} aria-hidden />
+                Book a meeting
+                <RiArrowRightLine size={16} aria-hidden />
+              </button>
+            </aside>
+          ) : null}
+
           <div className="contact-faq-head">
             <div>
               <p className="section-label">{page.faq.label}</p>

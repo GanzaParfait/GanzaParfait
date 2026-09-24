@@ -28,20 +28,19 @@ import { getLocalSettings, saveLocalSettings, fetchRemoteSettings } from "@/lib/
 import CustomSelect from "@/components/ui/CustomSelect";
 import { useSectionHash } from "@/hooks/useSectionHash";
 
-type SectionId = "hero" | "focus" | "story" | "facts" | "values" | "strengths" | "cta";
+type SectionId = "hero" | "focus" | "facts" | "values" | "strengths" | "cta";
 type PreviewDevice = "desktop" | "tablet" | "mobile";
 
 const SECTIONS: { id: SectionId; label: string }[] = [
   { id: "hero", label: "Hero" },
-  { id: "focus", label: "Focus" },
-  { id: "story", label: "Story" },
-  { id: "facts", label: "Key facts" },
-  { id: "values", label: "Values" },
-  { id: "strengths", label: "Strengths" },
+  { id: "focus", label: "Specializations" },
+  { id: "facts", label: "Evidence" },
+  { id: "values", label: "Principles" },
+  { id: "strengths", label: "Toolkit note" },
   { id: "cta", label: "CTA" },
 ];
 
-const FACT_ICONS: AboutFactIcon[] = ["pin", "briefcase", "grad", "bolt", "target", "globe"];
+const FACT_ICONS: AboutFactIcon[] = ["pin", "building", "briefcase", "grad", "sparkle", "bolt", "target", "globe"];
 const FOCUS_ICONS: AboutFocusIcon[] = ["code", "data", "bulb", "people", "rocket", "book"];
 const VALUE_ICONS: AboutValueIcon[] = ["diamond", "gear", "person", "chart"];
 
@@ -107,12 +106,6 @@ export default function AboutEditorPage() {
   const patchFocus = (next: Partial<AboutPageContent["focus"]>) => {
     setContent((current) => ({ ...current, focus: { ...current.focus, ...next } }));
   };
-  const patchStory = (next: Partial<AboutPageContent["story"]>) => {
-    setContent((current) => ({ ...current, story: { ...current.story, ...next } }));
-  };
-  const patchWork = (next: Partial<AboutPageContent["work"]>) => {
-    setContent((current) => ({ ...current, work: { ...current.work, ...next } }));
-  };
   const patchFacts = (next: Partial<AboutPageContent["facts"]>) => {
     setContent((current) => ({ ...current, facts: { ...current.facts, ...next } }));
   };
@@ -136,7 +129,7 @@ export default function AboutEditorPage() {
             <strong>{active.label}</strong>
           </nav>
           <h1>About page</h1>
-          <p>Compact person page. Keep copy verified — do not invent biography here.</p>
+          <p>Hero, specializations and evidence are editable. Journey lives on the homepage — not duplicated here.</p>
         </div>
         <div className="hp-board-actions">
           <div className="hp-section-pills" role="tablist" aria-label="About sections">
@@ -170,7 +163,6 @@ export default function AboutEditorPage() {
                 <Field label="Section label" value={content.hero.label} onChange={(label) => patchHero({ label })} />
                 <Field label="Title" value={content.hero.title} area onChange={(title) => patchHero({ title })} />
                 <Field label="Body" value={content.hero.body} area onChange={(body) => patchHero({ body })} />
-                <Field label="Roles line" value={content.hero.roles} onChange={(roles) => patchHero({ roles })} />
                 <Field label="Primary CTA label" value={content.hero.primaryCtaLabel} onChange={(primaryCtaLabel) => patchHero({ primaryCtaLabel })} />
                 <Field label="Primary CTA href" value={content.hero.primaryCtaHref} onChange={(primaryCtaHref) => patchHero({ primaryCtaHref })} />
                 <Field label="Secondary CTA label" value={content.hero.secondaryCtaLabel} onChange={(secondaryCtaLabel) => patchHero({ secondaryCtaLabel })} />
@@ -294,95 +286,18 @@ export default function AboutEditorPage() {
               </>
             )}
 
-            {section === "story" && (
-              <>
-                <Field label="Story label" value={content.story.label} onChange={(label) => patchStory({ label })} />
-                <Field label="Story title" value={content.story.title} onChange={(title) => patchStory({ title })} />
-                <Field
-                  label="Story paragraphs"
-                  value={content.story.paragraphs.join("\n\n")}
-                  area
-                  hint="Separate paragraphs with a blank line."
-                  onChange={(value) =>
-                    patchStory({
-                      paragraphs: value
-                        .split(/\n\s*\n/)
-                        .map((item) => item.trim())
-                        .filter(Boolean),
-                    })
-                  }
-                />
-                <Field label="Quote" value={content.story.quote} area onChange={(quote) => patchStory({ quote })} />
-                <Field label="What I do label" value={content.work.label} onChange={(label) => patchWork({ label })} />
-                <Field label="What I do title" value={content.work.title} onChange={(title) => patchWork({ title })} />
-                <div className="hp-list-head">
-                  <p>What I do items</p>
-                  <button
-                    type="button"
-                    className="btn btn-outline btn-sm"
-                    onClick={() =>
-                      patchWork({
-                        items: [...content.work.items, { icon: "code", title: "New item", body: "Short description." }],
-                      })
-                    }
-                  >
-                    <RiAddLine size={15} /> Add
-                  </button>
-                </div>
-                {content.work.items.map((item, index) => (
-                  <div key={`${item.title}-${index}`} className="hp-mini-card">
-                    <CustomSelect
-                      id={`about-work-icon-${index}`}
-                      value={item.icon}
-                      options={FOCUS_ICONS.map((icon) => ({ value: icon, label: icon }))}
-                      onChange={(icon) => {
-                        const items = content.work.items.map((entry, i) =>
-                          i === index ? { ...entry, icon: icon as AboutFocusIcon } : entry,
-                        );
-                        patchWork({ items });
-                      }}
-                    />
-                    <Field
-                      label="Title"
-                      value={item.title}
-                      onChange={(title) => {
-                        const items = content.work.items.map((entry, i) => (i === index ? { ...entry, title } : entry));
-                        patchWork({ items });
-                      }}
-                    />
-                    <Field
-                      label="Body"
-                      value={item.body}
-                      area
-                      onChange={(body) => {
-                        const items = content.work.items.map((entry, i) => (i === index ? { ...entry, body } : entry));
-                        patchWork({ items });
-                      }}
-                    />
-                    <button
-                      type="button"
-                      className="btn btn-outline btn-sm"
-                      onClick={() => patchWork({ items: content.work.items.filter((_, i) => i !== index) })}
-                    >
-                      <RiDeleteBin6Line size={15} /> Remove
-                    </button>
-                  </div>
-                ))}
-              </>
-            )}
-
             {section === "facts" && (
               <>
                 <Field label="Section label" value={content.facts.label} onChange={(label) => patchFacts({ label })} />
                 <Field label="Title" value={content.facts.title} onChange={(title) => patchFacts({ title })} />
                 <div className="hp-list-head">
-                  <p>Fact cards</p>
+                  <p>Evidence cards</p>
                   <button
                     type="button"
                     className="btn btn-outline btn-sm"
                     onClick={() =>
                       patchFacts({
-                        items: [...content.facts.items, { title: "New", subtitle: "Detail", meta: "Meta", href: "/experience" }],
+                        items: [...content.facts.items, { title: "New", subtitle: "Detail", meta: "Meta", href: "/projects" }],
                       })
                     }
                   >
@@ -440,13 +355,13 @@ export default function AboutEditorPage() {
                 <Field label="Section label" value={content.values.label} onChange={(label) => patchValues({ label })} />
                 <Field label="Title" value={content.values.title} onChange={(title) => patchValues({ title })} />
                 <div className="hp-list-head">
-                  <p>Values</p>
+                  <p>Principles</p>
                   <button
                     type="button"
                     className="btn btn-outline btn-sm"
                     onClick={() =>
                       patchValues({
-                        items: [...content.values.items, { icon: "diamond", title: "New value", body: "Short line." }],
+                        items: [...content.values.items, { icon: "diamond", title: "New principle", body: "Short line." }],
                       })
                     }
                   >
@@ -497,22 +412,14 @@ export default function AboutEditorPage() {
 
             {section === "strengths" && (
               <>
-                <Field label="Section label" value={content.strengths.label} onChange={(label) => patchStrengths({ label })} />
-                <Field label="Title" value={content.strengths.title} onChange={(title) => patchStrengths({ title })} />
-                <Field
-                  label="Strength tags"
-                  value={content.strengths.items.join("\n")}
-                  area
-                  hint="One tag per line. Leave empty to hide the section."
-                  onChange={(value) =>
-                    patchStrengths({
-                      items: value
-                        .split("\n")
-                        .map((item) => item.trim())
-                        .filter(Boolean),
-                    })
-                  }
-                />
+                <Field label="Toolkit label" value={content.strengths.label} onChange={(label) => patchStrengths({ label })} />
+                <Field label="Toolkit title" value={content.strengths.title} onChange={(title) => patchStrengths({ title })} />
+                <p className="hp-field">
+                  <small>
+                    The Engineering Toolkit section on the public About page is driven by project evidence, not these tags.
+                    Keep this empty unless you need a custom note list later.
+                  </small>
+                </p>
               </>
             )}
 

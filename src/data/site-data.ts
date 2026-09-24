@@ -86,6 +86,8 @@ export const siteConfig = {
   },
   contact: {
     email: "hello@princeparfait.com",
+    /** Secondary professional address — prefer settings.contactEmailSecondary at runtime. */
+    emailSecondary: "ganzaparfait7@gmail.com",
     location: "Kigali, Rwanda",
     whatsapp: "https://wa.me/250792054846",
   },
@@ -95,6 +97,9 @@ export const siteConfig = {
     role: "Founder & CEO",
     established: "2025",
     location: "Kigali, Rwanda",
+    email: "info@lerony.com",
+    phone: "+250 799 656 580",
+    phoneDigits: "250799656580",
     summary:
       "A Rwanda-based technology and innovation company building practical solutions that help organizations, businesses, and communities operate better, grow, and prepare for the future.",
   },
@@ -198,6 +203,8 @@ export type Project = {
   learned?: string;
   quote?: string;
   quoteBy?: string;
+  /** Structured impact / evidence items (dashboard-managed; verified only). */
+  evidence?: import("@/lib/project-evidence").ProjectEvidenceItem[];
   caseStudyFile?: string;
   screenshotCaptions?: string[];
   flourish?: string;
@@ -490,10 +497,11 @@ export const projects: Project[] = [
       "Redux",
       "API integration",
       "XLSForm",
+      "Survey Logic",
       "CAPI",
       "CATI",
       "CAWI",
-      "GPS / geolocation",
+      "GPS / Geolocation",
     ],
     category: "web",
     workGroup: "research",

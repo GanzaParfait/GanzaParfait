@@ -17,6 +17,7 @@ import {
   RiSearchLine,
   RiHome5Line,
   RiMailLine,
+  RiChatQuoteLine,
   RiContactsBook2Line,
   RiPagesLine,
   RiArrowDownSLine,
@@ -351,6 +352,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
             {[
               { id: "messages", path: "/dashboard/messages", label: "Messages", icon: RiMailLine },
+              { id: "testimonials", path: "/dashboard/testimonials", label: "Testimonials", icon: RiChatQuoteLine },
               { id: "subscribers", path: "/dashboard/subscribers", label: "Subscribers", icon: RiUserHeartLine },
               { id: "settings", path: "/dashboard/settings", label: "Site Settings", icon: RiSettings4Line },
             ].map((tab) => {
@@ -500,7 +502,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         <main
           className={
-            pathname.startsWith("/dashboard/settings") || pathname.startsWith("/dashboard/media")
+            pathname.startsWith("/dashboard/settings") ||
+            pathname.startsWith("/dashboard/media") ||
+            pathname.startsWith("/dashboard/cv")
               ? "dash-main is-flush"
               : "dash-main"
           }

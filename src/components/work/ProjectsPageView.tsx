@@ -15,6 +15,7 @@ import AnimatedSection from "@/components/ui/AnimatedSection";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { projectCover, workCategoryLabel } from "@/components/work/work-media";
 import { listListedProjects } from "@/lib/projects";
+import { featuredEvidenceMetric } from "@/lib/project-evidence";
 
 const FILTERS = [
   { id: "all", label: "All" },
@@ -225,18 +226,20 @@ export default function ProjectsPageView() {
 
       <section className="projects-cta" data-page-section aria-label="Start a conversation">
         <div className="container projects-cta-grid">
-          <AnimatedSection>
+          <div className="projects-cta-copy">
             <p className="section-label">Let&apos;s work together</p>
             <h2>Have a project in mind?</h2>
-            <Link href="/contact" className="btn btn-primary btn-lg">
-              Start a conversation <RiArrowRightLine size={16} />
+          </div>
+          <div className="projects-cta-actions">
+            <Link href="/contact" className="btn btn-primary">
+              Start a conversation <RiArrowRightLine size={14} />
             </Link>
-          </AnimatedSection>
-          <ol className="projects-cta-rail" aria-hidden="true">
-            {["Ideas", "Systems", "Impact"].map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ol>
+            <ol className="projects-cta-rail" aria-hidden="true">
+              {["Ideas", "People", "Impact"].map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ol>
+          </div>
         </div>
       </section>
     </div>
@@ -254,6 +257,7 @@ function ProjectIndexCard({
   const category = workCategoryLabel(project);
   const metaLeft = project.myRole || project.organization || location;
   const href = `/projects/${project.id}`;
+  const metric = project.featured ? featuredEvidenceMetric(project.evidence) : null;
 
   return (
     <article
@@ -290,6 +294,12 @@ function ProjectIndexCard({
             ) : null}
           </h3>
           <p>{project.description}</p>
+          {metric ? (
+            <p className="projects-card-metric">
+              {metric.value ? <strong>{metric.value}</strong> : null}
+              <span>{metric.label}</span>
+            </p>
+          ) : null}
           <div className="projects-card-meta">
             <span>
               {project.organization ? <RiCodeSSlashLine size={13} /> : <RiMapPinLine size={13} />}

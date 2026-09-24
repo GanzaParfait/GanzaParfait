@@ -334,7 +334,7 @@ function renderSocials(brand: EmailBrandContext) {
 function renderSignature(brand: EmailBrandContext) {
   if (!brand.showSignature) return "";
   const quote = brand.signatureQuote
-    ? `<div style="margin-top:6px;font-size:12px;color:#64748B;font-style:italic;line-height:1.45">“${escapeHtml(brand.signatureQuote)}”</div>`
+    ? `<div style="margin-top:6px;margin-bottom:14px;padding-bottom:2px;font-size:12px;color:#64748B;font-style:italic;line-height:1.45">“${escapeHtml(brand.signatureQuote)}”</div>`
     : "";
   // Prefer portrait; fall back to square brand mark so the message never looks “empty”.
   const avatar = brand.portraitUrl || brand.logoMarkUrl;

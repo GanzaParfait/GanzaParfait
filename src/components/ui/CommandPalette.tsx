@@ -18,10 +18,12 @@ import {
   RiMailLine,
   RiPhoneLine,
   RiUser3Line,
+  RiCalendarEventLine,
 } from "react-icons/ri";
 import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
 import { searchSiteIndex, type SiteSearchItem } from "@/lib/site-search";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { openBookingLink } from "@/lib/booking";
 
 const OPEN_EVENT = "pp:open-search";
 
@@ -33,6 +35,7 @@ export function openSiteSearch() {
 function GroupIcon({ item }: { item: SiteSearchItem }) {
   if (item.action === "mailto") return <RiMailLine size={16} />;
   if (item.action === "tel") return <RiPhoneLine size={16} />;
+  if (item.action === "booking" || item.id === "quick-booking") return <RiCalendarEventLine size={16} />;
   if (item.id === "quick-about") return <RiUser3Line size={16} />;
   if (item.group === "Quick") return <RiFlashlightLine size={16} />;
   if (item.group === "Work") return <RiBriefcaseLine size={16} />;
@@ -70,7 +73,7 @@ export default function CommandPalette() {
   const [mounted, setMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  const results = useMemo(() => searchSiteIndex(query, 12), [query]);
+  const results = useMemo(() => searchSiteIndex(query, 12, settings), [query, settings]);
 
   const close = useCallback(() => {
     setOpen(false);
@@ -176,14 +179,18 @@ export default function CommandPalette() {
   const go = (item: SiteSearchItem) => {
     const href = item.href;
     const action = item.action;
-    const external = action === "external" || /^https?:\/\//i.test(href);
+    const external = action === "external" || action === "booking" || /^https?:\/\//i.test(href);
 
-    // Open external / mail / tel synchronously so popup blockers and history cleanup don't cancel navigation.
     if (action === "mailto" || action === "tel") {
       close();
       window.setTimeout(() => {
         window.location.assign(href);
       }, 80);
+      return;
+    }
+    if (action === "booking") {
+      openBookingLink(href, "command_palette");
+      close();
       return;
     }
     if (external) {
@@ -192,7 +199,6 @@ export default function CommandPalette() {
       return;
     }
 
-    // Close first so useHistoryBackClose can history.back(), then route.
     close();
     window.setTimeout(() => {
       router.push(href);

@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   RiAddLine,
   RiArrowLeftLine,
@@ -46,10 +45,15 @@ import {
   itemsForFamily,
   parseServiceFocus,
   serviceFocusHref,
+  servicesPageFrom,
   type ServiceFocus,
   type ServiceItem,
   type ServicesPageContent,
 } from "@/lib/services-page";
+import { mergeProjectCatalog } from "@/lib/projects";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { primaryEmail } from "@/lib/contact-emails";
+import { whatsappContactUrl } from "@/lib/whatsapp";
 
 export type ServicesProjectCard = {
   id: string;
@@ -169,18 +173,41 @@ function FamilyVisual({
 }
 
 export default function ServicesPageView({
-  content,
-  initialFocus,
-  projects,
-  whatsappUrl,
+  content: contentOverride,
+  initialFocus: initialFocusProp = null,
+  projects: projectsOverride,
+  whatsappUrl: whatsappOverride,
 }: {
-  content: ServicesPageContent;
-  initialFocus: ServiceFocus | null;
-  projects: ServicesProjectCard[];
-  whatsappUrl: string;
-}) {
-  const router = useRouter();
-  const [focus, setFocus] = useState<ServiceFocus | null>(initialFocus);
+  content?: ServicesPageContent;
+  initialFocus?: ServiceFocus | null;
+  projects?: ServicesProjectCard[];
+  whatsappUrl?: string;
+} = {}) {
+  const settings = useSiteSettings();
+  const content = contentOverride || servicesPageFrom(settings);
+  const catalog = useMemo(() => mergeProjectCatalog(settings.projectRecords), [settings.projectRecords]);
+  const projects = useMemo(
+    () =>
+      projectsOverride ||
+      catalog.map((project) => ({
+        id: project.id,
+        title: project.title,
+        description: project.description,
+        image: project.image || project.logo || "/images/projects/project-placeholder.png",
+        organization: project.organization,
+      })),
+    [catalog, projectsOverride],
+  );
+  const whatsappUrl =
+    whatsappOverride ||
+    whatsappContactUrl(settings.whatsappNumber) ||
+    siteConfig.social.whatsapp;
+  const leronyWhatsappUrl =
+    whatsappContactUrl(siteConfig.company.phoneDigits) ||
+    `https://wa.me/${siteConfig.company.phoneDigits}`;
+  const emailMailto = `mailto:${primaryEmail(settings)}`;
+
+  const [focus, setFocus] = useState<ServiceFocus | null>(initialFocusProp);
   const [search, setSearch] = useState("");
   const [draftSearch, setDraftSearch] = useState("");
   const [filtering, setFiltering] = useState(false);
@@ -229,8 +256,12 @@ export default function ServicesPageView({
   }, [content, families, focus, search]);
 
   useEffect(() => {
-    setFocus(initialFocus);
-  }, [initialFocus]);
+    if (initialFocusProp) setFocus(initialFocusProp);
+    else {
+      const params = new URLSearchParams(window.location.search);
+      setFocus(parseServiceFocus(params.get("focus")));
+    }
+  }, [initialFocusProp]);
 
   useEffect(() => {
     const onPopState = () => {
@@ -288,7 +319,8 @@ export default function ServicesPageView({
   const selectFocus = (next: ServiceFocus | null) => {
     runWithLoader(() => {
       setFocus(next);
-      router.push(serviceFocusHref(next), { scroll: false });
+      const href = serviceFocusHref(next);
+      window.history.replaceState(window.history.state, "", href);
     });
   };
 
@@ -597,12 +629,26 @@ export default function ServicesPageView({
             ) : null}
           </div>
           {content.leronyNote ? (
-            <p className="svc-lerony">
-              {content.leronyNote}{" "}
-              <a href={siteConfig.company.url} target="_blank" rel="noopener noreferrer">
-                {siteConfig.company.name} <RiExternalLinkLine size={12} aria-hidden="true" />
-              </a>
-            </p>
+            <div className="svc-lerony">
+              <p>
+                {content.leronyNote}{" "}
+                <a href={siteConfig.company.url} target="_blank" rel="noopener noreferrer">
+                  {siteConfig.company.name} <RiExternalLinkLine size={12} aria-hidden="true" />
+                </a>
+              </p>
+              <p className="svc-lerony-contact">
+                <a href={`mailto:${siteConfig.company.email}`}>{siteConfig.company.email}</a>
+                <span aria-hidden="true">·</span>
+                <a
+                  href={leronyWhatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`WhatsApp ${siteConfig.company.name} at ${siteConfig.company.phone}`}
+                >
+                  {siteConfig.company.phone}
+                </a>
+              </p>
+            </div>
           ) : null}
         </div>
       </section>
@@ -612,45 +658,45 @@ export default function ServicesPageView({
           <div className="svc-cta-copy">
             {content.cta.label ? <p className="svc-cta-label">{content.cta.label}</p> : null}
             <h2 id="svc-cta-heading">{content.cta.title}</h2>
-            <p>
-              {content.cta.body.includes(siteConfig.name) ? (
-                <>
-                  {content.cta.body.split(siteConfig.name)[0]}
-                  <Link href="/about" className="svc-seo-name">
-                    {siteConfig.name}
-                  </Link>
-                  {content.cta.body.split(siteConfig.name).slice(1).join(siteConfig.name)}
-                </>
-              ) : (
-                <>
-                  {content.cta.body} Talk with{" "}
-                  <Link href="/about" className="svc-seo-name">
-                    {siteConfig.name}
-                  </Link>{" "}
-                  in Kigali, Rwanda, or remotely.
-                </>
-              )}
-            </p>
+            {content.cta.body ? (
+              <p className="svc-cta-body">
+                {content.cta.body.includes(siteConfig.name) ? (
+                  <>
+                    {content.cta.body.split(siteConfig.name)[0]}
+                    <Link href="/about" className="svc-seo-name">
+                      {siteConfig.name}
+                    </Link>
+                    {content.cta.body.split(siteConfig.name).slice(1).join(siteConfig.name)}
+                  </>
+                ) : (
+                  content.cta.body
+                )}
+              </p>
+            ) : null}
           </div>
           <div className="svc-cta-aside">
             <div className="svc-cta-actions">
-              <Link href={content.cta.primaryHref} className="btn btn-primary">
-                <RiCalendarLine size={15} /> {content.cta.primaryLabel} <RiArrowRightLine size={15} />
-              </Link>
-              <a href={content.cta.secondaryHref} className="btn btn-outline">
-                <RiMailLine size={15} /> {content.cta.secondaryLabel}
-              </a>
-              {whatsappUrl ? (
-                <a href={whatsappUrl} className="btn btn-outline" target="_blank" rel="noopener noreferrer">
-                  <RiWhatsappLine size={15} /> {content.cta.whatsappLabel}
+              <div className="svc-cta-actions-primary">
+                <Link href={content.cta.primaryHref} className="btn btn-primary">
+                  {content.cta.primaryLabel} <RiArrowRightLine size={14} />
+                </Link>
+              </div>
+              <div className="svc-cta-actions-secondary">
+                <a href={emailMailto} className="btn btn-outline">
+                  <RiMailLine size={14} /> {content.cta.secondaryLabel}
                 </a>
-              ) : null}
+                {whatsappUrl ? (
+                  <a href={whatsappUrl} className="btn btn-outline" target="_blank" rel="noopener noreferrer">
+                    <RiWhatsappLine size={14} /> {content.cta.whatsappLabel}
+                  </a>
+                ) : null}
+              </div>
             </div>
             {content.cta.trust?.length ? (
               <ul className="svc-cta-trust">
                 {content.cta.trust.map((item) => (
                   <li key={item}>
-                    <RiCheckboxCircleLine size={15} aria-hidden="true" /> {item}
+                    <RiCheckboxCircleLine size={14} aria-hidden="true" /> {item}
                   </li>
                 ))}
               </ul>

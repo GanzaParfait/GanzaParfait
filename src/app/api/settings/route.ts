@@ -5,6 +5,7 @@ import { createServerSupabase, hasServiceRoleKey } from "@/lib/supabase-server";
 import { DEFAULT_SOCIAL_LINKS } from "@/lib/socials";
 import type { SiteSettings } from "@/lib/supabase";
 import { canonicalizeIdentityFields } from "@/lib/identity";
+import { normalizeBookingSettings } from "@/lib/booking";
 
 const PUBLIC_PATHS = ["/", "/projects", "/about", "/contact", "/experience", "/services", "/cv"] as const;
 
@@ -29,8 +30,8 @@ export async function GET() {
   const settings = await getServerSiteSettings();
   return NextResponse.json(settings, {
     headers: {
-      // Clients and CDNs must not serve stale dashboard content as “live”.
-      "Cache-Control": "private, no-store, max-age=0, must-revalidate",
+      // Short private cache — dashboard PUT still revalidates the server tag.
+      "Cache-Control": "private, max-age=60, stale-while-revalidate=120",
     },
   });
 }
@@ -46,7 +47,7 @@ export async function PUT(request: NextRequest) {
 
   let settings: SiteSettings;
   try {
-    settings = canonicalizeIdentityFields((await request.json()) as SiteSettings);
+    settings = normalizeBookingSettings(canonicalizeIdentityFields((await request.json()) as SiteSettings));
   } catch {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }

@@ -5,6 +5,12 @@ import { RiCloseLine, RiSaveLine, RiImageAddLine, RiFolderLine } from "react-ico
 import { Project } from "@/data/site-data";
 import CustomSelect from "@/components/ui/CustomSelect";
 import { useHistoryBackClose, dismissOnBackdrop } from "@/hooks/useHistoryBackClose";
+import {
+  newEvidenceId,
+  PROJECT_EVIDENCE_TYPES,
+  PROJECT_EVIDENCE_VERIFICATION,
+  type ProjectEvidenceItem,
+} from "@/lib/project-evidence";
 
 function projectVideos(project: Partial<Project>) {
   return project.videos?.length ? project.videos : project.video ? [project.video] : [];
@@ -568,6 +574,203 @@ export default function ProjectEditorModal({
               />
             </div>
           </div>
+
+              <div style={{ marginTop: "0.35rem" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem", marginBottom: "0.55rem" }}>
+                  <div>
+                    <label style={{ ...labelStyle, marginBottom: 0 }}>Evidence items</label>
+                    <p style={{ margin: "0.2rem 0 0", fontSize: "0.72rem", color: "var(--color-text-3)" }}>
+                      Verified metrics and outcomes only. Leave value empty when something is not quantified — never invent numbers.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-outline btn-sm"
+                    onClick={() => {
+                      const list = [...(formData.evidence || [])];
+                      list.push({
+                        id: newEvidenceId(),
+                        type: "outcome",
+                        label: "",
+                        verificationStatus: "pending",
+                        public: false,
+                        sortOrder: list.length,
+                      });
+                      set("evidence", list);
+                    }}
+                  >
+                    Add evidence
+                  </button>
+                </div>
+                {(formData.evidence || []).length === 0 ? (
+                  <p style={{ margin: 0, fontSize: "0.78rem", color: "var(--color-text-3)" }}>No evidence items yet.</p>
+                ) : (
+                  <div style={{ display: "grid", gap: "0.65rem" }}>
+                    {(formData.evidence || []).map((item, index) => (
+                      <div
+                        key={item.id}
+                        style={{
+                          display: "grid",
+                          gap: "0.45rem",
+                          padding: "0.7rem",
+                          borderRadius: "0.55rem",
+                          border: "1px solid var(--color-border)",
+                          background: "var(--color-bg-2)",
+                        }}
+                      >
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr auto", gap: "0.45rem", alignItems: "end" }}>
+                          <div>
+                            <label style={labelStyle}>Type</label>
+                            <CustomSelect
+                              value={item.type}
+                              onChange={(value) => {
+                                const list = [...(formData.evidence || [])];
+                                list[index] = { ...item, type: value as ProjectEvidenceItem["type"] };
+                                set("evidence", list);
+                              }}
+                              options={PROJECT_EVIDENCE_TYPES.map((opt) => ({ value: opt.id, label: opt.label }))}
+                            />
+                          </div>
+                          <div>
+                            <label style={labelStyle}>Verification</label>
+                            <CustomSelect
+                              value={item.verificationStatus}
+                              onChange={(value) => {
+                                const list = [...(formData.evidence || [])];
+                                list[index] = {
+                                  ...item,
+                                  verificationStatus: value as ProjectEvidenceItem["verificationStatus"],
+                                };
+                                set("evidence", list);
+                              }}
+                              options={PROJECT_EVIDENCE_VERIFICATION.map((opt) => ({ value: opt.id, label: opt.label }))}
+                            />
+                          </div>
+                          <div>
+                            <label style={labelStyle}>Value (optional)</label>
+                            <input
+                              type="text"
+                              placeholder="e.g. 12 districts — only if verified"
+                              value={item.value || ""}
+                              onChange={(e) => {
+                                const list = [...(formData.evidence || [])];
+                                list[index] = { ...item, value: e.target.value };
+                                set("evidence", list);
+                              }}
+                              style={fieldStyle}
+                            />
+                          </div>
+                          <div style={{ display: "flex", gap: "0.25rem", paddingBottom: "0.15rem" }}>
+                            <button
+                              type="button"
+                              className="btn btn-outline btn-sm"
+                              aria-label="Move up"
+                              disabled={index === 0}
+                              onClick={() => {
+                                const list = [...(formData.evidence || [])];
+                                if (index <= 0) return;
+                                [list[index - 1], list[index]] = [list[index], list[index - 1]];
+                                set(
+                                  "evidence",
+                                  list.map((row, i) => ({ ...row, sortOrder: i })),
+                                );
+                              }}
+                            >
+                              ↑
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-outline btn-sm"
+                              aria-label="Move down"
+                              disabled={index >= (formData.evidence || []).length - 1}
+                              onClick={() => {
+                                const list = [...(formData.evidence || [])];
+                                if (index >= list.length - 1) return;
+                                [list[index], list[index + 1]] = [list[index + 1], list[index]];
+                                set(
+                                  "evidence",
+                                  list.map((row, i) => ({ ...row, sortOrder: i })),
+                                );
+                              }}
+                            >
+                              ↓
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-outline btn-sm"
+                              aria-label="Delete evidence"
+                              onClick={() => {
+                                const list = (formData.evidence || []).filter((_, i) => i !== index);
+                                set(
+                                  "evidence",
+                                  list.map((row, i) => ({ ...row, sortOrder: i })),
+                                );
+                              }}
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+                        <div>
+                          <label style={labelStyle}>Label</label>
+                          <input
+                            type="text"
+                            placeholder="Short public label"
+                            value={item.label}
+                            onChange={(e) => {
+                              const list = [...(formData.evidence || [])];
+                              list[index] = { ...item, label: e.target.value };
+                              set("evidence", list);
+                            }}
+                            style={fieldStyle}
+                          />
+                        </div>
+                        <div>
+                          <label style={labelStyle}>Description</label>
+                          <textarea
+                            rows={2}
+                            placeholder="Operational improvement without inventing percentages"
+                            value={item.description || ""}
+                            onChange={(e) => {
+                              const list = [...(formData.evidence || [])];
+                              list[index] = { ...item, description: e.target.value };
+                              set("evidence", list);
+                            }}
+                            style={fieldStyle}
+                          />
+                        </div>
+                        <div>
+                          <label style={labelStyle}>Source note (admin only)</label>
+                          <input
+                            type="text"
+                            placeholder="Private verification note — never shown publicly"
+                            value={item.sourceNote || ""}
+                            onChange={(e) => {
+                              const list = [...(formData.evidence || [])];
+                              list[index] = { ...item, sourceNote: e.target.value };
+                              set("evidence", list);
+                            }}
+                            style={fieldStyle}
+                          />
+                        </div>
+                        <label style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", fontSize: "0.78rem", fontWeight: 600 }}>
+                          <input
+                            type="checkbox"
+                            checked={item.public}
+                            onChange={(e) => {
+                              const list = [...(formData.evidence || [])];
+                              list[index] = { ...item, public: e.target.checked };
+                              set("evidence", list);
+                            }}
+                          />
+                          Public
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <div>
                 <label style={labelStyle}>Case study file</label>
                 <div style={{ display: "flex", gap: "0.5rem" }}>

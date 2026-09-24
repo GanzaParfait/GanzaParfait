@@ -75,11 +75,14 @@ https://github.com/GanzaParfait
 
 ## Public contact
 
-Email: hello@princeparfait.com
+Primary email: hello@princeparfait.com
 
-Additional public professional profiles may be linked when they contribute
-meaningfully to the professional identity. Do not add social accounts only
-to make the footer look full.
+Secondary professional email: ganzaparfait7@gmail.com
+
+Keep the primary address as the public contact default. Surface the secondary
+selectively (contact details, CV when the layout supports two addresses,
+structured data, site search). Do not repeat the Gmail address throughout
+page copy for SEO. Runtime source of truth: Site Settings → Primary / Secondary email.
 
 ---
 

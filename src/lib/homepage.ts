@@ -214,7 +214,7 @@ export const DEFAULT_HOMEPAGE: HomepageContent = {
     moreLabel: "More projects",
     moreTitle: "Explore more of my work.",
     moreBody:
-      "Platforms, business systems and research-oriented products, each built to solve a real operational problem.",
+      "Platforms, business systems and research products built for real operational needs.",
     rail: ["Software", "Research", "Data"],
     stories: [
       story("askfield", {
@@ -392,23 +392,9 @@ export const DEFAULT_HOMEPAGE: HomepageContent = {
     items: [
       {
         icon: "chat",
-        title: "Introduction",
-        time: "20 min",
-        body: "An idea, or a first introduction.",
-        href: "/contact",
-      },
-      {
-        icon: "doc",
-        title: "Project discovery",
-        time: "30 min",
-        body: "Requirements and whether a collaboration fits.",
-        href: "/contact",
-      },
-      {
-        icon: "people",
-        title: "Partnership discussion",
-        time: "45 min",
-        body: "Lerony, a venture, or an institutional brief.",
+        title: "Send a message",
+        time: "Form",
+        body: "Share context through the contact form.",
         href: "/contact",
       },
     ],
@@ -563,20 +549,36 @@ export function homepageFrom(settings: SiteSettings): HomepageContent {
         topics: savedSpeaking.topics?.length ? savedSpeaking.topics : DEFAULT_HOMEPAGE.speaking.topics,
       };
     })(),
-    booking: {
-      ...DEFAULT_HOMEPAGE.booking,
-      ...saved.booking,
-      rails: saved.booking?.rails?.length ? saved.booking.rails : DEFAULT_HOMEPAGE.booking.rails,
-      items: (saved.booking?.items?.length ? saved.booking.items : DEFAULT_HOMEPAGE.booking.items).map((item, index) => {
-        const fallback = DEFAULT_HOMEPAGE.booking.items[index];
-        return {
-          title: item.title || fallback?.title || "",
-          time: item.time || fallback?.time || "",
-          body: item.body || fallback?.body || "",
-          icon: item.icon || fallback?.icon || "chat",
-          href: item.href || fallback?.href || "/contact",
-        };
-      }),
-    },
+    booking: (() => {
+      const merged = {
+        ...DEFAULT_HOMEPAGE.booking,
+        ...saved.booking,
+        rails: saved.booking?.rails?.length ? saved.booking.rails : DEFAULT_HOMEPAGE.booking.rails,
+        items: (saved.booking?.items?.length ? saved.booking.items : DEFAULT_HOMEPAGE.booking.items).map((item, index) => {
+          const fallback = DEFAULT_HOMEPAGE.booking.items[index];
+          return {
+            title: item.title || fallback?.title || "",
+            time: item.time || fallback?.time || "",
+            body: item.body || fallback?.body || "",
+            icon: item.icon || fallback?.icon || "chat",
+            href: item.href || fallback?.href || "/contact",
+          };
+        }),
+      };
+      // Drop legacy fake multi-duration cards that all pointed at the same booking URL.
+      const times = merged.items.map((item) => item.time.trim().toLowerCase());
+      if (
+        merged.items.length >= 3 &&
+        times.includes("20 min") &&
+        times.includes("30 min") &&
+        times.includes("45 min")
+      ) {
+        merged.items = DEFAULT_HOMEPAGE.booking.items.map((item) => ({
+          ...item,
+          href: item.href || "/contact",
+        }));
+      }
+      return merged;
+    })(),
   };
 }

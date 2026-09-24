@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { primaryEmail } from "@/lib/contact-emails";
 import { mailboxes } from "@/lib/env";
 import {
   brandEmailHtml,
@@ -307,6 +308,112 @@ export async function contactNotifyMail(
       },
       site,
     ),
+    html: brandEmailHtml(content, site),
+  } satisfies OutboundMail;
+}
+
+/** `BrandMailContent.detail` is injected as raw HTML, so submitted text must be escaped. */
+function escapeDetail(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/\n/g, "<br />");
+}
+
+export async function testimonialAckMail(
+  input: { name: string; email: string },
+  settings?: SiteSettings,
+) {
+  const site = settings || (await getServerSiteSettings());
+  const brand = emailBrandFromSettings(site);
+  const first = input.name.split(/\s+/)[0] || input.name;
+  const content = {
+    preheader: `Thanks ${first} — your testimonial is with me for review.`,
+    eyebrow: "Testimonial received",
+    title: `Thank you, ${first}.`,
+    body:
+      "Your testimonial has been received and will be reviewed before publication. Nothing goes live until I have read it — reply to this email if you would like to change or withdraw it.",
+    ctaLabel: "Visit the site",
+    ctaHref: brand.origin,
+  };
+  return {
+    to: input.email,
+    from: mailboxes.hello() || mailboxes.thanks(),
+    replyTo: mailboxes.replyTo(),
+    subject: `Thanks for your testimonial — ${site.siteTitle || "Prince Parfait GANZA"}`,
+    text: brandEmailText(content, site),
+    html: brandEmailHtml(content, site),
+  } satisfies OutboundMail;
+}
+
+export async function testimonialNotifyMail(
+  input: {
+    name: string;
+    email: string;
+    body: string;
+    organization?: string;
+    relationship?: string;
+    project?: string;
+    location?: string;
+  },
+  settings?: SiteSettings,
+) {
+  const site = settings || (await getServerSiteSettings());
+  const brand = emailBrandFromSettings(site);
+  const who = [input.name, input.organization].filter(Boolean).join(" · ");
+  const meta = [
+    input.relationship ? `Relationship: ${input.relationship}` : "",
+    input.project ? `Project: ${input.project}` : "",
+    input.location ? `Location: ${input.location}` : "",
+    `Email: ${input.email}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+  const plainDetail = `${who}\n${meta}\n\n${input.body}`;
+  const content = {
+    preheader: `${input.name} submitted a testimonial for review.`,
+    eyebrow: "Needs review",
+    title: "New testimonial awaiting moderation",
+    body: `${who} submitted a testimonial. Review it in the dashboard — it stays unpublished until you confirm and publish.`,
+    detail: escapeDetail(plainDetail),
+    ctaLabel: "Open testimonials dashboard",
+    ctaHref: `${brand.origin}/dashboard/testimonials`,
+  };
+  return {
+    to: primaryEmail(site) || mailboxes.contact(),
+    from: mailboxes.noreply(),
+    replyTo: input.email,
+    subject: `Testimonial for review — ${input.name}`,
+    text: brandEmailText({ ...content, detail: plainDetail }, site),
+    html: brandEmailHtml(content, site),
+  } satisfies OutboundMail;
+}
+
+export async function testimonialPublishedMail(
+  to: string,
+  input: { name: string; shareUrl: string; project?: string },
+  settings?: SiteSettings,
+) {
+  const site = settings || (await getServerSiteSettings());
+  const brand = emailBrandFromSettings(site);
+  const first = input.name.split(/\s+/)[0] || input.name;
+  const projectLine = input.project ? ` It is listed with ${input.project}.` : "";
+  const content = {
+    preheader: `Your testimonial is live on ${brand.origin.replace(/^https?:\/\//, "")}.`,
+    eyebrow: "Now published",
+    title: `Your words are live, ${first}.`,
+    body: `Thank you again — your testimonial is now published on the site.${projectLine} You can view and share it with the link below.`,
+    ctaLabel: "View your testimonial",
+    ctaHref: input.shareUrl,
+  };
+  return {
+    to,
+    from: mailboxes.hello() || mailboxes.thanks(),
+    replyTo: mailboxes.replyTo(),
+    subject: `Your testimonial is published — ${site.siteTitle || "Prince Parfait GANZA"}`,
+    text: brandEmailText(content, site),
     html: brandEmailHtml(content, site),
   } satisfies OutboundMail;
 }

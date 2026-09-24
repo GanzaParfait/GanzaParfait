@@ -195,14 +195,27 @@ export function buildPersonJsonLd() {
         url: "https://www.alxafrica.com",
       },
     ],
-    contactPoint: {
-      "@type": "ContactPoint",
-      contactType: "professional inquiries",
-      email: siteConfig.contact.email,
-      telephone: "+250792054846",
-      areaServed: ["RW", "Africa"],
-      availableLanguage: ["en"],
-    },
+    contactPoint: [
+      {
+        "@type": "ContactPoint",
+        contactType: "professional inquiries",
+        email: siteConfig.contact.email,
+        telephone: "+250792054846",
+        areaServed: ["RW", "Africa"],
+        availableLanguage: ["en"],
+      },
+      ...(siteConfig.contact.emailSecondary
+        ? [
+            {
+              "@type": "ContactPoint",
+              contactType: "professional inquiries (secondary)",
+              email: siteConfig.contact.emailSecondary,
+              areaServed: ["RW", "Africa"],
+              availableLanguage: ["en"],
+            },
+          ]
+        : []),
+    ],
     sameAs: [
       siteConfig.social.linkedin,
       siteConfig.social.github,
@@ -245,9 +258,11 @@ export function buildLeronyOrganizationJsonLd() {
     "@id": LERONY_ORG_ID,
     name: "LERONY Ltd",
     url: "https://lerony.com",
+    email: siteConfig.company.email,
+    telephone: siteConfig.company.phone,
     foundingDate: "2025",
     description:
-      "A Rwanda-based technology and innovation company building practical solutions that help organizations, businesses, and communities operate better, grow, and prepare for the future.",
+      "A Rwanda-based technology and innovation company building practical solutions that help organizations, businesses, and communities operate better, grow, and prepare for the future. Contact: info@lerony.com · +250 799 656 580.",
     logo: absoluteAssetUrl("/images/projects/logos/lerony-icon.png"),
     image: absoluteAssetUrl("/images/projects/lerony/lerony-wide.jpg"),
     address: {
@@ -256,6 +271,16 @@ export function buildLeronyOrganizationJsonLd() {
       addressCountry: "RW",
     },
     founder: personRef(),
+    contactPoint: [
+      {
+        "@type": "ContactPoint",
+        contactType: "customer service",
+        email: siteConfig.company.email,
+        telephone: siteConfig.company.phone,
+        areaServed: "RW",
+        availableLanguage: ["en", "fr"],
+      },
+    ],
     knowsAbout: [
       "Technology and innovation",
       "Digital solutions",

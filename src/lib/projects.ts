@@ -183,7 +183,16 @@ export function mergeProjectCatalog(records?: Project[] | null): Project[] {
           title: record.title || base.title,
           description: record.description || base.description,
           links: { ...base.links, ...record.links },
-          technologies: record.technologies?.length ? record.technologies : base.technologies,
+          technologies: (() => {
+            const fromRecord = record.technologies?.length ? record.technologies : [];
+            const fromBase = base.technologies || [];
+            // Keep verified seed research/tech tags when a dashboard override
+            // accidentally drops them (AskField toolkit evidence depends on this).
+            if (base.id === "askfield") {
+              return [...new Set([...fromBase, ...fromRecord])];
+            }
+            return fromRecord.length ? fromRecord : fromBase;
+          })(),
           capabilities: record.capabilities?.length ? record.capabilities : base.capabilities,
           // Allow clearing collaborators with an explicit empty array from Dashboard/migration.
           collaborators: Array.isArray(record.collaborators)

@@ -6,7 +6,17 @@ import {
   cvPdfFilename,
   isCvTemplateId,
   resolveCvDocument,
+  type CvResolvedDocument,
 } from "@/lib/cv";
+import { resolveLibraryDocument } from "@/lib/cv-document-resolve";
+import {
+  cvDocumentFilename,
+  defaultPublicCvDocument,
+  findCvDocument,
+  getCvLibrary,
+  isCvDocumentPubliclyAccessible,
+  type CvDocument,
+} from "@/lib/cv-library";
 import { getServerSiteSettings } from "@/lib/site-settings-server";
 
 export const runtime = "nodejs";
@@ -19,21 +29,51 @@ function isAdmin(request: NextRequest): boolean {
 export async function GET(request: NextRequest) {
   try {
     const settings = await getServerSiteSettings();
-    const raw = request.nextUrl.searchParams.get("template");
-    const template = isCvTemplateId(raw) ? raw : undefined;
-    const doc = resolveCvDocument(settings, template, { origin: request.nextUrl.origin });
     const admin = isAdmin(request);
+    const origin = request.nextUrl.origin;
+    const forceDownload = request.nextUrl.searchParams.get("download") === "1";
+    const rawTemplate = request.nextUrl.searchParams.get("template");
+    const docId = request.nextUrl.searchParams.get("doc");
 
-    if (!canAccessCvTemplate(settings, doc.template, admin)) {
-      return NextResponse.json({ error: "This CV format is not public." }, { status: 403 });
+    let resolved: CvResolvedDocument | null = null;
+    let filename = "Prince-Parfait-GANZA-CV.pdf";
+    let pageSize: "A4" | "LETTER" = "A4";
+
+    // Library documents take precedence; `?template=` keeps legacy links working.
+    if (docId || !rawTemplate) {
+      const library = getCvLibrary(settings);
+      const document: CvDocument | null = docId
+        ? findCvDocument(library, docId)
+        : defaultPublicCvDocument(library);
+
+      if (docId && !document) {
+        return NextResponse.json({ error: "CV document not found." }, { status: 404 });
+      }
+      if (document && !admin && !isCvDocumentPubliclyAccessible(library, document)) {
+        return NextResponse.json({ error: "This CV is not public." }, { status: 403 });
+      }
+
+      if (document) {
+        resolved = resolveLibraryDocument(document, { origin });
+        filename = cvDocumentFilename(document);
+        pageSize = document.pageSize === "letter" ? "LETTER" : "A4";
+      }
+    }
+
+    if (!resolved) {
+      const template = isCvTemplateId(rawTemplate) ? rawTemplate : undefined;
+      const doc = resolveCvDocument(settings, template, { origin });
+      if (!canAccessCvTemplate(settings, doc.template, admin)) {
+        return NextResponse.json({ error: "This CV format is not public." }, { status: 403 });
+      }
+      resolved = doc;
+      filename = cvPdfFilename(doc.template);
     }
 
     const buffer = await renderToBuffer(
-      <CvPdfDocument doc={doc} origin={request.nextUrl.origin} />
+      <CvPdfDocument doc={resolved} origin={origin} size={pageSize} />
     );
-    const filename = cvPdfFilename(doc.template);
     const bytes = new Uint8Array(buffer);
-    const forceDownload = request.nextUrl.searchParams.get("download") === "1";
 
     return new NextResponse(bytes, {
       status: 200,

@@ -60,12 +60,23 @@ export const ENGINEERING_TOOLKIT: ToolkitCategory[] = [
     id: "research",
     title: "Research & Data Collection",
     items: [
-      { name: "XLSForm" },
-      { name: "Survey Logic", aliases: ["questionnaire logic"] },
-      { name: "CAPI" },
-      { name: "CATI" },
-      { name: "CAWI" },
-      { name: "GPS / Geolocation", aliases: ["GPS / geolocation", "GPS"] },
+      { name: "XLSForm", aliases: ["xlsform"] },
+      {
+        name: "Survey Logic",
+        aliases: [
+          "questionnaire logic",
+          "survey programming",
+          "skip logic",
+          "Survey Logic",
+        ],
+      },
+      { name: "CAPI", aliases: ["capi"] },
+      { name: "CATI", aliases: ["cati"] },
+      { name: "CAWI", aliases: ["cawi"] },
+      {
+        name: "GPS / Geolocation",
+        aliases: ["GPS / geolocation", "GPS-enabled", "GPS", "geolocation"],
+      },
     ],
   },
   {
@@ -92,10 +103,29 @@ export const ENGINEERING_TOOLKIT: ToolkitCategory[] = [
   },
 ];
 
+function normalizeTechToken(value: string) {
+  return value.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
 function techMatches(projectTech: string, item: ToolkitItem): boolean {
-  const hay = projectTech.trim().toLowerCase();
-  if (hay === item.name.toLowerCase()) return true;
-  return (item.aliases || []).some((alias) => hay === alias.toLowerCase() || hay.includes(alias.toLowerCase()));
+  const hay = normalizeTechToken(projectTech);
+  const name = normalizeTechToken(item.name);
+  if (!hay) return false;
+  if (hay === name) return true;
+  if (hay.includes(name) || name.includes(hay)) return true;
+  return (item.aliases || []).some((alias) => {
+    const needle = normalizeTechToken(alias);
+    return hay === needle || hay.includes(needle) || needle.includes(hay);
+  });
+}
+
+function projectEvidenceBag(project: Project): string[] {
+  return [
+    ...(project.technologies || []),
+    ...(project.capabilities || []),
+    ...(project.features || []),
+    ...(project.highlights || []),
+  ];
 }
 
 export function evidenceProjectsForTech(
@@ -103,7 +133,7 @@ export function evidenceProjectsForTech(
   records?: Project[] | null,
 ): Project[] {
   return listListedProjects(records).filter((project) =>
-    (project.technologies || []).some((tech) => techMatches(tech, item)),
+    projectEvidenceBag(project).some((tech) => techMatches(tech, item)),
   );
 }
 

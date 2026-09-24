@@ -807,10 +807,10 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
     ],
   },
   leronyNote:
-    "Larger commercial and organizational engagements may be delivered through LERONY Ltd. This personal site remains the place to understand the person, capabilities and evidence.",
+    "Larger commercial and organizational engagements may be delivered through LERONY Ltd (info@lerony.com · +250 799 656 580). This personal site remains the place to understand the person, capabilities and evidence.",
   cta: {
     label: "Let's work together",
-    title: "Have a project or challenge in mind?",
+    title: "Have a project in mind?",
     body: "Start with the problem. We can figure out the right approach from there. Talk with Prince Parfait GANZA in Kigali, Rwanda, or remotely.",
     primaryLabel: "Start a conversation",
     primaryHref: "/contact",
@@ -971,20 +971,30 @@ export function servicesPageFrom(
           note: saved.process?.note?.trim() || DEFAULT_SERVICES_PAGE.process.note,
           steps: saved.process?.steps?.length ? saved.process.steps : DEFAULT_SERVICES_PAGE.process.steps,
         },
-    leronyNote: saved.leronyNote?.trim() || DEFAULT_SERVICES_PAGE.leronyNote,
+    leronyNote: (() => {
+      const note = saved.leronyNote?.trim() || "";
+      if (!note || (!/info@lerony\.com/i.test(note) && /LERONY Ltd\. This personal site/i.test(note))) {
+        return DEFAULT_SERVICES_PAGE.leronyNote;
+      }
+      return note || DEFAULT_SERVICES_PAGE.leronyNote;
+    })(),
     cta: {
       ...DEFAULT_SERVICES_PAGE.cta,
       ...saved.cta,
       label: saved.cta?.label?.trim() || DEFAULT_SERVICES_PAGE.cta.label,
       trust: saved.cta?.trust?.length ? saved.cta.trust : DEFAULT_SERVICES_PAGE.cta.trust,
       ...(saved.cta?.title === "Not sure which service fits?" ||
+      saved.cta?.title === "Have a project or challenge in mind?" ||
       saved.cta?.body ===
         "Start with the problem. We can figure out the right approach from there." ||
       saved.cta?.body ===
-        "Start with the problem. We can figure out the right approach from there. Talk with Prince Parfait GANZA in Kigali, Rwanda."
+        "Start with the problem. We can figure out the right approach from there. Talk with Prince Parfait GANZA in Kigali, Rwanda." ||
+      saved.cta?.body ===
+        "Start with the problem. We can figure out the right approach from there. Talk with Prince Parfait GANZA in Kigali, Rwanda, or remotely."
         ? {
             title:
-              saved.cta?.title === "Not sure which service fits?"
+              saved.cta?.title === "Not sure which service fits?" ||
+              saved.cta?.title === "Have a project or challenge in mind?"
                 ? DEFAULT_SERVICES_PAGE.cta.title
                 : saved.cta?.title?.trim() || DEFAULT_SERVICES_PAGE.cta.title,
             body: DEFAULT_SERVICES_PAGE.cta.body,

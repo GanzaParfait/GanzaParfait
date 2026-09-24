@@ -42,6 +42,12 @@ import FooterFocusDragPreview from "@/components/dashboard/FooterFocusDragPrevie
 import CustomSelect from "@/components/ui/CustomSelect";
 import { setting } from "@/lib/hero";
 import { defaultFooterQuote } from "@/data/site-data";
+import {
+  DEFAULT_BOOKING_OPTION,
+  MAX_BOOKING_OPTIONS,
+  normalizeBookingSettings,
+  type BookingOption,
+} from "@/lib/booking";
 
 const inputStyle = {
   width: "100%",
@@ -58,7 +64,7 @@ type SettingsView = "identity" | "contact" | "socials" | "navbar" | "footer" | "
 
 const VIEWS: { id: SettingsView; label: string; hint: string; icon: typeof RiUser3Line }[] = [
   { id: "identity", label: "Identity", hint: "Name, location, roles, bio", icon: RiUser3Line },
-  { id: "contact", label: "Public contact", hint: "Email, phone, WhatsApp", icon: RiPhoneLine },
+  { id: "contact", label: "Public contact", hint: "Email, phone, booking", icon: RiPhoneLine },
   { id: "socials", label: "Social links", hint: "Where each link appears", icon: RiShareLine },
   { id: "navbar", label: "Public navbar", hint: "Pill or full width", icon: RiLayoutTopLine },
   { id: "footer", label: "Footer", hint: "Company image and layout", icon: RiImageLine },
@@ -87,10 +93,10 @@ export default function SettingsPage() {
   const { runSave, saving } = useDashboardFeedback();
 
   useEffect(() => {
-    const loaded = getLocalSettings();
+    const loaded = normalizeBookingSettings(getLocalSettings());
     setSettings(withDefaultFooterQuote(loaded));
     void fetchRemoteSettings().then((remote) => {
-      if (remote) setSettings(withDefaultFooterQuote(remote));
+      if (remote) setSettings(withDefaultFooterQuote(normalizeBookingSettings(remote)));
     });
     const applyHash = () => {
       const hash = window.location.hash.replace("#", "") as SettingsView;
@@ -216,8 +222,23 @@ export default function SettingsPage() {
 
           {view === "contact" && (
             <div className="dash-form-grid" style={{ maxWidth: "44rem" }}>
-              <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>Email
+              <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>Primary email
                 <input type="email" style={{ ...inputStyle, marginTop: "0.3rem" }} value={settings.contactEmail} onChange={(e) => patch({ contactEmail: e.target.value })} />
+                <span style={{ display: "block", fontWeight: 500, color: "#94a3b8", marginTop: "0.3rem" }}>
+                  Public default (hero, footer, contact CTAs). Prefer the domain mailbox.
+                </span>
+              </label>
+              <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>Secondary email
+                <input
+                  type="email"
+                  style={{ ...inputStyle, marginTop: "0.3rem" }}
+                  value={settings.contactEmailSecondary || ""}
+                  onChange={(e) => patch({ contactEmailSecondary: e.target.value })}
+                  placeholder="optional@example.com"
+                />
+                <span style={{ display: "block", fontWeight: 500, color: "#94a3b8", marginTop: "0.3rem" }}>
+                  Shown selectively on Contact, CV, schema, and search — not repeated in marketing copy.
+                </span>
               </label>
               <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>Phone (display)
                 <input style={{ ...inputStyle, marginTop: "0.3rem" }} value={settings.phoneNumber || ""} onChange={(e) => patch({ phoneNumber: e.target.value })} />
@@ -225,18 +246,169 @@ export default function SettingsPage() {
               <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>WhatsApp number (digits)
                 <input style={{ ...inputStyle, marginTop: "0.3rem" }} value={settings.whatsappNumber} onChange={(e) => patch({ whatsappNumber: e.target.value })} />
               </label>
-              <label style={{ gridColumn: "1 / -1", fontSize: "0.75rem", fontWeight: 700, color: "#334155" }}>
-                Google Calendar booking page
-                <input
-                  style={{ ...inputStyle, marginTop: "0.3rem" }}
-                  value={settings.bookingCalendarUrl || ""}
-                  onChange={(e) => patch({ bookingCalendarUrl: e.target.value })}
-                  placeholder="https://calendar.app.google/…"
-                />
-                <span style={{ display: "block", fontWeight: 500, color: "#94a3b8", marginTop: "0.3rem" }}>
-                  Public appointment link only. Leave empty until the booking page exists. Private calendar addresses stay off the site.
-                </span>
-              </label>
+
+              <div style={{ gridColumn: "1 / -1", border: "1px solid #e2e8f0", borderRadius: "0.75rem", padding: "0.9rem", background: "#fff" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem", marginBottom: "0.75rem" }}>
+                  <div>
+                    <p style={{ margin: 0, fontSize: "0.8rem", fontWeight: 800, color: "#0f172a" }}>Google Calendar booking</p>
+                    <p style={{ margin: "0.2rem 0 0", fontSize: "0.72rem", color: "#64748b" }}>
+                      Powers Let&apos;s Talk, Contact, ⌘K, and the homepage conversation section. Public appointment links only.
+                    </p>
+                  </div>
+                  <label style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", fontSize: "0.75rem", fontWeight: 700, color: "#334155", whiteSpace: "nowrap" }}>
+                    <input
+                      type="checkbox"
+                      checked={settings.bookingEnabled !== false}
+                      onChange={(e) => patch({ bookingEnabled: e.target.checked })}
+                    />
+                    Enable meeting booking
+                  </label>
+                </div>
+
+                {(settings.bookingOptions?.length ? settings.bookingOptions : [{ ...DEFAULT_BOOKING_OPTION, url: settings.bookingCalendarUrl || "" }])
+                  .slice(0, MAX_BOOKING_OPTIONS)
+                  .map((option, index) => {
+                    const updateOption = (next: Partial<BookingOption>) => {
+                      const current = settings.bookingOptions?.length
+                        ? settings.bookingOptions
+                        : [{ ...DEFAULT_BOOKING_OPTION, url: settings.bookingCalendarUrl || "" }];
+                      const options = current.map((item, itemIndex) =>
+                        itemIndex === index ? { ...item, ...next } : item,
+                      );
+                      patch(normalizeBookingSettings({ ...settings, bookingOptions: options }));
+                    };
+                    return (
+                      <div
+                        key={option.id || index}
+                        style={{
+                          border: "1px solid #e2e8f0",
+                          borderRadius: "0.65rem",
+                          padding: "0.75rem",
+                          marginBottom: "0.65rem",
+                          background: option.enabled === false ? "#f8fafc" : "#fff",
+                        }}
+                      >
+                        <div style={{ display: "flex", justifyContent: "space-between", gap: "0.75rem", marginBottom: "0.55rem" }}>
+                          <strong style={{ fontSize: "0.78rem", color: "#0f172a" }}>Option {index + 1}</strong>
+                          <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+                            <label style={{ display: "inline-flex", alignItems: "center", gap: "0.3rem", fontSize: "0.72rem", fontWeight: 600, color: "#475569" }}>
+                              <input
+                                type="checkbox"
+                                checked={option.enabled !== false}
+                                onChange={(e) => updateOption({ enabled: e.target.checked })}
+                              />
+                              Enabled
+                            </label>
+                            {(settings.bookingOptions?.length || 0) > 1 ? (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const options = (settings.bookingOptions || []).filter((_, itemIndex) => itemIndex !== index);
+                                  patch(normalizeBookingSettings({ ...settings, bookingOptions: options }));
+                                }}
+                                style={{ border: "none", background: "none", color: "#b91c1c", fontSize: "0.72rem", fontWeight: 700, cursor: "pointer" }}
+                              >
+                                Remove
+                              </button>
+                            ) : null}
+                          </div>
+                        </div>
+                        <div style={{ display: "grid", gridTemplateColumns: "1.4fr 0.6fr", gap: "0.55rem" }}>
+                          <label style={{ fontSize: "0.72rem", fontWeight: 700, color: "#334155" }}>
+                            Title
+                            <input
+                              style={{ ...inputStyle, marginTop: "0.25rem" }}
+                              value={option.label}
+                              onChange={(e) => updateOption({ label: e.target.value })}
+                              placeholder="30-minute meeting"
+                            />
+                          </label>
+                          <label style={{ fontSize: "0.72rem", fontWeight: 700, color: "#334155" }}>
+                            Duration (minutes)
+                            <input
+                              type="number"
+                              min={5}
+                              max={180}
+                              style={{ ...inputStyle, marginTop: "0.25rem" }}
+                              value={option.durationMinutes || 30}
+                              onChange={(e) => updateOption({ durationMinutes: Number(e.target.value) || 30 })}
+                            />
+                          </label>
+                          <label style={{ gridColumn: "1 / -1", fontSize: "0.72rem", fontWeight: 700, color: "#334155" }}>
+                            Public Google Calendar URL
+                            <input
+                              style={{ ...inputStyle, marginTop: "0.25rem" }}
+                              value={option.url || ""}
+                              onChange={(e) => updateOption({ url: e.target.value })}
+                              placeholder="https://calendar.app.google/…"
+                            />
+                          </label>
+                          <label style={{ gridColumn: "1 / -1", fontSize: "0.72rem", fontWeight: 700, color: "#334155" }}>
+                            Short description
+                            <input
+                              style={{ ...inputStyle, marginTop: "0.25rem" }}
+                              value={option.description || ""}
+                              onChange={(e) => updateOption({ description: e.target.value })}
+                              placeholder="Choose an available time that works for you."
+                            />
+                          </label>
+                          <label style={{ fontSize: "0.72rem", fontWeight: 700, color: "#334155" }}>
+                            Meeting type
+                            <input
+                              style={{ ...inputStyle, marginTop: "0.25rem" }}
+                              value={option.meetingType || "Google Meet"}
+                              onChange={(e) => updateOption({ meetingType: e.target.value })}
+                              placeholder="Google Meet"
+                            />
+                          </label>
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                {(settings.bookingOptions?.length || 1) < MAX_BOOKING_OPTIONS ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const current = settings.bookingOptions?.length
+                        ? settings.bookingOptions
+                        : [{ ...DEFAULT_BOOKING_OPTION, url: settings.bookingCalendarUrl || "" }];
+                      patch(
+                        normalizeBookingSettings({
+                          ...settings,
+                          bookingOptions: [
+                            ...current,
+                            {
+                              ...DEFAULT_BOOKING_OPTION,
+                              id: `meet-${current.length + 1}`,
+                              label: "Additional meeting",
+                              featured: false,
+                              url: "",
+                            },
+                          ],
+                        }),
+                      );
+                    }}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.35rem",
+                      border: "1px dashed #cbd5e1",
+                      background: "#f8fafc",
+                      borderRadius: "0.5rem",
+                      padding: "0.45rem 0.7rem",
+                      fontSize: "0.75rem",
+                      fontWeight: 700,
+                      color: "#334155",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <RiAddLine size={15} /> Add booking option
+                  </button>
+                ) : (
+                  <p style={{ margin: 0, fontSize: "0.72rem", color: "#94a3b8" }}>Maximum of {MAX_BOOKING_OPTIONS} public booking options.</p>
+                )}
+              </div>
             </div>
           )}
 

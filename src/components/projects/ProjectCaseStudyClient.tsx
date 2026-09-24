@@ -26,8 +26,10 @@ import { useMemo, useState, type ReactNode } from "react";
 import { type Project } from "@/data/site-data";
 import ShareActions from "@/components/ui/ShareActions";
 import MediaPreview, { type PreviewItem } from "@/components/ui/MediaPreview";
+import ProjectTestimonials from "@/components/testimonials/ProjectTestimonials";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { isVideoUrl, listListedProjects } from "@/lib/projects";
+import { publicEvidence } from "@/lib/project-evidence";
 
 function PosterVideo({ src, poster, title }: { src: string; poster?: string; title: string }) {
   const [ready, setReady] = useState(false);
@@ -167,7 +169,11 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
     { id: "features", label: "Process", show: Boolean(project.features?.length || project.solution) },
     { id: "stack", label: "Architecture", show: Boolean(project.technologies?.length || project.capabilities?.length || project.websiteTechnologies?.length) },
     { id: "media", label: "Screens", show: mediaItems.length > 0 },
-    { id: "results", label: "Outcome", show: Boolean(project.outcome || project.result) },
+    {
+      id: "results",
+      label: "Outcome",
+      show: Boolean(project.outcome || project.result || publicEvidence(project.evidence).length),
+    },
     { id: "learned", label: "Lessons", show: Boolean(project.learned) },
   ].filter((tab) => tab.show);
   const [tab, setTab] = useState(tabs[0]?.id || "overview");
@@ -315,6 +321,8 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
           </section>
         ) : null}
 
+        <ProjectTestimonials projectId={project.id} />
+
         <div className="case-layout" data-page-section>
           <div className="case-main">
             <div className="case-tabs" role="tablist" aria-label="Case study sections">
@@ -438,8 +446,26 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
               )}
               {tab === "results" && (
                 <>
-                  <h2>Outcome</h2>
-                  <p>{project.outcome || project.result}</p>
+                  {project.outcome || project.result ? (
+                    <>
+                      <h2>Outcome</h2>
+                      <p>{project.outcome || project.result}</p>
+                    </>
+                  ) : null}
+                  {publicEvidence(project.evidence).length ? (
+                    <div className="case-evidence">
+                      <h2>{project.outcome || project.result ? "Evidence" : "Impact & evidence"}</h2>
+                      <ul className="case-evidence-list">
+                        {publicEvidence(project.evidence).map((item) => (
+                          <li key={item.id}>
+                            {item.value ? <strong className="case-evidence-value">{item.value}</strong> : null}
+                            <span className="case-evidence-label">{item.label}</span>
+                            {item.description ? <p>{item.description}</p> : null}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
                 </>
               )}
               {tab === "media" && mediaItems.length > 0 && (

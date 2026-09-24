@@ -3,7 +3,9 @@
 import { useMemo } from "react";
 import {
   resolveCvDocument,
+  resolvedSectionKey,
   splitDisplayName,
+  splitResolvedSections,
   type CvResolvedDocument,
   type CvResolvedItem,
   type CvSectionId,
@@ -57,6 +59,20 @@ function ProSectionBody({ section }: { section: CvResolvedDocument["sections"][n
   if (section.id === "profile" && section.body) {
     return <p className="cv-pro-body">{section.body}</p>;
   }
+  if (section.chips?.length) {
+    return (
+      <>
+        {section.body ? <p className="cv-pro-body">{section.body}</p> : null}
+        <div className="cv-pro-chip-grid">
+          {section.chips.map((chip) => (
+            <span key={chip} className="cv-pro-chip">
+              {chip}
+            </span>
+          ))}
+        </div>
+      </>
+    );
+  }
   if (section.id === "skills" && section.skillsByCategory?.length) {
     return (
       <div className="cv-pro-skills">
@@ -96,16 +112,18 @@ function ProSectionBody({ section }: { section: CvResolvedDocument["sections"][n
   if (section.id === "projects") {
     return section.items.map((item) => <ProEntry key={item.key} item={item} mode="project" />);
   }
+  if (section.body && !section.items.length) {
+    return <p className="cv-pro-body">{section.body}</p>;
+  }
   return section.items.map((item) => <ProEntry key={item.key} item={item} />);
 }
 
 function ProfessionalSheet({ doc }: { doc: CvResolvedDocument }) {
-  const byId = new Map(doc.sections.map((s) => [s.id, s]));
-  const full = FULL_FLOW.map((id) => byId.get(id)).filter(Boolean) as CvResolvedDocument["sections"];
-  const left = LEFT_COL.map((id) => byId.get(id)).filter(Boolean) as CvResolvedDocument["sections"];
-  const right = RIGHT_COL.map((id) => byId.get(id)).filter(Boolean) as CvResolvedDocument["sections"];
-  const placed = new Set([...FULL_FLOW, ...LEFT_COL, ...RIGHT_COL]);
-  const extras = doc.sections.filter((s) => !placed.has(s.id));
+  const { full, left, right, extras } = splitResolvedSections(doc.sections, {
+    full: FULL_FLOW,
+    left: LEFT_COL,
+    right: RIGHT_COL,
+  });
   const tagline =
     doc.appearance.tagline?.trim() ||
     "Technology for people. Practical solutions for real impact.";
@@ -145,6 +163,7 @@ function ProfessionalSheet({ doc }: { doc: CvResolvedDocument }) {
         <ul className="cv-pro-contact">
           {doc.contact.location ? <li data-icon="pin">{doc.contact.location}</li> : null}
           {doc.contact.email ? <li data-icon="mail">{doc.contact.email}</li> : null}
+          {doc.contact.emailSecondary ? <li data-icon="mail">{doc.contact.emailSecondary}</li> : null}
           {doc.contact.phone ? <li data-icon="phone">{doc.contact.phone}</li> : null}
           <li data-icon="web">{site}</li>
           {linkedin ? <li data-icon="in">LinkedIn</li> : null}
@@ -153,14 +172,14 @@ function ProfessionalSheet({ doc }: { doc: CvResolvedDocument }) {
       </header>
 
       {full.map((section) => (
-        <section key={section.id} className="cv-pro-section">
+        <section key={resolvedSectionKey(section)} className="cv-pro-section">
           <h2>{section.title}</h2>
           <ProSectionBody section={section} />
         </section>
       ))}
 
       {extras.map((section) => (
-        <section key={section.id} className="cv-pro-section">
+        <section key={resolvedSectionKey(section)} className="cv-pro-section">
           <h2>{section.title}</h2>
           <ProSectionBody section={section} />
         </section>
@@ -170,7 +189,7 @@ function ProfessionalSheet({ doc }: { doc: CvResolvedDocument }) {
         <div className="cv-pro-cols">
           <div className="cv-pro-col">
             {left.map((section) => (
-              <section key={section.id} className="cv-pro-section">
+              <section key={resolvedSectionKey(section)} className="cv-pro-section">
                 <h2>{section.title}</h2>
                 <ProSectionBody section={section} />
               </section>
@@ -178,7 +197,7 @@ function ProfessionalSheet({ doc }: { doc: CvResolvedDocument }) {
           </div>
           <div className="cv-pro-col">
             {right.map((section) => (
-              <section key={section.id} className="cv-pro-section">
+              <section key={resolvedSectionKey(section)} className="cv-pro-section">
                 <h2>{section.title}</h2>
                 <ProSectionBody section={section} />
               </section>
@@ -219,7 +238,7 @@ function SheetHeader({ doc }: { doc: CvResolvedDocument }) {
           <h1>{doc.name}</h1>
           <p className="cv-sheet-headline">{doc.headline}</p>
           <p className="cv-sheet-meta">
-            {[doc.contact.location, doc.contact.email, doc.contact.phone, site].filter(Boolean).join(" · ")}
+            {[doc.contact.location, doc.contact.email, doc.contact.emailSecondary, doc.contact.phone, site].filter(Boolean).join(" · ")}
           </p>
           {social.length ? (
             <p className="cv-sheet-meta">{social.map((l) => l.label).join(" · ")}</p>
@@ -242,7 +261,7 @@ function SheetHeader({ doc }: { doc: CvResolvedDocument }) {
         <h1>{doc.name}</h1>
         <p className="cv-sheet-headline">{doc.headline}</p>
         <p className="cv-sheet-meta">
-          {[doc.contact.location, doc.contact.email, doc.contact.phone, site].filter(Boolean).join(" · ")}
+          {[doc.contact.location, doc.contact.email, doc.contact.emailSecondary, doc.contact.phone, site].filter(Boolean).join(" · ")}
         </p>
         {social.length ? (
           <p className="cv-sheet-meta">{social.map((l) => l.label).join(" · ")}</p>
@@ -258,7 +277,7 @@ function SheetHeader({ doc }: { doc: CvResolvedDocument }) {
           <h1>{doc.name}</h1>
           <p className="cv-sheet-headline">{doc.headline}</p>
           <p className="cv-sheet-meta">
-            {[doc.contact.location, doc.contact.email, doc.contact.phone, site].filter(Boolean).join(" · ")}
+            {[doc.contact.location, doc.contact.email, doc.contact.emailSecondary, doc.contact.phone, site].filter(Boolean).join(" · ")}
           </p>
           {social.length ? (
             <p className="cv-sheet-meta">{social.map((l) => l.label).join(" · ")}</p>
@@ -297,16 +316,28 @@ function SheetFooter({ doc }: { doc: CvResolvedDocument }) {
   );
 }
 
+/**
+ * Renders a CV either from site settings + template (legacy `cvConfig`) or from a
+ * pre-resolved document, which lets the dashboard editor preview live edits
+ * without writing to settings first.
+ */
 export function CvDocumentSheet({
   settings,
   template,
+  resolved,
   className = "",
 }: {
-  settings: SiteSettings;
-  template: CvTemplateId;
+  settings?: SiteSettings;
+  template?: CvTemplateId;
+  resolved?: CvResolvedDocument;
   className?: string;
 }) {
-  const doc = useMemo(() => resolveCvDocument(settings, template), [settings, template]);
+  const doc = useMemo(
+    () => resolved || (settings ? resolveCvDocument(settings, template) : null),
+    [resolved, settings, template]
+  );
+
+  if (!doc) return null;
 
   if (doc.template === "professional") {
     return (
@@ -330,7 +361,7 @@ export function CvDocumentSheet({
       {doc.sections.map((section) => {
         if (section.id === "profile" && hideProfile) return null;
         return (
-          <section key={section.id} className="cv-sheet-section">
+          <section key={resolvedSectionKey(section)} className="cv-sheet-section">
             <h2>{section.title}</h2>
             {section.body ? <p>{section.body}</p> : null}
             {section.chips?.length ? (
@@ -386,8 +417,20 @@ export function CvDocumentSheet({
                     <h3>{item.title}</h3>
                     {item.period ? <span>{item.period}</span> : null}
                   </div>
-                  {item.subtitle ? <p className="cv-sheet-sub">{item.subtitle}</p> : null}
+                  {item.subtitle || item.location ? (
+                    <p className="cv-sheet-sub">
+                      {[item.subtitle, item.location].filter(Boolean).join(" · ")}
+                    </p>
+                  ) : null}
                   {section.id !== "links" && item.summary ? <p>{item.summary}</p> : null}
+                  {item.highlights?.length && doc.template !== "compact" ? (
+                    <ul className="cv-sheet-bullets">
+                      {item.highlights.map((line) => (
+                        <li key={line}>{line}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  {item.meta ? <p className="cv-sheet-sub">{item.meta}</p> : null}
                   {section.id === "links" && item.href ? (
                     <p className="cv-sheet-sub">{item.href.replace(/^https?:\/\//, "")}</p>
                   ) : null}

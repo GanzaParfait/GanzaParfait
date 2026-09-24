@@ -2,6 +2,7 @@ import React from "react";
 import { Document, Page, Text, View, StyleSheet, Link, Image } from "@react-pdf/renderer";
 import {
   absolutizeCvMedia,
+  resolvedSectionKey,
   splitDisplayName,
   type CvFooterStyle,
   type CvResolvedDocument,
@@ -445,7 +446,7 @@ function HeaderBlock({ doc, origin }: { doc: CvResolvedDocument; origin: string 
       ? appearance.resolvedPhotoUrl || absolutizeCvMedia(appearance.photoUrl, origin)
       : undefined;
   const { given, family } = splitDisplayName(doc.name);
-  const contactBits = [doc.contact.location, doc.contact.email, doc.contact.phone]
+  const contactBits = [doc.contact.location, doc.contact.email, doc.contact.emailSecondary, doc.contact.phone]
     .filter(Boolean)
     .join("  ·  ");
   const site = doc.contact.website?.replace(/^https?:\/\//, "");
@@ -522,6 +523,7 @@ function HeaderBlock({ doc, origin }: { doc: CvResolvedDocument; origin: string 
           <View style={styles.metaStack}>
             {doc.contact.location ? <Text style={styles.metaLine}>{doc.contact.location}</Text> : null}
             {doc.contact.email ? <Text style={styles.metaLine}>{doc.contact.email}</Text> : null}
+            {doc.contact.emailSecondary ? <Text style={styles.metaLine}>{doc.contact.emailSecondary}</Text> : null}
             {doc.contact.phone ? <Text style={styles.metaLine}>{doc.contact.phone}</Text> : null}
             {site ? <Text style={styles.metaLine}>{site}</Text> : null}
             {social.map((link) => (
@@ -710,12 +712,14 @@ function CompactLinks({ items }: { items: CvResolvedItem[] }) {
 export function CvPdfDocument({
   doc,
   origin = siteUrl(),
+  size = "A4",
 }: {
   doc: CvResolvedDocument;
   origin?: string;
+  size?: "A4" | "LETTER";
 }) {
   if (doc.template === "professional") {
-    return <ProfessionalCvPdf doc={doc} origin={origin} />;
+    return <ProfessionalCvPdf doc={doc} origin={origin} size={size} />;
   }
 
   const dense = isCompact(doc.template);
@@ -752,17 +756,17 @@ export function CvPdfDocument({
     if (section.id === "profile" && section.body) {
       if (headerStyle === "banner") return null;
       return (
-        <View key={section.id} style={sectionStyle}>
+        <View key={resolvedSectionKey(section)} style={sectionStyle}>
           <SectionLabel title={section.title} />
           <Text style={dense ? [styles.body, styles.bodyCompact] : styles.body}>{section.body}</Text>
         </View>
       );
     }
 
-    if (section.id === "expertise" && section.chips?.length) {
+    if (section.chips?.length) {
       if (dense || headerStyle === "centered") {
         return (
-          <View key={section.id} style={sectionStyle}>
+          <View key={resolvedSectionKey(section)} style={sectionStyle}>
             <SectionLabel title={section.title} />
             <View style={styles.chips}>
               {section.chips.map((chip) => (
@@ -776,7 +780,7 @@ export function CvPdfDocument({
       }
       const fourCol = section.chips.length >= 4;
       return (
-        <View key={section.id} style={sectionStyle}>
+        <View key={resolvedSectionKey(section)} style={sectionStyle}>
           <SectionLabel title={section.title} />
           <View style={styles.expertiseGrid}>
             {section.chips.map((chip) => (
@@ -792,7 +796,7 @@ export function CvPdfDocument({
 
     if (section.id === "skills" && section.skillsByCategory?.length) {
       return (
-        <View key={section.id} style={sectionStyle}>
+        <View key={resolvedSectionKey(section)} style={sectionStyle}>
           <SectionLabel title={section.title} />
           <View style={styles.twoCol}>
             {section.skillsByCategory.map((group) => (
@@ -810,7 +814,7 @@ export function CvPdfDocument({
 
     if (section.id === "languages" && section.languages?.length) {
       return (
-        <View key={section.id} style={sectionStyle} wrap>
+        <View key={resolvedSectionKey(section)} style={sectionStyle} wrap>
           <SectionLabel title={section.title} />
           <View style={styles.twoCol}>
             {section.languages.map((lang) => (
@@ -827,7 +831,7 @@ export function CvPdfDocument({
 
     if (section.id === "links" && section.items.length) {
       return (
-        <View key={section.id} style={sectionStyle} wrap>
+        <View key={resolvedSectionKey(section)} style={sectionStyle} wrap>
           <SectionLabel title={section.title} plain />
           <CompactLinks items={section.items} />
         </View>
@@ -837,7 +841,7 @@ export function CvPdfDocument({
     if (section.id === "leadership" && exec && section.items[0]) {
       const lead = section.items[0];
       return (
-        <View key={section.id} style={sectionStyle}>
+        <View key={resolvedSectionKey(section)} style={sectionStyle}>
           <SectionLabel title={section.title} />
           <View style={styles.execCard} minPresenceAhead={72}>
             <ItemBlock item={lead} emphasizeOrg keepTogether />
@@ -859,7 +863,7 @@ export function CvPdfDocument({
         .slice(0, 3);
 
       return (
-        <View key={section.id} style={sectionStyle}>
+        <View key={resolvedSectionKey(section)} style={sectionStyle}>
           <SectionLabel title={section.title} />
           {metrics.length >= 2 ? (
             <View style={styles.impactRow}>
@@ -886,7 +890,7 @@ export function CvPdfDocument({
 
     if (section.body && !section.items.length) {
       return (
-        <View key={section.id} style={sectionStyle}>
+        <View key={resolvedSectionKey(section)} style={sectionStyle}>
           <SectionLabel title={section.title} />
           <Text style={styles.body}>{section.body}</Text>
         </View>
@@ -896,7 +900,7 @@ export function CvPdfDocument({
     if (!section.items.length) return null;
 
     return (
-      <View key={section.id} style={sectionStyle}>
+      <View key={resolvedSectionKey(section)} style={sectionStyle}>
         <SectionLabel title={section.title} />
         {section.items.map((item) => (
           <ItemBlock
@@ -920,7 +924,7 @@ export function CvPdfDocument({
       creator="princeparfait.com"
       producer="princeparfait.com"
     >
-      <Page size="A4" style={pageStyle} wrap>
+      <Page size={size} style={pageStyle} wrap>
         <HeaderBlock doc={doc} origin={origin} />
         {useExecPage ? <View style={styles.pageInner}>{sections}</View> : sections}
         <FooterBlock doc={doc} dense={dense} style={doc.appearance.footerStyle} />

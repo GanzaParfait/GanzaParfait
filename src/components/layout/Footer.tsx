@@ -8,6 +8,8 @@ import { defaultFooterQuote, footerNav } from "@/data/site-data";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { socialByPlatform, socialIcon, socialsFor } from "@/lib/socials";
 import { setting } from "@/lib/hero";
+import { contactEmailsFrom } from "@/lib/contact-emails";
+import { whatsappContactUrl } from "@/lib/whatsapp";
 import { submitSubscribe } from "@/lib/subscribe-client";
 import type { SiteSettings } from "@/lib/supabase";
 
@@ -312,8 +314,11 @@ export default function Footer() {
   const socialLinks = socialsFor(settings, "footer").filter((link) => link.platform !== "buymeacoffee");
   const coffee = socialByPlatform(settings, "buymeacoffee");
   const location = setting(settings, "location");
-  const email = setting(settings, "contactEmail");
+  const emails = contactEmailsFrom(settings);
+  const email = emails.primary;
+  const secondaryEmail = emails.secondary;
   const phone = settings.phoneNumber?.trim() || "";
+  const whatsappHref = whatsappContactUrl(settings.whatsappNumber || phone);
   const quote = settings.footerQuote?.trim() || defaultFooterQuote.text;
   const quoteBy =
     settings.footerQuoteAttribution?.trim() || defaultFooterQuote.attribution || setting(settings, "siteTitle");
@@ -366,15 +371,29 @@ export default function Footer() {
               {(showEmail || showPhone || showLocation) ? (
                 <ul className="site-footer-contact">
                   {showEmail ? (
-                    <li>
+                    <li className="site-footer-emails">
                       <RiMailLine size={15} aria-hidden="true" />
-                      <a href={`mailto:${email}`}>{email}</a>
+                      <span>
+                        <a href={`mailto:${email}`}>{email}</a>
+                        {secondaryEmail ? (
+                          <>
+                            <br />
+                            <a href={`mailto:${secondaryEmail}`}>{secondaryEmail}</a>
+                          </>
+                        ) : null}
+                      </span>
                     </li>
                   ) : null}
                   {showPhone ? (
                     <li>
                       <RiPhoneLine size={15} aria-hidden="true" />
-                      <span>{phone}</span>
+                      {whatsappHref ? (
+                        <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
+                          {phone}
+                        </a>
+                      ) : (
+                        <span>{phone}</span>
+                      )}
                     </li>
                   ) : null}
                   {showLocation ? (

@@ -8,6 +8,7 @@ import {
   timeline,
 } from "@/data/site-data";
 import { careerFrom, type CareerRecord } from "@/lib/career";
+import { contactEmailsFrom } from "@/lib/contact-emails";
 import { DEFAULT_CV_ACCESS, normalizeCvAccess, type CvAccessConfig } from "@/lib/cv-access";
 import { siteUrl } from "@/lib/env";
 import { resolvedSocials } from "@/lib/socials";
@@ -41,7 +42,10 @@ export type CvSectionId =
   | "certifications"
   | "achievements"
   | "links"
-  | "references";
+  | "references"
+  | "research"
+  | "data"
+  | "custom";
 
 export type CvSectionConfig = {
   id: CvSectionId;
@@ -163,6 +167,7 @@ export type CvResolvedDocument = {
   appearance: CvAppearance & { resolvedPhotoUrl?: string };
   contact: {
     email?: string;
+    emailSecondary?: string;
     phone?: string;
     location?: string;
     website?: string;
@@ -170,6 +175,8 @@ export type CvResolvedDocument = {
   };
   sections: {
     id: CvSectionId;
+    /** Unique per document — several sections may share a kind (e.g. two custom blocks). */
+    key?: string;
     title: string;
     items: CvResolvedItem[];
     body?: string;
@@ -232,6 +239,43 @@ export function defaultAppearance(template: CvTemplateId): CvAppearance {
   };
 }
 
+export type CvResolvedSection = CvResolvedDocument["sections"][number];
+
+export function resolvedSectionKey(section: CvResolvedSection): string {
+  return section.key || section.id;
+}
+
+/**
+ * Place sections into the Professional layout slots. A document may contain more
+ * than one section of the same kind (e.g. two custom blocks), so each slot claims
+ * the first unclaimed match and anything left over renders full width.
+ */
+export function splitResolvedSections(
+  sections: CvResolvedSection[],
+  groups: { full: CvSectionId[]; left: CvSectionId[]; right: CvSectionId[] }
+): { full: CvResolvedSection[]; left: CvResolvedSection[]; right: CvResolvedSection[]; extras: CvResolvedSection[] } {
+  const claimed = new Set<string>();
+  const pick = (ids: CvSectionId[]) => {
+    const out: CvResolvedSection[] = [];
+    for (const id of ids) {
+      const match = sections.find(
+        (section) => section.id === id && !claimed.has(resolvedSectionKey(section))
+      );
+      if (match) {
+        claimed.add(resolvedSectionKey(match));
+        out.push(match);
+      }
+    }
+    return out;
+  };
+
+  const full = pick(groups.full);
+  const left = pick(groups.left);
+  const right = pick(groups.right);
+  const extras = sections.filter((section) => !claimed.has(resolvedSectionKey(section)));
+  return { full, left, right, extras };
+}
+
 export function splitDisplayName(name: string): { given: string; family: string } {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length < 2) return { given: name.trim(), family: "" };
@@ -260,6 +304,9 @@ const SECTION_TITLES: Record<CvSectionId, string> = {
   achievements: "Achievements",
   links: "Selected Links",
   references: "References",
+  research: "Research & Publications",
+  data: "Data & Reporting",
+  custom: "Additional Information",
 };
 
 const EXECUTIVE_TITLES: Partial<Record<CvSectionId, string>> = {
@@ -1380,7 +1427,8 @@ export function resolveCvDocument(
       resolvedPhotoUrl,
     },
     contact: {
-      email: normalizeText(settings.contactEmail),
+      email: normalizeText(contactEmailsFrom(settings).primary),
+      emailSecondary: normalizeText(contactEmailsFrom(settings).secondary) || undefined,
       phone: normalizeText(settings.phoneNumber),
       location: normalizeText(settings.location) || "Kigali, Rwanda",
       website: "https://www.princeparfait.com",

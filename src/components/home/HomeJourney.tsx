@@ -8,6 +8,7 @@ import JourneySection from "@/components/home/JourneySection";
 import PrinciplesSection from "@/components/home/PrinciplesSection";
 import SpeakingSection from "@/components/home/SpeakingSection";
 import BookingSection from "@/components/home/BookingSection";
+import TestimonialsSection from "@/components/testimonials/TestimonialsSection";
 import { homepageFrom } from "@/lib/homepage";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
@@ -58,6 +59,8 @@ export default function HomeJourney() {
         speaking={home.speaking}
         attribution={settings.siteTitle || "Prince Parfait GANZA"}
       />
+
+      <TestimonialsSection limit={8} />
 
       <BookingSection booking={home.booking} />
     </>

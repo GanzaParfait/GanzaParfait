@@ -2,22 +2,30 @@
 
 import Link from "next/link";
 import { RiArrowRightLine, RiWhatsappLine } from "react-icons/ri";
-import { configuredBookingUrl, WHATSAPP_CALL_URL } from "@/lib/booking";
+import {
+  openBookingLink,
+  primaryBookingOption,
+  WHATSAPP_CALL_URL,
+} from "@/lib/booking";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export default function BookCall() {
   const settings = useSiteSettings();
-  const booking = configuredBookingUrl(settings.bookingCalendarUrl);
+  const booking = primaryBookingOption(settings);
 
   return (
     <div className="book-actions">
       {booking ? (
-        <a className="btn btn-primary" href={booking} target="_blank" rel="noopener noreferrer">
-          Book a conversation <RiArrowRightLine size={16} />
-        </a>
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={() => openBookingLink(booking.url, "homepage")}
+        >
+          Book a meeting <RiArrowRightLine size={16} />
+        </button>
       ) : (
         <Link className="btn btn-primary" href="/contact">
-          Book a conversation <RiArrowRightLine size={16} />
+          Book a meeting <RiArrowRightLine size={16} />
         </Link>
       )}
       <a className="btn btn-outline" href={WHATSAPP_CALL_URL} target="_blank" rel="noopener noreferrer">
