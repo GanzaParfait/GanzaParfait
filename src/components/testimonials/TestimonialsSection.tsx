@@ -57,7 +57,7 @@ function quoteParts(item: PublicTestimonial) {
 }
 
 function usePerView() {
-  const [perView, setPerView] = useState(4);
+  const [perView, setPerView] = useState(1);
   useEffect(() => {
     const sync = () => {
       const w = window.innerWidth;

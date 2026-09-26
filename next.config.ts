@@ -81,12 +81,19 @@ const nextConfig: NextConfig = {
           { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
         ],
       },
-      {
-        source: "/_next/static/:path*",
-        headers: [
-          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
-        ],
-      },
+      // Only pin hashed build assets in production. In `next dev`, Turbopack can
+      // reuse the same chunk URL while CSS changes — immutable caching then
+      // freezes a stale stylesheet and breaks responsive layout during local work.
+      ...(process.env.NODE_ENV === "production"
+        ? [
+            {
+              source: "/_next/static/:path*",
+              headers: [
+                { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+              ],
+            },
+          ]
+        : []),
       {
         source: "/dashboard",
         headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],

@@ -215,7 +215,7 @@ export default function Navbar() {
         }}
       >
         {showTopBar ? <AnnouncementBar settings={settings} /> : null}
-        <div data-public-nav style={{ padding: isPill ? "0.45rem clamp(1.1rem, 3vw, 2.75rem) 0" : 0 }}>
+        <div data-public-nav style={{ padding: isPill ? "0.45rem max(0.65rem, env(safe-area-inset-left, 0px)) 0 max(0.65rem, env(safe-area-inset-right, 0px))" : 0, maxWidth: "100%", boxSizing: "border-box" }}>
         <div
           style={{
             background: pillBg,
@@ -225,22 +225,26 @@ export default function Navbar() {
             borderBottom: isPill ? "none" : `1px solid ${pillBorder}`,
             borderRadius: isPill ? "9999px" : 0,
             boxShadow: pillShadow,
-            maxWidth: isPill ? "92rem" : undefined,
+            maxWidth: isPill ? "min(92rem, 100%)" : undefined,
             margin: isPill ? "0 auto" : undefined,
             transition: "box-shadow 0.3s ease, background 0.3s ease, border-color 0.3s ease, border-radius 0.3s ease",
+            boxSizing: "border-box",
+            width: isPill ? "100%" : undefined,
           }}
         >
           <div
             className={isPill ? undefined : "container"}
           style={{
             minHeight: isPill ? "3.55rem" : "3.75rem",
-            padding: isPill ? "0.35rem 1rem" : "0.45rem 0",
+            padding: isPill ? "0.35rem 0.85rem" : "0.45rem 0",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            gap: "0.75rem",
+            gap: "0.5rem",
             width: "100%",
             maxWidth: isPill ? "none" : undefined,
+            minWidth: 0,
+            overflow: "hidden",
           }}
         >
 
@@ -250,9 +254,9 @@ export default function Navbar() {
             aria-label="Prince Parfait GANZA — Home"
             className="home-logo"
             data-home-cue={pathname !== "/" && homeCue ? "true" : undefined}
-            style={{ display: "flex", flexShrink: 0 }}
+            style={{ display: "flex", flexShrink: 1, minWidth: 0 }}
           >
-            <div style={{ position: "relative", width: "clamp(7.5rem, 17vw, 10.75rem)", height: "2.3rem" }}>
+            <div style={{ position: "relative", width: "clamp(6.75rem, 34vw, 10.75rem)", height: "2.3rem", maxWidth: "100%" }}>
               <Image
                 src={logoSrc}
                 alt="Prince Parfait GANZA"
@@ -300,7 +304,7 @@ export default function Navbar() {
           </nav>
 
           {/* Right actions */}
-          <div style={{ display: "flex", alignItems: "center", gap: "0.45rem", flexShrink: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.35rem", flexShrink: 0, minWidth: 0 }}>
 
             <div className="hidden lg:flex" style={{ alignItems: "center", gap: "0.125rem", position: "relative" }}>
               {primarySocials.map((link) => {
@@ -406,19 +410,10 @@ export default function Navbar() {
             <div className="share-panel-handle" aria-hidden="true" />
 
             <div className="share-panel-top">
-              <div className="share-panel-brand">
-                <Image
-                  src={isDark ? "/brand/logos/logo-horizontal-light.webp" : "/brand/logos/logo-horizontal-blue.webp"}
-                  alt=""
-                  width={148}
-                  height={36}
-                  className="share-panel-logo"
-                />
-                <p className="share-panel-kicker">
-                  <RiLink size={14} aria-hidden />
-                  Share page
-                </p>
-              </div>
+              <p className="share-panel-kicker">
+                <RiLink size={14} aria-hidden />
+                Share page
+              </p>
               <button
                 type="button"
                 className="share-panel-close"

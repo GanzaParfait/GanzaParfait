@@ -66,7 +66,7 @@ export default function AboutPageView({
     <div className={embedded ? "about-page about-embedded" : "about-page"}>
       <section className="about-hero" aria-label="About introduction">
         <div className="container about-hero-grid">
-          <AnimatedSection direction="left" className="about-hero-visual">
+          <AnimatedSection direction="fade" className="about-hero-visual">
             <span className="about-portrait-aura" aria-hidden />
             <div className="about-portrait-wrap">
               {page.hero.portrait ? (

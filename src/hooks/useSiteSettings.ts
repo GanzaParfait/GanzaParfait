@@ -15,9 +15,9 @@ import { useSiteSettingsContext } from "@/components/providers/SiteSettingsProvi
  */
 export function useSiteSettings() {
   const fromServer = useSiteSettingsContext();
-  const [fallback, setFallback] = useState<SiteSettings>(() =>
-    typeof window === "undefined" ? DEFAULT_SETTINGS : getLocalSettings()
-  );
+  // Always start from defaults so SSR and the first client paint match.
+  // Local/remote overrides apply only after mount when no server context exists.
+  const [fallback, setFallback] = useState<SiteSettings>(DEFAULT_SETTINGS);
 
   useEffect(() => {
     if (fromServer) return;
