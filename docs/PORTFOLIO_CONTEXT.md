@@ -418,6 +418,11 @@ in this document.
 Organization:
 Caritas Rwanda
 
+Delivered through LERONY Ltd. Developed from scratch with a team.
+Prince Parfait GANZA was Team Leader and Full Stack Software Engineer.
+Other roles on the team included a UI/UX designer, a full stack developer,
+a system analyst, and other roles. Do not invent individual names.
+
 Work includes development of organizational digital systems,
 including indicator/information-management functionality.
 
@@ -440,7 +445,11 @@ Evidence level: CONFIRMED
 
 ## Caritas Rwanda Website
 
-Website revamp / digital work for Caritas Rwanda.
+Public website revamp for Caritas Rwanda, delivered through LERONY Ltd
+and developed from scratch with a team. Prince Parfait GANZA was Team
+Leader and Full Stack Software Engineer. Other roles on the team included
+a UI/UX designer, a full stack developer, a system analyst, and other
+roles. Do not invent individual names.
 
 Treat website work separately from internal information-management
 systems where appropriate.

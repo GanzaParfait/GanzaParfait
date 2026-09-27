@@ -1,16 +1,23 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { RiAddLine, RiEditLine, RiDeleteBinLine, RiSearchLine } from "react-icons/ri";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  RiAddLine,
+  RiDeleteBinLine,
+  RiDownloadLine,
+  RiEditLine,
+  RiRefreshLine,
+  RiSearchLine,
+} from "react-icons/ri";
 import { projects as initialProjects, type Project } from "@/data/site-data";
 import ProjectEditorModal from "@/components/dashboard/ProjectEditorModal";
 import MediaManagerModal from "@/components/dashboard/MediaManagerModal";
 import { fetchRemoteSettings, getLocalSettings, saveLocalSettings } from "@/lib/supabase";
 import { useDashboardFeedback } from "@/components/dashboard/DashboardFeedback";
-import CustomSelect from "@/components/ui/CustomSelect";
 import { mergeProjectCatalog } from "@/lib/projects";
+import { downloadCsv } from "@/lib/download-csv";
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 10;
 
 function projectsFromSettings(): Project[] {
   return mergeProjectCatalog(getLocalSettings().projectRecords);
@@ -26,6 +33,8 @@ export default function ProjectsPage() {
   const [category, setCategory] = useState("all");
   const [status, setStatus] = useState("all");
   const [page, setPage] = useState(1);
+  const [exportOpen, setExportOpen] = useState(false);
+  const exportRef = useRef<HTMLDivElement>(null);
   const { runSave } = useDashboardFeedback();
 
   useEffect(() => {
@@ -35,6 +44,15 @@ export default function ProjectsPage() {
     });
   }, []);
 
+  useEffect(() => {
+    if (!exportOpen) return;
+    const onDoc = (event: MouseEvent) => {
+      if (!exportRef.current?.contains(event.target as Node)) setExportOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [exportOpen]);
+
   const persist = async (next: Project[]) => {
     setProjectsList(next);
     await saveLocalSettings({ projectRecords: next });
@@ -42,142 +60,276 @@ export default function ProjectsPage() {
 
   const handleSaveProject = (proj: Project) => {
     const exists = projectsList.some((item) => item.id === proj.id);
-    const next = exists
+    let next = exists
       ? projectsList.map((item) => (item.id === proj.id ? proj : item))
       : [proj, ...projectsList];
+    if (proj.homepagePinned) {
+      next = next.map((item) =>
+        item.id === proj.id ? { ...item, homepagePinned: true } : { ...item, homepagePinned: false },
+      );
+    }
     void runSave(() => persist(next), "Project saved.");
   };
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
     return projectsList.filter((project) => {
-      const matchesQuery = !needle || [project.title, project.organization, project.description, ...(project.technologies || [])].join(" ").toLowerCase().includes(needle);
+      const matchesQuery =
+        !needle ||
+        [project.title, project.organization, project.description, ...(project.technologies || [])]
+          .join(" ")
+          .toLowerCase()
+          .includes(needle);
       const matchesCategory = category === "all" || project.category === category;
-      const matchesStatus = status === "all" || project.status === status || (status === "draft" && project.visibility === "draft");
+      const matchesStatus =
+        status === "all" || project.status === status || (status === "draft" && project.visibility === "draft");
       return matchesQuery && matchesCategory && matchesStatus;
     });
   }, [projectsList, query, category, status]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [query, category, status]);
 
   const pages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, pages);
   const rows = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
+  const exportRows = (scope: "filtered" | "all") => {
+    const data = scope === "all" ? projectsList : filtered;
+    if (!data.length) {
+      setExportOpen(false);
+      return;
+    }
+    downloadCsv(
+      `projects-${scope}-${new Date().toISOString().slice(0, 10)}.csv`,
+      ["Title", "Organization", "Category", "Status", "Visibility", "Technologies", "Live URL"],
+      data.map((project) => [
+        project.title,
+        project.organization,
+        project.category,
+        project.status,
+        project.visibility || "public",
+        (project.technologies || []).join("; "),
+        project.links?.live || "",
+      ]),
+    );
+    setExportOpen(false);
+  };
+
   return (
-    <div className="projects-page" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-      <div className="projects-page-head dash-page-head" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
+    <div className="dash-tm dash-projects">
+      <header className="dash-tm-head">
         <div>
-          <h2 style={{ fontSize: "1.375rem", fontWeight: 800, color: "#0f172a" }}>Portfolio Projects ({projectsList.length})</h2>
-          <p style={{ fontSize: "0.8125rem", color: "#64748b", marginTop: "0.15rem" }}>Search, filter, and keep case images from loading until a visitor opens them.</p>
+          <p className="section-label">Portfolio</p>
+          <h1>Projects ({projectsList.length})</h1>
+          <p>Search, filter, and keep case images from loading until a visitor opens them.</p>
         </div>
-        <button
-          type="button"
-          onClick={() => { setEditingProject(null); setIsProjectModalOpen(true); }}
-          className="btn btn-primary btn-sm projects-new-btn"
-          style={{ gap: "0.375rem" }}
-        >
-          <RiAddLine size={16} /> New Project
-        </button>
-      </div>
-
-      <div className="projects-page-filters" style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-        <label style={{ display: "flex", alignItems: "center", gap: "0.35rem", flex: "1 1 14rem", background: "#fff", border: "1px solid #e2e8f0", borderRadius: "0.5rem", padding: "0.4rem 0.65rem" }}>
-          <RiSearchLine size={15} color="#64748b" />
-          <input value={query} onChange={(event) => { setQuery(event.target.value); setPage(1); }} placeholder="Search title, organization, technology" style={{ border: 0, outline: "none", width: "100%", fontSize: "0.82rem" }} />
-        </label>
-        <CustomSelect
-          value={category}
-          aria-label="Category"
-          options={[
-            { value: "all", label: "All categories" },
-            { value: "systems", label: "Systems" },
-            { value: "web", label: "Web" },
-            { value: "product", label: "Product" },
-            { value: "saas", label: "Company" },
-            { value: "technology", label: "Technology" },
-            { value: "ai", label: "AI" },
-            { value: "mobile", label: "Mobile" },
-            { value: "other", label: "Other" },
-          ]}
-          onChange={(value) => {
-            setCategory(value);
-            setPage(1);
-          }}
-          className="dash-cselect"
-        />
-        <CustomSelect
-          value={status}
-          aria-label="Status"
-          options={[
-            { value: "all", label: "All statuses" },
-            { value: "live", label: "Live" },
-            { value: "staging", label: "Staging" },
-            { value: "completed", label: "Completed" },
-            { value: "ongoing", label: "Ongoing" },
-            { value: "in-progress", label: "In progress" },
-            { value: "archived", label: "Archived" },
-            { value: "draft", label: "Draft visibility" },
-          ]}
-          onChange={(value) => {
-            setStatus(value);
-            setPage(1);
-          }}
-          className="dash-cselect"
-        />
-      </div>
-
-      <div style={{ overflowX: "auto", background: "#fff", border: "1px solid #e2e8f0", borderRadius: "0.75rem" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "42rem" }}>
-          <thead>
-            <tr style={{ textAlign: "left", fontSize: "0.72rem", letterSpacing: "0.04em", textTransform: "uppercase", color: "#64748b" }}>
-              <th style={th}>Cover</th>
-              <th style={th}>Project</th>
-              <th style={th}>Category</th>
-              <th style={th}>Status</th>
-              <th style={th} />
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((project) => (
-              <tr key={project.id} style={{ borderTop: "1px solid #e2e8f0" }}>
-                <td style={td}>
-                  {project.image && !project.image.includes("placeholder") ? (
-                    <img src={project.image} alt="" width={72} height={44} style={{ width: "4.5rem", height: "2.75rem", objectFit: "cover", borderRadius: "0.35rem" }} />
-                  ) : (
-                    <span style={{ fontSize: "0.7rem", color: "#94a3b8" }}>No image</span>
-                  )}
-                </td>
-                <td style={td}>
-                  <strong style={{ display: "block", color: "#0f172a" }}>{project.title}</strong>
-                  <span style={{ fontSize: "0.72rem", color: "#64748b" }}>{project.organization || project.technologies.slice(0, 3).join(", ")}</span>
-                </td>
-                <td style={td}>{project.category}</td>
-                <td style={td}>{project.status}</td>
-                <td style={{ ...td, textAlign: "right", whiteSpace: "nowrap" }}>
-                  <button className="btn btn-outline btn-sm" onClick={() => { setEditingProject(project); setIsProjectModalOpen(true); }}><RiEditLine size={13} /> Edit</button>
-                  <button className="btn btn-ghost btn-sm" style={{ color: "#ef4444" }} onClick={() => void runSave(() => persist(projectsList.filter((item) => item.id !== project.id)), "Project deleted.")} aria-label={`Delete ${project.title}`}><RiDeleteBinLine size={15} /></button>
-                </td>
-              </tr>
-            ))}
-            {rows.length === 0 ? (
-              <tr><td colSpan={5} style={{ ...td, color: "#64748b" }}>No projects match this filter.</td></tr>
+        <div className="dash-tm-head-actions">
+          <div className="dash-export" ref={exportRef}>
+            <button
+              type="button"
+              className="btn btn-outline btn-sm"
+              aria-expanded={exportOpen}
+              aria-haspopup="menu"
+              onClick={() => setExportOpen((open) => !open)}
+            >
+              <RiDownloadLine size={15} /> Export
+            </button>
+            {exportOpen ? (
+              <div className="dash-export-menu" role="menu">
+                <button type="button" role="menuitem" onClick={() => exportRows("filtered")}>
+                  Export filtered CSV
+                </button>
+                <button type="button" role="menuitem" onClick={() => exportRows("all")}>
+                  Export all CSV
+                </button>
+              </div>
             ) : null}
-          </tbody>
-        </table>
+          </div>
+          <button
+            type="button"
+            className="btn btn-outline btn-sm"
+            onClick={() => {
+              setProjectsList(projectsFromSettings());
+              void fetchRemoteSettings().then((remote) => {
+                if (remote) setProjectsList(mergeProjectCatalog(remote.projectRecords));
+              });
+            }}
+          >
+            <RiRefreshLine size={15} /> Refresh
+          </button>
+          <button
+            type="button"
+            className="btn btn-primary btn-sm projects-new-btn"
+            onClick={() => {
+              setEditingProject(null);
+              setIsProjectModalOpen(true);
+            }}
+          >
+            <RiAddLine size={16} /> New Project
+          </button>
+        </div>
+      </header>
+
+      <div className="dash-tm-toolbar">
+        <label className="dash-tm-search">
+          <RiSearchLine size={16} aria-hidden="true" />
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search title, organization, technology…"
+            aria-label="Search projects"
+          />
+        </label>
+        <label className="dash-tm-filter">
+          <span>Category</span>
+          <select value={category} onChange={(event) => setCategory(event.target.value)}>
+            <option value="all">All categories</option>
+            <option value="systems">Systems</option>
+            <option value="web">Web</option>
+            <option value="product">Product</option>
+            <option value="saas">Company</option>
+            <option value="technology">Technology</option>
+            <option value="ai">AI</option>
+            <option value="mobile">Mobile</option>
+            <option value="other">Other</option>
+          </select>
+        </label>
+        <label className="dash-tm-filter">
+          <span>Status</span>
+          <select value={status} onChange={(event) => setStatus(event.target.value)}>
+            <option value="all">All statuses</option>
+            <option value="live">Live</option>
+            <option value="staging">Staging</option>
+            <option value="completed">Completed</option>
+            <option value="ongoing">Ongoing</option>
+            <option value="in-progress">In progress</option>
+            <option value="archived">Archived</option>
+            <option value="draft">Draft visibility</option>
+          </select>
+        </label>
+        <p className="dash-tm-result-count" aria-live="polite">
+          {filtered.length} result{filtered.length === 1 ? "" : "s"}
+        </p>
       </div>
 
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem" }}>
-        <p style={{ margin: 0, fontSize: "0.78rem", color: "#64748b" }}>{filtered.length} shown</p>
-        <nav className="page-text-nav" aria-label="Project pages">
-          <button type="button" disabled={currentPage <= 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>Previous</button>
-          <span>{currentPage} of {pages}</span>
-          <button type="button" disabled={currentPage >= pages} onClick={() => setPage((value) => value + 1)}>Next</button>
-        </nav>
-      </div>
+      {filtered.length === 0 ? (
+        <p className="dash-tm-empty">No projects match this filter.</p>
+      ) : (
+        <>
+          <div className="dash-tm-table-wrap">
+            <table className="dash-tm-table is-compact dash-projects-table">
+              <thead>
+                <tr>
+                  <th scope="col">Cover</th>
+                  <th scope="col">Project</th>
+                  <th scope="col">Category</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((project) => (
+                  <tr key={project.id}>
+                    <td>
+                      {project.image && !project.image.includes("placeholder") ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img className="dash-projects-cover" src={project.image} alt="" />
+                      ) : (
+                        <span className="dash-projects-cover is-empty">No image</span>
+                      )}
+                    </td>
+                    <td>
+                      <div className="dash-tm-person is-compact dash-projects-person">
+                        <div className="dash-tm-person-copy">
+                          <strong>{project.title}</strong>
+                          <span>
+                            {project.homepagePinned ? "Pinned · " : ""}
+                            {project.organization || project.technologies.slice(0, 3).join(", ") || "—"}
+                          </span>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span className="dash-projects-meta">{project.category}</span>
+                    </td>
+                    <td>
+                      <span className={`dash-tm-status is-${project.status === "live" ? "published" : "draft"}`}>
+                        {project.status}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="dash-tm-row-actions is-compact">
+                        <button
+                          type="button"
+                          className="btn btn-outline btn-sm"
+                          onClick={() => {
+                            setEditingProject(project);
+                            setIsProjectModalOpen(true);
+                          }}
+                        >
+                          <RiEditLine size={14} /> Edit
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-ghost btn-sm dash-tm-delete"
+                          aria-label={`Delete ${project.title}`}
+                          onClick={() =>
+                            void runSave(
+                              () => persist(projectsList.filter((item) => item.id !== project.id)),
+                              "Project deleted.",
+                            )
+                          }
+                        >
+                          <RiDeleteBinLine size={15} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-      <div className="projects-page-foot" aria-hidden={false}>
+          <div className="dash-tm-pager" aria-label="Pagination">
+            {currentPage > 1 ? (
+              <button
+                type="button"
+                className="dash-tm-page-link"
+                onClick={() => setPage((value) => Math.max(1, value - 1))}
+              >
+                Previous
+              </button>
+            ) : (
+              <span className="dash-tm-page-link is-disabled">Previous</span>
+            )}
+            <span className="dash-tm-page-status">
+              Page {currentPage} of {pages}
+            </span>
+            {currentPage < pages ? (
+              <button
+                type="button"
+                className="dash-tm-page-link"
+                onClick={() => setPage((value) => Math.min(pages, value + 1))}
+              >
+                Next
+              </button>
+            ) : (
+              <span className="dash-tm-page-link is-disabled">Next</span>
+            )}
+          </div>
+        </>
+      )}
+
+      <div className="projects-page-foot">
         <button
           type="button"
-          onClick={() => { setEditingProject(null); setIsProjectModalOpen(true); }}
+          onClick={() => {
+            setEditingProject(null);
+            setIsProjectModalOpen(true);
+          }}
           className="btn btn-primary projects-new-btn-mobile"
         >
           <RiAddLine size={16} /> New Project
@@ -189,7 +341,10 @@ export default function ProjectsPage() {
         onClose={() => setIsProjectModalOpen(false)}
         project={editingProject}
         onSave={handleSaveProject}
-        onPickMedia={(apply) => { setMediaApply(() => apply); setIsMediaOpen(true); }}
+        onPickMedia={(apply) => {
+          setMediaApply(() => apply);
+          setIsMediaOpen(true);
+        }}
       />
       <MediaManagerModal
         isOpen={isMediaOpen}
@@ -203,6 +358,3 @@ export default function ProjectsPage() {
     </div>
   );
 }
-
-const th = { padding: "0.75rem 0.85rem", fontWeight: 800 } as const;
-const td = { padding: "0.75rem 0.85rem", fontSize: "0.82rem", color: "#334155", verticalAlign: "middle" } as const;

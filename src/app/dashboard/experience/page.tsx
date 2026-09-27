@@ -155,7 +155,7 @@ export default function ExperienceEditorPage() {
   };
 
   return (
-    <div className="hp-board">
+    <div className="hp-board exp-board">
       <div className="hp-board-top">
         <div>
           <nav className="hp-crumb" aria-label="Breadcrumb">
@@ -165,8 +165,7 @@ export default function ExperienceEditorPage() {
           </nav>
           <h1>Experience</h1>
           <p>
-            Canonical roles, education, and certifications. Homepage Journey picks which records to show. CV selects
-            which records appear on each format.
+            Canonical roles, education, and certifications. Homepage Journey and CV pick which records to show.
           </p>
         </div>
         <div className="hp-board-actions">
@@ -179,67 +178,71 @@ export default function ExperienceEditorPage() {
         </div>
       </div>
 
-      <div className="hp-editor-grid" style={{ gridTemplateColumns: "minmax(14rem, 0.85fr) minmax(0, 1.35fr)" }}>
+      <div className="hp-editor-grid exp-editor-grid">
         <section className="hp-editor-card">
           <div className="hp-list-head">
             <p>Page copy</p>
           </div>
-          <Field
-            label="Section label"
-            value={content.page.label}
-            onChange={(label) => setContent({ ...content, page: { ...content.page, label } })}
-          />
-          <Field
-            label="Title"
-            value={content.page.title}
-            onChange={(title) => setContent({ ...content, page: { ...content.page, title } })}
-          />
+          <div className="exp-copy-grid">
+            <Field
+              label="Section label"
+              value={content.page.label}
+              onChange={(label) => setContent({ ...content, page: { ...content.page, label } })}
+            />
+            <Field
+              label="Title"
+              value={content.page.title}
+              onChange={(title) => setContent({ ...content, page: { ...content.page, title } })}
+            />
+          </div>
           <Field
             label="Intro body"
             value={content.page.body}
             area
             onChange={(body) => setContent({ ...content, page: { ...content.page, body } })}
           />
-          <Field
-            label="Aside line"
-            value={content.page.asideLine}
-            onChange={(asideLine) => setContent({ ...content, page: { ...content.page, asideLine } })}
-            hint="e.g. Ideas · People · Systems · Impact"
-          />
-          <Field
-            label="Side label"
-            value={content.page.sideLabel}
-            onChange={(sideLabel) => setContent({ ...content, page: { ...content.page, sideLabel } })}
-          />
-          <Field
-            label="Side title"
-            value={content.page.sideTitle}
-            onChange={(sideTitle) => setContent({ ...content, page: { ...content.page, sideTitle } })}
-          />
+          <div className="exp-copy-grid">
+            <Field
+              label="Aside line"
+              value={content.page.asideLine}
+              onChange={(asideLine) => setContent({ ...content, page: { ...content.page, asideLine } })}
+              hint="e.g. Ideas · People · Systems · Impact"
+            />
+            <Field
+              label="Side label"
+              value={content.page.sideLabel}
+              onChange={(sideLabel) => setContent({ ...content, page: { ...content.page, sideLabel } })}
+            />
+            <Field
+              label="Side title"
+              value={content.page.sideTitle}
+              onChange={(sideTitle) => setContent({ ...content, page: { ...content.page, sideTitle } })}
+            />
+            <Field
+              label="Timeline CTA"
+              value={content.page.sideCta}
+              onChange={(sideCta) => setContent({ ...content, page: { ...content.page, sideCta } })}
+            />
+          </div>
           <Field
             label="Side body"
             value={content.page.sideBody}
             area
             onChange={(sideBody) => setContent({ ...content, page: { ...content.page, sideBody } })}
           />
-          <Field
-            label="Timeline CTA"
-            value={content.page.sideCta}
-            onChange={(sideCta) => setContent({ ...content, page: { ...content.page, sideCta } })}
-          />
 
-          <div className="hp-list-head" style={{ marginTop: "1rem" }}>
+          <div className="hp-list-head" style={{ marginTop: "0.85rem" }}>
             <p>Records</p>
             <span>{content.records.length}</span>
           </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem", marginBottom: "0.55rem" }}>
+          <div className="exp-add-row">
             {KINDS.map((kind) => (
               <button key={kind.value} type="button" className="btn btn-outline btn-sm" onClick={() => addRecord(kind.value)}>
                 <RiAddLine size={14} /> {kind.label}
               </button>
             ))}
           </div>
-          <div style={{ display: "grid", gap: "0.3rem", maxHeight: "28rem", overflow: "auto" }}>
+          <div className="exp-record-list">
             {content.records.map((item, index) => (
               <button
                 key={item.id}
@@ -282,7 +285,7 @@ export default function ExperienceEditorPage() {
                 </button>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.45rem" }}>
+              <div className="exp-copy-grid">
                 <label className="hp-field">
                   <span>Kind</span>
                   <CustomSelect
@@ -318,7 +321,7 @@ export default function ExperienceEditorPage() {
                 value={active.organization}
                 onChange={(organization) => patchRecord(active.id, { organization })}
               />
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.45rem" }}>
+              <div className="exp-copy-grid is-three">
                 <Field label="Period" value={active.period} onChange={(period) => patchRecord(active.id, { period })} />
                 <Field
                   label="Sort year"

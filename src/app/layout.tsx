@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Caveat, Outfit, Source_Serif_4 } from "next/font/google";
+import { Caveat, Outfit } from "next/font/google";
 import "./globals.css";
 import LayoutShell from "@/components/layout/LayoutShell";
 import ThemeInitScript from "@/components/providers/ThemeInitScript";
@@ -13,15 +13,6 @@ const outfit = Outfit({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-outfit",
-});
-
-const sourceSerif = Source_Serif_4({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-cv-serif",
-  weight: ["400", "600", "700"],
-  style: ["normal", "italic"],
-  preload: false,
 });
 
 const caveat = Caveat({
@@ -124,11 +115,18 @@ export default async function RootLayout({
     <html lang="en" dir="ltr" id="top" data-theme="light" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         <JsonLd data={buildIdentityGraph()} />
+        {/* Source Serif 4 via CSS — next/font + Turbopack on Next 16.3 fails for this family */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,600;1,8..60,700&display=swap"
+        />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=20260919b" />
         <meta name="msapplication-TileColor" content="#ffffff" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
       </head>
-      <body className={`${outfit.variable} ${sourceSerif.variable} ${caveat.variable} antialiased`} suppressHydrationWarning>
+      <body className={`${outfit.variable} ${caveat.variable} antialiased`} suppressHydrationWarning>
         <ThemeInitScript />
         <SiteSettingsProvider initial={settings}>
           <LayoutShell>{children}</LayoutShell>

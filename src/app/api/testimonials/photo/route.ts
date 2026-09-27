@@ -64,12 +64,16 @@ export async function POST(request: Request) {
     const buffer = Buffer.from(await file.arrayBuffer());
     const uploaded = await uploadToCloudinary(buffer, {
       filename: file.name || "testimonial-photo.jpg",
-      mime: file.type,
+      mime: file.type.startsWith("image/") ? "image/jpeg" : file.type,
       folder: "princeparfait/testimonials",
+      // Avatar-sized delivery — skip full-res storage work when possible.
+      transformation: [
+        { width: 480, height: 480, crop: "fill", gravity: "face", quality: "auto:eco", fetch_format: "auto" },
+      ],
     });
     const url = cloudinaryOptimizedUrl(uploaded.secureUrl || uploaded.url, {
-      width: 480,
-      height: 480,
+      width: 240,
+      height: 240,
       crop: "fill",
     });
 

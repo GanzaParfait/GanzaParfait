@@ -7,13 +7,18 @@ import {
   RiArrowRightLine,
   RiArrowRightSLine,
   RiChatQuoteLine,
+  RiDoubleQuotesR,
   RiDoubleQuotesL,
   RiExternalLinkLine,
+  RiGroupLine,
 } from "react-icons/ri";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { listListedProjects } from "@/lib/projects";
 import { sortTestimonials, type PublicTestimonial } from "@/lib/testimonials";
-import TestimonialFormDialog from "@/components/testimonials/TestimonialFormDialog";
+import TestimonialFormDialog, {
+  clearTestimonialFormDraft,
+  hasTestimonialFormDraft,
+} from "@/components/testimonials/TestimonialFormDialog";
 
 type Props = {
   items?: PublicTestimonial[];
@@ -23,6 +28,8 @@ type Props = {
   title?: string;
   titleAccent?: string;
   subtitle?: string;
+  /** live = normal; empty = force empty CTA; hidden = render nothing. */
+  displayMode?: "live" | "empty" | "hidden";
 };
 
 const CAROUSEL_CAP = 8;
@@ -35,9 +42,12 @@ function attribution(item: PublicTestimonial) {
 function badgeLabel(item: PublicTestimonial, projectName: string | null) {
   const rel = (item.relationship || "").trim();
   const project = (projectName || item.projectTitleOther || "").trim();
-  if (rel && project) return `${rel} · ${project}`;
-  if (rel) return rel;
-  if (project) return project;
+  if (rel && project) {
+    const compact = `${rel} · ${project}`;
+    return compact.length > 42 ? `${compact.slice(0, 41).trim()}…` : compact;
+  }
+  if (rel) return rel.length > 42 ? `${rel.slice(0, 41).trim()}…` : rel;
+  if (project) return project.length > 42 ? `${project.slice(0, 41).trim()}…` : project;
   return "Collaborator";
 }
 
@@ -80,18 +90,24 @@ export default function TestimonialsSection({
   title = "Words from people I've",
   titleAccent = "worked with.",
   subtitle = "Client and collaborator feedback from work, projects and training.",
+  displayMode = "live",
 }: Props) {
   const settings = useSiteSettings();
   const perView = usePerView();
   const [fetched, setFetched] = useState<PublicTestimonial[] | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [notice, setNotice] = useState("");
+  const [draftReminder, setDraftReminder] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
 
   useEffect(() => {
-    if (items) return;
+    setDraftReminder(hasTestimonialFormDraft());
+  }, []);
+
+  useEffect(() => {
+    if (items || displayMode === "hidden" || displayMode === "empty") return;
     let active = true;
     fetch(`/api/testimonials?limit=${Math.max(limit, 16)}`)
       .then((res) => (res.ok ? res.json() : { items: [] }))
@@ -104,9 +120,9 @@ export default function TestimonialsSection({
     return () => {
       active = false;
     };
-  }, [items, limit]);
+  }, [items, limit, displayMode]);
 
-  const source = items ?? fetched;
+  const source = displayMode === "empty" ? [] : (items ?? fetched);
   const sorted = useMemo(() => sortTestimonials(source || []), [source]);
   const capped = sorted.slice(0, Math.max(limit, CAROUSEL_CAP));
   const pool = expanded ? sorted : capped;
@@ -141,187 +157,245 @@ export default function TestimonialsSection({
   const proofAvatars = capped.slice(0, 5);
   const proofExtra = Math.max(0, capped.length - proofAvatars.length);
 
+  if (displayMode === "hidden") return null;
+
   return (
     <section
-      className="testimonials"
+      className={`testimonials${source !== null && pool.length === 0 ? " is-empty" : ""}`}
       aria-labelledby="testimonials-title"
       id="testimonials"
       data-page-section
       data-section-label="References"
     >
       <div className="container">
-        <div className="testimonials-head">
-          <div>
-            <p className="section-label">{label}</p>
-            <h2 id="testimonials-title">
-              {title} <span className="testimonials-accent">{titleAccent}</span>
-            </h2>
-            <p className="testimonials-lead">{subtitle}</p>
-          </div>
-          <div className="testimonials-head-actions">
-            <button type="button" className="btn btn-outline testimonials-cta" onClick={() => setFormOpen(true)}>
-              <RiChatQuoteLine size={16} /> Share your experience
-            </button>
-          </div>
-        </div>
-
         {notice ? (
           <p className="testimonials-notice" role="status">
             {notice}
           </p>
         ) : null}
 
-        {source === null ? (
-          <div className="testimonials-viewport" aria-busy="true" aria-label="Loading testimonials">
-            <div className="testimonials-track">
-              {Array.from({ length: perView }).map((_, i) => (
-                <div key={i} className="testimonials-card is-skeleton">
-                  <div className="testimonials-card-top">
-                    <div className="testimonials-skel skel-quote" />
-                    <div className="testimonials-skel skel-badge" />
-                  </div>
-                  <div className="testimonials-skel skel-line" />
-                  <div className="testimonials-skel skel-line" />
-                  <div className="testimonials-skel skel-line is-short" />
-                  <div className="testimonials-skel-foot">
-                    <div className="testimonials-skel skel-avatar" />
-                    <div className="testimonials-skel-copy">
-                      <div className="testimonials-skel skel-name" />
-                      <div className="testimonials-skel skel-meta" />
-                    </div>
-                  </div>
-                </div>
-              ))}
+        {source !== null && pool.length === 0 ? (
+          <div className="testimonials-empty-split">
+            <div className="testimonials-empty-copy">
+              <p className="section-label">{label}</p>
+              <h2 id="testimonials-title">
+                {title} <span className="testimonials-accent">{titleAccent}</span>
+              </h2>
+              <p className="testimonials-lead">{subtitle}</p>
+            </div>
+            <div className="testimonials-empty-panel" role="status">
+              <span className="testimonials-empty-badge">
+                <RiGroupLine size={14} aria-hidden="true" />
+                No published feedback yet
+              </span>
+              <p className="testimonials-empty-prompt">
+                Worked together on a project, engagement or training?
+              </p>
+              <button type="button" className="testimonials-empty-link" onClick={() => setFormOpen(true)}>
+                Share your experience <RiArrowRightLine size={16} aria-hidden="true" />
+              </button>
+              <RiDoubleQuotesR className="testimonials-empty-watermark" aria-hidden="true" />
             </div>
           </div>
-        ) : pool.length ? (
-          <>
-            <div
-              className={`testimonials-viewport${expanded ? " is-expanded" : ""}`}
-              onMouseEnter={() => setPaused(true)}
-              onMouseLeave={() => setPaused(false)}
-              onFocusCapture={() => setPaused(true)}
-              onBlurCapture={(event) => {
-                if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setPaused(false);
-              }}
-            >
-              <ul className={`testimonials-track${expanded ? " is-grid" : ""}`}>
-                {visible.map((item) => {
-                  const related = projectTitle(item.projectId) || item.projectTitleOther;
-                  const parts = quoteParts(item);
-                  const badge = badgeLabel(item, related);
-                  return (
-                    <li key={item.id} className="testimonials-card">
-                      <div className="testimonials-card-top">
-                        <RiDoubleQuotesL className="testimonials-quote-mark" size={28} aria-hidden="true" />
-                        <span className="testimonials-badge">{badge}</span>
-                      </div>
-                      <blockquote>
-                        <p className="testimonials-lead-quote" style={{ whiteSpace: "pre-wrap" }}>
-                          {parts.lead}
-                        </p>
-                        {parts.support ? (
-                          <p className="testimonials-support" style={{ whiteSpace: "pre-wrap" }}>
-                            {parts.support}
-                          </p>
-                        ) : null}
-                      </blockquote>
-                      <figcaption className="testimonials-card-foot">
-                        {item.photoUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img className="testimonials-avatar" src={item.photoUrl} alt="" loading="lazy" decoding="async" />
-                        ) : (
-                          <span className="testimonials-avatar is-initial" aria-hidden="true">
-                            {item.personName.slice(0, 1).toUpperCase()}
-                          </span>
-                        )}
-                        <span className="testimonials-person">
-                          <strong>
-                            {item.profileUrl ? (
-                              <a href={item.profileUrl} target="_blank" rel="noopener noreferrer nofollow">
-                                {item.personName} <RiExternalLinkLine size={12} aria-hidden="true" />
-                              </a>
-                            ) : (
-                              item.personName
-                            )}
-                          </strong>
-                          {attribution(item) ? <span>{attribution(item)}</span> : null}
-                        </span>
-                        {item.projectId ? (
-                          <Link className="testimonials-project" href={`/projects/${item.projectId}`}>
-                            View project <RiArrowRightLine size={14} aria-hidden="true" />
-                          </Link>
-                        ) : related ? (
-                          <span className="testimonials-relation">{related}</span>
-                        ) : null}
-                      </figcaption>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-
-            <div className="testimonials-bar">
-              <div className="testimonials-proof">
-                <div className="testimonials-proof-avatars" aria-hidden="true">
-                  {proofAvatars.map((item) =>
-                    item.photoUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img key={item.id} src={item.photoUrl} alt="" />
-                    ) : (
-                      <span key={item.id}>{item.personName.slice(0, 1).toUpperCase()}</span>
-                    ),
-                  )}
-                  {proofExtra > 0 ? <em>+{proofExtra}</em> : null}
-                </div>
-                <p>
-                  <strong>{Math.max(sorted.length, capped.length)}+</strong> Clients, collaborators and trainees
-                </p>
-              </div>
-
-              <div className="testimonials-bar-actions">
-                {!expanded && pool.length > perView ? (
-                  <div className="testimonials-arrows">
-                    <button type="button" className="testimonials-arrow" onClick={goPrev} aria-label="Previous testimonials">
-                      <RiArrowLeftSLine size={20} />
-                    </button>
-                    <button type="button" className="testimonials-arrow" onClick={goNext} aria-label="Next testimonials">
-                      <RiArrowRightSLine size={20} />
-                    </button>
-                  </div>
-                ) : null}
-                {hasMore ? (
-                  <button type="button" className="btn btn-primary" onClick={() => setExpanded(true)}>
-                    Show more <RiArrowRightLine size={16} />
-                  </button>
-                ) : (
-                  <button type="button" className="btn btn-primary" onClick={() => setFormOpen(true)}>
-                    Share your experience <RiArrowRightLine size={16} />
-                  </button>
-                )}
-              </div>
-            </div>
-          </>
         ) : (
-          <div className="testimonials-empty" role="status">
-            <p>
-              No testimonials are published yet. If we have worked together, yours can be the first —
-              it will be reviewed before it goes live.
-            </p>
-            <button type="button" className="btn btn-primary" onClick={() => setFormOpen(true)}>
-              <RiChatQuoteLine size={16} /> Share your experience
-            </button>
-          </div>
+          <>
+            <div className="testimonials-head">
+              <div>
+                <p className="section-label">{label}</p>
+                <h2 id="testimonials-title">
+                  {title} <span className="testimonials-accent">{titleAccent}</span>
+                </h2>
+                <p className="testimonials-lead">{subtitle}</p>
+              </div>
+              {pool.length > 0 ? (
+                <div className="testimonials-head-actions">
+                  <button type="button" className="btn btn-outline testimonials-cta" onClick={() => setFormOpen(true)}>
+                    <RiChatQuoteLine size={16} /> Share your experience
+                  </button>
+                </div>
+              ) : null}
+            </div>
+
+            {source === null ? (
+              <div className="testimonials-viewport" aria-busy="true" aria-label="Loading testimonials">
+                <div className="testimonials-track">
+                  {Array.from({ length: perView }).map((_, i) => (
+                    <div key={i} className="testimonials-card is-skeleton">
+                      <div className="testimonials-card-top">
+                        <div className="testimonials-skel skel-quote" />
+                        <div className="testimonials-skel skel-badge" />
+                      </div>
+                      <div className="testimonials-skel skel-line" />
+                      <div className="testimonials-skel skel-line" />
+                      <div className="testimonials-skel skel-line is-short" />
+                      <div className="testimonials-skel-foot">
+                        <div className="testimonials-skel skel-avatar" />
+                        <div className="testimonials-skel-copy">
+                          <div className="testimonials-skel skel-name" />
+                          <div className="testimonials-skel skel-meta" />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <>
+                <div
+                  className={`testimonials-viewport${expanded ? " is-expanded" : ""}`}
+                  onMouseEnter={() => setPaused(true)}
+                  onMouseLeave={() => setPaused(false)}
+                  onFocusCapture={() => setPaused(true)}
+                  onBlurCapture={(event) => {
+                    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setPaused(false);
+                  }}
+                >
+                  <ul className={`testimonials-track${expanded ? " is-grid" : ""}`}>
+                    {visible.map((item) => {
+                      const related = projectTitle(item.projectId) || item.projectTitleOther;
+                      const parts = quoteParts(item);
+                      const badge = badgeLabel(item, related);
+                      return (
+                        <li key={item.id} className="testimonials-card">
+                          <div className="testimonials-card-top">
+                            <RiDoubleQuotesL className="testimonials-quote-mark" size={28} aria-hidden="true" />
+                            <span className="testimonials-badge">{badge}</span>
+                          </div>
+                          <blockquote>
+                            <p className="testimonials-lead-quote" style={{ whiteSpace: "pre-wrap" }}>
+                              {parts.lead}
+                            </p>
+                            {parts.support ? (
+                              <p className="testimonials-support" style={{ whiteSpace: "pre-wrap" }}>
+                                {parts.support}
+                              </p>
+                            ) : null}
+                          </blockquote>
+                          <figcaption className="testimonials-card-foot">
+                            {item.photoUrl ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img className="testimonials-avatar" src={item.photoUrl} alt="" loading="lazy" decoding="async" />
+                            ) : (
+                              <span className="testimonials-avatar is-initial" aria-hidden="true">
+                                {item.personName.slice(0, 1).toUpperCase()}
+                              </span>
+                            )}
+                            <span className="testimonials-person">
+                              <strong>
+                                {item.profileUrl ? (
+                                  <a href={item.profileUrl} target="_blank" rel="noopener noreferrer nofollow">
+                                    {item.personName} <RiExternalLinkLine size={12} aria-hidden="true" />
+                                  </a>
+                                ) : (
+                                  item.personName
+                                )}
+                              </strong>
+                              {attribution(item) ? <span>{attribution(item)}</span> : null}
+                            </span>
+                            {item.projectId ? (
+                              <Link className="testimonials-project" href={`/projects/${item.projectId}`}>
+                                View project <RiArrowRightLine size={14} aria-hidden="true" />
+                              </Link>
+                            ) : related ? (
+                              <span className="testimonials-relation">{related}</span>
+                            ) : null}
+                          </figcaption>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+
+                <div className="testimonials-bar">
+                  <div className="testimonials-proof">
+                    <div className="testimonials-proof-avatars" aria-hidden="true">
+                      {proofAvatars.map((item) =>
+                        item.photoUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img key={item.id} src={item.photoUrl} alt="" />
+                        ) : (
+                          <span key={item.id}>{item.personName.slice(0, 1).toUpperCase()}</span>
+                        ),
+                      )}
+                      {proofExtra > 0 ? <em>+{proofExtra}</em> : null}
+                    </div>
+                    <p>
+                      <strong>{Math.max(sorted.length, capped.length)}+</strong> Clients, collaborators and trainees
+                    </p>
+                  </div>
+
+                  <div className="testimonials-bar-actions">
+                    {!expanded && pool.length > perView ? (
+                      <div className="testimonials-arrows">
+                        <button type="button" className="testimonials-arrow" onClick={goPrev} aria-label="Previous testimonials">
+                          <RiArrowLeftSLine size={20} />
+                        </button>
+                        <button type="button" className="testimonials-arrow" onClick={goNext} aria-label="Next testimonials">
+                          <RiArrowRightSLine size={20} />
+                        </button>
+                      </div>
+                    ) : null}
+                    {hasMore ? (
+                      <button type="button" className="btn btn-primary" onClick={() => setExpanded(true)}>
+                        Show more <RiArrowRightLine size={16} />
+                      </button>
+                    ) : (
+                      <button type="button" className="btn btn-primary" onClick={() => setFormOpen(true)}>
+                        Share your experience <RiArrowRightLine size={16} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+          </>
         )}
       </div>
+
+      {draftReminder && !formOpen ? (
+        <div className="testimonials-draft-banner" role="status">
+          <div>
+            <strong>You have an unfinished testimonial</strong>
+            <p>Your answers were saved. Continue where you left off, or discard the draft.</p>
+          </div>
+          <div className="testimonials-draft-actions">
+            <button
+              type="button"
+              className="btn btn-outline btn-sm"
+              onClick={() => {
+                clearTestimonialFormDraft();
+                setDraftReminder(false);
+              }}
+            >
+              Discard
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary btn-sm"
+              onClick={() => {
+                setDraftReminder(false);
+                setFormOpen(true);
+              }}
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       {formOpen ? (
         <TestimonialFormDialog
           open
-          onClose={() => setFormOpen(false)}
+          onClose={(result) => {
+            setFormOpen(false);
+            if (result?.savedDraft) setDraftReminder(true);
+            else if (hasTestimonialFormDraft()) setDraftReminder(true);
+            else setDraftReminder(false);
+          }}
           projects={projectOptions}
           onSubmitted={(message) => {
             setFormOpen(false);
+            setDraftReminder(false);
             setNotice(message);
           }}
         />

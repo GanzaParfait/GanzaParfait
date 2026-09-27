@@ -20,8 +20,39 @@ export function workCategoryLabel(project?: Project, fallback?: string) {
   return WORK_CATEGORY[project.category] || fallback || "";
 }
 
-function uniqueMedia(list: string[]) {
-  return list.filter((src, index, all) => src && !src.includes("placeholder") && all.indexOf(src) === index);
+/** Homepage Selected Work badge label (prefer domain / work group). */
+export function selectedWorkCategory(project?: Project, fallback?: string) {
+  if (!project) return fallback || "";
+  if (project.domain?.trim()) {
+    const part = project.domain.split(/[&/·|]/)[0]?.trim();
+    if (part) return part;
+  }
+  if (project.workGroup === "research") return "Research Technology";
+  if (project.workGroup === "client") {
+    return project.category === "systems" ? "Client Systems" : workCategoryLabel(project, fallback);
+  }
+  if (project.category === "web") return "Web Platform";
+  if (project.category === "product") return "Product";
+  return workCategoryLabel(project, fallback);
+}
+
+/** Accent tone for category pills on Selected Work cards. */
+export function selectedWorkTone(project?: Project): "research" | "client" | "product" | "web" | "default" {
+  if (!project) return "default";
+  if (project.workGroup === "research" || /research/i.test(project.domain || "")) return "research";
+  if (project.workGroup === "client" || project.category === "systems") return "client";
+  if (project.workGroup === "ventures" || project.category === "product") return "product";
+  if (project.category === "web") return "web";
+  return "default";
+}
+
+function asMediaSrc(src: unknown) {
+  return typeof src === "string" ? src.trim() : "";
+}
+
+function uniqueMedia(list: unknown[]) {
+  const strings = list.map(asMediaSrc).filter((src) => src && !src.includes("placeholder"));
+  return strings.filter((src, index) => strings.indexOf(src) === index);
 }
 
 /** Pinned media first (homepage / cards), then screenshots and cover. */
@@ -59,12 +90,12 @@ export function mediaForProject(project: Project | undefined, images: string[]):
 }
 
 export function projectCover(project: Project) {
-  const pinned = (project.pinnedMedia || []).find((src) => src && !src.includes("placeholder") && !isVideoUrl(src));
+  const image = asMediaSrc(project.image);
+  if (image && !image.includes("placeholder") && !isVideoUrl(image)) return image;
+  const pinned = (project.pinnedMedia || []).map(asMediaSrc).find((src) => src && !src.includes("placeholder") && !isVideoUrl(src));
   if (pinned) return pinned;
-  const shots = (project.screenshots || []).filter((src) => src && !src.includes("placeholder"));
-  if (shots[0]) return shots[0];
-  if (project.image && !project.image.includes("placeholder")) return project.image;
-  return "";
+  const shots = (project.screenshots || []).map(asMediaSrc).filter((src) => src && !src.includes("placeholder") && !isVideoUrl(src));
+  return shots[0] || "";
 }
 
 export function projectImages(project: Project) {

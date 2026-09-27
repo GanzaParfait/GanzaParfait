@@ -52,12 +52,14 @@ export default function Navbar() {
   const [moreOpen, setMoreOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [homeCue, setHomeCue] = useState(false);
+  const [isNarrow, setIsNarrow] = useState(false);
   const settings = useSiteSettings();
   const headerRef = useRef<HTMLElement>(null);
   const headerSocials = socialsFor(settings, "header");
   const primarySocials = headerSocials.slice(0, settings.headerSocialLimit || 3);
   const overflowSocials = headerSocials.slice(settings.headerSocialLimit || 3);
   const isPill = (settings.navbarStyle || "pill") === "pill";
+  const showHomeCue = pathname !== "/" && (homeCue || isNarrow);
   useHistoryBackClose(isOpen, () => setIsOpen(false));
   useHistoryBackClose(shareOpen, () => setShareOpen(false));
 
@@ -69,6 +71,14 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 1023px)");
+    const sync = () => setIsNarrow(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   // Sync dark state for logo switching
   useEffect(() => {
@@ -244,17 +254,17 @@ export default function Navbar() {
             width: "100%",
             maxWidth: isPill ? "none" : undefined,
             minWidth: 0,
-            overflow: "hidden",
+            overflow: "visible",
           }}
         >
 
-          {/* Logo is the home link. There is no Home item in the nav. */}
+          {/* Logo is the home link. Home cue sits inside the header pill beside the logo. */}
           <Link
             href="/"
             aria-label="Prince Parfait GANZA — Home"
             className="home-logo"
-            data-home-cue={pathname !== "/" && homeCue ? "true" : undefined}
-            style={{ display: "flex", flexShrink: 1, minWidth: 0 }}
+            data-home-cue={showHomeCue ? "true" : undefined}
+            style={{ display: "flex", flexShrink: 1, minWidth: 0, position: "relative", zIndex: 2 }}
           >
             <div style={{ position: "relative", width: "clamp(6.75rem, 34vw, 10.75rem)", height: "2.3rem", maxWidth: "100%" }}>
               <Image
@@ -515,9 +525,29 @@ export default function Navbar() {
           <div style={{ width: "2rem", height: "3px", borderRadius: "2px", background: "var(--color-border)" }} />
         </div>
 
-        {/* Nav links — compact grid for very small screens */}
+        {/* Nav links — compact list; Home first on mobile */}
         <nav aria-label="Mobile navigation">
           <div style={{ display: "flex", flexDirection: "column", gap: "0.0625rem" }}>
+            <Link
+              href="/"
+              aria-current={pathname === "/" ? "page" : undefined}
+              onClick={() => setIsOpen(false)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                padding: "0.55rem 0.75rem",
+                borderRadius: 0,
+                fontSize: "0.875rem",
+                fontWeight: pathname === "/" ? 700 : 500,
+                textDecoration: "none",
+                transitionDelay: isOpen ? "0ms" : "0ms",
+                color: pathname === "/" ? "var(--color-primary)" : "var(--color-text-2)",
+                background: "transparent",
+                borderLeft: pathname === "/" ? "2px solid var(--color-primary)" : "2px solid transparent",
+              }}
+            >
+              Home
+            </Link>
             {navLinks.map((link, i) => {
               const active = pathname === link.href || pathname.startsWith(`${link.href}/`);
               return (
@@ -525,6 +555,7 @@ export default function Navbar() {
                 key={link.href}
                 href={link.href}
                 aria-current={active ? "page" : undefined}
+                onClick={() => setIsOpen(false)}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -533,7 +564,7 @@ export default function Navbar() {
                   fontSize: "0.875rem",
                   fontWeight: active ? 700 : 500,
                   textDecoration: "none",
-                  transitionDelay: isOpen ? `${i * 30}ms` : "0ms",
+                  transitionDelay: isOpen ? `${(i + 1) * 30}ms` : "0ms",
                   color: active ? "var(--color-primary)" : "var(--color-text-2)",
                   background: "transparent",
                   borderLeft: active ? "2px solid var(--color-primary)" : "2px solid transparent",

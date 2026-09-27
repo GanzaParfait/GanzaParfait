@@ -37,8 +37,13 @@ const breadcrumbItems = [
   { name: "Work", path: "/projects" },
 ];
 
-export default async function ProjectsPage() {
+export default async function ProjectsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ focus?: string; type?: string; category?: string; q?: string; tech?: string; sort?: string }>;
+}) {
   const projects = await getPublicProjects();
+  const params = await searchParams;
 
   return (
     <>
@@ -54,7 +59,11 @@ export default async function ProjectsPage() {
           buildItemListJsonLd(projects, "/projects"),
         ])}
       />
-      <ProjectsPageView />
+      <ProjectsPageView
+        initialFocus={params.focus || params.type || params.category || null}
+        initialQuery={params.q || params.tech || null}
+        initialSort={params.sort || null}
+      />
     </>
   );
 }

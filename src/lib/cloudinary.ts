@@ -50,7 +50,12 @@ export type CloudinaryUploadResult = {
  */
 export async function uploadToCloudinary(
   buffer: Buffer,
-  options: { filename: string; mime?: string; folder?: string },
+  options: {
+    filename: string;
+    mime?: string;
+    folder?: string;
+    transformation?: Record<string, string | number | boolean>[];
+  },
 ): Promise<CloudinaryUploadResult> {
   if (!ensureConfigured()) {
     throw new Error("Cloudinary is not configured.");
@@ -81,11 +86,12 @@ export async function uploadToCloudinary(
         use_filename: true,
         unique_filename: true,
         overwrite: false,
-        quality: "auto:good",
-        eager_async: true,
+        quality: "auto:eco",
+        transformation: options.transformation,
+        eager_async: !options.transformation,
         eager:
-          resourceType === "image"
-            ? [{ fetch_format: "auto", quality: "auto:good" }]
+          !options.transformation && resourceType === "image"
+            ? [{ fetch_format: "auto", quality: "auto:eco" }]
             : undefined,
         context: `alt=${options.filename}|source=dashboard`,
         tags: ["ppg", "library", "seo"],

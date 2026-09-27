@@ -179,6 +179,8 @@ export type Project = {
   /** Work-page evidence group (not a job title). */
   workGroup?: "ventures" | "client" | "research" | "web";
   featured: boolean;
+  /** When true, this project is the large pinned card on homepage Selected Work (only one). */
+  homepagePinned?: boolean;
   independent?: boolean;
   links: {
     /** Canonical public product/client URL (no tracking params). */
@@ -279,7 +281,7 @@ export const projects: Project[] = [
     description:
       "Organization-wide indicator management and decision-support systems for reporting, dashboards and information management.",
     longDescription:
-      "Work for Caritas Rwanda on internal digital systems used for organizational indicators, reporting and information management. The systems support role-based access, dashboards, data management, exports and administrative workflows, helping programme and operations teams see what is happening and report reliably.",
+      "Internal digital systems for Caritas Rwanda, used for organizational indicators, reporting and information management. Delivered through LERONY Ltd and developed from scratch with a team. Prince Parfait GANZA was Team Leader and Full Stack Software Engineer. The team also included a UI/UX designer, a full stack developer, a system analyst, and other roles. The systems support role-based access, dashboards, data management, exports and administrative workflows.",
     context: "Caritas Rwanda needed digital systems for organizational indicator tracking and decision-oriented reporting.",
     challenge:
       "Humanitarian and organizational reporting depends on reliable indicators, controlled access, disaggregated views and repeatable administrative workflows.",
@@ -288,12 +290,12 @@ export const projects: Project[] = [
     problem:
       "Organizational indicator and information-management work required structured digital systems rather than fragmented records.",
     whatIBuilt:
-      "Digital systems covering role-based access, indicator tracking, dashboards, reporting, data management, exports and administrative workflows.",
-    myRole: "Software engineer",
+      "Developed from scratch with a LERONY Ltd team. Prince Parfait GANZA led the engagement as Team Leader and Full Stack Software Engineer, working with a UI/UX designer, a full stack developer, a system analyst, and other roles. The systems cover role-based access, indicator tracking, dashboards, reporting, data management, exports and administrative workflows.",
+    myRole: "Team Leader and Full Stack Software Engineer",
     domain: "Data Systems, Analytics & Decision Support",
-    deliveredThrough: "Engagement work",
+    deliveredThrough: "LERONY Ltd",
     contributionSummary:
-      "Software engineering contribution to organization-wide indicator management and decision-support systems (CRNIS).",
+      "Team Leader and Full Stack Software Engineer on a LERONY Ltd delivery, developed from scratch with a team that also included a UI/UX designer, a full stack developer, a system analyst, and other roles.",
     technologies: ["Web platforms", "Indicators", "Dashboards", "Reporting", "Role-based access"],
     category: "systems",
     workGroup: "research",
@@ -450,16 +452,18 @@ export const projects: Project[] = [
     description:
       "Website revamp and public digital presence work for Caritas Rwanda.",
     longDescription:
-      "Public-facing website work for Caritas Rwanda, treated separately from the internal indicator and information-management systems (CRNIS).",
+      "Public-facing website for Caritas Rwanda, kept separate from the internal indicator and information-management systems (CRNIS). Delivered through LERONY Ltd and developed from scratch with a team. Prince Parfait GANZA was Team Leader and Full Stack Software Engineer. The team also included a UI/UX designer, a full stack developer, a system analyst, and other roles.",
     context: "Caritas Rwanda needed a renewed public website alongside its internal systems work.",
     challenge: "The public website and internal information systems serve different audiences and should not be conflated.",
-    solution: "Website revamp / digital work for the public-facing Caritas Rwanda presence.",
+    solution: "A public website revamp for Caritas Rwanda, delivered through LERONY Ltd.",
     problem: "The public digital presence required a website revamp distinct from internal systems.",
-    whatIBuilt: "Website revamp and related public digital work.",
-    myRole: "Software engineer",
+    whatIBuilt:
+      "Developed from scratch with a LERONY Ltd team. Prince Parfait GANZA led the engagement as Team Leader and Full Stack Software Engineer, working with a UI/UX designer, a full stack developer, a system analyst, and other roles.",
+    myRole: "Team Leader and Full Stack Software Engineer",
     domain: "Software Engineering & Digital Systems",
-    deliveredThrough: "Engagement work",
-    contributionSummary: "Software engineering contribution to the public website revamp, kept separate from CRNIS internal systems work.",
+    deliveredThrough: "LERONY Ltd",
+    contributionSummary:
+      "Team Leader and Full Stack Software Engineer on a LERONY Ltd delivery, developed from scratch with a team that also included a UI/UX designer, a full stack developer, a system analyst, and other roles.",
     technologies: ["Web", "Content", "Frontend"],
     category: "web",
     workGroup: "web",
@@ -507,6 +511,7 @@ export const projects: Project[] = [
     workGroup: "research",
     status: "live",
     featured: true,
+    homepagePinned: true,
     contribution: "contributor",
     highlights: [
       "Survey programming and questionnaire logic",
@@ -619,6 +624,40 @@ export const projects: Project[] = [
     ],
     outcome:
       "A live marketplace at apnafricanmarket.com presenting catalog, account and cart experiences for the client’s audience.",
+    image: "/images/projects/apn/welcome-banner.png",
+    pinnedMedia: [
+      "/images/projects/apn/welcome-banner.png",
+      "/images/projects/apn/shop.png",
+      "/images/projects/apn/product.png",
+    ],
+    screenshots: [
+      "/images/projects/apn/welcome-banner.png",
+      "/images/projects/apn/welcome-banner-2.png",
+      "/images/projects/apn/navigation.png",
+      "/images/projects/apn/shop.png",
+      "/images/projects/apn/discover.png",
+      "/images/projects/apn/new-arrivals.png",
+      "/images/projects/apn/product.png",
+      "/images/projects/apn/product-gallery.png",
+      "/images/projects/apn/checkout.png",
+      "/images/projects/apn/account.png",
+      "/images/projects/apn/wishlist.png",
+      "/images/projects/apn/product-loading.png",
+    ],
+    screenshotCaptions: [
+      "Storefront welcome",
+      "Collection banner",
+      "Category navigation",
+      "Shop",
+      "Discover more",
+      "New arrivals",
+      "Product page",
+      "Product image gallery",
+      "Checkout",
+      "Account sign-in",
+      "Wishlist",
+      "Product loading state",
+    ],
     links: {
       live: "https://apnafricanmarket.com/",
     },

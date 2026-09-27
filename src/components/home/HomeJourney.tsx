@@ -60,7 +60,10 @@ export default function HomeJourney() {
         attribution={settings.siteTitle || "Prince Parfait GANZA"}
       />
 
-      <TestimonialsSection limit={8} />
+      <TestimonialsSection
+        limit={8}
+        displayMode={settings.testimonialsDisplay || "live"}
+      />
 
       <BookingSection booking={home.booking} />
     </>

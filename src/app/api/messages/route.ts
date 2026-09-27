@@ -16,7 +16,11 @@ export async function GET(request: Request) {
     await Promise.all([
       supabase.from("contact_messages").select("*").order("created_at", { ascending: false }).limit(150),
       supabase.from("subscribers").select("*").order("created_at", { ascending: false }).limit(150),
-      supabase.from("mail_outbox").select("*").order("created_at", { ascending: false }).limit(150),
+      supabase
+        .from("mail_outbox")
+        .select("id, subject, to_email, kind, from_email, preview_text, status, created_at, related_type, related_id")
+        .order("created_at", { ascending: false })
+        .limit(150),
     ]);
 
   if (contactError) {
@@ -82,7 +86,9 @@ export async function GET(request: Request) {
       body: (row.preview_text as string | null) || "",
       status: row.status as string,
       replyText: null as string | null,
-      previewHtml: (row.preview_html as string | null) || null,
+      // HTML preview loads on demand when a sent item is opened.
+      previewHtml: null as string | null,
+      hasPreview: true,
       createdAt: row.created_at as string,
       kind: row.kind as string,
       relatedType: (row.related_type as string | null) || null,

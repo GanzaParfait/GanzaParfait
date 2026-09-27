@@ -174,14 +174,14 @@ export default function DashboardIntroPage() {
           </p>
         </div>
         <div className="dash-page-head-actions">
-          <button type="button" className="btn btn-outline" onClick={() => setPreviewing(true)}>
-            <RiEyeLine size={16} /> Preview Intro
+          <button type="button" className="btn btn-outline btn-sm" onClick={() => setPreviewing(true)}>
+            <RiEyeLine size={15} /> Preview
           </button>
-          <button type="button" className="btn btn-outline" onClick={resetDefaults}>
-            Reset defaults
+          <button type="button" className="btn btn-outline btn-sm" onClick={resetDefaults}>
+            Reset
           </button>
-          <button type="button" className="btn btn-primary" onClick={() => void persist()} disabled={saving}>
-            <RiSaveLine size={16} /> {saving ? "Saving..." : "Save"}
+          <button type="button" className="btn btn-primary btn-sm" onClick={() => void persist()} disabled={saving}>
+            <RiSaveLine size={15} /> {saving ? "Saving…" : "Save"}
           </button>
         </div>
       </header>
@@ -385,7 +385,7 @@ export default function DashboardIntroPage() {
           </section>
         </div>
 
-        <aside style={{ ...panelStyle, alignSelf: "start" }} className="dash-split-aside">
+        <aside className="dash-split-aside intro-preview-aside" style={panelStyle}>
           <h2 style={{ fontSize: "0.85rem", fontWeight: 800, margin: "0 0 0.55rem" }}>Notes</h2>
           <ul style={{ margin: 0, paddingLeft: "1.1rem", fontSize: "0.78rem", color: "#64748b", lineHeight: 1.55 }}>
             <li>Shows on any public entry (/about, /projects, shared links) — not only the homepage.</li>
@@ -394,21 +394,7 @@ export default function DashboardIntroPage() {
             <li>Max greetings caps how many enabled lines play in one visit.</li>
             <li>Use pure #000000 / #ffffff for a stark look; Save after changing colors.</li>
           </ul>
-          <div
-            style={{
-              marginTop: "1rem",
-              borderRadius: "0.85rem",
-              background: config.background,
-              color: config.textColor,
-              minHeight: "10rem",
-              display: "grid",
-              placeItems: "center",
-              padding: "2.5rem 1rem",
-              fontSize: "1.6rem",
-              fontWeight: 600,
-              letterSpacing: "-0.02em",
-            }}
-          >
+          <div className="intro-inline-preview" style={{ background: config.background, color: config.textColor }}>
             <span style={{ color: config.textColor }}>{config.greetings.find((g) => g.enabled)?.text || "Hello."}</span>
           </div>
         </aside>

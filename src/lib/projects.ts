@@ -7,6 +7,9 @@ const TEAM_DELIVERY_IDS = new Set([
   "kt-computer-supplying",
 ]);
 
+/** Confirmed LERONY Ltd team deliveries. Public copy stays on the verified seed. */
+const LERONY_TEAM_BUILD_IDS = new Set(["caritas-systems", "caritas-website"]);
+
 const FORBIDDEN_COLLABORATOR = /digne|nurukundo/i;
 const FORBIDDEN_ATTRIBUTION = /digne|nurukundo|primary developer/i;
 
@@ -75,6 +78,18 @@ export function sanitizeProjectAttribution(project: Project): Project {
             outcome: seed.outcome,
           }
         : {}),
+    };
+  }
+
+  if (LERONY_TEAM_BUILD_IDS.has(next.id) && seed) {
+    next = {
+      ...next,
+      myRole: seed.myRole,
+      deliveredThrough: seed.deliveredThrough,
+      contributionSummary: seed.contributionSummary,
+      longDescription: seed.longDescription,
+      whatIBuilt: seed.whatIBuilt,
+      solution: seed.solution,
     };
   }
 
@@ -167,6 +182,14 @@ export function isProjectIndexable(project: Project): boolean {
   return hasSubstance;
 }
 
+function usableMedia(src?: unknown) {
+  return typeof src === "string" && src.trim().length > 0 && !src.includes("placeholder");
+}
+
+function usableList(list?: unknown[]) {
+  return (list || []).filter((src): src is string => usableMedia(src));
+}
+
 /** Merge verified seed projects with dashboard/Supabase overrides and extras. */
 export function mergeProjectCatalog(records?: Project[] | null): Project[] {
   const byId = new Map<string, Project>();
@@ -194,6 +217,10 @@ export function mergeProjectCatalog(records?: Project[] | null): Project[] {
             return fromRecord.length ? fromRecord : fromBase;
           })(),
           capabilities: record.capabilities?.length ? record.capabilities : base.capabilities,
+          image: usableMedia(record.image) ? record.image : base.image,
+          screenshots: usableList(record.screenshots).length ? usableList(record.screenshots) : base.screenshots,
+          pinnedMedia: usableList(record.pinnedMedia).length ? usableList(record.pinnedMedia) : base.pinnedMedia,
+          screenshotCaptions: record.screenshotCaptions?.length ? record.screenshotCaptions : base.screenshotCaptions,
           // Allow clearing collaborators with an explicit empty array from Dashboard/migration.
           collaborators: Array.isArray(record.collaborators)
             ? record.collaborators

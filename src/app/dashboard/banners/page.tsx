@@ -106,185 +106,109 @@ export default function BannersPage() {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-      <div>
-        <p style={{ fontSize: "0.72rem", fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "#0e52a8" }}>
-          Public homepage
-        </p>
-        <h1 style={{ fontSize: "1.75rem", fontWeight: 800, color: "#0b192c", letterSpacing: "-0.03em" }}>
-          Hero layouts
-        </h1>
-      </div>
-
-      <section className="banners-carousel-card" style={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "1rem", padding: "1rem 1.1rem" }}>
-        <div className="banners-carousel-head">
-          <div>
-            <h2 style={{ fontSize: "0.95rem", fontWeight: 800, color: "#0b192c" }}>Moving carousel</h2>
-            <p style={{ fontSize: "0.78rem", color: "#64748b", marginTop: "0.2rem", maxWidth: "36rem" }}>
-              Rotate the homepage through every visible layout, or only the ones you tick. Runs on desktop, tablet, and mobile. Hover pauses on desktop.
-            </p>
-          </div>
-          <div className="banners-carousel-actions">
-            <label style={{ display: "flex", alignItems: "center", gap: "0.45rem", fontSize: "0.82rem", fontWeight: 700, color: "#0f172a" }}>
-              <input
-                type="checkbox"
-                checked={Boolean(settings.heroCarouselEnabled)}
-                onChange={(event) => handleSaveSettings({ heroCarouselEnabled: event.target.checked })}
-              />
-              Rotate layouts
-            </label>
-            <button
-              type="button"
-              className="btn btn-outline btn-sm banners-carousel-sheet-btn"
-              onClick={() => setCarouselSheetOpen(true)}
-            >
-              <RiSettings3Line size={15} /> Layout options
-            </button>
-          </div>
+    <div className="banners-page">
+      <header className="banners-page-head">
+        <div>
+          <p className="section-label">Public homepage</p>
+          <h1 className="banners-page-title">Hero layouts</h1>
         </div>
-        {settings.heroCarouselEnabled ? (
-          <div className="banners-carousel-desktop" style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "0.9rem" }}>
-            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-              {(["all", "selected"] as const).map((mode) => (
-                <button
-                  key={mode}
-                  type="button"
-                  onClick={() => handleSaveSettings({ heroCarouselMode: mode })}
-                  style={{
-                    border: "1px solid #cbd5e1",
-                    borderRadius: "999px",
-                    padding: "0.35rem 0.75rem",
-                    background: (settings.heroCarouselMode || "all") === mode ? "#0e52a8" : "#fff",
-                    color: (settings.heroCarouselMode || "all") === mode ? "#fff" : "#0f172a",
-                    fontWeight: 700,
-                    fontSize: "0.75rem",
-                    cursor: "pointer",
-                  }}
-                >
-                  {mode === "all" ? "All visible layouts" : "Only selected"}
-                </button>
-              ))}
-              <label style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.78rem", color: "#334155", marginLeft: "0.25rem" }}>
-                Every
-                <input
-                  type="number"
-                  min={4}
-                  max={20}
-                  value={settings.heroCarouselInterval || 8}
-                  onChange={(event) => handleSaveSettings({ heroCarouselInterval: Number(event.target.value) || 8 })}
-                  style={{ width: "4rem", padding: "0.3rem 0.45rem", borderRadius: "0.4rem", border: "1px solid #cbd5e1" }}
-                />
-                seconds
-              </label>
-            </div>
-            {settings.heroCarouselMode === "selected" ? (
-              <div style={{ display: "flex", gap: "0.85rem", flexWrap: "wrap" }}>
-                {HERO_LAYOUTS.map((layout) => {
-                  const selected = (settings.heroCarouselLayouts || []).includes(layout.id);
-                  return (
-                    <label key={layout.id} style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.8rem", color: "#334155" }}>
-                      <input
-                        type="checkbox"
-                        checked={selected}
-                        onChange={() => {
-                          const current = settings.heroCarouselLayouts || [];
-                          handleSaveSettings({
-                            heroCarouselLayouts: selected
-                              ? current.filter((id) => id !== layout.id)
-                              : [...current, layout.id],
-                          });
-                        }}
-                      />
-                      {layout.name}
-                    </label>
-                  );
-                })}
-              </div>
-            ) : null}
-          </div>
-        ) : null}
-      </section>
+        <div className="banners-page-head-actions">
+          <span className={settings.heroCarouselEnabled ? "banners-carousel-pill is-on" : "banners-carousel-pill"}>
+            {settings.heroCarouselEnabled ? "Carousel on" : "Carousel off"}
+          </span>
+          <button
+            type="button"
+            className="btn btn-outline btn-sm"
+            onClick={() => setCarouselSheetOpen(true)}
+          >
+            <RiSettings3Line size={15} /> Configure carousel
+          </button>
+        </div>
+      </header>
 
       {carouselSheetOpen ? (
         <div className="dash-sheet-layer" role="presentation">
           <button type="button" className="dash-sheet-backdrop" aria-label="Close carousel options" onClick={() => setCarouselSheetOpen(false)} />
-          <div className="dash-sheet" role="dialog" aria-modal="true" aria-labelledby="carousel-sheet-title">
-            <div className="dash-sheet-handle" aria-hidden="true" />
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.75rem" }}>
+          <div className="dash-sheet banners-carousel-modal" role="dialog" aria-modal="true" aria-labelledby="carousel-sheet-title">
+            <header className="banners-modal-head">
               <div>
-                <h2 id="carousel-sheet-title">Carousel layout</h2>
-                <p>Choose which layouts rotate and how often.</p>
+                <p className="banners-modal-kicker">Homepage</p>
+                <h2 id="carousel-sheet-title">Moving carousel</h2>
+                <p className="banners-modal-lead">
+                  Rotate layouts on desktop, tablet, and mobile. Hover pauses on desktop.
+                </p>
               </div>
-              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setCarouselSheetOpen(false)} aria-label="Close">
+              <button type="button" className="btn btn-ghost btn-sm banners-modal-close" onClick={() => setCarouselSheetOpen(false)} aria-label="Close">
                 <RiCloseLine size={18} />
               </button>
-            </div>
-            <label style={{ display: "flex", alignItems: "center", gap: "0.45rem", fontSize: "0.85rem", fontWeight: 700, marginBottom: "0.85rem" }}>
+            </header>
+
+            <label className="banners-modal-check">
               <input
                 type="checkbox"
                 checked={Boolean(settings.heroCarouselEnabled)}
                 onChange={(event) => handleSaveSettings({ heroCarouselEnabled: event.target.checked })}
               />
-              Rotate layouts
+              <span>Rotate layouts</span>
             </label>
-            <div style={{ display: "flex", gap: "0.45rem", flexWrap: "wrap", marginBottom: "0.85rem" }}>
-              {(["all", "selected"] as const).map((mode) => (
-                <button
-                  key={mode}
-                  type="button"
-                  onClick={() => handleSaveSettings({ heroCarouselMode: mode })}
-                  style={{
-                    border: "1px solid #cbd5e1",
-                    borderRadius: "999px",
-                    padding: "0.4rem 0.8rem",
-                    background: (settings.heroCarouselMode || "all") === mode ? "#0e52a8" : "#fff",
-                    color: (settings.heroCarouselMode || "all") === mode ? "#fff" : "#0f172a",
-                    fontWeight: 700,
-                    fontSize: "0.78rem",
-                    cursor: "pointer",
-                  }}
-                >
-                  {mode === "all" ? "All visible" : "Only selected"}
-                </button>
-              ))}
+
+            <div className="banners-modal-section">
+              <p className="banners-modal-label">Which layouts</p>
+              <div className="banners-modal-pills" role="group" aria-label="Carousel mode">
+                {(["all", "selected"] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    className={(settings.heroCarouselMode || "all") === mode ? "is-on" : undefined}
+                    onClick={() => handleSaveSettings({ heroCarouselMode: mode })}
+                  >
+                    {mode === "all" ? "All visible" : "Only selected"}
+                  </button>
+                ))}
+              </div>
             </div>
-            <label style={{ display: "grid", gap: "0.3rem", fontSize: "0.72rem", fontWeight: 750, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "0.85rem" }}>
-              Interval (seconds)
+
+            <label className="banners-modal-field">
+              <span className="banners-modal-label">Interval (seconds)</span>
               <input
                 type="number"
                 min={4}
                 max={20}
                 value={settings.heroCarouselInterval || 8}
                 onChange={(event) => handleSaveSettings({ heroCarouselInterval: Number(event.target.value) || 8 })}
-                style={{ height: "2.5rem", padding: "0 0.75rem", borderRadius: "0.55rem", border: "1px solid #cbd5e1", fontSize: "0.9rem", color: "#0f172a" }}
               />
             </label>
+
             {settings.heroCarouselMode === "selected" ? (
-              <div style={{ display: "grid", gap: "0.55rem", marginBottom: "0.85rem" }}>
-                {HERO_LAYOUTS.map((layout) => {
-                  const selected = (settings.heroCarouselLayouts || []).includes(layout.id);
-                  return (
-                    <label key={layout.id} style={{ display: "flex", alignItems: "center", gap: "0.45rem", fontSize: "0.84rem", color: "#334155" }}>
-                      <input
-                        type="checkbox"
-                        checked={selected}
-                        onChange={() => {
-                          const current = settings.heroCarouselLayouts || [];
-                          handleSaveSettings({
-                            heroCarouselLayouts: selected
-                              ? current.filter((id) => id !== layout.id)
-                              : [...current, layout.id],
-                          });
-                        }}
-                      />
-                      {layout.name}
-                    </label>
-                  );
-                })}
+              <div className="banners-modal-section">
+                <p className="banners-modal-label">Selected layouts</p>
+                <div className="banners-modal-checks">
+                  {HERO_LAYOUTS.map((layout) => {
+                    const selected = (settings.heroCarouselLayouts || []).includes(layout.id);
+                    return (
+                      <label key={layout.id} className="banners-modal-check is-row">
+                        <input
+                          type="checkbox"
+                          checked={selected}
+                          onChange={() => {
+                            const current = settings.heroCarouselLayouts || [];
+                            handleSaveSettings({
+                              heroCarouselLayouts: selected
+                                ? current.filter((id) => id !== layout.id)
+                                : [...current, layout.id],
+                            });
+                          }}
+                        />
+                        <span>{layout.name}</span>
+                      </label>
+                    );
+                  })}
+                </div>
               </div>
             ) : null}
-            <div className="dash-sheet-actions">
-              <button type="button" className="btn btn-primary" onClick={() => setCarouselSheetOpen(false)} style={{ gridColumn: "1 / -1" }}>
+
+            <div className="banners-modal-foot">
+              <button type="button" className="btn btn-primary" onClick={() => setCarouselSheetOpen(false)}>
                 Done
               </button>
             </div>
@@ -324,7 +248,7 @@ export default function BannersPage() {
         )}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1rem" }}>
+      <div className="banners-layout-grid">
         {visible.map((layout) => {
           const isActive = liveId === layout.id;
           const image = heroImageFor(settings, layout.id);
@@ -332,14 +256,7 @@ export default function BannersPage() {
           return (
             <article
               key={layout.id}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                borderRadius: "1rem",
-                border: `1.5px solid ${isActive ? "#0e52a8" : "#e2e8f0"}`,
-                background: "#ffffff",
-                overflow: "hidden",
-              }}
+              className={isActive ? "banners-layout-card is-active" : "banners-layout-card"}
             >
               <div style={{ display: "flex", gap: "0.85rem", padding: "0.9rem 1rem 0.75rem" }}>
                 <div style={{
@@ -385,46 +302,32 @@ export default function BannersPage() {
                 ))}
               </div>
 
-              <div style={{ display: "flex", gap: "0.4rem", padding: "0 1rem 0.95rem", position: "relative" }}>
+              <div className="banners-card-actions">
                 <button
                   type="button"
-                  className="btn btn-outline"
-                  style={{ flex: 1, justifyContent: "center", padding: "0.45rem 0.6rem", fontSize: "0.8rem" }}
+                  className="btn btn-outline btn-sm"
                   onClick={() => openEditor(layout.id)}
                 >
-                  <RiEyeLine /> Preview
+                  <RiEyeLine size={14} /> Preview
                 </button>
                 <button
                   type="button"
-                  className={isActive ? "btn btn-primary" : "btn btn-ghost"}
-                  style={{ justifyContent: "center", minWidth: "6.4rem", padding: "0.45rem 0.6rem", fontSize: "0.8rem" }}
+                  className={isActive ? "btn btn-primary btn-sm" : "btn btn-outline btn-sm"}
                   onClick={() => activate(layout.id)}
                   disabled={isActive}
                 >
-                  {isActive ? <><RiCheckLine /> Active</> : "Activate"}
+                  {isActive ? <><RiCheckLine size={14} /> Active</> : "Activate"}
                 </button>
                 <button
                   type="button"
-                  className="btn btn-ghost"
-                  style={{ padding: "0.45rem 0.55rem" }}
+                  className="btn btn-ghost btn-sm banners-card-more"
                   aria-label={`More actions for ${layout.name}`}
                   onClick={() => setMenuOpen((current) => (current === layout.id ? null : layout.id))}
                 >
-                  <RiMoreLine />
+                  <RiMoreLine size={16} />
                 </button>
                 {menuOpen === layout.id && (
-                  <div style={{
-                    position: "absolute",
-                    right: "1rem",
-                    bottom: "3.1rem",
-                    background: "#fff",
-                    border: "1px solid #e2e8f0",
-                    borderRadius: "0.7rem",
-                    boxShadow: "0 12px 30px rgba(15,23,42,0.12)",
-                    minWidth: "11.5rem",
-                    zIndex: 4,
-                    overflow: "hidden",
-                  }}>
+                  <div className="banners-card-menu">
                     <button type="button" style={menuItemStyle} onClick={() => openEditor(layout.id)}>Preview &amp; edit</button>
                     {isActive ? (
                       <button type="button" style={menuItemStyle} onClick={() => deactivate(layout.id)} disabled={visible.length <= 1}>

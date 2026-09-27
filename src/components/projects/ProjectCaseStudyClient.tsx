@@ -22,10 +22,11 @@ import {
   RiTeamLine,
   RiFlashlightLine,
 } from "react-icons/ri";
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { type Project } from "@/data/site-data";
 import ShareActions from "@/components/ui/ShareActions";
 import MediaPreview, { type PreviewItem } from "@/components/ui/MediaPreview";
+import FrameImage from "@/components/ui/FrameImage";
 import ProjectTestimonials from "@/components/testimonials/ProjectTestimonials";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { isVideoUrl, listListedProjects } from "@/lib/projects";
@@ -111,15 +112,63 @@ function MetaItem({
   );
 }
 
+function MetaRail({ children }: { children: ReactNode }) {
+  const scroller = useRef<HTMLDListElement>(null);
+  const [edges, setEdges] = useState({ left: false, right: false });
+
+  useEffect(() => {
+    const node = scroller.current;
+    if (!node) return;
+    const measure = () => {
+      const max = node.scrollWidth - node.clientWidth;
+      setEdges({
+        left: node.scrollLeft > 8,
+        right: max > 8 && node.scrollLeft < max - 8,
+      });
+    };
+    measure();
+    node.addEventListener("scroll", measure, { passive: true });
+    const observer = new ResizeObserver(measure);
+    observer.observe(node);
+    return () => {
+      node.removeEventListener("scroll", measure);
+      observer.disconnect();
+    };
+  }, [children]);
+
+  const move = (direction: number) => {
+    const node = scroller.current;
+    if (!node) return;
+    const item = node.querySelector<HTMLElement>(".case-meta-item");
+    const distance = (item?.getBoundingClientRect().width || 180) + 8;
+    node.scrollBy({ left: direction * distance, behavior: "smooth" });
+  };
+
+  return (
+    <div className="case-meta-rail">
+      {edges.left ? (
+        <button type="button" className="case-meta-arrow is-prev" aria-label="Previous details" onClick={() => move(-1)}>
+          <RiArrowLeftLine size={16} />
+        </button>
+      ) : null}
+      <dl ref={scroller} className="case-meta" data-page-section>
+        {children}
+      </dl>
+      {edges.right ? (
+        <button type="button" className="case-meta-arrow is-next" aria-label="Next details" onClick={() => move(1)}>
+          <RiArrowRightLine size={16} />
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
 type MediaItem = { type: "image" | "video"; src: string; caption: string };
 
 export default function ProjectCaseStudyClient({ project: seed }: { project: Project }) {
   const settings = useSiteSettings();
   const project = useMemo(() => {
-    const saved = settings.projectRecords?.find((item) => item.id === seed.id);
-    return saved
-      ? { ...seed, ...saved, title: saved.title || seed.title, description: saved.description || seed.description }
-      : seed;
+    return listListedProjects(settings.projectRecords).find((item) => item.id === seed.id) || seed;
   }, [seed, settings.projectRecords]);
 
   const list = useMemo(() => listListedProjects(settings.projectRecords), [settings.projectRecords]);
@@ -134,16 +183,22 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
 
   const mediaItems = useMemo<MediaItem[]>(() => {
     const pinned = (project.pinnedMedia || []).filter((src) => src && !src.includes("placeholder"));
-    const shots = (project.screenshots?.length ? project.screenshots : cover ? [cover] : []).filter(
+    const shots = (project.screenshots?.length ? project.screenshots : []).filter(
       (src) => src && !src.includes("placeholder"),
     );
-    const orderedImages = [...pinned.filter((src) => !isVideoUrl(src)), ...shots].filter(
+    const featured = cover && !isVideoUrl(cover) ? [cover] : [];
+    const orderedImages = [...featured, ...pinned.filter((src) => !isVideoUrl(src)), ...shots].filter(
       (src, index, all) => all.indexOf(src) === index,
     );
+    const captionFor = (src: string, index: number) => {
+      const shotIndex = (project.screenshots || []).indexOf(src);
+      if (shotIndex >= 0 && project.screenshotCaptions?.[shotIndex]) return project.screenshotCaptions[shotIndex];
+      return project.screenshotCaptions?.[index] || `View ${index + 1}`;
+    };
     const images: MediaItem[] = orderedImages.map((src, absolute) => ({
       type: "image",
       src,
-      caption: project.screenshotCaptions?.[absolute] || `View ${absolute + 1}`,
+      caption: captionFor(src, absolute),
     }));
     const pinnedVideos = pinned.filter(isVideoUrl);
     const videos = [
@@ -179,6 +234,7 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
   const [tab, setTab] = useState(tabs[0]?.id || "overview");
   const [shotStart, setShotStart] = useState(0);
   const [previewStart, setPreviewStart] = useState<number | null>(null);
+  const mediaRef = useRef<HTMLElement>(null);
   const visibleShots = Math.min(4, mediaItems.length);
   const shotWindow = mediaItems.slice(shotStart, shotStart + visibleShots);
   const previewItems = useMemo<PreviewItem[]>(
@@ -193,6 +249,15 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
 
   const openPreview = (absoluteIndex: number) => {
     setPreviewStart(absoluteIndex);
+  };
+
+  const revealMedia = (immediate = false) => {
+    const node = mediaRef.current;
+    if (!node) return;
+    const raw = getComputedStyle(document.documentElement).getPropertyValue("--public-nav-offset").trim();
+    const nav = raw.endsWith("px") ? parseFloat(raw) : 76;
+    const top = node.getBoundingClientRect().top + window.scrollY - nav - 16;
+    window.scrollTo({ top: Math.max(0, top), behavior: immediate ? "auto" : "smooth" });
   };
 
   const shiftGallery = (delta: number) => {
@@ -261,7 +326,16 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
               aria-label={`View ${project.title} media`}
               disabled={!mediaItems.length && !cover}
             >
-              {cover ? <img src={cover} alt="" /> : <span>{project.title}</span>}
+              {cover ? (
+                <FrameImage
+                  src={cover}
+                  alt=""
+                  priority
+                  sizes="(max-width: 900px) 92vw, 640px"
+                />
+              ) : (
+                <span>{project.title}</span>
+              )}
             </button>
             <p className="case-flourish" aria-hidden="true">
               {flourish}
@@ -269,7 +343,7 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
           </div>
         </header>
 
-        <dl className="case-meta" data-page-section>
+        <MetaRail>
           {project.deliveredThrough ? (
             <MetaItem icon={<RiBuilding2Line size={18} />} label="Delivered through" value={project.deliveredThrough} />
           ) : null}
@@ -302,7 +376,7 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
             value={STATUS[project.status] || project.status}
             live={project.status === "live"}
           />
-        </dl>
+        </MetaRail>
 
         {project.contributionSummary || project.collaborators?.length ? (
           <section className="case-contribution" data-page-section aria-label="Contribution">
@@ -336,9 +410,10 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
                   onClick={() => {
                     setTab(item.id);
                     if (item.id === "media") {
-                      window.requestAnimationFrame(() => {
-                        document.getElementById("case-media")?.scrollIntoView({ behavior: "smooth", block: "start" });
-                      });
+                      window.setTimeout(() => {
+                        revealMedia(true);
+                        if (mediaItems.length) setPreviewStart(0);
+                      }, 80);
                     }
                   }}
                 >
@@ -528,7 +603,7 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
         </div>
 
         {mediaItems.length > 0 ? (
-          <section className="case-shots" id="case-media" data-page-section aria-label="Project media">
+          <section ref={mediaRef} className="case-shots" id="case-media" data-page-section aria-label="Project media">
             <div className="case-shots-head">
               <h2>Project media</h2>
               {mediaItems.length > visibleShots ? (
@@ -557,7 +632,11 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
                         onClick={() => openPreview(absolute)}
                         aria-label={`Open ${item.caption}`}
                       >
-                        <img src={item.src} alt="" loading="lazy" decoding="async" />
+                        <FrameImage
+                          src={item.src}
+                          alt={item.caption}
+                          sizes="(max-width: 720px) 88vw, (max-width: 1100px) 44vw, 280px"
+                        />
                       </button>
                     )}
                     <figcaption>{item.caption}</figcaption>

@@ -169,9 +169,15 @@ export default function CvLibraryManager({
             return (
               <li key={doc.id} className={isDefault ? "cv-lib-card is-default" : "cv-lib-card"}>
                 <div className="cv-lib-card-top">
-                  <div>
-                    <h2>{doc.name}</h2>
-                    {doc.targetRole ? <p className="cv-lib-target">{doc.targetRole}</p> : null}
+                  <div className="cv-lib-card-identity">
+                    <span className="cv-lib-thumb" aria-hidden="true">
+                      {doc.name.slice(0, 1).toUpperCase()}
+                    </span>
+                    <div className="cv-lib-card-titles">
+                      <h2>{doc.name}</h2>
+                      {doc.targetRole ? <p className="cv-lib-target">{doc.targetRole}</p> : null}
+                      {isDefault ? <p className="cv-lib-badge">Default public CV</p> : null}
+                    </div>
                   </div>
                   <div className="cv-lib-card-menu">
                     <button
@@ -224,23 +230,29 @@ export default function CvLibraryManager({
                   </div>
                 </dl>
 
-                {isDefault ? <p className="cv-lib-badge">Default public CV</p> : null}
                 {overflow ? <p className="cv-lib-warn">{overflow}</p> : null}
 
                 <div className="cv-lib-card-actions">
                   <Link href={`/dashboard/cv/${doc.id}`} className="btn btn-primary btn-sm">
                     <RiEditLine size={14} /> Edit
                   </Link>
-                  <Link href={`/dashboard/cv/${doc.id}?tab=preview`} className="btn btn-outline btn-sm">
-                    <RiEyeLine size={14} /> Preview
+                  <Link
+                    href={`/dashboard/cv/${doc.id}?tab=preview`}
+                    className="btn btn-outline btn-sm"
+                    aria-label={`Preview ${doc.name}`}
+                    title="Preview"
+                  >
+                    <RiEyeLine size={14} />
                   </Link>
                   <a
                     className="btn btn-outline btn-sm"
                     href={`/api/cv/pdf?doc=${encodeURIComponent(doc.id)}&download=1`}
                     target="_blank"
                     rel="noopener noreferrer"
+                    aria-label={`Export ${doc.name} PDF`}
+                    title="Export PDF"
                   >
-                    <RiDownloadLine size={14} /> Export
+                    <RiDownloadLine size={14} />
                   </a>
                 </div>
               </li>

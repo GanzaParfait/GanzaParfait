@@ -154,7 +154,12 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const supabase = createServerSupabase(true);
 
-  if (isAdmin(request)) {
+  // Admin queue must opt in with scope=admin. Cookie alone must not change the
+  // public homepage response — otherwise drafts appear on the live site while
+  // an admin session is open in the same browser.
+  const wantAdmin = isAdmin(request) && url.searchParams.get("scope") === "admin";
+
+  if (wantAdmin) {
     let query = supabase
       .from("testimonials")
       .select("*")

@@ -504,7 +504,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           className={
             pathname.startsWith("/dashboard/settings") ||
             pathname.startsWith("/dashboard/media") ||
-            pathname.startsWith("/dashboard/cv")
+            pathname.startsWith("/dashboard/cv") ||
+            pathname.startsWith("/dashboard/messages") ||
+            pathname.startsWith("/dashboard/intro") ||
+            pathname.startsWith("/dashboard/about")
               ? "dash-main is-flush"
               : "dash-main"
           }

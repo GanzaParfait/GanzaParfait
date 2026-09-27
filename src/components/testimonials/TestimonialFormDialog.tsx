@@ -24,9 +24,11 @@ import {
 
 export type TestimonialProjectOption = { id: string; title: string };
 
+type CloseResult = { savedDraft?: boolean };
+
 type Props = {
   open: boolean;
-  onClose: () => void;
+  onClose: (result?: CloseResult) => void;
   onSubmitted: (message: string) => void;
   projects?: TestimonialProjectOption[];
   lockedProjectId?: string;
@@ -34,12 +36,102 @@ type Props = {
 
 type Step = 1 | 2 | 3 | 4;
 
+type StoredDraft = {
+  step: Step;
+  name: string;
+  email: string;
+  personTitle: string;
+  organization: string;
+  location: string;
+  relationship: string;
+  profileUrl: string;
+  projectId: string;
+  projectTitleOther: string;
+  photoUrl: string;
+  body: string;
+  consent: boolean;
+  notifyOnPublish: boolean;
+};
+
 const STEPS: { id: Step; label: string }[] = [
   { id: 1, label: "About you" },
   { id: 2, label: "Context" },
   { id: 3, label: "Message" },
   { id: 4, label: "Review" },
 ];
+
+const DRAFT_KEY = "ppg_testimonial_form_draft_v1";
+
+function readDraft(): StoredDraft | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw) as Partial<StoredDraft>;
+    if (!data || typeof data !== "object") return null;
+    return {
+      step: ([1, 2, 3, 4].includes(Number(data.step)) ? Number(data.step) : 1) as Step,
+      name: String(data.name || ""),
+      email: String(data.email || ""),
+      personTitle: String(data.personTitle || ""),
+      organization: String(data.organization || ""),
+      location: String(data.location || ""),
+      relationship: String(data.relationship || ""),
+      profileUrl: String(data.profileUrl || ""),
+      projectId: String(data.projectId || ""),
+      projectTitleOther: String(data.projectTitleOther || ""),
+      photoUrl: String(data.photoUrl || ""),
+      body: String(data.body || ""),
+      consent: data.consent !== false,
+      notifyOnPublish: data.notifyOnPublish !== false,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function draftHasContent(draft: Partial<StoredDraft> | null | undefined) {
+  if (!draft) return false;
+  return Boolean(
+    draft.name?.trim() ||
+      draft.email?.trim() ||
+      draft.personTitle?.trim() ||
+      draft.organization?.trim() ||
+      draft.location?.trim() ||
+      draft.relationship?.trim() ||
+      draft.profileUrl?.trim() ||
+      draft.projectId?.trim() ||
+      draft.projectTitleOther?.trim() ||
+      draft.photoUrl?.trim() ||
+      draft.body?.trim(),
+  );
+}
+
+export function hasTestimonialFormDraft() {
+  return draftHasContent(readDraft());
+}
+
+export function clearTestimonialFormDraft() {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(DRAFT_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+function writeDraft(draft: StoredDraft) {
+  if (typeof window === "undefined") return;
+  try {
+    if (!draftHasContent(draft)) {
+      window.localStorage.removeItem(DRAFT_KEY);
+      return;
+    }
+    window.localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+  } catch {
+    /* ignore quota / private mode */
+  }
+}
 
 export default function TestimonialFormDialog({
   open,
@@ -55,6 +147,7 @@ export default function TestimonialFormDialog({
   const nameRef = useRef<HTMLInputElement>(null);
   const restoreFocusRef = useRef<HTMLElement | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const hydratedRef = useRef(false);
 
   const [step, setStep] = useState<Step>(1);
   const [name, setName] = useState("");
@@ -84,7 +177,41 @@ export default function TestimonialFormDialog({
 
   const isOtherProject = projectId === "other";
 
-  useHistoryBackClose(open && phase === "form", onClose);
+  const snapshotDraft = (): StoredDraft => ({
+    step,
+    name,
+    email,
+    personTitle,
+    organization,
+    location,
+    relationship,
+    profileUrl,
+    projectId: lockedProjectId || projectId,
+    projectTitleOther,
+    photoUrl,
+    body,
+    consent,
+    notifyOnPublish,
+  });
+
+  const requestClose = () => {
+    if (phase === "success") {
+      clearTestimonialFormDraft();
+      onSubmitted(successMessage);
+      onClose({ savedDraft: false });
+      return;
+    }
+    const draft = snapshotDraft();
+    if (draftHasContent(draft)) {
+      writeDraft(draft);
+      onClose({ savedDraft: true });
+      return;
+    }
+    clearTestimonialFormDraft();
+    onClose({ savedDraft: false });
+  };
+
+  useHistoryBackClose(open && phase === "form", requestClose);
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 720px)");
@@ -96,13 +223,38 @@ export default function TestimonialFormDialog({
 
   useEffect(() => {
     if (!open) {
-      setStep(1);
+      hydratedRef.current = false;
       setPhase("form");
       setError("");
       setSubscribeOffer(false);
       setSubscribeState("idle");
       return;
     }
+
+    if (!hydratedRef.current) {
+      hydratedRef.current = true;
+      const draft = readDraft();
+      if (draft && draftHasContent(draft)) {
+        setStep(draft.step);
+        setName(draft.name);
+        setEmail(draft.email);
+        setPersonTitle(draft.personTitle);
+        setOrganization(draft.organization);
+        setLocation(draft.location);
+        setRelationship(draft.relationship);
+        setProfileUrl(draft.profileUrl);
+        setProjectId(lockedProjectId || draft.projectId);
+        setProjectTitleOther(draft.projectTitleOther);
+        setPhotoUrl(draft.photoUrl);
+        setPhotoPreview("");
+        setBody(draft.body);
+        setConsent(draft.consent);
+        setNotifyOnPublish(draft.notifyOnPublish);
+      } else if (lockedProjectId) {
+        setProjectId(lockedProjectId);
+      }
+    }
+
     restoreFocusRef.current = document.activeElement as HTMLElement | null;
     const previous = document.body.style.overflow;
     if (phase === "form") document.body.style.overflow = "hidden";
@@ -112,7 +264,7 @@ export default function TestimonialFormDialog({
       window.clearTimeout(t);
       restoreFocusRef.current?.focus?.();
     };
-  }, [open, phase]);
+  }, [open, phase, lockedProjectId]);
 
   useEffect(() => {
     return () => {
@@ -145,8 +297,9 @@ export default function TestimonialFormDialog({
   if (!open || typeof document === "undefined") return null;
 
   const finish = (message: string) => {
+    clearTestimonialFormDraft();
     onSubmitted(message);
-    onClose();
+    onClose({ savedDraft: false });
   };
 
   const onPhotoFile = async (file: File | null) => {
@@ -155,8 +308,8 @@ export default function TestimonialFormDialog({
       setPhotoPreview("");
       return;
     }
-    if (file.size > 2 * 1024 * 1024) {
-      setError("Keep the photo under 2 MB.");
+    if (file.size > 8 * 1024 * 1024) {
+      setError("Keep the photo under 8 MB before compression.");
       return;
     }
     const local = URL.createObjectURL(file);
@@ -164,8 +317,14 @@ export default function TestimonialFormDialog({
     setError("");
     setPhotoUploading(true);
     try {
+      const { compressImageForAvatar } = await import("@/lib/compress-image");
+      const prepared = await compressImageForAvatar(file, { maxEdge: 512, quality: 0.8 });
+      if (prepared.size > 2 * 1024 * 1024) {
+        setError("Keep the photo under 2 MB.");
+        return;
+      }
       const payload = new FormData();
-      payload.append("file", file);
+      payload.append("file", prepared);
       const res = await fetch("/api/testimonials/photo", { method: "POST", body: payload });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.url) {
@@ -277,6 +436,7 @@ export default function TestimonialFormDialog({
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "Could not save your testimonial.");
+      clearTestimonialFormDraft();
       const message = String(data.message || TESTIMONIAL_SUCCESS_MESSAGE);
       setSuccessMessage(message);
       setSubscribeEmail(String(data.email || email.trim().toLowerCase()));
@@ -369,7 +529,7 @@ export default function TestimonialFormDialog({
       className={`tm-dialog-layer ${isMobile ? "is-sheet" : "is-drawer"}`}
       role="presentation"
       onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose();
+        if (event.target === event.currentTarget) requestClose();
       }}
     >
       <div
@@ -381,7 +541,7 @@ export default function TestimonialFormDialog({
         aria-describedby={descId}
       >
         {isMobile ? <div className="tm-dialog-handle" aria-hidden="true" /> : null}
-        <button type="button" className="tm-dialog-close" onClick={onClose} aria-label="Close">
+        <button type="button" className="tm-dialog-close" onClick={requestClose} aria-label="Close">
           <RiCloseLine size={20} />
         </button>
 

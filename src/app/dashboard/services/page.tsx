@@ -4,12 +4,16 @@ import { useEffect, useState } from "react";
 import {
   RiAddLine,
   RiCloseLine,
+  RiComputerLine,
   RiDeleteBin6Line,
   RiEyeLine,
   RiSaveLine,
+  RiSmartphoneLine,
+  RiTabletLine,
 } from "react-icons/ri";
 import { useDashboardFeedback } from "@/components/dashboard/DashboardFeedback";
 import CustomSelect from "@/components/ui/CustomSelect";
+import ServicesPageView from "@/components/services/ServicesPageView";
 import { getLocalSettings, saveLocalSettings, fetchRemoteSettings } from "@/lib/supabase";
 import {
   DEFAULT_SERVICES_PAGE,
@@ -22,6 +26,7 @@ import {
 import { useSectionHash } from "@/hooks/useSectionHash";
 
 type SectionId = "hero" | "families" | "items" | "work" | "audiences" | "process" | "cta" | "seo";
+type PreviewDevice = "desktop" | "tablet" | "mobile";
 
 const SECTIONS: { id: SectionId; label: string }[] = [
   { id: "hero", label: "Hero" },
@@ -32,6 +37,12 @@ const SECTIONS: { id: SectionId; label: string }[] = [
   { id: "process", label: "Process" },
   { id: "cta", label: "CTA" },
   { id: "seo", label: "SEO" },
+];
+
+const DEVICES: { id: PreviewDevice; label: string; width: string; Icon: typeof RiComputerLine }[] = [
+  { id: "desktop", label: "Desktop", width: "100%", Icon: RiComputerLine },
+  { id: "tablet", label: "Tablet", width: "820px", Icon: RiTabletLine },
+  { id: "mobile", label: "Mobile", width: "390px", Icon: RiSmartphoneLine },
 ];
 
 const FOCUS_OPTIONS = SERVICE_FOCUS_IDS.map((id) => ({
@@ -81,10 +92,12 @@ export default function ServicesEditorPage() {
   const [section, setSection] = useState<SectionId>("hero");
   const [itemIndex, setItemIndex] = useState(0);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [device, setDevice] = useState<PreviewDevice>("desktop");
   const { runSave, saving } = useDashboardFeedback();
   const selectSection = useSectionHash(SECTIONS, setSection);
   const active = SECTIONS.find((item) => item.id === section) || SECTIONS[0];
   const currentItem = content.items[itemIndex] || content.items[0];
+  const previewWidth = DEVICES.find((item) => item.id === device)?.width || "100%";
 
   useEffect(() => {
     setContent(servicesPageFrom(getLocalSettings(), { includeUnpublished: true }));
@@ -495,30 +508,32 @@ export default function ServicesEditorPage() {
           </div>
         </aside>
 
-        <section className="hp-preview" aria-label="Services summary">
+        <section className="hp-preview" aria-label="Services live preview">
           <div className="hp-preview-top">
-            <p>Live structure</p>
+            <strong>Live preview</strong>
+            <div className="hp-devices">
+              {DEVICES.map((item) => {
+                const Icon = item.Icon;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={device === item.id ? "is-on" : undefined}
+                    onClick={() => setDevice(item.id)}
+                  >
+                    <Icon size={14} /> {item.label}
+                  </button>
+                );
+              })}
+            </div>
             <button type="button" className="btn btn-ghost btn-sm hp-preview-close" onClick={() => setPreviewOpen(false)}>
               <RiCloseLine size={16} /> Close
             </button>
           </div>
-          <div className="hp-preview-stage" style={{ padding: "1rem" }}>
-            <p className="section-label">{content.hero.label}</p>
-            <h2 style={{ margin: "0.35rem 0", fontSize: "1.25rem" }}>{content.hero.title}</h2>
-            <p style={{ color: "#64748b", fontSize: "0.86rem", marginBottom: "1rem" }}>{content.hero.body}</p>
-            {content.families.map((family) => (
-              <div key={family.id} style={{ marginBottom: "0.85rem" }}>
-                <strong style={{ color: "#0e52a8" }}>{family.label}</strong>
-                <div style={{ fontSize: "0.84rem", fontWeight: 700 }}>{family.title}</div>
-                <ul style={{ margin: "0.35rem 0 0", paddingLeft: "1rem", color: "#475569", fontSize: "0.78rem" }}>
-                  {content.items
-                    .filter((item) => item.category === family.id && item.published)
-                    .map((item) => (
-                      <li key={item.id}>{item.title}</li>
-                    ))}
-                </ul>
-              </div>
-            ))}
+          <div className="hp-preview-stage">
+            <div className="hp-preview-frame" data-device={device} style={{ width: previewWidth, maxWidth: "100%" }}>
+              <ServicesPageView content={content} />
+            </div>
           </div>
         </section>
       </div>

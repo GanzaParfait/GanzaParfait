@@ -132,6 +132,8 @@ export interface SiteSettings {
   announcementMediaKicker?: string;
   announcementMediaTitle?: string;
   announcementAudience?: string;
+  /** Public homepage testimonials block: live list, forced empty CTA, or fully hidden. */
+  testimonialsDisplay?: "live" | "empty" | "hidden";
   homepage?: HomepageContent;
   contactPage?: ContactPageContent;
   aboutPage?: AboutPageContent;
@@ -320,6 +322,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   announcementMediaTitle: "Building Impact Together",
   announcementAudience: "Leaders · Innovators · Change-makers",
   announcementMedia: [],
+  testimonialsDisplay: "live",
   emailHeaderLayout: "brand_tagline",
   emailShowSignature: true,
   emailSignatureQuote: "I only send something when there is something worth sharing.",

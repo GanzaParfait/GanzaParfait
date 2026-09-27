@@ -812,20 +812,26 @@ export default function CvDocumentEditor({
       <header className="cv-editor-bar">
         <div className="cv-editor-bar-left">
           <Link href="/dashboard/cv" className="cv-editor-back">
-            <RiArrowLeftLine size={16} /> My CVs
+            <RiArrowLeftLine size={16} />
+            <span>My CVs</span>
           </Link>
-          <div>
-            <h1>{doc.name}</h1>
-            <p className="cv-editor-status" data-dirty={dirty ? "1" : "0"}>
-              {saving ? (
-                <>
-                  <RiLoader4Line size={13} className="cv-spin" /> Saving…
-                </>
-              ) : (
-                status
-              )}
-            </p>
-          </div>
+          <span className="cv-editor-crumb-sep" aria-hidden="true">
+            /
+          </span>
+          <h1 className="cv-editor-title">{doc.name}</h1>
+          <span
+            className="cv-editor-status"
+            data-dirty={dirty ? "1" : "0"}
+            aria-live="polite"
+          >
+            {saving ? (
+              <>
+                <RiLoader4Line size={13} className="cv-spin" /> Saving…
+              </>
+            ) : (
+              status
+            )}
+          </span>
         </div>
         <div className="cv-editor-bar-right">
           <div className="cv-editor-zoom" role="group" aria-label="Preview zoom">

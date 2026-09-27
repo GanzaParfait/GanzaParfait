@@ -74,8 +74,8 @@ export default function AboutPageView({
                   src={page.hero.portrait}
                   alt={siteConfig.portraitAlt}
                   className="about-portrait"
-                  width={1200}
-                  height={1200}
+                  width={480}
+                  height={640}
                   fetchPriority="high"
                   decoding="async"
                 />

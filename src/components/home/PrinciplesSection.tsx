@@ -69,9 +69,8 @@ export default function PrinciplesSection({
         </ol>
 
         {principles.ctaHref && principles.ctaLabel ? (
-          <div className="principles-foot">
-            <span />
-            <Link href={principles.ctaHref} className="btn btn-outline principles-cta">
+          <div className="selected-foot-cta" aria-label={principles.ctaLabel}>
+            <Link href={principles.ctaHref} className="btn btn-outline">
               {principles.ctaLabel} <RiArrowRightLine size={16} />
             </Link>
           </div>

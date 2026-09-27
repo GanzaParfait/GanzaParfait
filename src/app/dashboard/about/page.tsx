@@ -465,7 +465,7 @@ export default function AboutEditorPage() {
             </button>
           </div>
           <div className="hp-preview-stage">
-            <div className="hp-preview-frame" data-device={device} style={{ width: previewWidth }}>
+            <div className="hp-preview-frame" data-device={device} style={{ width: previewWidth, maxWidth: "100%" }}>
               <AboutPageView content={content} embedded />
             </div>
           </div>
