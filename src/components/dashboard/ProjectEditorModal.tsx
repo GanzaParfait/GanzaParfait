@@ -800,15 +800,15 @@ export default function ProjectEditorModal({
           {tab === "gallery" && (
             <>
               <div>
-                <label style={{ ...labelStyle, marginBottom: "0.35rem" }}>Pinned preview media</label>
+                <label style={{ ...labelStyle, marginBottom: "0.35rem" }}>Pinned preview media (homepage + cards)</label>
                 <p style={{ margin: "0 0 0.55rem", fontSize: "0.75rem", color: "var(--color-text-3)" }}>
-                  Pin extra images for the second preview under the case-study button. Choose Featured on any image to make it the default cover.
+                  Pin at least three images or videos. These drive the tilted homepage preview and project card cover.
                 </p>
                 <div className="project-pin-grid">
                   {Array.from({ length: Math.max(3, (formData.pinnedMedia || []).length + 1) }, (_, index) => {
                     const src = formData.pinnedMedia?.[index];
                     return (
-                      <div key={`pin-${index}`} className={`project-pin-slot${src && formData.image === src ? " is-featured" : ""}`}>
+                      <div key={`pin-${index}`} className="project-pin-slot">
                         {src ? (
                           <>
                             {/\.(mp4|webm|ogg|mov)(\?|$)/i.test(src) ? (
@@ -816,27 +816,25 @@ export default function ProjectEditorModal({
                             ) : (
                               <img src={src} alt="" />
                             )}
-                            <div style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap" }}>
-                              <button
-                                type="button"
-                                className="btn btn-ghost btn-sm"
-                                onClick={() => set("image", src)}
-                              >
-                                {formData.image === src ? "Featured" : "Set as featured"}
-                              </button>
-                              <button
-                                type="button"
-                                className="btn btn-ghost btn-sm"
-                                onClick={() =>
-                                  setFormData((prev) => ({
-                                    ...prev,
-                                    pinnedMedia: (prev.pinnedMedia || []).filter((_, pin) => pin !== index),
-                                  }))
-                                }
-                              >
-                                Unpin
-                              </button>
-                            </div>
+                            <button
+                              type="button"
+                              className="btn btn-ghost btn-sm"
+                              onClick={() => setFormData((prev) => ({ ...prev, image: src }))}
+                            >
+                              {formData.image === src ? "Featured" : "Use as featured"}
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-ghost btn-sm"
+                              onClick={() =>
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  pinnedMedia: (prev.pinnedMedia || []).filter((_, pin) => pin !== index),
+                                }))
+                              }
+                            >
+                              Unpin
+                            </button>
                           </>
                         ) : (
                           <button
@@ -864,9 +862,9 @@ export default function ProjectEditorModal({
                 </div>
               </div>
               <div>
-                <label style={{ ...labelStyle, marginBottom: "0.45rem" }}>Featured cover and stills</label>
+                <label style={{ ...labelStyle, marginBottom: "0.45rem" }}>Featured image &amp; stills</label>
                 <p style={{ margin: "0 0 0.55rem", fontSize: "0.75rem", color: "var(--color-text-3)" }}>
-                  The featured image is the default on project cards and the case study. Set any still as featured.
+                  The featured image is the default cover on cards and the case study. Choose it from a pinned still or any screenshot.
                 </p>
                 <div style={{ display: "flex", gap: "0.7rem", alignItems: "stretch", flexWrap: "wrap" }}>
                   <div style={{ flex: "1 1 18rem", minHeight: "14rem", borderRadius: "0.85rem", overflow: "hidden", border: "1px solid var(--color-border)", background: "#0b192c" }}>
@@ -877,26 +875,28 @@ export default function ProjectEditorModal({
                     )}
                   </div>
                   {(formData.screenshots || []).map((src, index) => (
-                    <div key={`${src}-${index}`} className={`project-still${formData.image === src ? " is-featured" : ""}`} style={{ width: "11rem" }}>
+                    <div key={`${src}-${index}`} style={{ width: "11rem" }}>
                       <img src={src} alt="" style={{ width: "11rem", height: "8.5rem", objectFit: "cover", borderRadius: "0.85rem", border: "1px solid var(--color-border)" }} />
-                      <div style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap" }}>
-                        <button type="button" className="btn btn-ghost btn-sm" onClick={() => set("image", src)}>
-                          {formData.image === src ? "Featured" : "Set as featured"}
-                        </button>
-                        <button
-                          type="button"
-                          className="btn btn-ghost btn-sm"
-                          onClick={() =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              screenshots: (prev.screenshots || []).filter((_, shot) => shot !== index),
-                              image: prev.image === src ? (prev.screenshots || []).find((item) => item !== src) || "" : prev.image,
-                            }))
-                          }
-                        >
-                          Remove
-                        </button>
-                      </div>
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => setFormData((prev) => ({ ...prev, image: src }))}
+                      >
+                        {formData.image === src ? "Featured" : "Use as featured"}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm"
+                        onClick={() =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            screenshots: (prev.screenshots || []).filter((_, shot) => shot !== index),
+                            image: prev.image === src ? (prev.screenshots || []).find((item) => item !== src) || "" : prev.image,
+                          }))
+                        }
+                      >
+                        Remove
+                      </button>
                     </div>
                   ))}
                   <button

@@ -820,7 +820,7 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
     trust: ["Practical discussion", "No obligation", "Response within 24 hours"],
   },
   seo: {
-    title: "Services & Capabilities | Software Engineer & Technology Entrepreneur | Prince Parfait GANZA",
+    title: "Services & Capabilities | Software Engineer & Technology Entrepreneur — Prince Parfait GANZA",
     description:
       "Services from Prince Parfait GANZA in Kigali: software systems, research technology and digital data collection, organizational data and reporting, digital products, and hands-on technical support.",
   },

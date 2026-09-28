@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   RiMenuFoldLine,
   RiMenuUnfoldLine,
@@ -27,7 +27,8 @@ import ThemeToggle from "@/components/ui/ThemeToggle";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { socialIcon, socialsFor } from "@/lib/socials";
 import AnnouncementBar from "@/components/layout/AnnouncementBar";
-import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
+import { closeOverlayWithoutHistory, useHistoryBackClose } from "@/hooks/useHistoryBackClose";
+import { useSheetDrag } from "@/hooks/useSheetDrag";
 import { openSiteSearch } from "@/components/ui/CommandPalette";
 import LetsTalkChooser from "@/components/ui/LetsTalkChooser";
 import { CANONICAL_NAME } from "@/lib/identity";
@@ -45,6 +46,7 @@ function shareDisplayUrl(href: string) {
 
 export default function Navbar() {
   const pathname   = usePathname();
+  const router     = useRouter();
   const [isOpen,    setIsOpen]    = useState(false);
   const [isScrolled,setIsScrolled]= useState(false);
   const [isDark,    setIsDark]    = useState(false);
@@ -55,12 +57,21 @@ export default function Navbar() {
   const [isNarrow, setIsNarrow] = useState(false);
   const settings = useSiteSettings();
   const headerRef = useRef<HTMLElement>(null);
+  const menuSheetRef = useRef<HTMLDivElement>(null);
+  const shareSheetRef = useRef<HTMLElement>(null);
+  useSheetDrag(isOpen && isNarrow, () => setIsOpen(false), menuSheetRef, { maxWidth: 1023, variable: true });
+  useSheetDrag(shareOpen, () => setShareOpen(false), shareSheetRef, { maxWidth: 767 });
   const headerSocials = socialsFor(settings, "header");
   const primarySocials = headerSocials.slice(0, settings.headerSocialLimit || 3);
   const overflowSocials = headerSocials.slice(settings.headerSocialLimit || 3);
   const isPill = (settings.navbarStyle || "pill") === "pill";
   const showHomeCue = pathname !== "/" && (homeCue || isNarrow);
   useHistoryBackClose(isOpen, () => setIsOpen(false));
+
+  useEffect(() => {
+    document.body.classList.toggle("mobile-nav-open", isOpen);
+    return () => document.body.classList.remove("mobile-nav-open");
+  }, [isOpen]);
   useHistoryBackClose(shareOpen, () => setShareOpen(false));
 
   const handleScroll = useCallback(() => {
@@ -219,7 +230,7 @@ export default function Navbar() {
         style={{
           position: "fixed",
           top: 0, left: 0, right: 0,
-          zIndex: 50,
+          zIndex: 100,
           transition: "all 0.3s ease",
           padding: 0,
         }}
@@ -383,7 +394,13 @@ export default function Navbar() {
 
             {/* Mobile hamburger */}
             <button
-              onClick={() => setIsOpen(!isOpen)}
+              onClick={() => {
+                if (!isOpen) {
+                  closeOverlayWithoutHistory();
+                  window.dispatchEvent(new Event("pp:dismiss-subscribe"));
+                }
+                setIsOpen(!isOpen);
+              }}
               className="inline-flex lg:hidden"
               style={{
                 width: "1.9rem",
@@ -411,6 +428,7 @@ export default function Navbar() {
       {shareOpen && (
         <div className="share-overlay" role="presentation" onMouseDown={() => setShareOpen(false)}>
           <section
+            ref={shareSheetRef}
             className="share-panel"
             role="dialog"
             aria-modal="true"
@@ -486,7 +504,7 @@ export default function Navbar() {
         style={{
           position: "fixed",
           inset: 0,
-          zIndex: 40,
+          zIndex: 90,
           background: "rgba(0,0,0,0.4)",
           backdropFilter: "blur(4px)",
           transition: "opacity 0.3s ease",
@@ -498,6 +516,7 @@ export default function Navbar() {
 
       {/* Sheet */}
       <div
+        ref={menuSheetRef}
         id="mobile-menu"
         role="dialog"
         aria-modal="true"
@@ -508,12 +527,12 @@ export default function Navbar() {
           bottom: 0,
           left: 0,
           right: 0,
-          zIndex: 50,
+          zIndex: 95,
           background: "var(--color-bg)",
           borderTop: "1px solid var(--color-border)",
           borderRadius: "1.25rem 1.25rem 0 0",
           boxShadow: "0 -4px 24px rgba(0,0,0,0.12)",
-          transform: isOpen ? "translateY(0)" : "translateY(100%)",
+          transform: `translateY(calc(${isOpen ? "0px" : "100%"} + var(--sheet-drag, 0px)))`,
           transition: "transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)",
           maxHeight: "55dvh",
           overflowY: "auto",
@@ -531,7 +550,12 @@ export default function Navbar() {
             <Link
               href="/"
               aria-current={pathname === "/" ? "page" : undefined}
-              onClick={() => setIsOpen(false)}
+              onClick={(event) => {
+                event.preventDefault();
+                closeOverlayWithoutHistory();
+                setIsOpen(false);
+                router.push("/");
+              }}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -555,7 +579,12 @@ export default function Navbar() {
                 key={link.href}
                 href={link.href}
                 aria-current={active ? "page" : undefined}
-                onClick={() => setIsOpen(false)}
+                onClick={(event) => {
+                  event.preventDefault();
+                  closeOverlayWithoutHistory();
+                  setIsOpen(false);
+                  router.push(link.href);
+                }}
                 style={{
                   display: "flex",
                   alignItems: "center",

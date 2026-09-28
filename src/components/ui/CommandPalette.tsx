@@ -21,6 +21,7 @@ import {
   RiCalendarEventLine,
 } from "react-icons/ri";
 import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
+import { useSheetDrag } from "@/hooks/useSheetDrag";
 import { searchSiteIndex, type SiteSearchItem } from "@/lib/site-search";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { openBookingLink } from "@/lib/booking";
@@ -82,6 +83,7 @@ export default function CommandPalette() {
   }, []);
 
   useHistoryBackClose(open, close);
+  useSheetDrag(open && isMobile, close, panelRef);
 
   useEffect(() => {
     setMounted(true);

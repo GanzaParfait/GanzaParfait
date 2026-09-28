@@ -12,6 +12,7 @@ import {
 } from "react-icons/ri";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
+import { useSheetDrag } from "@/hooks/useSheetDrag";
 import {
   bookingOptionMeta,
   openBookingLink,
@@ -49,6 +50,7 @@ export default function LetsTalkChooser({ className }: { className?: string }) {
   }, []);
 
   useHistoryBackClose(open && isMobile, close);
+  useSheetDrag(open && isMobile, close, panelRef);
 
   useEffect(() => {
     setMounted(true);

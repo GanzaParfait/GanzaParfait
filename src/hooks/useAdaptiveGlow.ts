@@ -33,10 +33,7 @@ export function useAdaptiveGlow(src?: string) {
         if (!ctx) return;
         ctx.drawImage(img, 0, 0, size, size);
         const { data } = ctx.getImageData(0, 0, size, size);
-        let r = 0;
-        let g = 0;
-        let b = 0;
-        let n = 0;
+        const samples: { r: number; g: number; b: number; chroma: number }[] = [];
         for (let i = 0; i < data.length; i += 4) {
           if (data[i + 3] < 140) continue;
           const pr = data[i];
@@ -44,15 +41,18 @@ export function useAdaptiveGlow(src?: string) {
           const pb = data[i + 2];
           const max = Math.max(pr, pg, pb);
           const min = Math.min(pr, pg, pb);
-          if (max < 36 || min > 232) continue;
-          if (max - min < 16) continue;
-          r += pr;
-          g += pg;
-          b += pb;
-          n += 1;
+          const chroma = max - min;
+          if (max < 28 || min > 246) continue;
+          if (chroma < 22) continue;
+          samples.push({ r: pr, g: pg, b: pb, chroma });
         }
-        if (n > 0 && !cancelled) {
-          setGlow(`${Math.round(r / n)}, ${Math.round(g / n)}, ${Math.round(b / n)}`);
+        samples.sort((a, b) => b.chroma - a.chroma);
+        const top = samples.slice(0, Math.max(1, Math.ceil(samples.length * 0.18)));
+        if (top.length && !cancelled) {
+          const r = top.reduce((sum, sample) => sum + sample.r, 0) / top.length;
+          const g = top.reduce((sum, sample) => sum + sample.g, 0) / top.length;
+          const b = top.reduce((sum, sample) => sum + sample.b, 0) / top.length;
+          setGlow(`${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)}`);
         }
       } catch {
         if (!cancelled) setGlow(FALLBACK);

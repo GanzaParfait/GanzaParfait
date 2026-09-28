@@ -8,8 +8,9 @@ import {
   RiCloseLine,
   RiArrowDownLine,
 } from "react-icons/ri";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
+import { useSheetDrag } from "@/hooks/useSheetDrag";
 import { SiteSettings } from "@/lib/supabase";
 import { heroHighlights, heroImageFor, heroPortraitAlt, setting, splitDisplayName } from "@/lib/hero";
 import { socialIcon, heroSocialsFor } from "@/lib/socials";
@@ -23,7 +24,9 @@ export default function SplitHero({
   isPreview?: boolean;
 }) {
   const [isMoreOpen, setIsMoreOpen] = useState(false);
+  const moreSheetRef = useRef<HTMLDivElement>(null);
   useHistoryBackClose(isMoreOpen && !isPreview, () => setIsMoreOpen(false));
+  useSheetDrag(isMoreOpen && !isPreview, () => setIsMoreOpen(false), moreSheetRef, { maxWidth: 1023, variable: true });
   const roles = settings.siteSubtitle
     ? settings.siteSubtitle.split(/\s*[•·]\s*/).filter(Boolean)
     : IDENTITY_ROLE_LINE.split(/\s*·\s*/);
@@ -392,6 +395,7 @@ export default function SplitHero({
         }}
       />
       <div
+        ref={moreSheetRef}
         role="dialog" aria-modal="true" aria-label="More actions"
         className="lg:hidden"
         style={{
@@ -400,7 +404,7 @@ export default function SplitHero({
           borderTop: "1px solid var(--color-border)",
           borderRadius: "1.5rem 1.5rem 0 0",
           boxShadow: "0 -12px 50px rgba(0,0,0,0.18)",
-          transform: isMoreOpen ? "translateY(0)" : "translateY(100%)",
+          transform: `translateY(calc(${isMoreOpen ? "0px" : "100%"} + var(--sheet-drag, 0px)))`,
           transition: "transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)",
           padding: "1.5rem 1.5rem 2.5rem",
         }}

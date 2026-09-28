@@ -82,7 +82,35 @@ export async function GET() {
     }));
   });
 
-  const images = [...entityPortraits, ...projectImages];
+  const serviceImages = [
+    {
+      file: "svc-build.png",
+      title: "Build digital products — Prince Parfait GANZA",
+      caption: "Software and product systems by Prince Parfait GANZA in Kigali.",
+    },
+    {
+      file: "svc-grow.png",
+      title: "Grow digital presence — Prince Parfait GANZA",
+      caption: "Digital presence and growth support by Prince Parfait GANZA in Kigali.",
+    },
+    {
+      file: "svc-transform.png",
+      title: "Data to decisions — Prince Parfait GANZA",
+      caption: "Research technology and data systems by Prince Parfait GANZA in Kigali.",
+    },
+    {
+      file: "svc-support.png",
+      title: "Local insight and global collaboration — Prince Parfait GANZA",
+      caption: "Technical support and collaboration from Prince Parfait GANZA in Kigali.",
+    },
+  ].map((image) => ({
+    page: canonicalUrl("/services"),
+    loc: absoluteAssetUrl(`/images/services/${image.file}`),
+    title: image.title,
+    caption: image.caption,
+  }));
+
+  const images = [...entityPortraits, ...serviceImages, ...projectImages];
 
   const body = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">

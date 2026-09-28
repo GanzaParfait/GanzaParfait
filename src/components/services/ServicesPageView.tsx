@@ -161,12 +161,11 @@ function FamilyVisual({
         <Image
           src={visual.src}
           alt={visual.alt}
-          width={640}
-          height={480}
-          sizes="(max-width: 860px) 90vw, 280px"
+          width={1672}
+          height={941}
+          sizes="(max-width: 860px) 92vw, 360px"
           className="svc-visual-img"
         />
-        <span className="svc-visual-caption">{visual.caption}</span>
       </button>
     </figure>
   );
@@ -730,7 +729,7 @@ export default function ServicesPageView({
             <RiArrowLeftLine size={20} />
           </button>
           <figure className="svc-lightbox-frame" onClick={(event) => event.stopPropagation()}>
-            <Image src={preview.src} alt={preview.alt} width={1200} height={900} className="svc-lightbox-img" />
+            <Image src={preview.src} alt={preview.alt} width={1672} height={941} className="svc-lightbox-img" />
             <figcaption>
               <strong>{preview.label}</strong>
               <span>{preview.caption}</span>

@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { RiArrowDownLine, RiArrowUpLine, RiCloseLine, RiCompass3Line } from "react-icons/ri";
 import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
+import { useSheetDrag } from "@/hooks/useSheetDrag";
 
 type Chapter = {
   el: HTMLElement;
@@ -55,8 +56,10 @@ export default function PageFloaters() {
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const chapterRef = useRef<HTMLDivElement>(null);
 
   useHistoryBackClose(sheetOpen, () => setSheetOpen(false));
+  useSheetDrag(sheetOpen, () => setSheetOpen(false), chapterRef, { maxWidth: 899 });
 
   useEffect(() => {
     setMounted(true);
@@ -165,6 +168,7 @@ export default function PageFloaters() {
               onMouseDown={(event) => event.target === event.currentTarget && setSheetOpen(false)}
             >
               <div
+                ref={chapterRef}
                 className="chapter-sheet"
                 role="dialog"
                 aria-modal="true"

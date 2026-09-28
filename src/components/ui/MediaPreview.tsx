@@ -60,10 +60,7 @@ export default function MediaPreview({
     <div className="media-preview" role="dialog" aria-modal="true" aria-label={title} onClick={onClose}>
       <div className="media-preview-chrome" onClick={(event) => event.stopPropagation()}>
         <div className="media-preview-top">
-          <p>
-            <span>{title}</span>
-            {list.length > 1 ? <span className="media-preview-count">{index + 1}/{list.length}</span> : null}
-          </p>
+          <p>{title}{list.length > 1 ? ` · ${index + 1}/${list.length}` : ""}</p>
           <div>
             {list.length > 1 && !isVideo ? (
               <button type="button" aria-label={playing ? "Pause autoplay" : "Play autoplay"} onClick={() => setPlaying((value) => !value)}>

@@ -32,7 +32,7 @@ export const PORTRAIT_PATH_16X9 = PORTRAIT_PATHS.ratio16x9;
 export const OG_IMAGE_PATH = "/images/og/seo-share-image.jpg";
 
 /** Date the public factual content was last revised. Do not stamp deploy time. */
-export const SITE_CONTENT_REVISED = "2026-09-22";
+export const SITE_CONTENT_REVISED = "2026-09-28";
 
 /**
  * Canonical absolute URL.
@@ -497,6 +497,28 @@ export function buildEducationItemListJsonLd() {
         },
       };
     }),
+  };
+}
+
+export function buildFaqPageJsonLd(items: { q: string; a: string }[]) {
+  const questions = items
+    .map((item) => ({ q: item.q.trim(), a: item.a.trim() }))
+    .filter((item) => item.q && item.a);
+  if (!questions.length) return null;
+  return {
+    "@type": "FAQPage",
+    "@id": `${canonicalUrl("/contact")}#faq`,
+    url: `${canonicalUrl("/contact")}#faq`,
+    isPartOf: websiteRef(),
+    about: personRef(),
+    mainEntity: questions.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.a,
+      },
+    })),
   };
 }
 

@@ -46,7 +46,15 @@ type FilterId =
 
 type SortId = "recent" | "featured" | "az";
 
-const BATCH = 10;
+const BATCH = 12;
+const ROW_PATTERNS = ["wide-left", "wide-center", "wide-right", "even"] as const;
+
+function chunkProjects<T>(items: T[], size = 3) {
+  const rows: T[][] = [];
+  for (let index = 0; index < items.length; index += size) rows.push(items.slice(index, index + size));
+  return rows;
+}
+
 const FILTER_DELAY_MS = 500;
 const AUTO_BATCHES = 3;
 
@@ -476,21 +484,17 @@ export default function ProjectsPageView({
         <div className="container">
           {visible.length ? (
             <>
-              <div className="selected-stage projects-archive">
-                <div className="selected-featured">
-                  <ArchiveCard project={visible[0]} number={1} wide />
-                </div>
-                {visible.length > 1 ? (
-                  <div className="selected-rest">
-                    {visible.slice(1).map((project, index) => (
-                      <ArchiveCard
-                        key={project.id}
-                        project={project}
-                        number={index + 2}
-                      />
-                    ))}
-                  </div>
-                ) : null}
+              <div className="projects-board">
+                {chunkProjects(visible).map((row, rowIndex) => {
+                  const pattern = row.length < 3 ? "even" : ROW_PATTERNS[rowIndex % ROW_PATTERNS.length];
+                  return (
+                    <div key={row[0].id} className={`projects-row is-${pattern} count-${row.length}`}>
+                      {row.map((project, index) => (
+                        <ArchiveCard key={project.id} project={project} number={rowIndex * 3 + index + 1} />
+                      ))}
+                    </div>
+                  );
+                })}
               </div>
               {hasMore ? (
                 <div className="projects-load" ref={sentinelRef}>
@@ -563,7 +567,6 @@ function ArchiveCard({
       body={wide ? project.description : shortDescription(project)}
       href={`/projects/${project.id}`}
       cover={cover || project.image || ""}
-      extras={wide ? images.filter((src) => src !== (cover || project.image)).slice(0, 2).map((src) => ({ src })) : undefined}
       mediaCount={images.length}
       wide={wide}
       locked={isInProgress(project)}

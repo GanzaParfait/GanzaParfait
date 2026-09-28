@@ -14,6 +14,7 @@ import {
   RiUserLine,
 } from "react-icons/ri";
 import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
+import { useSheetDrag } from "@/hooks/useSheetDrag";
 import { plainTextFromClipboard } from "@/lib/paste-plain-text";
 import {
   TESTIMONIAL_BODY_MAX,
@@ -212,6 +213,7 @@ export default function TestimonialFormDialog({
   };
 
   useHistoryBackClose(open && phase === "form", requestClose);
+  useSheetDrag(open && isMobile, requestClose, panelRef);
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 720px)");

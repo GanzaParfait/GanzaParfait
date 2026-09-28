@@ -12,6 +12,25 @@ type StackEntry = {
 const stack: StackEntry[] = [];
 let listening = false;
 let ignorePops = 0;
+/** While this timestamp is in the future, overlay cleanup must not call history.back(). */
+let suppressHistoryBackUntil = 0;
+
+/** Close an overlay without popping history, so an in-app link can navigate. */
+export function closeOverlayWithoutHistory() {
+  const until = Date.now() + 1500;
+  suppressHistoryBackUntil = until;
+  if (typeof window !== "undefined") {
+    (window as Window & { __ppSuppressHistoryBackUntil?: number }).__ppSuppressHistoryBackUntil = until;
+  }
+}
+
+function historyBackSuppressed() {
+  const fromWindow =
+    typeof window !== "undefined"
+      ? (window as Window & { __ppSuppressHistoryBackUntil?: number }).__ppSuppressHistoryBackUntil || 0
+      : 0;
+  return Date.now() < Math.max(suppressHistoryBackUntil, fromWindow);
+}
 
 function ensureListeners() {
   if (listening || typeof window === "undefined") return;
@@ -61,6 +80,9 @@ export function useHistoryBackClose(open: boolean, onClose: () => void) {
 
       const state = window.history.state as { [STATE_KEY]?: string } | null;
       if (state?.[STATE_KEY] === id) {
+        if (historyBackSuppressed()) {
+          return;
+        }
         ignorePops += 1;
         window.history.back();
       }

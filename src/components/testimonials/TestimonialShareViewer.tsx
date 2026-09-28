@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useId, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import {
@@ -11,6 +11,7 @@ import {
   RiShareForwardLine,
 } from "react-icons/ri";
 import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
+import { useSheetDrag } from "@/hooks/useSheetDrag";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { listListedProjects } from "@/lib/projects";
 import {
@@ -30,6 +31,7 @@ export default function TestimonialShareViewer() {
   const [open, setOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [copied, setCopied] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   const close = useCallback(() => {
     setOpen(false);
@@ -46,6 +48,7 @@ export default function TestimonialShareViewer() {
   }, []);
 
   useHistoryBackClose(open, close);
+  useSheetDrag(open && isMobile, close, panelRef);
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 720px)");
@@ -131,7 +134,7 @@ export default function TestimonialShareViewer() {
         if (event.target === event.currentTarget) close();
       }}
     >
-      <div className="tm-share-panel" role="dialog" aria-modal="true" aria-labelledby={titleId}>
+      <div ref={panelRef} className="tm-share-panel" role="dialog" aria-modal="true" aria-labelledby={titleId}>
         {isMobile ? <div className="tm-dialog-handle" aria-hidden="true" /> : null}
         <button type="button" className="tm-dialog-close" onClick={close} aria-label="Close">
           <RiCloseLine size={20} />

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { createPortal } from "react-dom";
 import { RiCloseLine, RiLoader4Line } from "react-icons/ri";
 import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
+import { useSheetDrag } from "@/hooks/useSheetDrag";
 import {
   cvAccessModalHeading,
   isValidEmail,
@@ -56,6 +57,7 @@ export default function CvAccessDialog({
   const [mounted, setMounted] = useState(false);
 
   useHistoryBackClose(open, onClose);
+  useSheetDrag(open && isMobile, onClose, panelRef);
 
   useEffect(() => {
     setMounted(true);

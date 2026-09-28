@@ -122,10 +122,17 @@ export function sanitizeProjectAttribution(project: Project): Project {
         seoTitle: seed.seoTitle,
         seoDescription: seed.seoDescription,
         links: { ...seed.links, ...next.links, live: seed.links.live },
+        technologies: (next.technologies || []).some((item) => item?.trim())
+          ? next.technologies
+          : seed.technologies,
         deliveredThrough: undefined,
         collaborators: undefined,
       };
     }
+  }
+
+  if (next.id === "goa-plus" && seed && !(next.technologies || []).some((item) => item?.trim())) {
+    next = { ...next, technologies: seed.technologies };
   }
 
   // Never publish ownership percentages / cap-table language.
@@ -190,6 +197,14 @@ function usableList(list?: unknown[]) {
   return (list || []).filter((src): src is string => usableMedia(src));
 }
 
+/** Keep a newer seed screenshot library when a saved record still points at older stills. */
+function sharesShotLibrary(record: Project, base: Project) {
+  const seedShots = usableList(base.screenshots);
+  const savedShots = usableList(record.screenshots);
+  if (!seedShots.length || !savedShots.length) return true;
+  return savedShots.some((src) => seedShots.includes(src));
+}
+
 /** Merge verified seed projects with dashboard/Supabase overrides and extras. */
 export function mergeProjectCatalog(records?: Project[] | null): Project[] {
   const byId = new Map<string, Project>();
@@ -217,10 +232,10 @@ export function mergeProjectCatalog(records?: Project[] | null): Project[] {
             return fromRecord.length ? fromRecord : fromBase;
           })(),
           capabilities: record.capabilities?.length ? record.capabilities : base.capabilities,
-          image: usableMedia(record.image) ? record.image : base.image,
-          screenshots: usableList(record.screenshots).length ? usableList(record.screenshots) : base.screenshots,
-          pinnedMedia: usableList(record.pinnedMedia).length ? usableList(record.pinnedMedia) : base.pinnedMedia,
-          screenshotCaptions: record.screenshotCaptions?.length ? record.screenshotCaptions : base.screenshotCaptions,
+          image: sharesShotLibrary(record, base) && usableMedia(record.image) ? record.image : base.image,
+          screenshots: sharesShotLibrary(record, base) && usableList(record.screenshots).length ? usableList(record.screenshots) : base.screenshots,
+          pinnedMedia: sharesShotLibrary(record, base) && usableList(record.pinnedMedia).length ? usableList(record.pinnedMedia) : base.pinnedMedia,
+          screenshotCaptions: sharesShotLibrary(record, base) && record.screenshotCaptions?.length ? record.screenshotCaptions : base.screenshotCaptions,
           // Allow clearing collaborators with an explicit empty array from Dashboard/migration.
           collaborators: Array.isArray(record.collaborators)
             ? record.collaborators

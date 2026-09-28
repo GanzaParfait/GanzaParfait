@@ -4,6 +4,7 @@ import { useCallback, useEffect, useId, useRef, useState, type FormEvent } from 
 import { usePathname } from "next/navigation";
 import { RiMailSendLine, RiCloseLine, RiCheckDoubleLine, RiLoader4Line } from "react-icons/ri";
 import { useHistoryBackClose, dismissOnBackdrop } from "@/hooks/useHistoryBackClose";
+import { useSheetDrag } from "@/hooks/useSheetDrag";
 import {
   hasSubscribeJoined,
   markSubscribeJoined,
@@ -21,6 +22,7 @@ export default function SubscribeWidget() {
   const pathname = usePathname();
   const titleId = useId();
   const successTimer = useRef<number | null>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [email, setEmail] = useState("");
@@ -81,6 +83,16 @@ export default function SubscribeWidget() {
   }, [joined, isVisible, status]);
 
   useHistoryBackClose(isVisible && isMobile && status !== "loading", handleDismiss);
+  useSheetDrag(isVisible && isMobile && status !== "loading", handleDismiss, panelRef, { variable: true });
+
+  useEffect(() => {
+    const dismiss = () => {
+      if (status === "loading") return;
+      handleDismiss();
+    };
+    window.addEventListener("pp:dismiss-subscribe", dismiss);
+    return () => window.removeEventListener("pp:dismiss-subscribe", dismiss);
+  }, [handleDismiss, status]);
 
   useEffect(() => {
     if (!isVisible || !isMobile) return;
@@ -148,6 +160,7 @@ export default function SubscribeWidget() {
         />
       ) : null}
       <div
+        ref={panelRef}
         className="subscribe-widget"
         role={sheet ? "dialog" : "complementary"}
         aria-labelledby={titleId}

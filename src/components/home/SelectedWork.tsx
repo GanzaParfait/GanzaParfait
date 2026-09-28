@@ -7,7 +7,7 @@ import { type Project } from "@/data/site-data";
 import { imagesForStory, type HomepageContent, type WorkStory } from "@/lib/homepage";
 import MediaPreview, { type PreviewItem } from "@/components/ui/MediaPreview";
 import WorkProjectCard from "@/components/work/WorkProjectCard";
-import { mediaForProject } from "@/components/work/work-media";
+import { mediaForProject, projectCover, projectRelatedStills, projectStillCaption } from "@/components/work/work-media";
 import { mergeProjectCatalog } from "@/lib/projects";
 
 export default function SelectedWork({
@@ -25,8 +25,8 @@ export default function SelectedWork({
   const [preview, setPreview] = useState<{ title: string; items: PreviewItem[]; start: number } | null>(null);
   const Tag = embedded ? "div" : "section";
 
-  const openPreview = (title: string, items: PreviewItem[], start = 0) => {
-    setPreview({ title, items, start });
+  const openPreview = (title: string, items: PreviewItem[]) => {
+    setPreview({ title, items, start: 0 });
   };
 
   return (
@@ -60,15 +60,31 @@ export default function SelectedWork({
               {(() => {
                 const images = imagesForStory(featured.story, records);
                 const items = mediaForProject(featured.project, images);
-                const own = images.filter((src, index) => index > 0 && src !== images[0]).slice(0, 2).map((src) => ({ src }));
-                const related = rest
-                  .map(({ story }) => ({
-                    src: imagesForStory(story, records)[0] || "",
-                    href: story.href || `/projects/${story.id}`,
-                    label: story.title,
-                  }))
-                  .filter((item) => item.src)
-                  .slice(0, 2);
+                const cover = featured.project ? projectCover(featured.project) || images[0] : images[0];
+                const href = featured.story.href || `/projects/${featured.story.id}`;
+                const fromStills = featured.project
+                  ? projectRelatedStills(featured.project, cover, 2).map((src) => ({
+                      src,
+                      title: projectStillCaption(featured.project!, src),
+                      href,
+                    }))
+                  : [];
+                const fromNeighbors =
+                  fromStills.length >= 2
+                    ? []
+                    : rest
+                        .map(({ story, project }) => {
+                          const neighborImages = imagesForStory(story, records);
+                          const src = project ? projectCover(project) || neighborImages[0] : neighborImages[0];
+                          if (!src) return null;
+                          return {
+                            src,
+                            title: story.title || project?.title || "Project",
+                            href: story.href || (project ? `/projects/${project.id}` : "/projects"),
+                          };
+                        })
+                        .filter((item): item is { src: string; title: string; href: string } => Boolean(item));
+                const related = [...fromStills, ...fromNeighbors].slice(0, 2);
                 return (
                   <WorkProjectCard
                     project={featured.project}
@@ -77,16 +93,13 @@ export default function SelectedWork({
                     line={featured.story.line}
                     body={featuredBody(featured.project, featured.story)}
                     href={featured.story.href || `/projects/${featured.story.id}`}
-                    cover={images[0]}
-                    extras={own.length ? own : related}
+                    cover={cover}
+                    related={related}
                     mediaCount={items.length}
                     wide
                     flourish={work.flourish}
                     onPreview={() =>
                       openPreview(featured.story.title || featured.project?.title || "Project", items)
-                    }
-                    onOpenExtra={(index) =>
-                      openPreview(featured.story.title || featured.project?.title || "Project", items, index)
                     }
                   />
                 );
@@ -108,7 +121,7 @@ export default function SelectedWork({
                     line={story.line}
                     body={compactBody(project, story)}
                     href={story.href || `/projects/${story.id}`}
-                    cover={images[0]}
+                    cover={project ? projectCover(project) || images[0] : images[0]}
                     mediaCount={items.length}
                     onPreview={() => openPreview(story.title || project?.title || "Project", items)}
                   />

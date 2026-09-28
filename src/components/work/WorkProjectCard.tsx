@@ -2,13 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState, type CSSProperties } from "react";
+import type { CSSProperties } from "react";
 import { RiArrowRightLine, RiExternalLinkLine, RiLockLine } from "react-icons/ri";
 import type { Project } from "@/data/site-data";
 import { selectedWorkCategory, selectedWorkTone } from "@/components/work/work-media";
 import { useAdaptiveGlow } from "@/hooks/useAdaptiveGlow";
-
-type CardExtra = { src: string; href?: string; label?: string };
 
 function CoverImage({
   cover,
@@ -19,12 +17,6 @@ function CoverImage({
   title: string;
   wide: boolean;
 }) {
-  const [ready, setReady] = useState(false);
-  useEffect(() => {
-    setReady(false);
-    const timer = window.setTimeout(() => setReady(true), 2800);
-    return () => window.clearTimeout(timer);
-  }, [cover]);
   const local = cover.startsWith("/") && !cover.startsWith("//");
   const remote = /^https?:\/\//i.test(cover);
   const sizes = wide
@@ -32,35 +24,21 @@ function CoverImage({
     : "(max-width: 900px) 92vw, (max-width: 1200px) 30vw, 360px";
   const alt = `${title} — work by Prince Parfait GANZA`;
 
-  return (
-    <>
-      {ready ? null : <span className="frame-skel" aria-hidden="true" />}
-      {local || remote ? (
-        <Image
-          src={cover}
-          alt={alt}
-          width={1200}
-          height={750}
-          sizes={sizes}
-          quality={75}
-          loading="lazy"
-          className={`selected-shot-img${ready ? " is-ready" : ""}`}
-          onLoad={() => setReady(true)}
-        />
-      ) : (
-        <img
-          src={cover}
-          alt={alt}
-          loading="lazy"
-          decoding="async"
-          width={1200}
-          height={750}
-          className={ready ? "is-ready" : undefined}
-          onLoad={() => setReady(true)}
-        />
-      )}
-    </>
-  );
+  if (local || remote) {
+    return (
+      <Image
+        src={cover}
+        alt={alt}
+        width={1200}
+        height={750}
+        sizes={sizes}
+        loading="lazy"
+        className="selected-shot-img"
+      />
+    );
+  }
+
+  return <img src={cover} alt={alt} loading="lazy" decoding="async" width={1200} height={750} />;
 }
 
 export default function WorkProjectCard({
@@ -71,13 +49,12 @@ export default function WorkProjectCard({
   body,
   href,
   cover,
-  extras = [],
+  related = [],
   mediaCount = 0,
   wide = false,
   flourish = "",
   locked = false,
   onPreview,
-  onOpenExtra,
 }: {
   project?: Project;
   number: number;
@@ -86,20 +63,19 @@ export default function WorkProjectCard({
   body: string;
   href: string;
   cover?: string;
-  extras?: CardExtra[];
+  /** Two pictures shown under the wide-card case-study action. */
+  related?: { src: string; title?: string; href: string }[];
   mediaCount?: number;
   wide?: boolean;
   flourish?: string;
   locked?: boolean;
   onPreview?: () => void;
-  onOpenExtra?: (index: number) => void;
 }) {
   const category = selectedWorkCategory(project);
   const tone = selectedWorkTone(project);
   const live = project?.links?.live;
   const tech = (project?.technologies || []).filter(Boolean).slice(0, wide ? 4 : 3);
   const glow = useAdaptiveGlow(wide ? cover : undefined);
-  const more = wide ? extras.filter((item) => item.src && item.src !== cover).slice(0, 2) : [];
 
   return (
     <article
@@ -139,36 +115,16 @@ export default function WorkProjectCard({
                 </a>
               ) : null}
             </div>
-            {more.length ? (
-              <div className={`selected-extra${more.length === 1 ? " is-single" : ""}`} aria-label={`More from ${title}`}>
-                {more.map((item, extraIndex) => {
-                  const label = item.label ? `Open ${item.label}` : `Open another image from ${title}`;
-                  const shot = (
-                    <>
-                      <CoverImage cover={item.src} title={item.label || title} wide={false} />
-                      {item.label ? <em>{item.label}</em> : null}
-                    </>
-                  );
-                  if (item.href) {
-                    return (
-                      <Link key={`${item.src}-${item.href}`} href={item.href} aria-label={label}>
-                        {shot}
-                      </Link>
-                    );
-                  }
-                  if (onOpenExtra) {
-                    return (
-                      <button key={`${item.src}-${extraIndex}`} type="button" onClick={() => onOpenExtra(extraIndex + 1)} aria-label={label}>
-                        {shot}
-                      </button>
-                    );
-                  }
-                  return (
-                    <Link key={`${item.src}-${extraIndex}`} href={href} aria-label={label}>
-                      {shot}
-                    </Link>
-                  );
-                })}
+            {related.length ? (
+              <div className="selected-related-row">
+                {related.slice(0, 2).map((item) => (
+                  <Link key={item.src} href={item.href} className="selected-related">
+                    <span className="selected-related-shot">
+                      <CoverImage cover={item.src} title={item.title || title} wide={false} />
+                    </span>
+                    {item.title ? <span className="selected-related-name">{item.title}</span> : null}
+                  </Link>
+                ))}
               </div>
             ) : null}
           </>

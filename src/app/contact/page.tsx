@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ContactForm from "./ContactForm";
 import { buildPageMetadata } from "@/lib/seo";
-import { buildBreadcrumbListJsonLd, buildGraph, buildWebPageJsonLd } from "@/lib/schema";
+import { buildBreadcrumbListJsonLd, buildFaqPageJsonLd, buildGraph, buildWebPageJsonLd } from "@/lib/schema";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { getServerSiteSettings } from "@/lib/site-settings-server";
+import { contactPageFrom } from "@/lib/contact-page";
 
 const PAGE_DESCRIPTION =
   "Contact Prince Parfait GANZA in Kigali — software engineer and technology entrepreneur — about software systems, research technology, data systems, or a venture that needs to exist. Email hello@princeparfait.com.";
@@ -27,7 +29,9 @@ const breadcrumbItems = [
   { name: "Contact", path: "/contact" },
 ];
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const settings = await getServerSiteSettings();
+  const faq = buildFaqPageJsonLd(contactPageFrom(settings).faq.items);
   return (
     <>
       <JsonLd
@@ -39,6 +43,7 @@ export default function ContactPage() {
             type: "ContactPage",
           }),
           buildBreadcrumbListJsonLd(breadcrumbItems, "/contact"),
+          ...(faq ? [faq] : []),
         ])}
       />
       <ContactForm />

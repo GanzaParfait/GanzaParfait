@@ -59,9 +59,9 @@ function uniqueMedia(list: unknown[]) {
 export function projectPreviewMedia(project?: Project): string[] {
   if (!project) return [];
   return uniqueMedia([
+    ...(project.image ? [project.image] : []),
     ...(project.pinnedMedia || []),
     ...(project.screenshots || []),
-    ...(project.image ? [project.image] : []),
   ]);
 }
 
@@ -89,6 +89,7 @@ export function mediaForProject(project: Project | undefined, images: string[]):
   });
 }
 
+/** Featured image (`image`) is the default cover. Pinned and screenshots follow. */
 export function projectCover(project: Project) {
   const image = asMediaSrc(project.image);
   if (image && !image.includes("placeholder") && !isVideoUrl(image)) return image;
@@ -96,6 +97,20 @@ export function projectCover(project: Project) {
   if (pinned) return pinned;
   const shots = (project.screenshots || []).map(asMediaSrc).filter((src) => src && !src.includes("placeholder") && !isVideoUrl(src));
   return shots[0] || "";
+}
+
+/** Caption for a still, matched to the screenshot library when one exists. */
+export function projectStillCaption(project: Project, src: string) {
+  const shots = (project.screenshots || []).map(asMediaSrc);
+  const index = shots.indexOf(src);
+  if (index < 0) return "";
+  return project.screenshotCaptions?.[index]?.trim() || "";
+}
+
+/** Extra stills from this project, excluding the cover. */
+export function projectRelatedStills(project: Project, cover?: string, count = 2) {
+  const current = cover || projectCover(project);
+  return projectImages(project).filter((src) => src && src !== current).slice(0, count);
 }
 
 export function projectImages(project: Project) {

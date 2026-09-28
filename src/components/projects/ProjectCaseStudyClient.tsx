@@ -26,7 +26,6 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { type Project } from "@/data/site-data";
 import ShareActions from "@/components/ui/ShareActions";
 import MediaPreview, { type PreviewItem } from "@/components/ui/MediaPreview";
-import FrameImage from "@/components/ui/FrameImage";
 import ProjectTestimonials from "@/components/testimonials/ProjectTestimonials";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { isVideoUrl, listListedProjects } from "@/lib/projects";
@@ -116,22 +115,24 @@ function MetaRail({ children }: { children: ReactNode }) {
   const scroller = useRef<HTMLDListElement>(null);
   const [edges, setEdges] = useState({ left: false, right: false });
 
-  useEffect(() => {
+  const sync = () => {
     const node = scroller.current;
     if (!node) return;
-    const measure = () => {
-      const max = node.scrollWidth - node.clientWidth;
-      setEdges({
-        left: node.scrollLeft > 8,
-        right: max > 8 && node.scrollLeft < max - 8,
-      });
-    };
-    measure();
-    node.addEventListener("scroll", measure, { passive: true });
-    const observer = new ResizeObserver(measure);
+    setEdges({
+      left: node.scrollLeft > 8,
+      right: node.scrollLeft + node.clientWidth < node.scrollWidth - 8,
+    });
+  };
+
+  useEffect(() => {
+    sync();
+    const node = scroller.current;
+    if (!node) return;
+    node.addEventListener("scroll", sync, { passive: true });
+    const observer = new ResizeObserver(sync);
     observer.observe(node);
     return () => {
-      node.removeEventListener("scroll", measure);
+      node.removeEventListener("scroll", sync);
       observer.disconnect();
     };
   }, [children]);
@@ -139,26 +140,20 @@ function MetaRail({ children }: { children: ReactNode }) {
   const move = (direction: number) => {
     const node = scroller.current;
     if (!node) return;
-    const item = node.querySelector<HTMLElement>(".case-meta-item");
-    const distance = (item?.getBoundingClientRect().width || 180) + 8;
-    node.scrollBy({ left: direction * distance, behavior: "smooth" });
+    node.scrollBy({ left: direction * Math.max(220, node.clientWidth * 0.72), behavior: "smooth" });
   };
 
   return (
-    <div className="case-meta-rail">
-      {edges.left ? (
-        <button type="button" className="case-meta-arrow is-prev" aria-label="Previous details" onClick={() => move(-1)}>
-          <RiArrowLeftLine size={16} />
-        </button>
-      ) : null}
-      <dl ref={scroller} className="case-meta" data-page-section>
+    <div className="case-meta-rail" data-page-section>
+      <button type="button" className="case-meta-arrow" aria-label="Previous details" disabled={!edges.left} onClick={() => move(-1)}>
+        <RiArrowLeftLine size={16} />
+      </button>
+      <dl className="case-meta" ref={scroller}>
         {children}
       </dl>
-      {edges.right ? (
-        <button type="button" className="case-meta-arrow is-next" aria-label="Next details" onClick={() => move(1)}>
-          <RiArrowRightLine size={16} />
-        </button>
-      ) : null}
+      <button type="button" className="case-meta-arrow" aria-label="Next details" disabled={!edges.right} onClick={() => move(1)}>
+        <RiArrowRightLine size={16} />
+      </button>
     </div>
   );
 }
@@ -183,22 +178,16 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
 
   const mediaItems = useMemo<MediaItem[]>(() => {
     const pinned = (project.pinnedMedia || []).filter((src) => src && !src.includes("placeholder"));
-    const shots = (project.screenshots?.length ? project.screenshots : []).filter(
+    const shots = (project.screenshots?.length ? project.screenshots : cover ? [cover] : []).filter(
       (src) => src && !src.includes("placeholder"),
     );
-    const featured = cover && !isVideoUrl(cover) ? [cover] : [];
-    const orderedImages = [...featured, ...pinned.filter((src) => !isVideoUrl(src)), ...shots].filter(
-      (src, index, all) => all.indexOf(src) === index,
+    const orderedImages = [cover, ...pinned.filter((src) => !isVideoUrl(src)), ...shots].filter(
+      (src, index, all): src is string => Boolean(src && !src.includes("placeholder") && all.indexOf(src) === index),
     );
-    const captionFor = (src: string, index: number) => {
-      const shotIndex = (project.screenshots || []).indexOf(src);
-      if (shotIndex >= 0 && project.screenshotCaptions?.[shotIndex]) return project.screenshotCaptions[shotIndex];
-      return project.screenshotCaptions?.[index] || `View ${index + 1}`;
-    };
     const images: MediaItem[] = orderedImages.map((src, absolute) => ({
       type: "image",
       src,
-      caption: captionFor(src, absolute),
+      caption: project.screenshotCaptions?.[absolute] || `View ${absolute + 1}`,
     }));
     const pinnedVideos = pinned.filter(isVideoUrl);
     const videos = [
@@ -234,7 +223,6 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
   const [tab, setTab] = useState(tabs[0]?.id || "overview");
   const [shotStart, setShotStart] = useState(0);
   const [previewStart, setPreviewStart] = useState<number | null>(null);
-  const mediaRef = useRef<HTMLElement>(null);
   const visibleShots = Math.min(4, mediaItems.length);
   const shotWindow = mediaItems.slice(shotStart, shotStart + visibleShots);
   const previewItems = useMemo<PreviewItem[]>(
@@ -249,15 +237,6 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
 
   const openPreview = (absoluteIndex: number) => {
     setPreviewStart(absoluteIndex);
-  };
-
-  const revealMedia = (immediate = false) => {
-    const node = mediaRef.current;
-    if (!node) return;
-    const raw = getComputedStyle(document.documentElement).getPropertyValue("--public-nav-offset").trim();
-    const nav = raw.endsWith("px") ? parseFloat(raw) : 76;
-    const top = node.getBoundingClientRect().top + window.scrollY - nav - 16;
-    window.scrollTo({ top: Math.max(0, top), behavior: immediate ? "auto" : "smooth" });
   };
 
   const shiftGallery = (delta: number) => {
@@ -326,16 +305,7 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
               aria-label={`View ${project.title} media`}
               disabled={!mediaItems.length && !cover}
             >
-              {cover ? (
-                <FrameImage
-                  src={cover}
-                  alt=""
-                  priority
-                  sizes="(max-width: 900px) 92vw, 640px"
-                />
-              ) : (
-                <span>{project.title}</span>
-              )}
+              {cover ? <img src={cover} alt="" /> : <span>{project.title}</span>}
             </button>
             <p className="case-flourish" aria-hidden="true">
               {flourish}
@@ -410,10 +380,8 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
                   onClick={() => {
                     setTab(item.id);
                     if (item.id === "media") {
-                      window.setTimeout(() => {
-                        revealMedia(true);
-                        if (mediaItems.length) setPreviewStart(0);
-                      }, 80);
+                      document.getElementById("case-media")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                      if (mediaItems.length) openPreview(0);
                     }
                   }}
                 >
@@ -603,7 +571,7 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
         </div>
 
         {mediaItems.length > 0 ? (
-          <section ref={mediaRef} className="case-shots" id="case-media" data-page-section aria-label="Project media">
+          <section className="case-shots" id="case-media" data-page-section aria-label="Project media">
             <div className="case-shots-head">
               <h2>Project media</h2>
               {mediaItems.length > visibleShots ? (
@@ -632,11 +600,7 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
                         onClick={() => openPreview(absolute)}
                         aria-label={`Open ${item.caption}`}
                       >
-                        <FrameImage
-                          src={item.src}
-                          alt={item.caption}
-                          sizes="(max-width: 720px) 88vw, (max-width: 1100px) 44vw, 280px"
-                        />
+                        <img src={item.src} alt="" loading="lazy" decoding="async" />
                       </button>
                     )}
                     <figcaption>{item.caption}</figcaption>
