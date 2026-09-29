@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { RiSearchLine } from "react-icons/ri";
+import { RiCheckLine, RiDeleteBin6Line, RiNotification3Line, RiSearchLine } from "react-icons/ri";
 import { useSheetDrag } from "@/hooks/useSheetDrag";
 
 type Notice = {
@@ -43,15 +43,18 @@ export default function NotificationsPage() {
   const [missing, setMissing] = useState(false);
   const [blocked, setBlocked] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [note, setNote] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [confirmAll, setConfirmAll] = useState(false);
+  const [confirm, setConfirm] = useState<null | "read" | "delete">(null);
   const [isMobile, setIsMobile] = useState(false);
   const settingsRef = useRef<HTMLDivElement>(null);
+  const confirmRef = useRef<HTMLDivElement>(null);
   const pageSize = 12;
 
   useSheetDrag(settingsOpen && isMobile, () => setSettingsOpen(false), settingsRef);
+  useSheetDrag(Boolean(confirm) && isMobile, () => setConfirm(null), confirmRef);
 
   useEffect(() => {
     const sync = () => setIsMobile(window.matchMedia("(max-width: 800px)").matches);
@@ -70,26 +73,31 @@ export default function NotificationsPage() {
 
   useEffect(() => {
     let cancel = false;
+    setLoading(true);
     (async () => {
-      const params = new URLSearchParams({
-        view: "list",
-        q: query,
-        sort,
-        kind,
-        page: String(page),
-        pageSize: String(pageSize),
-      });
-      const res = await fetch(`/api/notifications?${params}`);
-      if (!res.ok || cancel) return;
-      const data = await res.json();
-      if (cancel) return;
-      setItems(data.items || []);
-      setTotal(data.total || 0);
-      if (data.counts) setCounts(data.counts);
-      if (data.prefs?.email) setEmail(data.prefs.email);
-      if (typeof data.prefs?.enabled === "boolean") setEnabled(data.prefs.enabled);
-      setMissing(Boolean(data.missing));
-      setBlocked(Boolean(data.blocked));
+      try {
+        const params = new URLSearchParams({
+          view: "list",
+          q: query,
+          sort,
+          kind,
+          page: String(page),
+          pageSize: String(pageSize),
+        });
+        const res = await fetch(`/api/notifications?${params}`);
+        if (!res.ok || cancel) return;
+        const data = await res.json();
+        if (cancel) return;
+        setItems(data.items || []);
+        setTotal(data.total || 0);
+        if (data.counts) setCounts(data.counts);
+        if (data.prefs?.email) setEmail(data.prefs.email);
+        if (typeof data.prefs?.enabled === "boolean") setEnabled(data.prefs.enabled);
+        setMissing(Boolean(data.missing));
+        setBlocked(Boolean(data.blocked));
+      } finally {
+        if (!cancel) setLoading(false);
+      }
     })();
     return () => {
       cancel = true;
@@ -102,7 +110,7 @@ export default function NotificationsPage() {
 
   const refresh = () => {
     setSelected([]);
-    setConfirmAll(false);
+    setConfirm(null);
     setNote(String(Date.now()));
   };
 
@@ -152,79 +160,62 @@ export default function NotificationsPage() {
     return counts.total;
   };
 
+  const kindLabel = (id: string) => {
+    if (id === "message") return "Message";
+    if (id === "testimonial") return "Testimonial";
+    if (id === "subscriber") return "Subscriber";
+    return id;
+  };
+
   return (
-    <div className="dash-notes">
-      <header className="dash-notes-head">
+    <div className="dash-tm dash-notes">
+      <header className="dash-tm-head">
         <div>
           <p className="section-label">Inbox</p>
           <h1>Notifications</h1>
-          <p className="dash-notes-lead">New messages, testimonials, and subscribers.</p>
+          <p>New messages, testimonials, and subscribers.</p>
         </div>
-        <div className="dash-notes-head-actions">
+        <div className="dash-tm-head-actions">
           <button type="button" className="btn btn-outline btn-sm" onClick={() => setSettingsOpen(true)}>
             Digest settings
           </button>
-          <button type="button" className="btn btn-outline btn-sm" disabled={busy || !counts.total} onClick={() => void post({ all: true }).then((ok) => ok && refresh())}>
+          <button type="button" className="btn btn-outline btn-sm" disabled={busy || !counts.total} onClick={() => setConfirm("read")}>
             Mark all read
           </button>
-          <button type="button" className="btn btn-outline btn-sm" disabled={busy || !total} onClick={() => setConfirmAll(true)}>
+          <button type="button" className="btn btn-outline btn-sm dash-notes-delete" disabled={busy || !total} onClick={() => setConfirm("delete")}>
             Delete all
           </button>
         </div>
       </header>
 
-      {missing || blocked ? (
-        <p className="dash-tm-error">
-          Notifications could not be read. In the Supabase SQL editor, run the admin notification grants so the service role can use those tables.
-        </p>
-      ) : null}
-      {note === "saved" ? <p className="dash-notes-ok">Inbox saved. The daily digest goes to this address.</p> : null}
-      {note && note !== "saved" && !note.match(/^\d+$/) ? <p className="dash-tm-error">{note}</p> : null}
-
-      {confirmAll ? (
-        <div className="dash-notes-confirm" role="status">
-          <p>Delete every notification in this inbox? Messages, testimonials, and subscribers themselves stay in place.</p>
-          <div>
-            <button type="button" className="btn btn-ghost btn-sm" disabled={busy} onClick={() => setConfirmAll(false)}>
-              Cancel
-            </button>
-            <button
-              type="button"
-              className="btn btn-primary btn-sm"
-              disabled={busy}
-              onClick={() => void post({ action: "delete", all: true }).then((ok) => ok && refresh())}
-            >
-              Delete all
-            </button>
-          </div>
-        </div>
-      ) : null}
-
-      <div className="dash-notes-toolbar">
-        <label className="dash-notes-search">
-          <RiSearchLine size={16} />
-          <input value={q} onChange={(event) => setQ(event.target.value)} placeholder="Search notifications" aria-label="Search notifications" />
+      <div className="dash-tm-toolbar">
+        <label className="dash-tm-search">
+          <RiSearchLine size={16} aria-hidden="true" />
+          <input value={q} onChange={(event) => setQ(event.target.value)} placeholder="Search title or note…" aria-label="Search notifications" />
         </label>
-        <div className="dash-notes-kinds" role="tablist" aria-label="Notification kind">
-          {KINDS.map((item) => (
-            <button
-              key={item.id || "all"}
-              type="button"
-              className={kind === item.id ? "is-on" : ""}
-              onClick={() => {
-                setKind(item.id);
-                setPage(1);
-              }}
-            >
-              {item.label}
-              {kindCount(item.id) ? <em>{kindCount(item.id)}</em> : null}
-            </button>
-          ))}
-        </div>
-        <label className="dash-notes-sort">
+        <label className="dash-tm-filter">
+          <span>Kind</span>
+          <select
+            value={kind}
+            aria-label="Notification kind"
+            onChange={(event) => {
+              setKind(event.target.value);
+              setPage(1);
+            }}
+          >
+            {KINDS.map((item) => (
+              <option key={item.id || "all"} value={item.id}>
+                {item.label}
+                {kindCount(item.id) ? ` ${kindCount(item.id)}` : ""}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="dash-tm-filter">
           <span>Sort</span>
           <select
             value={sort}
+            aria-label="Sort notifications"
             onChange={(event) => {
               setSort(event.target.value);
               setPage(1);
@@ -234,68 +225,174 @@ export default function NotificationsPage() {
             <option value="oldest">Oldest</option>
           </select>
         </label>
+        {selected.length ? (
+          <>
+            <button type="button" className="btn btn-outline btn-sm" disabled={busy} onClick={() => void post({ ids: selected }).then((ok) => ok && refresh())}>
+              <RiCheckLine size={15} /> Mark read ({selected.length})
+            </button>
+            <button type="button" className="btn btn-outline btn-sm" disabled={busy} onClick={() => void post({ action: "delete", ids: selected }).then((ok) => ok && refresh())}>
+              <RiDeleteBin6Line size={15} /> Delete ({selected.length})
+            </button>
+          </>
+        ) : null}
+        <p className="dash-tm-result-count" aria-live="polite">
+          {total} result{total === 1 ? "" : "s"}
+        </p>
       </div>
 
-      {selected.length ? (
-        <div className="dash-notes-batch">
-          <span>{selected.length} selected</span>
-          <button type="button" disabled={busy} onClick={() => void post({ ids: selected }).then((ok) => ok && refresh())}>
-            Mark read
-          </button>
-          <button type="button" disabled={busy} onClick={() => void post({ action: "delete", ids: selected }).then((ok) => ok && refresh())}>
-            Delete selected
-          </button>
+      {missing || blocked ? (
+        <p className="dash-tm-error">
+          Notifications could not be read. In the Supabase SQL editor, run the admin notification grants so the service role can use those tables.
+        </p>
+      ) : null}
+      {note === "saved" ? <p className="dash-tm-ok">Inbox saved. The daily digest goes to this address.</p> : null}
+      {note && note !== "saved" && !note.match(/^\d+$/) ? <p className="dash-tm-error">{note}</p> : null}
+
+      {loading ? (
+        <p className="dash-tm-empty">Loading…</p>
+      ) : items.length === 0 ? (
+        <p className="dash-tm-empty">
+          <RiNotification3Line size={18} /> No notifications match this view.
+        </p>
+      ) : (
+        <>
+          <div className="dash-tm-table-wrap">
+            <table className="dash-tm-table is-compact dash-notes-table">
+              <thead>
+                <tr>
+                  <th scope="col">
+                    <input type="checkbox" checked={allPageSelected} onChange={togglePage} aria-label="Select notifications on this page" />
+                  </th>
+                  <th scope="col">Notification</th>
+                  <th scope="col">Kind</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">When</th>
+                  <th scope="col">Manage</th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((item) => (
+                  <tr key={item.id} className={item.readAt ? undefined : "is-unread"}>
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={selected.includes(item.id)}
+                        onChange={() => toggleOne(item.id)}
+                        aria-label={`Select ${item.title}`}
+                      />
+                    </td>
+                    <td>
+                      <div className="dash-tm-person is-compact dash-projects-person">
+                        <div className="dash-tm-person-copy">
+                          <strong>{item.title}</strong>
+                          {item.body ? <span>{item.body}</span> : null}
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span className={`dash-tm-status is-${item.kind === "message" ? "confirmed" : item.kind === "testimonial" ? "published" : "draft"}`}>
+                        {kindLabel(item.kind)}
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`dash-tm-status ${item.readAt ? "is-read" : "is-confirmed"}`}>{item.readAt ? "Read" : "New"}</span>
+                    </td>
+                    <td>
+                      <time dateTime={item.createdAt}>{whenLabel(item.createdAt)}</time>
+                    </td>
+                    <td>
+                      <div className="dash-tm-row-actions is-compact">
+                        {item.readAt ? null : (
+                          <button
+                            type="button"
+                            className="btn btn-outline btn-sm"
+                            title="Mark read"
+                            disabled={busy}
+                            onClick={() => void post({ ids: [item.id] }).then((ok) => ok && refresh())}
+                          >
+                            <RiCheckLine size={14} />
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          className="btn btn-ghost btn-sm dash-tm-delete"
+                          title="Delete notification"
+                          disabled={busy}
+                          onClick={() => void post({ action: "delete", ids: [item.id] }).then((ok) => ok && refresh())}
+                        >
+                          <RiDeleteBin6Line size={15} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="dash-tm-pager" aria-label="Pagination">
+            {page > 1 ? (
+              <button type="button" className="dash-tm-page-link" onClick={() => setPage((value) => value - 1)}>
+                Previous
+              </button>
+            ) : (
+              <span className="dash-tm-page-link is-disabled">Previous</span>
+            )}
+            <span className="dash-tm-page-status">
+              Page {page} of {pages}
+            </span>
+            {page < pages ? (
+              <button type="button" className="dash-tm-page-link" onClick={() => setPage((value) => value + 1)}>
+                Next
+              </button>
+            ) : (
+              <span className="dash-tm-page-link is-disabled">Next</span>
+            )}
+          </div>
+        </>
+      )}
+
+      {confirm ? (
+        <div
+          className={`dash-note-settings-layer${isMobile ? " is-sheet" : ""}`}
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setConfirm(null);
+          }}
+        >
+          <div ref={confirmRef} className="dash-note-settings" role="dialog" aria-modal="true" aria-labelledby="dash-notes-confirm-title">
+            {isMobile ? <div className="tm-dialog-handle" aria-hidden="true" /> : null}
+            <header>
+              <p className="section-label">{confirm === "delete" ? "Delete" : "Read"}</p>
+              <h2 id="dash-notes-confirm-title">{confirm === "delete" ? "Delete every notification?" : "Mark all as read?"}</h2>
+              <p>
+                {confirm === "delete"
+                  ? "This clears the inbox only. Messages, testimonials, and subscribers stay where they are."
+                  : "Every unread notification in this inbox will be marked read."}
+              </p>
+            </header>
+            <div className="dash-note-settings-actions">
+              <button type="button" className="btn btn-outline" disabled={busy} onClick={() => setConfirm(null)}>
+                Cancel
+              </button>
+              {confirm === "delete" ? (
+                <button
+                  type="button"
+                  className="btn btn-primary dash-tm-confirm-danger"
+                  disabled={busy}
+                  onClick={() => void post({ action: "delete", all: true }).then((ok) => ok && refresh())}
+                >
+                  Delete all
+                </button>
+              ) : (
+                <button type="button" className="btn btn-primary" disabled={busy} onClick={() => void post({ all: true }).then((ok) => ok && refresh())}>
+                  Mark all read
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       ) : null}
-
-      <div className="dash-notes-list-wrap">
-        <div className="dash-notes-selectall">
-          <label>
-            <input type="checkbox" checked={allPageSelected} onChange={togglePage} disabled={!items.length} aria-label="Select notifications on this page" />
-            Select page
-          </label>
-        </div>
-        {items.length ? (
-          <ul className="dash-notes-list">
-            {items.map((item) => (
-              <li key={item.id} className={item.readAt ? "" : "is-unread"}>
-                <label className="dash-notes-check">
-                  <input
-                    type="checkbox"
-                    checked={selected.includes(item.id)}
-                    onChange={() => toggleOne(item.id)}
-                    aria-label={`Select ${item.title}`}
-                  />
-                </label>
-                <div className="dash-notes-copy">
-                  <p>
-                    <em>{item.kind}</em>
-                    <time dateTime={item.createdAt}>{whenLabel(item.createdAt)}</time>
-                    <span>{item.readAt ? "Read" : "New"}</span>
-                  </p>
-                  <strong>{item.title}</strong>
-                  {item.body ? <span>{item.body}</span> : null}
-                </div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="dash-notes-empty">No notifications match this view.</p>
-        )}
-      </div>
-
-      <div className="dash-notes-pager">
-        <span>{total} result{total === 1 ? "" : "s"}</span>
-        <button type="button" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>
-          Previous
-        </button>
-        <span>
-          {page} / {pages}
-        </span>
-        <button type="button" disabled={page >= pages} onClick={() => setPage((value) => value + 1)}>
-          Next
-        </button>
-      </div>
 
       {settingsOpen ? (
         <div
@@ -321,10 +418,10 @@ export default function NotificationsPage() {
               Email daily
             </label>
             <div className="dash-note-settings-actions">
-              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setSettingsOpen(false)}>
+              <button type="button" className="btn btn-outline" onClick={() => setSettingsOpen(false)}>
                 Cancel
               </button>
-              <button type="button" className="btn btn-primary btn-sm" disabled={busy} onClick={() => void savePrefs()}>
+              <button type="button" className="btn btn-primary" disabled={busy} onClick={() => void savePrefs()}>
                 Save
               </button>
             </div>
