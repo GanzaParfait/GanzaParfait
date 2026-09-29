@@ -93,6 +93,10 @@ export default function ResilientCover({
 
   const shotClass = className || "selected-shot-img";
 
+  if (local && src.toLowerCase().endsWith(".svg")) {
+    return <img key={attempt} src={src} alt={alt} className={shotClass} />;
+  }
+
   if (local || remote) {
     return (
       <Image

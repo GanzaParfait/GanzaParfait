@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useEffectEvent, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { RiArrowLeftLine, RiArrowRightLine, RiCloseLine, RiPauseFill, RiPlayFill } from "react-icons/ri";
 import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
 
@@ -30,6 +30,7 @@ export default function MediaPreview({
   const [index, setIndex] = useState(Math.min(Math.max(start, 0), Math.max(list.length - 1, 0)));
   const [playing, setPlaying] = useState(true);
   const current = list[index];
+  const swipe = useRef({ x: 0, y: 0 });
   const isVideo = current ? kindOf(current.src, current.kind) === "video" : false;
   useHistoryBackClose(Boolean(current), onClose);
 
@@ -72,7 +73,18 @@ export default function MediaPreview({
             </button>
           </div>
         </div>
-        <div className="media-preview-stage">
+        <div
+          className="media-preview-stage"
+          onPointerDown={(event) => {
+            swipe.current = { x: event.clientX, y: event.clientY };
+          }}
+          onPointerUp={(event) => {
+            const dx = event.clientX - swipe.current.x;
+            const dy = event.clientY - swipe.current.y;
+            if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy)) return;
+            step(dx < 0 ? 1 : -1);
+          }}
+        >
           {list.length > 1 ? (
             <button type="button" className="media-preview-nav is-prev" aria-label="Previous" onClick={() => step(-1)}>
               <RiArrowLeftLine size={20} />

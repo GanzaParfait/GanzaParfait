@@ -84,7 +84,7 @@ function seedRecords(): CareerRecord[] {
       (item.id === "eshuri"
         ? "/images/projects/logos/data-systems.webp"
         : item.id === "askfield"
-          ? "/images/projects/logos/askfield.webp"
+          ? "/images/projects/logos/askfield-wordmark.png"
           : undefined),
     website: item.website,
     relatedHref: item.relatedHref,

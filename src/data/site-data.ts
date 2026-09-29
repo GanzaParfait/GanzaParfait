@@ -466,6 +466,7 @@ export const projects: Project[] = [
     status: "live",
     featured: true,
     period: "Associated with 2023–2024 PSTA work",
+    logo: "/images/projects/logos/psta.webp",
     image: "/images/projects/psta/dashboard.png",
     pinnedMedia: [
       "/images/projects/psta/dashboard.png",
@@ -614,7 +615,7 @@ export const projects: Project[] = [
       "Public website, survey templates and XLSForm",
       "Multi-mode collection workflows (CAPI / CATI / CAWI)",
     ],
-    logo: "/images/projects/logos/askfield.webp",
+    logo: "/images/projects/logos/askfield-wordmark.png",
     image: "/images/projects/askfield/homepage.png",
     pinnedMedia: [
       "/images/projects/askfield/homepage.png",
@@ -766,6 +767,7 @@ export const projects: Project[] = [
       "Wishlist",
       "Product loading state",
     ],
+    logo: "/images/projects/logos/apn.png",
     links: {
       live: "https://apnafricanmarket.com/",
     },
@@ -829,6 +831,7 @@ export const projects: Project[] = [
       "/images/projects/wakow/footer.png",
     ],
     screenshotCaptions: ["Homepage", "About", "Contact", "Footer"],
+    logo: "/images/projects/logos/wakow.svg",
     links: {
       live: "https://wakowgeneral.com/en",
     },
@@ -883,6 +886,7 @@ export const projects: Project[] = [
       "/images/projects/ngazi/footer.png",
     ],
     screenshotCaptions: ["Homepage", "Services", "Projects", "Contact", "Support chat", "Footer"],
+    logo: "/images/projects/logos/ngazi.png",
     links: {
       live: "https://www.ngaziconstruction.com/",
     },
@@ -980,6 +984,7 @@ export const projects: Project[] = [
       "Site loader",
       "Site loader, dark",
     ],
+    logo: "/images/projects/logos/julia.svg",
     links: {
       live: "https://juliafoundation.org/",
     },
@@ -1088,6 +1093,7 @@ export const projects: Project[] = [
       "Checkout",
       "Footer",
     ],
+    logo: "/images/projects/logos/kt-computer.png",
     links: {
       live: "https://www.ktcomputersupplying.com/",
     },
@@ -1176,6 +1182,7 @@ export const projects: Project[] = [
     seoTitle: "GOA+ | Co-Founder & CTO | Prince Parfait GANZA",
     seoDescription:
       "Prince Parfait GANZA is Co-Founder & CTO of GOA+, a VR education platform for African schools. Technology leadership and technical direction from Kigali.",
+    logo: "/images/projects/logos/goa-plus.png",
     links: {
       live: "https://goapluss.com/",
     },
@@ -1390,6 +1397,7 @@ export const experience: ExperienceItem[] = [
     website: "https://goapluss.com/",
     relatedHref: "/projects/goa-plus",
     relatedLabel: "View GOA+ case study",
+    logo: "/images/projects/logos/goa-plus.png",
     sortYear: 2025,
   },
   {
@@ -1423,7 +1431,7 @@ export const experience: ExperienceItem[] = [
     category: "work",
     relatedHref: "/projects/askfield",
     relatedLabel: "View related work",
-    logo: "/images/projects/logos/askfield.webp",
+    logo: "/images/projects/logos/askfield-wordmark.png",
     sortYear: 2024,
   },
   {

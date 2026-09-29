@@ -2612,33 +2612,19 @@ code, pre {
 }
 @media (max-width: 800px) {
   .journey-drawer-layer {
-    top: var(--public-nav-offset, 4.75rem);
-    z-index: 80;
-    align-items: flex-end;
-    justify-content: center;
+    z-index: 90;
+    justify-content: flex-end;
   }
   .journey-drawer {
     width: 100%;
-    height: auto;
-    max-height: 100%;
-    border-radius: 1.15rem 1.15rem 0 0;
-    box-shadow: 0 -18px 48px rgba(7, 17, 31, 0.22);
-    animation: none;
-    transform: translateY(var(--sheet-drag, 0px));
+    height: 100%;
+    max-height: none;
+    border-radius: 0;
+    padding-top: calc(var(--public-nav-offset, 4.75rem) + 0.65rem);
     padding-bottom: calc(1.15rem + env(safe-area-inset-bottom, 0px));
-    transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
   }
-  .journey-drawer.is-sheet-dragging {
-    animation: none;
-  }
-  .journey-sheet-handle {
-    display: block;
-    width: 2.4rem;
-    height: 0.28rem;
-    margin: 0 auto 0.85rem;
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--color-text-3) 28%, #fff);
-    flex: none;
+  .journey-drawer-body {
+    grid-template-columns: 1fr;
   }
 }
 @media (max-width: 800px) and (prefers-reduced-motion: reduce) {
@@ -10547,20 +10533,21 @@ fieldset.hp-field {
   position: relative;
   display: grid;
   place-items: center;
-  min-height: 40vh;
-  padding: 0.85rem;
-  border-radius: 1rem;
-  background: color-mix(in srgb, var(--color-surface) 88%, #0b192c);
-  border: 1px solid color-mix(in srgb, #fff 16%, var(--color-border));
+  min-height: 68vh;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  border: 0;
+  touch-action: pan-y;
 }
 .media-preview-stage img,
 .media-preview-stage video {
-  width: auto;
-  max-width: 100%;
-  max-height: 72vh;
+  width: 100%;
+  height: 72vh;
+  max-height: 78vh;
   border-radius: 0.7rem;
   object-fit: contain;
-  background: var(--color-bg);
+  background: transparent;
 }
 .media-preview-nav {
   position: absolute;
@@ -11005,12 +10992,14 @@ fieldset.hp-field {
   background: #ffffff;
   border: 1px solid color-mix(in srgb, var(--color-primary) 10%, var(--color-border));
 }
-.case-aside-logo img {
+.case-aside-logo img,
+.case-aside-logo img.selected-shot-img {
   max-width: 100%;
-  max-height: 3.5rem;
+  max-height: 4.75rem;
   width: auto;
   height: auto;
   object-fit: contain;
+  object-position: center;
 }
 .case-aside-org {
   margin: 0;
@@ -15916,8 +15905,23 @@ a.experience-org:hover {
   .case-list {
     grid-template-columns: 1fr;
   }
-  .case-shots-track {
-    grid-template-columns: 1fr;
+  .case-shots.is-filmstrip .case-shots-track {
+    display: flex;
+    grid-template-columns: none;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x pan-y;
+    gap: 0.75rem;
+    padding-bottom: 0.35rem;
+  }
+  .case-shots.is-filmstrip .case-shots-track figure {
+    flex: 0 0 86%;
+    scroll-snap-align: center;
+  }
+  .case-shots.is-filmstrip .case-shots-nav {
+    display: none;
   }
 
   /* Homepage Selected Work: sticky stack — cards scroll over one another */
@@ -21295,12 +21299,32 @@ button.case-hero-shot {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.testimonials-card-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+  margin-left: auto;
+  flex: none;
+}
+.testimonials-share {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--color-primary);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
 .testimonials-project {
   display: inline-flex;
   align-items: center;
   gap: 0.2rem;
   flex-shrink: 0;
-  margin-left: auto;
   font-size: 0.78rem;
   font-weight: 700;
   color: var(--color-primary);
@@ -21377,6 +21401,9 @@ button.case-hero-shot {
   align-items: center;
   gap: 0.55rem;
   margin-left: auto;
+}
+.testimonials-cta-inline {
+  display: none;
 }
 .testimonials-arrows {
   display: inline-flex;
@@ -21612,16 +21639,47 @@ button.case-hero-shot {
   .testimonials-track.is-grid {
     grid-template-columns: 1fr;
   }
+  .testimonials-head-actions {
+    display: none;
+  }
+  .testimonials-cta.testimonials-cta-inline {
+    display: inline-flex;
+    flex: 0 0 auto;
+    width: auto;
+    height: 2.35rem;
+    min-height: 2.35rem;
+    padding: 0 0.95rem;
+    border-radius: 999px;
+    border-width: 1px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    gap: 0.35rem;
+    box-shadow: none;
+  }
+  .testimonials-cta.testimonials-cta-inline:hover {
+    transform: none;
+  }
   .testimonials-bar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
     align-items: stretch;
+    gap: 0.75rem;
+  }
+  .testimonials-proof {
+    width: 100%;
+  }
+  .testimonials-proof p {
+    min-width: 0;
   }
   .testimonials-bar-actions {
     width: 100%;
     margin-left: 0;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center;
   }
-  .testimonials-bar-actions .btn {
-    flex: 1 1 auto;
-    justify-content: center;
+  .testimonials-arrows {
+    flex: none;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -23261,7 +23319,7 @@ body.tm-share-open .page-floaters {
   .testimonials-head {
     align-items: flex-start;
   }
-  .testimonials-cta {
+  .testimonials-head-actions .testimonials-cta {
     width: 100%;
     justify-content: center;
   }

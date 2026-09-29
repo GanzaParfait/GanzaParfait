@@ -224,8 +224,18 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
   const [tab, setTab] = useState(tabs[0]?.id || "overview");
   const [shotStart, setShotStart] = useState(0);
   const [previewStart, setPreviewStart] = useState<number | null>(null);
+  const [filmstrip, setFilmstrip] = useState(false);
   const visibleShots = Math.min(4, mediaItems.length);
   const shotWindow = mediaItems.slice(shotStart, shotStart + visibleShots);
+  const shownShots = filmstrip ? mediaItems : shotWindow;
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 800px)");
+    const sync = () => setFilmstrip(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
   const previewItems = useMemo<PreviewItem[]>(
     () =>
       mediaItems.map((item) => ({
@@ -576,10 +586,10 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
         </div>
 
         {mediaItems.length > 0 ? (
-          <section className="case-shots" id="case-media" data-page-section aria-label="Project media">
+          <section className={`case-shots${filmstrip ? " is-filmstrip" : ""}`} id="case-media" data-page-section aria-label="Project media">
             <div className="case-shots-head">
               <h2>Project media</h2>
-              {mediaItems.length > visibleShots ? (
+              {!filmstrip && mediaItems.length > visibleShots ? (
                 <div className="case-shots-nav">
                   <button type="button" aria-label="Previous media" onClick={() => shiftGallery(-1)}>
                     <RiArrowLeftLine size={16} />
@@ -591,8 +601,8 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
               ) : null}
             </div>
             <div className="case-shots-track">
-              {shotWindow.map((item, windowIndex) => {
-                const absolute = shotStart + windowIndex;
+              {shownShots.map((item, windowIndex) => {
+                const absolute = filmstrip ? windowIndex : shotStart + windowIndex;
                 const video = item.type === "video" || isVideoUrl(item.src);
                 return (
                   <figure key={`${item.src}-${absolute}`} className={video ? "is-video" : undefined}>

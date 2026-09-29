@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ResilientCover from "@/components/work/ResilientCover";
 import Link from "next/link";
 import {
@@ -18,7 +18,6 @@ import {
 import type { HomepageContent, JourneyEntry, JourneyType } from "@/lib/homepage";
 import CustomSelect from "@/components/ui/CustomSelect";
 import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
-import { useSheetDrag } from "@/hooks/useSheetDrag";
 
 type FilterId = "all" | JourneyType;
 type SortId = "latest" | "oldest";
@@ -80,9 +79,7 @@ export default function JourneySection({
   const [yearHover, setYearHover] = useState<string | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [detailTab, setDetailTab] = useState<DetailTab>("overview");
-  const drawerRef = useRef<HTMLElement>(null);
   useHistoryBackClose(Boolean(activeId), () => setActiveId(null));
-  useSheetDrag(Boolean(activeId), () => setActiveId(null), drawerRef, { maxWidth: 800, variable: true });
   const Tag = embedded ? "div" : "section";
   const entries = journey.entries || [];
   const yearRail = useMemo(() => buildYearRail(entries), [entries]);
@@ -336,14 +333,12 @@ export default function JourneySection({
       {active ? (
         <div className="journey-drawer-layer" role="presentation" onClick={() => setActiveId(null)}>
           <aside
-            ref={drawerRef}
             className="journey-drawer"
             role="dialog"
             aria-modal="true"
             aria-label={active.title}
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="journey-sheet-handle" aria-hidden="true" />
             <div className="journey-drawer-top">
               <div className="journey-drawer-tags">
                 <span className={`journey-tag is-${active.type}`}>{typeLabel(active.type)}</span>

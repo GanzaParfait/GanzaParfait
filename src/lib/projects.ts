@@ -252,6 +252,14 @@ export function mergeProjectCatalog(records?: Project[] | null): Project[] {
           })(),
           capabilities: record.capabilities?.length ? record.capabilities : base.capabilities,
           image: sharesShotLibrary(record, base) && usableMedia(record.image) ? record.image : base.image,
+          logo: (() => {
+            const saved = record.logo ? String(record.logo) : "";
+            const stale =
+              !saved ||
+              saved.includes("askfield.webp") ||
+              saved.endsWith("/logos/askfield.png");
+            return stale ? base.logo || saved : saved;
+          })(),
           screenshots: sharesShotLibrary(record, base) && usableList(record.screenshots).length ? usableList(record.screenshots) : base.screenshots,
           pinnedMedia: sharesShotLibrary(record, base) && usableList(record.pinnedMedia).length ? usableList(record.pinnedMedia) : base.pinnedMedia,
           screenshotCaptions: sharesShotLibrary(record, base) && record.screenshotCaptions?.length ? record.screenshotCaptions : base.screenshotCaptions,

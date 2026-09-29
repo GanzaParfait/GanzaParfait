@@ -11,10 +11,11 @@ import {
   RiDoubleQuotesL,
   RiExternalLinkLine,
   RiGroupLine,
+  RiShareForwardLine,
 } from "react-icons/ri";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { listListedProjects } from "@/lib/projects";
-import { sortTestimonials, type PublicTestimonial } from "@/lib/testimonials";
+import { sortTestimonials, testimonialSharePath, type PublicTestimonial } from "@/lib/testimonials";
 import TestimonialFormDialog, {
   clearTestimonialFormDraft,
   hasTestimonialFormDraft,
@@ -81,6 +82,29 @@ function usePerView() {
     return () => window.removeEventListener("resize", sync);
   }, []);
   return perView;
+}
+
+async function shareTestimonial(item: PublicTestimonial) {
+  const token = item.shareToken || item.id;
+  const url = `${window.location.origin}${testimonialSharePath(token)}`;
+  const payload = {
+    title: `${item.personName} on working with Prince Parfait GANZA`,
+    text: (item.shortBody || item.body).replace(/\s+/g, " ").trim().slice(0, 180),
+    url,
+  };
+  if (typeof navigator.share === "function") {
+    try {
+      await navigator.share(payload);
+      return;
+    } catch {
+      return;
+    }
+  }
+  try {
+    await navigator.clipboard.writeText(url);
+  } catch {
+    /* ignore */
+  }
 }
 
 export default function TestimonialsSection({
@@ -292,13 +316,22 @@ export default function TestimonialsSection({
                               </strong>
                               {attribution(item) ? <span>{attribution(item)}</span> : null}
                             </span>
-                            {item.projectId ? (
-                              <Link className="testimonials-project" href={`/projects/${item.projectId}`}>
-                                View project <RiArrowRightLine size={14} aria-hidden="true" />
-                              </Link>
-                            ) : related ? (
-                              <span className="testimonials-relation">{related}</span>
-                            ) : null}
+                            <span className="testimonials-card-actions">
+                              <button
+                                type="button"
+                                className="testimonials-share"
+                                onClick={() => void shareTestimonial(item)}
+                              >
+                                <RiShareForwardLine size={14} aria-hidden="true" /> Share
+                              </button>
+                              {item.projectId ? (
+                                <Link className="testimonials-project" href={`/projects/${item.projectId}`}>
+                                  View project <RiArrowRightLine size={14} aria-hidden="true" />
+                                </Link>
+                              ) : related ? (
+                                <span className="testimonials-relation">{related}</span>
+                              ) : null}
+                            </span>
                           </figcaption>
                         </li>
                       );
@@ -325,6 +358,9 @@ export default function TestimonialsSection({
                   </div>
 
                   <div className="testimonials-bar-actions">
+                    <button type="button" className="btn btn-outline testimonials-cta testimonials-cta-inline" onClick={() => setFormOpen(true)}>
+                      <RiChatQuoteLine size={16} /> Share your experience
+                    </button>
                     {!expanded && pool.length > perView ? (
                       <div className="testimonials-arrows">
                         <button type="button" className="testimonials-arrow" onClick={goPrev} aria-label="Previous testimonials">
