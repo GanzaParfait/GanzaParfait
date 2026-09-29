@@ -250,7 +250,7 @@ export default function TestimonialsSection({
                     if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setPaused(false);
                   }}
                 >
-                  <ul className={`testimonials-track${expanded ? " is-grid" : ""}`}>
+                  <ul className={`testimonials-track${expanded ? " is-grid" : ""}${!expanded && visible.length === 1 ? " is-single" : ""}`}>
                     {visible.map((item) => {
                       const related = projectTitle(item.projectId) || item.projectTitleOther;
                       const parts = quoteParts(item);
@@ -339,11 +339,7 @@ export default function TestimonialsSection({
                       <button type="button" className="btn btn-primary" onClick={() => setExpanded(true)}>
                         Show more <RiArrowRightLine size={16} />
                       </button>
-                    ) : (
-                      <button type="button" className="btn btn-primary" onClick={() => setFormOpen(true)}>
-                        Share your experience <RiArrowRightLine size={16} />
-                      </button>
-                    )}
+                    ) : null}
                   </div>
                 </div>
               </>

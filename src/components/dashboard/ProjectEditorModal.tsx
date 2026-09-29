@@ -249,9 +249,9 @@ export default function ProjectEditorModal({
                       { value: "draft", label: "Draft (dashboard only)" },
                     ]}
                     onChange={(value) => set("visibility", value as Project["visibility"])}
-                  />
-                </div>
-                <div>
+              />
+            </div>
+            <div>
                   <label style={labelStyle}>Client / organization</label>
                   <input type="text" placeholder="e.g. Caritas Rwanda" value={formData.organization || ""} onChange={(e) => set("organization", e.target.value)} style={fieldStyle} />
                 </div>
@@ -313,15 +313,15 @@ export default function ProjectEditorModal({
                 <div>
                   <label style={labelStyle}>SEO description (optional)</label>
                   <textarea rows={2} placeholder="Overrides default meta description when set" value={formData.seoDescription || ""} onChange={(e) => set("seoDescription", e.target.value)} style={fieldStyle} />
-                </div>
-              </div>
+            </div>
+          </div>
               <div>
                 <label style={labelStyle}>Hero flourish text</label>
                 <input type="text" placeholder="Short flourish near the case hero" value={formData.flourish || ""} onChange={(e) => set("flourish", e.target.value)} style={fieldStyle} />
               </div>
-              <div>
+          <div>
                 <label style={labelStyle}>Project logo</label>
-                <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
                   <div
                     style={{
                       width: "7.5rem",
@@ -344,7 +344,7 @@ export default function ProjectEditorModal({
                   <input type="text" value={formData.logo || ""} onChange={(e) => set("logo", e.target.value)} style={fieldStyle} placeholder="/images/projects/logos/…" />
                   <button type="button" className="btn btn-outline btn-sm" onClick={() => onPickMedia((url) => set("logo", url))}>
                     Choose
-                  </button>
+              </button>
             </div>
           </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
@@ -469,9 +469,9 @@ export default function ProjectEditorModal({
                   onChange={(value) => set("contribution", value as Project["contribution"])}
                 />
               </div>
-              <div>
+          <div>
                 <label style={labelStyle}>Collaborators (one per line: Name — Role)</label>
-                <textarea
+            <textarea
                   rows={3}
                   placeholder={"Name — Role (optional; leave blank if not public)"}
                   value={(formData.collaborators || [])
@@ -533,14 +533,14 @@ export default function ProjectEditorModal({
                     )
                   }
                   style={fieldStyle}
-                />
-              </div>
+            />
+          </div>
             </>
           )}
 
           {tab === "results" && (
             <>
-          <div>
+            <div>
                 <label style={labelStyle}>Outcome</label>
               <textarea
                 rows={3}

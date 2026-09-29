@@ -353,8 +353,11 @@ export default function DashboardTestimonialsPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Update failed");
-      await load();
-      setDetail((current) => (current?.id === id ? null : current));
+      const next = data.item as AdminTestimonial | null;
+      if (next?.id) {
+        setItems((current) => current.map((row) => (row.id === id ? next : row)));
+        setDetail((current) => (current?.id === id ? next : current));
+      }
       return true;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Update failed");
@@ -460,14 +463,12 @@ export default function DashboardTestimonialsPage() {
       setError("Replace placeholder attribution and change the source before publishing.");
       return;
     }
-    if (!item.verified) {
-      setError("Mark the testimonial as verified in the editor before publishing.");
-      return;
-    }
     const ok = await patch(item.id, {
       action: "publish",
       notifyAuthor,
       is_public: true,
+      verified: true,
+      verification_method: item.verificationMethod || "admin",
     });
     if (ok) setNotifyAuthor(false);
   };
@@ -784,6 +785,7 @@ export default function DashboardTestimonialsPage() {
               </p>
             ) : null}
 
+            {error && busyId !== detail.id ? <p className="dash-tm-error">{error}</p> : null}
             {detail.source === "placeholder" ? <p className="dash-tm-banner">{PLACEHOLDER_BANNER}</p> : null}
             {detail.moderationNotes ? <p className="dash-tm-notes">Note: {detail.moderationNotes}</p> : null}
 
@@ -792,7 +794,7 @@ export default function DashboardTestimonialsPage() {
             </blockquote>
 
             <div className="dash-tm-detail-actions">
-              {detail.status === "submitted" ? (
+              {detail.status === "submitted" || detail.status === "draft" ? (
                 <button
                   type="button"
                   className="btn btn-primary btn-sm"
@@ -805,21 +807,15 @@ export default function DashboardTestimonialsPage() {
                 </button>
               ) : null}
 
-              {(detail.status === "confirmed" ||
-                detail.status === "submitted" ||
-                (detail.status === "draft" && detail.source !== "placeholder")) ? (
+              {detail.status !== "published" && detail.status !== "declined" ? (
                 <button
                   type="button"
                   className="btn btn-primary btn-sm"
-                  disabled={
-                    busyId === detail.id || detail.source === "placeholder" || !detail.verified
-                  }
+                  disabled={busyId === detail.id || detail.source === "placeholder"}
                   title={
                     detail.source === "placeholder"
                       ? "Replace placeholder attribution before publishing"
-                      : !detail.verified
-                        ? "Mark verified in the editor before publishing"
-                        : undefined
+                      : undefined
                   }
                   onClick={() => void publish(detail)}
                 >

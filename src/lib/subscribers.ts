@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { recordAdminNotification } from "@/lib/admin-notifications";
 
 export type SubscriberSource = "widget" | "footer" | "contact" | "import" | "dashboard" | "cv" | "testimonial";
 
@@ -85,7 +86,17 @@ export async function upsertSubscriber(
     .single();
 
   if (error) throw error;
-  return { row: data as SubscriberRow, created: true, alreadyConfirmed: false };
+  const row = data as SubscriberRow;
+  if (row?.id) {
+    await recordAdminNotification(supabase, {
+      kind: "subscriber",
+      title: `New subscriber ${row.email}`,
+      body: row.name || "Joined the list",
+      href: "/dashboard/subscribers",
+      relatedId: row.id,
+    });
+  }
+  return { row, created: true, alreadyConfirmed: false };
 }
 
 /** Soft unsubscribe — never deletes the row. */

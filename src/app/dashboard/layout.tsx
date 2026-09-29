@@ -27,6 +27,7 @@ import {
   RiSparklingLine,
   RiShieldCheckLine,
   RiBriefcaseLine,
+  RiNotification3Line,
 } from "react-icons/ri";
 
 import {
@@ -38,6 +39,7 @@ import {
 import { SIDEBAR_STORAGE_KEY } from "@/lib/supabase";
 
 import MediaManagerModal from "@/components/dashboard/MediaManagerModal";
+import { AdminNoticeBell, useAdminNotices } from "@/components/dashboard/AdminNotifications";
 import { DashboardFeedbackProvider } from "@/components/dashboard/DashboardFeedback";
 import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
 export interface AdminProfile {
@@ -52,6 +54,7 @@ import ProjectEditorModal from "@/components/dashboard/ProjectEditorModal";
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const notices = useAdminNotices();
 
   if (typeof window !== "undefined") {
     try {
@@ -351,10 +354,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
 
             {[
-              { id: "messages", path: "/dashboard/messages", label: "Messages", icon: RiMailLine },
-              { id: "testimonials", path: "/dashboard/testimonials", label: "Testimonials", icon: RiChatQuoteLine },
-              { id: "subscribers", path: "/dashboard/subscribers", label: "Subscribers", icon: RiUserHeartLine },
-              { id: "settings", path: "/dashboard/settings", label: "Site Settings", icon: RiSettings4Line },
+              { id: "notifications", path: "/dashboard/notifications", label: "Notifications", icon: RiNotification3Line, count: notices.counts.total },
+              { id: "messages", path: "/dashboard/messages", label: "Messages", icon: RiMailLine, count: notices.counts.message },
+              { id: "testimonials", path: "/dashboard/testimonials", label: "Testimonials", icon: RiChatQuoteLine, count: notices.counts.testimonial },
+              { id: "subscribers", path: "/dashboard/subscribers", label: "Subscribers", icon: RiUserHeartLine, count: notices.counts.subscriber },
+              { id: "settings", path: "/dashboard/settings", label: "Site Settings", icon: RiSettings4Line, count: 0 },
             ].map((tab) => {
               const Icon = tab.icon;
               const active = pathname.startsWith(tab.path);
@@ -362,12 +366,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <Link
                   key={tab.id}
                   href={tab.path}
-                  title={tab.label}
+                  title={tab.count ? `${tab.label}, ${tab.count} unread` : tab.label}
                   className={active ? "dash-nav-link is-active" : "dash-nav-link"}
                   onClick={closeMobileSidebar}
                 >
                   <Icon size={17} />
                   {showNavLabels ? <span>{tab.label}</span> : null}
+                  {tab.count ? <em className="dash-nav-count">{tab.count > 99 ? "99+" : tab.count}</em> : null}
                 </Link>
               );
             })}
@@ -482,6 +487,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
 
           <div className="dash-topbar-right">
+            <AdminNoticeBell
+              counts={notices.counts}
+              items={notices.items}
+              open={notices.open}
+              setOpen={notices.setOpen}
+            />
             <Link href="/" target="_blank" className="btn btn-outline btn-sm dash-live-btn" title="View live site">
               <span className="dash-live-label">Live</span>
               <span className="dash-live-label-full">View Live Site</span>

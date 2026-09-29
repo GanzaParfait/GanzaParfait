@@ -22,6 +22,7 @@ import AnimatedSection from "@/components/ui/AnimatedSection";
 import CustomSelect from "@/components/ui/CustomSelect";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { projectCover, projectImages } from "@/components/work/work-media";
+import { ProjectSkeletonRow } from "@/components/work/ProjectCardSkeleton";
 import WorkProjectCard from "@/components/work/WorkProjectCard";
 import { listListedProjects } from "@/lib/projects";
 
@@ -339,6 +340,7 @@ export default function ProjectsPageView({
   }, [archiveList]);
 
   const moreActive = MORE_FILTERS.some((item) => item.id === filter);
+  const pickedMore = MORE_FILTERS.find((item) => item.id === filter) ?? null;
   const clearFilters = () => {
     runWithLoader(() => {
       setFilter("all");
@@ -414,6 +416,19 @@ export default function ProjectsPageView({
                 </button>
               ))}
             </div>
+            <div className="projects-filters-end">
+            {pickedMore ? (
+              <button
+                type="button"
+                role="tab"
+                aria-selected="true"
+                className="is-on projects-filter-picked"
+                disabled={filtering}
+                onClick={() => selectFilter(pickedMore.id)}
+              >
+                {pickedMore.label}
+              </button>
+            ) : null}
             <div className="projects-more-wrap" ref={moreRef}>
               <button
                 type="button"
@@ -442,6 +457,7 @@ export default function ProjectsPageView({
                   ))}
                 </div>
               ) : null}
+            </div>
             </div>
           </div>
           <div className="projects-toolbar-tools">
@@ -490,7 +506,12 @@ export default function ProjectsPageView({
                   return (
                     <div key={row[0].id} className={`projects-row is-${pattern} count-${row.length}`}>
                       {row.map((project, index) => (
-                        <ArchiveCard key={project.id} project={project} number={rowIndex * 3 + index + 1} />
+                        <ArchiveCard
+                          key={project.id}
+                          project={project}
+                          number={rowIndex * 3 + index + 1}
+                          stackIndex={rowIndex * 3 + index}
+                        />
                       ))}
                     </div>
                   );
@@ -503,11 +524,7 @@ export default function ProjectsPageView({
                       Load more projects
                     </button>
                   ) : (
-                    <div className="projects-skel-row" aria-hidden="true">
-                      <span />
-                      <span />
-                      <span />
-                    </div>
+                    <ProjectSkeletonRow />
                   )}
                 </div>
               ) : null}
@@ -528,14 +545,14 @@ export default function ProjectsPageView({
         </div>
       </section>
 
-      <section className="projects-cta" data-page-section aria-label="Start a conversation">
-        <div className="container projects-cta-grid">
-          <div className="projects-cta-copy">
+      <section className="experience-next" data-page-section aria-label="Start a conversation">
+        <div className="container experience-next-grid">
+          <div className="experience-next-copy">
             <p className="section-label">Let&apos;s work together</p>
             <h2>Have a project in mind?</h2>
           </div>
-          <div className="projects-cta-actions">
-            <Link href="/contact" className="btn btn-primary">
+          <div className="experience-next-actions">
+            <Link href="/contact" className="btn btn-primary experience-next-primary">
               Start a conversation <RiArrowRightLine size={14} />
             </Link>
           </div>
@@ -549,10 +566,12 @@ function ArchiveCard({
   project,
   number,
   wide = false,
+  stackIndex = 0,
 }: {
   project: Project;
   number: number;
   wide?: boolean;
+  stackIndex?: number;
 }) {
   const cover = projectCover(project);
   const images = projectImages(project);
@@ -569,6 +588,7 @@ function ArchiveCard({
       cover={cover || project.image || ""}
       mediaCount={images.length}
       wide={wide}
+      stackIndex={stackIndex}
       locked={isInProgress(project)}
     />
   );

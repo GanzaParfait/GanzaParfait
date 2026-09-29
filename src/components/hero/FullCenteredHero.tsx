@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
+import ResilientCover from "@/components/work/ResilientCover";
 import { useEffect, useState } from "react";
 import { SiteSettings } from "@/lib/supabase";
 import { heroHighlights, heroImageFor, heroPortraitAlt, heroRoles, setting } from "@/lib/hero";
@@ -23,7 +23,6 @@ export default function FullCenteredHero({
   const socials = heroSocialsFor(settings);
   const highlights = heroHighlights(settings);
   const [roleIndex, setRoleIndex] = useState(0);
-  const isStatic = image.startsWith("/") && !image.startsWith("//");
 
   useEffect(() => {
     if (roles.length <= 1) return;
@@ -49,26 +48,13 @@ export default function FullCenteredHero({
           <div className="hero-centered-floor" />
         </div>
         <div className="hero-centered-figure">
-          {isStatic ? (
-            <Image
-              src={image}
-              alt={portraitAlt}
-              width={900}
-              height={1350}
-              priority={!isPreview}
-              fetchPriority={isPreview ? undefined : "high"}
-              sizes="(max-width: 767px) 72vw, (max-width: 1100px) 40vw, 472px"
-              className="hero-centered-photo"
-            />
-          ) : (
-            <img
-              src={image}
-              alt={portraitAlt}
-              className="hero-centered-photo"
-              fetchPriority={isPreview ? undefined : "high"}
-              decoding="async"
-            />
-          )}
+          <ResilientCover
+            src={image}
+            alt={portraitAlt}
+            priority={!isPreview}
+            sizes="(max-width: 767px) 72vw, (max-width: 1100px) 40vw, 472px"
+            className="hero-centered-photo"
+          />
         </div>
         <div className="hero-centered-caption">
           <h1 className="hero-centered-name">{name}</h1>

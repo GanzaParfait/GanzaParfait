@@ -81,6 +81,25 @@ export function sanitizeProjectAttribution(project: Project): Project {
     };
   }
 
+  if (next.id === "askfield" && seed) {
+    next = {
+      ...next,
+      description: seed.description,
+      longDescription: seed.longDescription,
+      context: seed.context,
+      challenge: seed.challenge,
+      solution: seed.solution,
+      problem: seed.problem,
+      whatIBuilt: seed.whatIBuilt,
+      contributionSummary: seed.contributionSummary,
+      myRole: seed.myRole,
+      domain: seed.domain,
+      highlights: seed.highlights,
+      features: seed.features,
+      technologies: seed.technologies,
+    };
+  }
+
   if (LERONY_TEAM_BUILD_IDS.has(next.id) && seed) {
     next = {
       ...next,

@@ -443,7 +443,7 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
       summary:
         "Survey programming, multi-mode digital collection and research-data workflows, evidenced through AskField platform work.",
       description:
-        "Capabilities in digital research and survey systems demonstrated through team work on AskField with Ethical Research Solutions: survey programming and questionnaire design, validation and skip logic, XLSForm, CAPI / CATI / CAWI collection modes, GPS/geolocation-based collection, enumerator assignment, field operations, response monitoring, data export and research data management. Presented as domain experience from team contribution, not as separate job titles or sole ownership of the platform.",
+        "Capabilities in digital research and survey systems demonstrated through team work on AskField with Ethical Research Solutions: frontend and API integration, backend, React Native, DevOps, the website, templates and XLSForm, plus survey programming, validation and skip logic, CAPI / CATI / CAWI, field operations and research data management. Presented as team contribution, not as separate job titles or sole ownership of the platform.",
       icon: "flow",
       capabilities: [
         "Survey programming and questionnaire design",

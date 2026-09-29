@@ -1,4 +1,5 @@
 import Image from "next/image";
+import ResilientCover from "@/components/work/ResilientCover";
 import { RiArrowRightLine, RiBarChartBoxLine, RiLightbulbFlashLine, RiSettings3Line } from "react-icons/ri";
 import type { HomepageContent } from "@/lib/homepage";
 import ManifestoStepDeck from "@/components/home/ManifestoStepDeck";
@@ -8,7 +9,6 @@ const ICONS = [RiLightbulbFlashLine, RiSettings3Line, RiBarChartBoxLine];
 
 export default function ManifestoSection({ manifesto, embedded = false }: { manifesto: HomepageContent["manifesto"]; embedded?: boolean }) {
   const Tag = embedded ? "div" : "section";
-  const portraitLocal = Boolean(manifesto.image?.startsWith("/") && !manifesto.image.startsWith("//"));
 
   return (
     <Tag className={embedded ? "manifesto manifesto-embedded" : "manifesto"} id={embedded ? undefined : "manifesto"} aria-label="Opening statement" data-page-section={embedded ? undefined : true} data-section-label={embedded ? undefined : "Manifesto"}>
@@ -22,27 +22,12 @@ export default function ManifestoSection({ manifesto, embedded = false }: { mani
           <div className="manifesto-portrait">
             <div className="manifesto-halo" aria-hidden="true" />
             {manifesto.image ? (
-              portraitLocal ? (
-                <Image
-                  src={manifesto.image}
-                  alt={siteConfig.portraitAlt}
-                  className="manifesto-photo"
-                  width={800}
-                  height={1200}
-                  sizes="(max-width: 767px) 88vw, 312px"
-                  loading="lazy"
-                />
-              ) : (
-                <img
-                  src={manifesto.image}
-                  alt={siteConfig.portraitAlt}
-                  className="manifesto-photo"
-                  width={800}
-                  height={1200}
-                  loading="lazy"
-                  decoding="async"
-                />
-              )
+              <ResilientCover
+                src={manifesto.image}
+                alt={siteConfig.portraitAlt}
+                className="manifesto-photo"
+                sizes="(max-width: 767px) 88vw, 312px"
+              />
             ) : null}
             {manifesto.chip ? (
               <p className="manifesto-chip">

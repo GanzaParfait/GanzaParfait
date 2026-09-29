@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import ResilientCover from "@/components/work/ResilientCover";
 import {
   RiArrowLeftLine,
   RiArrowRightLine,
@@ -36,7 +37,7 @@ function PosterVideo({ src, poster, title }: { src: string; poster?: string; tit
   if (!ready) {
     return (
       <button type="button" className="poster-video" onClick={() => setReady(true)} aria-label={`Play ${title}`}>
-        {poster ? <img src={poster} alt="" /> : <span className="announcement-video-fallback" style={{ minHeight: "12rem" }} />}
+        {poster ? <ResilientCover src={poster} alt="" /> : <span className="announcement-video-fallback" style={{ minHeight: "12rem" }} />}
         <span>
           <RiPlayFill size={26} />
         </span>
@@ -305,7 +306,11 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
               aria-label={`View ${project.title} media`}
               disabled={!mediaItems.length && !cover}
             >
-              {cover ? <img src={cover} alt="" /> : <span>{project.title}</span>}
+              {cover ? (
+                <ResilientCover src={cover} alt={`${project.title} — work by Prince Parfait GANZA`} wide priority />
+              ) : (
+                <span>{project.title}</span>
+              )}
             </button>
             <p className="case-flourish" aria-hidden="true">
               {flourish}
@@ -536,7 +541,7 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
             <div className="case-aside-card">
               {project.logo ? (
                 <div className="case-aside-logo">
-                  <img src={project.logo} alt={`${project.organization || project.title} logo`} />
+                  <ResilientCover src={project.logo} alt={`${project.organization || project.title} logo`} sizes="72px" />
                 </div>
               ) : project.organization ? (
                 <p className="case-aside-org">{project.organization}</p>
@@ -600,7 +605,7 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
                         onClick={() => openPreview(absolute)}
                         aria-label={`Open ${item.caption}`}
                       >
-                        <img src={item.src} alt="" loading="lazy" decoding="async" />
+                        <ResilientCover src={item.src} alt={item.caption || `${project.title} — work by Prince Parfait GANZA`} />
                       </button>
                     )}
                     <figcaption>{item.caption}</figcaption>

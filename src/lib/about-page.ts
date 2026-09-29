@@ -166,7 +166,7 @@ export const DEFAULT_ABOUT_PAGE: AboutPageContent = {
     title: "My journey",
     paragraphs: [
       "Formal software foundations came through secondary Software Development training at SJITC, then continued into undergraduate study toward a Bachelor of Computer Science in Software Engineering at ULK, still in progress.",
-      "ALX Africa deepened data and analysis habits. That path led into research technology at Ethical Research Solutions on AskField, as Frontend Integrator: survey programming, digital collection workflows and research-data handling across CAPI, CATI and CAWI modes.",
+      "ALX Africa deepened data and analysis habits. That path led into research technology at Ethical Research Solutions on AskField: Frontend Integrator work across frontend, backend, React Native, DevOps, the website, templates, XLSForm and digital collection workflows.",
       "The same systems thinking carried into broader software engineering: inventory and sales operations in StockPro, ticket accounting work associated with PSTA, and organizational indicator and reporting systems for Caritas Rwanda.",
       "In 2025 I founded LERONY Ltd in Kigali to deliver practical technology with organizations and businesses. This site is about the person and the work. The company lives at lerony.com.",
     ],
@@ -199,7 +199,7 @@ export const DEFAULT_ABOUT_PAGE: AboutPageContent = {
     items: [
       {
         title: "AskField",
-        subtitle: "Frontend Integrator · Ethical Research Solutions",
+        subtitle: "Frontend Integrator · DevOps",
         meta: "Research technology & digital data collection",
         href: "/projects/askfield",
       },
@@ -281,7 +281,7 @@ export const DEFAULT_ABOUT_PAGE: AboutPageContent = {
       {
         year: "2024",
         title: "Research technology",
-        body: "Frontend Integrator on AskField at Ethical Research Solutions — survey programming, digital collection workflows and research-data handling.",
+        body: "AskField at Ethical Research Solutions: frontend, backend, React Native and DevOps, including the website, templates and XLSForm.",
         org: "AskField",
       },
       {

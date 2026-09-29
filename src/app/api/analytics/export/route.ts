@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { displayIp, pagePathToName } from "@/lib/analytics";
+import { correctAttribution } from "@/lib/utm";
 import { createServerSupabase, hasServiceRoleKey } from "@/lib/supabase-server";
 
 function isAdmin(request: NextRequest) {
@@ -107,7 +108,15 @@ export async function GET(request: NextRequest) {
     countryCounts.set(country, (countryCounts.get(country) || 0) + 1);
     const device = row.device_type || row.device || "Unknown";
     deviceCounts.set(device, (deviceCounts.get(device) || 0) + 1);
-    const source = row.utm_source || "Direct";
+    const source =
+      correctAttribution(
+        {
+          utm_source: row.utm_source || undefined,
+          utm_medium: row.utm_medium || undefined,
+          utm_campaign: row.utm_campaign || undefined,
+        },
+        row.referrer,
+      ).utm_source || "Direct";
     sourceCounts.set(source, (sourceCounts.get(source) || 0) + 1);
   }
 

@@ -3,6 +3,7 @@ import { createServerSupabase } from "@/lib/supabase-server";
 import { contactAckMail, contactNotifyMail, sendMail } from "@/lib/mail";
 import { getServerSiteSettings } from "@/lib/site-settings-server";
 import { mailboxes } from "@/lib/env";
+import { recordAdminNotification } from "@/lib/admin-notifications";
 import { upsertSubscriber } from "@/lib/subscribers";
 
 export async function POST(request: Request) {
@@ -36,6 +37,16 @@ export async function POST(request: Request) {
     if (error) {
       console.error("contact_messages insert failed", error);
       return NextResponse.json({ error: "Could not save your message." }, { status: 500 });
+    }
+
+    if (data?.id) {
+      await recordAdminNotification(supabase, {
+        kind: "message",
+        title: `New message from ${name}`,
+        body: message.slice(0, 180),
+        href: "/dashboard/messages",
+        relatedId: String(data.id),
+      });
     }
 
     let subscribeOffer = false;

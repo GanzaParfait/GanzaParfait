@@ -2,6 +2,7 @@ import { NextResponse, after } from "next/server";
 import { sendMail, testimonialAckMail, testimonialNotifyMail } from "@/lib/mail";
 import { getServerSiteSettings } from "@/lib/site-settings-server";
 import { createServerSupabase } from "@/lib/supabase-server";
+import { recordAdminNotification } from "@/lib/admin-notifications";
 import { upsertSubscriber } from "@/lib/subscribers";
 import {
   PUBLIC_TESTIMONIAL_COLUMNS,
@@ -77,6 +78,16 @@ export async function POST(request: Request) {
     if (error) {
       console.error("testimonials insert failed", error);
       return NextResponse.json({ error: "Could not save your testimonial." }, { status: 500 });
+    }
+
+    if (data?.id) {
+      await recordAdminNotification(supabase, {
+        kind: "testimonial",
+        title: `New testimonial from ${parsed.value.person_name}`,
+        body: parsed.value.body.slice(0, 180),
+        href: "/dashboard/testimonials",
+        relatedId: String(data.id),
+      });
     }
 
     let subscribeOffer = false;
@@ -198,12 +209,31 @@ export async function GET(request: Request) {
     if (shareToken) single = single.eq("share_token", shareToken);
     else single = single.eq("id", byId);
 
-    const { data, error } = await single.maybeSingle();
-    const row = data as unknown as Record<string, unknown> | null;
-    if (error || !row || !isPubliclyVisibleRow(row)) {
-      return NextResponse.json({ item: null }, { status: 404 });
+    let { data, error } = await single.maybeSingle();
+    if (!data && shareToken) {
+      const byIdLookup = await supabase.from("testimonials").select(deepSelect).eq("id", shareToken).maybeSingle();
+      data = byIdLookup.data;
+      error = byIdLookup.error;
     }
-    return NextResponse.json({ item: toPublicTestimonial(row) });
+    const row = data as unknown as Record<string, unknown> | null;
+    if (error || !row) {
+      return NextResponse.json({ item: null, state: "missing" }, { status: 404 });
+    }
+    if (!isPubliclyVisibleRow(row)) {
+      const status = String(row.status || "");
+      const state =
+        status === "declined"
+          ? "declined"
+          : status === "confirmed"
+            ? "confirmed"
+            : status === "draft"
+              ? "draft"
+              : status === "submitted"
+                ? "submitted"
+                : "unavailable";
+      return NextResponse.json({ item: null, state });
+    }
+    return NextResponse.json({ item: toPublicTestimonial(row), state: "published" });
   }
 
   // Public list: published + public + verified + never placeholders.

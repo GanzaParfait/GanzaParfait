@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import ResilientCover from "@/components/work/ResilientCover";
 import {
   RiArrowRightLine,
   RiMapPinLine,
@@ -40,7 +40,6 @@ export default function SplitHero({
   const secondaryCtaLabel = setting(settings, "heroSecondaryCtaLabel");
   const secondaryCtaHref = setting(settings, "heroSecondaryCtaHref");
   const splitImage = heroImageFor(settings, "split_portrait");
-  const splitIsStatic = splitImage.startsWith("/") && !splitImage.startsWith("//");
   const primarySocials = heroSocialsFor(settings);
 
   useEffect(() => {
@@ -310,23 +309,13 @@ export default function SplitHero({
 
               {/* Photo */}
               <div className="hero-split-shot" style={{ position: "relative", zIndex: 2, width: "88%", height: "98%", bottom: 0 }}>
-                {splitIsStatic ? (
-                  <Image
-                    src={splitImage}
-                    alt={heroPortraitAlt(settings)}
-                    fill
-                    priority
-                    sizes="(max-width: 1024px) 92vw, 28rem"
-                    className="object-contain object-bottom hero-split-img"
-                  />
-                ) : (
-                  <img
-                    src={splitImage}
-                    alt={heroPortraitAlt(settings)}
-                    className="hero-split-img"
-                    style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "bottom" }}
-                  />
-                )}
+                <ResilientCover
+                  src={splitImage}
+                  alt={heroPortraitAlt(settings)}
+                  priority
+                  sizes="(max-width: 1024px) 92vw, 28rem"
+                  className="hero-split-img"
+                />
               </div>
 
               {heroHighlights(settings).slice(0, 2).map((item, index) => (

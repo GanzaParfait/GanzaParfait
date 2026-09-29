@@ -220,7 +220,7 @@ export const DEFAULT_HOMEPAGE: HomepageContent = {
       story("askfield", {
         line: "Research surveys, connected through a real collection platform.",
         support:
-          "AskField: Frontend Integrator work expanding into survey programming, XLSForm, CAPI/CATI/CAWI and research-data workflows with Ethical Research Solutions.",
+          "AskField with Ethical Research Solutions: frontend, backend, React Native and DevOps, including the website, templates and XLSForm.",
         tags: ["Research", "Surveys", "XLSForm"],
         images: ["/images/projects/askfield.webp"],
         status: "Team contribution. No public metric is claimed.",

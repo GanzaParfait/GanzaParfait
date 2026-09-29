@@ -1,14 +1,12 @@
+import { ProjectSkeletonRow } from "@/components/work/ProjectCardSkeleton";
+
 export default function ProjectsLoading() {
   return (
     <div className="page-skel projects-page" aria-hidden="true">
       <div className="container">
-        <span className="page-skel-hero" />
-        <span className="page-skel-wide" />
-        <div className="projects-skel-row">
-          <span />
-          <span />
-          <span />
-        </div>
+        <span className="projects-skel-line is-hero" />
+        <span className="projects-skel-line is-lede" />
+        <ProjectSkeletonRow />
       </div>
     </div>
   );

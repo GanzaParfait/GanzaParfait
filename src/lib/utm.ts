@@ -8,6 +8,22 @@ export const UTM_PARAM_KEYS = [
   "utm_content",
 ] as const;
 
+/** Click and ad identifiers that should not stay in the public URL. */
+export const CLICK_ID_KEYS = [
+  "fbclid",
+  "gclid",
+  "gbraid",
+  "wbraid",
+  "msclkid",
+  "ttclid",
+  "twclid",
+  "li_fat_id",
+  "igshid",
+  "mc_cid",
+  "mc_eid",
+  "_ga",
+] as const;
+
 export type UtmParamKey = (typeof UTM_PARAM_KEYS)[number];
 
 export interface UtmParams {
@@ -53,6 +69,104 @@ export function parseUtmFromUrl(url: string): UtmParams {
 export function cleanPagePath(path: string): string {
   const withoutQuery = path.split("?")[0]?.split("#")[0] || path;
   return withoutQuery.startsWith("/") ? withoutQuery : `/${withoutQuery}`;
+}
+
+const SOURCE_RULES: { test: RegExp; source: string; medium: string }[] = [
+  { test: /(^|\.)chatgpt\.com$|(^|\.)chat\.openai\.com$|^chatgpt$/i, source: "ChatGPT", medium: "referral" },
+  { test: /(^|\.)openai\.com$/i, source: "OpenAI", medium: "referral" },
+  { test: /(^|\.)perplexity\.ai$/i, source: "Perplexity", medium: "referral" },
+  { test: /(^|\.)claude\.ai$|(^|\.)anthropic\.com$/i, source: "Claude", medium: "referral" },
+  { test: /(^|\.)gemini\.google\.com$|(^|\.)bard\.google\.com$/i, source: "Gemini", medium: "referral" },
+  { test: /(^|\.)google\.[a-z.]+$/i, source: "Google", medium: "organic" },
+  { test: /(^|\.)bing\.com$/i, source: "Bing", medium: "organic" },
+  { test: /(^|\.)duckduckgo\.com$/i, source: "DuckDuckGo", medium: "organic" },
+  { test: /(^|\.)linkedin\.com$|(^|\.)lnkd\.in$/i, source: "LinkedIn", medium: "social" },
+  { test: /(^|\.)twitter\.com$|(^|\.)x\.com$|(^|\.)t\.co$/i, source: "X", medium: "social" },
+  { test: /(^|\.)facebook\.com$|(^|\.)fb\.com$|(^|\.)instagram\.com$/i, source: "Meta", medium: "social" },
+  { test: /(^|\.)whatsapp\.com$|(^|\.)wa\.me$/i, source: "WhatsApp", medium: "social" },
+  { test: /(^|\.)github\.com$/i, source: "GitHub", medium: "referral" },
+  { test: /(^|\.)youtube\.com$|(^|\.)youtu\.be$/i, source: "YouTube", medium: "social" },
+];
+
+function hostOf(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  try {
+    if (trimmed.includes("://")) {
+      return new URL(trimmed).hostname.replace(/^www\./i, "").toLowerCase();
+    }
+  } catch {
+    return "";
+  }
+  return trimmed.replace(/^www\./i, "").toLowerCase().split("/")[0]?.split("?")[0] || "";
+}
+
+function matchSource(value: string): { source: string; medium: string } | null {
+  const host = hostOf(value);
+  if (!host) return null;
+  return SOURCE_RULES.find((rule) => rule.test.test(host)) || null;
+}
+
+/** Turn raw values such as chatgpt.com into a stable source name for metrics. */
+export function normalizeSourceLabel(value: string | null | undefined): string | null {
+  const raw = value?.trim();
+  if (!raw) return null;
+  return matchSource(raw)?.source || raw.slice(0, 120);
+}
+
+export function attributionFromReferrer(referrer: string | null | undefined): UtmParams {
+  const matched = referrer ? matchSource(referrer) : null;
+  if (!matched) return {};
+  return { utm_source: matched.source, utm_medium: matched.medium };
+}
+
+/** Keep an explicit campaign, and fill a missing source from the referrer. */
+export function correctAttribution(utm: UtmParams, referrer?: string | null): UtmParams {
+  const next: UtmParams = { ...utm };
+  if (next.utm_source) {
+    const matched = matchSource(next.utm_source);
+    next.utm_source = matched?.source || next.utm_source.trim().slice(0, 120);
+    if (matched && !next.utm_medium) next.utm_medium = matched.medium;
+  } else {
+    const inferred = attributionFromReferrer(referrer);
+    if (inferred.utm_source) next.utm_source = inferred.utm_source;
+    if (!next.utm_medium && inferred.utm_medium) next.utm_medium = inferred.utm_medium;
+  }
+  if (next.utm_medium) next.utm_medium = next.utm_medium.trim().slice(0, 120);
+  if (next.utm_campaign) next.utm_campaign = next.utm_campaign.trim().slice(0, 120);
+  return next;
+}
+
+export function stripTrackingSearch(params: URLSearchParams): boolean {
+  let changed = false;
+  for (const key of [...UTM_PARAM_KEYS, ...CLICK_ID_KEYS]) {
+    if (params.has(key)) {
+      params.delete(key);
+      changed = true;
+    }
+  }
+  return changed;
+}
+
+/** Record attribution first, then remove tracking params from the address bar. */
+export function cleanBrowserUrl(): void {
+  if (typeof window === "undefined") return;
+  const url = new URL(window.location.href);
+  if (!stripTrackingSearch(url.searchParams)) return;
+  const next = `${url.pathname}${url.search}${url.hash}`;
+  window.history.replaceState(window.history.state, "", next);
+}
+
+export function cleanReferrer(referrer: string | null | undefined): string | null {
+  const raw = referrer?.trim();
+  if (!raw) return null;
+  try {
+    const url = new URL(raw);
+    stripTrackingSearch(url.searchParams);
+    return url.toString().slice(0, 500);
+  } catch {
+    return raw.slice(0, 500);
+  }
 }
 
 export function buildUtmQuery(params: UtmParams | ShareUtmOptions): string {

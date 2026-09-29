@@ -102,6 +102,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     if (action === "confirm") {
       patch.status = "confirmed";
     } else if (action === "approve" || action === "publish") {
+      if (String(patch.source ?? current.source ?? "visitor") !== "placeholder") {
+        patch.verified = true;
+        if (!patch.verification_method && !current.verification_method) {
+          patch.verification_method = "admin";
+        }
+      }
       const gate = publishGate(current, patch);
       if (!gate.ok) return NextResponse.json({ error: gate.error }, { status: 400 });
       patch.status = "published";

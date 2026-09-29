@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useEffect, useLayoutEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
@@ -12,11 +12,42 @@ import UtmCapture from "@/components/analytics/UtmCapture";
 import SiteIntroOverlay from "@/components/intro/SiteIntroOverlay";
 import TestimonialShareViewer from "@/components/testimonials/TestimonialShareViewer";
 
+function resetPageScroll() {
+  window.scrollTo(0, 0);
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+  document.getElementById("main-content")?.scrollTo?.(0, 0);
+}
+
 export default function LayoutShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const skipScrollReset = useRef(false);
   const isBare =
     pathname?.startsWith("/dashboard") || pathname?.startsWith("/email-preview");
   const isHome = pathname === "/";
+
+  useEffect(() => {
+    const onPop = () => {
+      if (window.location.pathname !== pathname) skipScrollReset.current = true;
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, [pathname]);
+
+  useLayoutEffect(() => {
+    if (skipScrollReset.current) {
+      skipScrollReset.current = false;
+      return;
+    }
+    if (window.location.hash) return;
+    resetPageScroll();
+    const frame = window.requestAnimationFrame(resetPageScroll);
+    const timer = window.setTimeout(resetPageScroll, 80);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
+    };
+  }, [pathname]);
 
   if (isBare) {
     return <>{children}</>;

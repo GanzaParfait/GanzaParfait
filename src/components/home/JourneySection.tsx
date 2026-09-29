@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
+import { useEffect, useMemo, useRef, useState } from "react";
+import ResilientCover from "@/components/work/ResilientCover";
 import Link from "next/link";
 import {
   RiArrowLeftLine,
@@ -18,6 +18,7 @@ import {
 import type { HomepageContent, JourneyEntry, JourneyType } from "@/lib/homepage";
 import CustomSelect from "@/components/ui/CustomSelect";
 import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
+import { useSheetDrag } from "@/hooks/useSheetDrag";
 
 type FilterId = "all" | JourneyType;
 type SortId = "latest" | "oldest";
@@ -79,7 +80,9 @@ export default function JourneySection({
   const [yearHover, setYearHover] = useState<string | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [detailTab, setDetailTab] = useState<DetailTab>("overview");
+  const drawerRef = useRef<HTMLElement>(null);
   useHistoryBackClose(Boolean(activeId), () => setActiveId(null));
+  useSheetDrag(Boolean(activeId), () => setActiveId(null), drawerRef, { maxWidth: 800, variable: true });
   const Tag = embedded ? "div" : "section";
   const entries = journey.entries || [];
   const yearRail = useMemo(() => buildYearRail(entries), [entries]);
@@ -304,7 +307,7 @@ export default function JourneySection({
                       </div>
                       {item.logo ? (
                         <span className="journey-item-logo">
-                          <Image src={item.logo} alt={`${item.organization} logo`} width={40} height={40} />
+                          <ResilientCover src={item.logo} alt={`${item.organization} logo`} sizes="40px" />
                         </span>
                       ) : null}
                     </div>
@@ -333,12 +336,14 @@ export default function JourneySection({
       {active ? (
         <div className="journey-drawer-layer" role="presentation" onClick={() => setActiveId(null)}>
           <aside
+            ref={drawerRef}
             className="journey-drawer"
             role="dialog"
             aria-modal="true"
             aria-label={active.title}
             onClick={(event) => event.stopPropagation()}
           >
+            <div className="journey-sheet-handle" aria-hidden="true" />
             <div className="journey-drawer-top">
               <div className="journey-drawer-tags">
                 <span className={`journey-tag is-${active.type}`}>{typeLabel(active.type)}</span>
@@ -366,7 +371,7 @@ export default function JourneySection({
               {active.website ? (
                 <a className="journey-drawer-logo" href={active.website} target="_blank" rel="noopener noreferrer">
                   {active.logo ? (
-                    <Image src={active.logo} alt={`${active.organization} logo`} width={56} height={56} />
+                    <ResilientCover src={active.logo} alt={`${active.organization} logo`} sizes="56px" />
                   ) : (
                     active.organization.split(" ")[0]
                   )}
@@ -374,7 +379,7 @@ export default function JourneySection({
               ) : (
                 <span className="journey-drawer-logo">
                   {active.logo ? (
-                    <Image src={active.logo} alt={`${active.organization} logo`} width={56} height={56} />
+                    <ResilientCover src={active.logo} alt={`${active.organization} logo`} sizes="56px" />
                   ) : (
                     active.organization.split(" ")[0]
                   )}

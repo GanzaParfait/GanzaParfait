@@ -10,7 +10,7 @@ import {
 } from "@/lib/analytics";
 import { getClientIp, normalizeIp, resolveGeo } from "@/lib/geo";
 import { createServerSupabase } from "@/lib/supabase-server";
-import { cleanPagePath } from "@/lib/utm";
+import { cleanPagePath, cleanReferrer, correctAttribution } from "@/lib/utm";
 
 interface TrackPayload {
   page_path?: string;
@@ -58,17 +58,27 @@ export async function POST(request: NextRequest) {
 
     const supabase = createServerSupabase(true);
 
+    const corrected = correctAttribution(
+      {
+        utm_source: sanitizeUtm(body.utm_source) || undefined,
+        utm_medium: sanitizeUtm(body.utm_medium) || undefined,
+        utm_campaign: sanitizeUtm(body.utm_campaign) || undefined,
+        utm_term: sanitizeUtm(body.utm_term) || undefined,
+        utm_content: sanitizeUtm(body.utm_content) || undefined,
+      },
+      body.referrer,
+    );
     const utmFields = {
-      utm_source: sanitizeUtm(body.utm_source),
-      utm_medium: sanitizeUtm(body.utm_medium),
-      utm_campaign: sanitizeUtm(body.utm_campaign),
-      utm_term: sanitizeUtm(body.utm_term),
-      utm_content: sanitizeUtm(body.utm_content),
+      utm_source: sanitizeUtm(corrected.utm_source),
+      utm_medium: sanitizeUtm(corrected.utm_medium),
+      utm_campaign: sanitizeUtm(corrected.utm_campaign),
+      utm_term: sanitizeUtm(corrected.utm_term),
+      utm_content: sanitizeUtm(corrected.utm_content),
     };
 
     const baseRecord = {
       page_path: pagePath.slice(0, 255),
-      referrer: body.referrer?.slice(0, 500) || null,
+      referrer: cleanReferrer(body.referrer),
       country_code: geo.country_code,
       country_name: geo.country_name,
       country_flag: geo.country_flag,

@@ -538,7 +538,7 @@ export default function DashboardOverviewPage() {
           <div className="analytics-panel-head">
             <div>
               <div className="analytics-panel-title">Traffic sources</div>
-              <p className="analytics-panel-subtitle">Where visitors come from</p>
+              <p className="analytics-panel-subtitle">UTM and referral sources, grouped for analysis</p>
             </div>
           </div>
           {analytics.utmBreakdown.length === 0 ? (

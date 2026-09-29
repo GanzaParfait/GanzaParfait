@@ -329,9 +329,17 @@ Evidence level: VERIFIED
 Official role: **Frontend Integrator** on the AskField research technology
 platform.
 
-Contribution began in frontend development / API integration and expanded
-into hands-on research-technology practice. Public-safe capabilities
-demonstrated through this work:
+The engagement started in frontend development / API integration and kept
+advancing. Confirmed scope now also includes:
+
+- backend
+- mobile with React Native
+- DevOps (Docker on a Hostinger VPS)
+- the AskField website
+- survey templates
+- XLSForm creation
+
+Public-safe research-technology capabilities demonstrated through this work:
 
 - survey programming / questionnaire design
 - questionnaire logic, validations, skip logic
@@ -345,6 +353,8 @@ demonstrated through this work:
 
 Present these as capabilities and domain experience — not as separate job
 titles and not as claims of inventing or owning every part of AskField.
+Keep the recorded title as Frontend Integrator unless Prince confirms a
+new official title.
 
 Do not publish named study instruments (for example Tunga Taci),
 questionnaire contents, screenshots of confidential instruments, or
@@ -509,13 +519,20 @@ Survey / digital data-collection platform at Ethical Research Solutions.
 
 Official employment title: Frontend Integrator.
 
+The public case study should say the work started there and advanced.
+Confirmed engineering scope: frontend and API integration, backend,
+React Native mobile, DevOps (Docker on a Hostinger VPS), the website,
+survey templates and XLSForm creation. Describe the operations work as
+DevOps, not as a casual “deployments” line.
+
 Public case study leads with Research Technology & Digital Data Collection.
 Capabilities (not titles): survey programming, XLSForm, CAPI / CATI / CAWI,
 GPS/geolocation collection, enumerator assignment, field operations,
 monitoring, export and research data management — demonstrated through team
 platform work.
 
-Engineering stack (tools, not identity): React, Redux, API integration.
+Engineering stack (tools, not identity): React, Redux, React Native,
+Docker, API integration, XLSForm. Do not invent a backend language.
 
 Avoid claiming ownership of the entire product.
 

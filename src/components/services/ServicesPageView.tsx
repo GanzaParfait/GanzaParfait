@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import Image from "next/image";
+import ResilientCover from "@/components/work/ResilientCover";
 import Link from "next/link";
 import {
   RiAddLine,
@@ -51,6 +51,7 @@ import {
   type ServicesPageContent,
 } from "@/lib/services-page";
 import { mergeProjectCatalog } from "@/lib/projects";
+import { selectedWorkCategory } from "@/components/work/work-media";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { primaryEmail } from "@/lib/contact-emails";
 import { whatsappContactUrl } from "@/lib/whatsapp";
@@ -61,6 +62,7 @@ export type ServicesProjectCard = {
   description: string;
   image: string;
   organization?: string;
+  tag?: string;
 };
 
 const ICONS: Record<string, ElementType> = {
@@ -158,11 +160,9 @@ function FamilyVisual({
   return (
     <figure className={`svc-visual is-${focus}`}>
       <button type="button" className="svc-visual-hit" onClick={onOpen} aria-label={`Preview ${visual.label} image`}>
-        <Image
+        <ResilientCover
           src={visual.src}
           alt={visual.alt}
-          width={1672}
-          height={941}
           sizes="(max-width: 860px) 92vw, 360px"
           className="svc-visual-img"
         />
@@ -194,6 +194,7 @@ export default function ServicesPageView({
         description: project.description,
         image: project.image || project.logo || "/images/projects/project-placeholder.png",
         organization: project.organization,
+        tag: PROJECT_TAGS[project.id] || selectedWorkCategory(project),
       })),
     [catalog, projectsOverride],
   );
@@ -539,15 +540,16 @@ export default function ServicesPageView({
                   data-advance-label={project.title}
                 >
                   <Link href={`/projects/${project.id}`} className="svc-work-media">
-                    <Image
+                    <ResilientCover
                       src={project.image}
                       alt={`${project.title} — project by ${siteConfig.name}`}
-                      width={480}
-                      height={300}
+                      sizes="(max-width: 860px) 92vw, 280px"
                     />
                   </Link>
                   <div className="svc-work-copy">
-                    {PROJECT_TAGS[project.id] ? <span className="svc-work-tag">{PROJECT_TAGS[project.id]}</span> : null}
+                    {project.tag || PROJECT_TAGS[project.id] ? (
+                      <span className="svc-work-tag">{project.tag || PROJECT_TAGS[project.id]}</span>
+                    ) : null}
                     <h3>
                       <Link href={`/projects/${project.id}`}>{project.title}</Link>
                     </h3>
@@ -729,7 +731,7 @@ export default function ServicesPageView({
             <RiArrowLeftLine size={20} />
           </button>
           <figure className="svc-lightbox-frame" onClick={(event) => event.stopPropagation()}>
-            <Image src={preview.src} alt={preview.alt} width={1672} height={941} className="svc-lightbox-img" />
+            <ResilientCover src={preview.src} alt={preview.alt} sizes="92vw" className="svc-lightbox-img" />
             <figcaption>
               <strong>{preview.label}</strong>
               <span>{preview.caption}</span>

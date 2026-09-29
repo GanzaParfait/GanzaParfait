@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
   cleanPagePath,
+  correctAttribution,
   getStoredUtmAttribution,
   parseUtmFromSearchParams,
   resolveUtmAttribution,
@@ -17,9 +18,9 @@ export default function PageViewTracker() {
   useEffect(() => {
     if (!pathname || pathname.startsWith("/dashboard")) return;
 
-    const utm = resolveUtmAttribution(
-      parseUtmFromSearchParams(searchParams),
-      getStoredUtmAttribution()
+    const utm = correctAttribution(
+      resolveUtmAttribution(parseUtmFromSearchParams(searchParams), getStoredUtmAttribution()),
+      document.referrer,
     );
     const pagePath = cleanPagePath(pathname);
     const trackKey = `${pagePath}:${JSON.stringify(utm)}`;

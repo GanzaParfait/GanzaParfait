@@ -8,6 +8,7 @@ import {
   pagePathToName,
 } from "@/lib/analytics";
 import { createServerSupabase, hasServiceRoleKey } from "@/lib/supabase-server";
+import { correctAttribution } from "@/lib/utm";
 import type { AnalyticsMetrics } from "@/lib/supabase";
 
 interface PageViewRow {
@@ -444,7 +445,10 @@ export async function GET(request: NextRequest) {
         ip: displayIp(first.ip_address),
         pageCount: sorted.length,
         duration: formatDuration(durationSeconds),
-        utmSource: first.utm_source || undefined,
+        utmSource: correctAttribution(
+          { utm_source: first.utm_source || undefined, utm_medium: first.utm_medium || undefined, utm_campaign: first.utm_campaign || undefined },
+          first.referrer,
+        ).utm_source,
         utmCampaign: first.utm_campaign || undefined,
         pages: sorted.map((row, index) => {
           const prev = index > 0 ? sorted[index - 1] : null;
@@ -476,15 +480,23 @@ export async function GET(request: NextRequest) {
   const sourceCounts = new Map<string, { source: string; medium: string; campaign: string; visits: number }>();
   let directVisits = 0;
   for (const row of currentRows) {
-    if (!row.utm_source) {
+    const corrected = correctAttribution(
+      {
+        utm_source: row.utm_source || undefined,
+        utm_medium: row.utm_medium || undefined,
+        utm_campaign: row.utm_campaign || undefined,
+      },
+      row.referrer,
+    );
+    if (!corrected.utm_source) {
       directVisits += 1;
       continue;
     }
-    const key = `${row.utm_source}|${row.utm_medium || "—"}|${row.utm_campaign || "—"}`;
+    const key = `${corrected.utm_source}|${corrected.utm_medium || "—"}|${corrected.utm_campaign || "—"}`;
     const existing = sourceCounts.get(key) || {
-      source: row.utm_source,
-      medium: row.utm_medium || "—",
-      campaign: row.utm_campaign || "—",
+      source: corrected.utm_source,
+      medium: corrected.utm_medium || "—",
+      campaign: corrected.utm_campaign || "—",
       visits: 0,
     };
     existing.visits += 1;

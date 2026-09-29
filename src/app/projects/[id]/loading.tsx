@@ -10,7 +10,7 @@ export default function ProjectLoading() {
         <span className="page-skel-meta" />
         <div className="case-shots">
           <span className="page-skel-line is-short" />
-          <div className="projects-skel-row page-skel-media">
+          <div className="projects-skel-row is-media page-skel-media">
             <span />
             <span />
             <span />

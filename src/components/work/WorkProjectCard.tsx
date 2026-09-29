@@ -1,45 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import { RiArrowRightLine, RiExternalLinkLine, RiLockLine } from "react-icons/ri";
 import type { Project } from "@/data/site-data";
+import ResilientCover from "@/components/work/ResilientCover";
 import { selectedWorkCategory, selectedWorkTone } from "@/components/work/work-media";
 import { useAdaptiveGlow } from "@/hooks/useAdaptiveGlow";
-
-function CoverImage({
-  cover,
-  title,
-  wide,
-}: {
-  cover: string;
-  title: string;
-  wide: boolean;
-}) {
-  const local = cover.startsWith("/") && !cover.startsWith("//");
-  const remote = /^https?:\/\//i.test(cover);
-  const sizes = wide
-    ? "(max-width: 900px) 92vw, (max-width: 1200px) 55vw, 646px"
-    : "(max-width: 900px) 92vw, (max-width: 1200px) 30vw, 360px";
-  const alt = `${title} — work by Prince Parfait GANZA`;
-
-  if (local || remote) {
-    return (
-      <Image
-        src={cover}
-        alt={alt}
-        width={1200}
-        height={750}
-        sizes={sizes}
-        loading="lazy"
-        className="selected-shot-img"
-      />
-    );
-  }
-
-  return <img src={cover} alt={alt} loading="lazy" decoding="async" width={1200} height={750} />;
-}
 
 export default function WorkProjectCard({
   project,
@@ -54,6 +21,7 @@ export default function WorkProjectCard({
   wide = false,
   flourish = "",
   locked = false,
+  stackIndex = 0,
   onPreview,
 }: {
   project?: Project;
@@ -69,6 +37,7 @@ export default function WorkProjectCard({
   wide?: boolean;
   flourish?: string;
   locked?: boolean;
+  stackIndex?: number;
   onPreview?: () => void;
 }) {
   const category = selectedWorkCategory(project);
@@ -83,7 +52,12 @@ export default function WorkProjectCard({
       data-advance-item
       data-advance-label={title}
       data-tone={tone}
-      style={wide ? ({ ["--selected-glow"]: glow } as CSSProperties) : undefined}
+      style={
+        {
+          ["--stack-i"]: stackIndex,
+          ...(wide ? { ["--selected-glow"]: glow } : {}),
+        } as CSSProperties
+      }
     >
       <div className="selected-copy">
         <div className="selected-kicker">
@@ -120,7 +94,7 @@ export default function WorkProjectCard({
                 {related.slice(0, 2).map((item) => (
                   <Link key={item.src} href={item.href} className="selected-related">
                     <span className="selected-related-shot">
-                      <CoverImage cover={item.src} title={item.title || title} wide={false} />
+                      <ResilientCover src={item.src} alt={`${item.title || title} — work by Prince Parfait GANZA`} />
                     </span>
                     {item.title ? <span className="selected-related-name">{item.title}</span> : null}
                   </Link>
@@ -149,13 +123,23 @@ export default function WorkProjectCard({
         {cover ? (
           onPreview ? (
             <button type="button" className="selected-shot" onClick={onPreview} aria-label={`Preview ${title}`}>
-              <CoverImage cover={cover} title={title} wide={wide} />
+              <ResilientCover
+                src={cover}
+                alt={`${title} — work by Prince Parfait GANZA`}
+                wide={wide}
+                priority={wide}
+              />
               {mediaCount > 1 ? <em>{mediaCount}</em> : null}
               {locked ? <ProgressMark /> : null}
             </button>
           ) : (
             <Link href={href} className="selected-shot" aria-label={`Open ${title}`}>
-              <CoverImage cover={cover} title={title} wide={wide} />
+              <ResilientCover
+                src={cover}
+                alt={`${title} — work by Prince Parfait GANZA`}
+                wide={wide}
+                priority={wide}
+              />
               {mediaCount > 1 ? <em>{mediaCount}</em> : null}
               {locked ? <ProgressMark /> : null}
             </Link>
