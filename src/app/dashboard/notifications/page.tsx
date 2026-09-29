@@ -178,7 +178,7 @@ export default function NotificationsPage() {
           Notifications could not be read. In the Supabase SQL editor, run the admin notification grants so the service role can use those tables.
         </p>
       ) : null}
-      {note === "saved" ? <p className="dash-notes-ok">Inbox saved. The hourly digest goes to this address.</p> : null}
+      {note === "saved" ? <p className="dash-notes-ok">Inbox saved. The daily digest goes to this address.</p> : null}
       {note && note !== "saved" && !note.match(/^\d+$/) ? <p className="dash-tm-error">{note}</p> : null}
 
       {confirmAll ? (
@@ -310,7 +310,7 @@ export default function NotificationsPage() {
             <header>
               <p className="section-label">Digest</p>
               <h2 id="digest-settings-title">Inbox settings</h2>
-              <p>Hourly email of notifications that have not been sent yet.</p>
+              <p>Daily email of notifications that have not been sent yet.</p>
             </header>
             <label>
               Email
@@ -318,7 +318,7 @@ export default function NotificationsPage() {
             </label>
             <label className="dash-notes-toggle">
               <input type="checkbox" checked={enabled} onChange={(event) => setEnabled(event.target.checked)} />
-              Email hourly
+              Email daily
             </label>
             <div className="dash-note-settings-actions">
               <button type="button" className="btn btn-ghost btn-sm" onClick={() => setSettingsOpen(false)}>
