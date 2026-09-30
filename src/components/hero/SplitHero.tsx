@@ -382,7 +382,6 @@ export default function SplitHero({
       <div
         ref={moreSheetRef}
         role="dialog" aria-modal="true" aria-label="More actions"
-        className="lg:hidden"
         className="hero-more-sheet lg:hidden"
         style={{
           position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 1000,
