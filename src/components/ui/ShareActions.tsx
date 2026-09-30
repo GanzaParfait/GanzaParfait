@@ -9,6 +9,7 @@ import {
   RiWhatsappLine,
   RiCheckLine,
 } from "react-icons/ri";
+import { CANONICAL_ORIGIN } from "@/lib/schema";
 import { buildShareUrl, SHARE_PRESETS } from "@/lib/utm";
 
 interface ShareActionsProps {
@@ -16,6 +17,8 @@ interface ShareActionsProps {
   excerpt: string;
   campaign: string;
   content?: string;
+  /** Canonical path to share, such as `/projects/caritas-website`. */
+  href?: string;
   compact?: boolean;
   /** Single-row share strip (case study under title). */
   inline?: boolean;
@@ -26,12 +29,23 @@ export default function ShareActions({
   excerpt,
   campaign,
   content,
+  href,
   compact = false,
   inline = false,
 }: ShareActionsProps) {
   const [copied, setCopied] = useState(false);
 
-  const pageUrl = typeof window !== "undefined" ? window.location.href.split("?")[0] : "";
+  const pageUrl = useMemo(() => {
+    if (typeof window === "undefined") return "";
+    const origin = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+      ? window.location.origin
+      : CANONICAL_ORIGIN;
+    if (href) return new URL(href, origin).toString();
+    const current = new URL(window.location.href);
+    current.search = "";
+    current.hash = "";
+    return current.toString();
+  }, [href]);
   const shareText = `${title} — ${excerpt}`;
 
   const links = useMemo(() => {

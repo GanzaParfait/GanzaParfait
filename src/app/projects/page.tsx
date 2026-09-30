@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import ProjectsPageView from "@/components/work/ProjectsPageView";
 import { getPublicProjects } from "@/lib/projects";
+import { projectIdFromShareQuery } from "@/lib/share-target";
 import { buildPageMetadata } from "@/lib/seo";
 import {
   buildBreadcrumbListJsonLd,
@@ -37,13 +39,33 @@ const breadcrumbItems = [
   { name: "Work", path: "/projects" },
 ];
 
+function firstParam(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
+}
+
 export default async function ProjectsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ focus?: string; type?: string; category?: string; q?: string; tech?: string; sort?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const projects = await getPublicProjects();
   const params = await searchParams;
+  const sharedProject = projectIdFromShareQuery(
+    {
+      utm_content: firstParam(params.utm_content),
+      utm_campaign: firstParam(params.utm_campaign),
+    },
+    projects.map((project) => project.id),
+  );
+  if (sharedProject) {
+    const next = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+      const item = firstParam(value);
+      if (item) next.set(key, item);
+    }
+    const query = next.toString();
+    redirect(query ? `/projects/${sharedProject}?${query}` : `/projects/${sharedProject}`);
+  }
 
   return (
     <>
@@ -60,9 +82,9 @@ export default async function ProjectsPage({
         ])}
       />
       <ProjectsPageView
-        initialFocus={params.focus || params.type || params.category || null}
-        initialQuery={params.q || params.tech || null}
-        initialSort={params.sort || null}
+        initialFocus={firstParam(params.focus) || firstParam(params.type) || firstParam(params.category) || null}
+        initialQuery={firstParam(params.q) || firstParam(params.tech) || null}
+        initialSort={firstParam(params.sort) || null}
       />
     </>
   );

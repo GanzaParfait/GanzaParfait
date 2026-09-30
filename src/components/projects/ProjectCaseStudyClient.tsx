@@ -578,6 +578,7 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
                 inline
                 title={`${project.title} by Prince Parfait GANZA`}
                 excerpt={project.description}
+                href={`/projects/${project.id}`}
                 campaign={`project-${project.id}`}
                 content={project.id}
               />

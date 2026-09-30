@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     path: `/projects/${project.id}`,
     absoluteTitle: true,
     keywords: [project.title, project.organization || "", "Prince Parfait GANZA", ...project.technologies].filter(Boolean),
-    ogImage: project.image,
+    ogImage: `/projects/${project.id}/og`,
     ogImageAlt: `${project.title} — case study by Prince Parfait GANZA`,
     noIndex: !indexable,
   });
