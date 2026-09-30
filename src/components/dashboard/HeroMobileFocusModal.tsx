@@ -16,20 +16,26 @@ function clampPct(value: number) {
   return Math.min(100, Math.max(0, Math.round(value)));
 }
 
+const NATURAL = { x: 50, y: 50, zoom: 100 };
+
 export default function HeroMobileFocusModal({
   image,
   x,
   y,
   zoom,
+  saving = false,
   onChange,
   onClose,
+  onApply,
 }: {
   image: string;
   x: number;
   y: number;
   zoom: number;
+  saving?: boolean;
   onChange: (next: { x: number; y: number; zoom: number }) => void;
   onClose: () => void;
+  onApply: (next: { x: number; y: number; zoom: number }) => void;
 }) {
   const surface = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
@@ -107,7 +113,7 @@ export default function HeroMobileFocusModal({
               draggable={false}
               style={{
                 objectPosition: `${x}% ${y}%`,
-                transform: `scale(${safeZoom / 100})`,
+                transform: safeZoom === 100 ? "none" : `scale(${safeZoom / 100})`,
                 transformOrigin: `${x}% ${y}%`,
               }}
             />
@@ -149,13 +155,18 @@ export default function HeroMobileFocusModal({
               {preset.label}
             </button>
           ))}
-          <button type="button" className="btn btn-outline btn-sm" onClick={() => onChange({ x: 78, y: 12, zoom: 100 })}>
+          <button type="button" className="btn btn-outline btn-sm" onClick={() => onChange(NATURAL)} disabled={saving}>
             Reset
           </button>
         </div>
 
-        <button type="button" className="btn btn-primary hero-focus-done" onClick={onClose}>
-          Use this position
+        <button
+          type="button"
+          className="btn btn-primary hero-focus-done"
+          disabled={saving}
+          onClick={() => onApply({ x, y, zoom: safeZoom })}
+        >
+          {saving ? "Saving…" : "Use this position"}
         </button>
       </div>
     </div>

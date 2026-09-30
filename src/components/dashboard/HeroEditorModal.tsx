@@ -472,6 +472,7 @@ export default function HeroEditorModal({
           x={formData.heroOverlayMobilePositionX ?? 78}
           y={formData.heroOverlayMobilePositionY ?? 12}
           zoom={formData.heroOverlayMobileZoom ?? 100}
+          saving={saving}
           onChange={(next) =>
             update({
               heroOverlayMobilePositionX: next.x,
@@ -480,6 +481,21 @@ export default function HeroEditorModal({
             })
           }
           onClose={() => setFocusOpen(false)}
+          onApply={async (next) => {
+            update({
+              heroOverlayMobilePositionX: next.x,
+              heroOverlayMobilePositionY: next.y,
+              heroOverlayMobileZoom: next.zoom,
+            });
+            const ok = await runSave(async () => {
+              await onSave({
+                heroOverlayMobilePositionX: next.x,
+                heroOverlayMobilePositionY: next.y,
+                heroOverlayMobileZoom: next.zoom,
+              });
+            }, "Mobile image position saved.");
+            if (ok) setFocusOpen(false);
+          }}
         />
       ) : null}
     </div>

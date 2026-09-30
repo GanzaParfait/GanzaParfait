@@ -107,7 +107,7 @@ export default function SplitHero({
         >
 
           {/* ── LEFT — Text Content ── */}
-          <div className={isPreview ? undefined : "order-2 lg:order-1"} style={isPreview ? { order: 1 } : undefined}>
+          <div className={isPreview ? undefined : "hero-split-copy order-2 lg:order-1"} style={isPreview ? { order: 1 } : undefined}>
 
             {/* Status pill */}
             <div style={{ marginBottom: "1.75rem", ...delay(0) }}>
@@ -235,19 +235,15 @@ export default function SplitHero({
               </div>
 
               {!isPreview && (
-              <div className="flex lg:hidden" style={{ alignItems: "center", gap: "0.75rem", width: "100%" }}>
-                <Link
-                  href={primaryCtaHref}
-                  className="btn btn-primary"
-                  style={{ flex: 1, justifyContent: "center", height: "3.25rem", fontWeight: 700 }}
-                >
+              <div className="hero-split-mobile-actions flex lg:hidden">
+                <Link href={primaryCtaHref} className="btn btn-primary">
                   {primaryCtaLabel}
-                  <RiArrowRightLine size={18} />
+                  <RiArrowRightLine size={16} />
                 </Link>
                 <button
+                  type="button"
                   onClick={() => setIsMoreOpen(true)}
                   className="btn btn-outline"
-                  style={{ height: "3.25rem", paddingLeft: "1.25rem", paddingRight: "1.25rem" }}
                   aria-label="More actions"
                 >
                   More
@@ -387,54 +383,31 @@ export default function SplitHero({
         ref={moreSheetRef}
         role="dialog" aria-modal="true" aria-label="More actions"
         className="lg:hidden"
+        className="hero-more-sheet lg:hidden"
         style={{
           position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 1000,
           background: "var(--color-bg)",
           borderTop: "1px solid var(--color-border)",
-          borderRadius: "1.5rem 1.5rem 0 0",
-          boxShadow: "0 -12px 50px rgba(0,0,0,0.18)",
+          boxShadow: "0 -12px 40px rgba(0,0,0,0.16)",
           transform: `translateY(calc(${isMoreOpen ? "0px" : "100%"} + var(--sheet-drag, 0px)))`,
           transition: "transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)",
-          padding: "1.5rem 1.5rem 2.5rem",
         }}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.75rem" }}>
-          <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: "var(--color-text)" }}>More Actions</h3>
-          <button
-            onClick={() => setIsMoreOpen(false)}
-            style={{
-              width: "2rem", height: "2rem", display: "flex", alignItems: "center",
-              justifyContent: "center", background: "var(--color-surface)",
-              borderRadius: "50%", border: "1px solid var(--color-border)", cursor: "pointer",
-            }}
-          >
-            <RiCloseLine size={20} />
+        <div className="hero-more-handle" aria-hidden="true" />
+        <div className="hero-more-head">
+          <h3>More actions</h3>
+          <button type="button" className="hero-more-close" onClick={() => setIsMoreOpen(false)} aria-label="Close">
+            <RiCloseLine size={16} />
           </button>
         </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-          <Link
-            href="/contact"
-            className="btn btn-outline"
-            style={{ justifyContent: "center", width: "100%", height: "3.25rem", fontWeight: 600 }}
-          >
+        <div className="hero-more-list">
+          <Link href="/contact" className="btn btn-outline" onClick={() => setIsMoreOpen(false)}>
             Contact
           </Link>
-          <Link
-            href="/cv?source=homepage"
-            className="btn btn-outline"
-            onClick={() => setIsMoreOpen(false)}
-            style={{ justifyContent: "center", width: "100%", height: "3.25rem", fontWeight: 600 }}
-          >
+          <Link href="/cv?source=homepage" className="btn btn-outline" onClick={() => setIsMoreOpen(false)}>
             View CV
           </Link>
-          <Link
-            href="/experience"
-            className="btn btn-ghost"
-            style={{
-              justifyContent: "center", width: "100%", height: "3.25rem",
-              color: "var(--color-text)", border: "1px solid var(--color-border)", fontWeight: 500,
-            }}
-          >
+          <Link href="/experience" className="btn btn-outline" onClick={() => setIsMoreOpen(false)}>
             Experience
           </Link>
         </div>
