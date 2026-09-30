@@ -210,6 +210,7 @@ export type TestimonialSubmission = {
   organization: string | null;
   location: string | null;
   body: string;
+  short_body: string | null;
   photo_url: string | null;
   profile_url: string | null;
   relationship: string | null;
@@ -270,6 +271,7 @@ export function validateTestimonialSubmission(input: Record<string, unknown>): V
       organization: nullableText(input.organization)?.slice(0, 160) || null,
       location: nullableText(input.location)?.slice(0, 160) || null,
       body,
+      short_body: nullableText(input.short_body)?.slice(0, 280) || null,
       photo_url: safeExternalUrl(input.photo_url),
       profile_url: safeExternalUrl(input.profile_url),
       relationship: nullableText(input.relationship)?.slice(0, 160) || null,

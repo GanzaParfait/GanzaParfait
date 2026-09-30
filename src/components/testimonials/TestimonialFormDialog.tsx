@@ -13,6 +13,7 @@ import {
   RiMailSendLine,
   RiUserLine,
 } from "react-icons/ri";
+import CustomSelect from "@/components/ui/CustomSelect";
 import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
 import { useSheetDrag } from "@/hooks/useSheetDrag";
 import { plainTextFromClipboard } from "@/lib/paste-plain-text";
@@ -49,6 +50,7 @@ type StoredDraft = {
   projectId: string;
   projectTitleOther: string;
   photoUrl: string;
+  shortBody: string;
   body: string;
   consent: boolean;
   notifyOnPublish: boolean;
@@ -82,6 +84,7 @@ function readDraft(): StoredDraft | null {
       projectId: String(data.projectId || ""),
       projectTitleOther: String(data.projectTitleOther || ""),
       photoUrl: String(data.photoUrl || ""),
+      shortBody: String(data.shortBody || ""),
       body: String(data.body || ""),
       consent: data.consent !== false,
       notifyOnPublish: data.notifyOnPublish !== false,
@@ -104,6 +107,7 @@ function draftHasContent(draft: Partial<StoredDraft> | null | undefined) {
       draft.projectId?.trim() ||
       draft.projectTitleOther?.trim() ||
       draft.photoUrl?.trim() ||
+      draft.shortBody?.trim() ||
       draft.body?.trim(),
   );
 }
@@ -163,6 +167,7 @@ export default function TestimonialFormDialog({
   const [photoUrl, setPhotoUrl] = useState("");
   const [photoPreview, setPhotoPreview] = useState("");
   const [photoUploading, setPhotoUploading] = useState(false);
+  const [shortBody, setShortBody] = useState("");
   const [body, setBody] = useState("");
   const [consent, setConsent] = useState(true);
   const [notifyOnPublish, setNotifyOnPublish] = useState(true);
@@ -190,6 +195,7 @@ export default function TestimonialFormDialog({
     projectId: lockedProjectId || projectId,
     projectTitleOther,
     photoUrl,
+    shortBody,
     body,
     consent,
     notifyOnPublish,
@@ -249,6 +255,7 @@ export default function TestimonialFormDialog({
         setProjectTitleOther(draft.projectTitleOther);
         setPhotoUrl(draft.photoUrl);
         setPhotoPreview("");
+        setShortBody(draft.shortBody);
         setBody(draft.body);
         setConsent(draft.consent);
         setNotifyOnPublish(draft.notifyOnPublish);
@@ -430,6 +437,7 @@ export default function TestimonialFormDialog({
           photo_url: photoUrl.trim() || undefined,
           project_id: lockedProjectId || (isOtherProject ? "other" : projectId) || undefined,
           project_title_other: isOtherProject ? projectTitleOther.trim() : undefined,
+          short_body: shortBody.trim() || undefined,
           body: body.trim(),
           consent: true,
           notify_on_publish: notifyOnPublish,
@@ -733,23 +741,22 @@ export default function TestimonialFormDialog({
 
                 {!lockedProjectId ? (
                   <>
-                    <label className="tm-field" htmlFor={`${fieldId}-project`}>
-                      <span>Related project</span>
-                      <select
+                    <div className="tm-field">
+                      <span id={`${fieldId}-project-label`}>Related project</span>
+                      <CustomSelect
                         id={`${fieldId}-project`}
+                        aria-label="Related project"
                         value={projectId}
-                        onChange={(event) => setProjectId(event.target.value)}
                         disabled={submitting}
-                      >
-                        <option value="">Not tied to one project</option>
-                        {projects.map((project) => (
-                          <option key={project.id} value={project.id}>
-                            {project.title}
-                          </option>
-                        ))}
-                        <option value="other">Other</option>
-                      </select>
-                    </label>
+                        placeholder="Not tied to one project"
+                        options={[
+                          { value: "", label: "Not tied to one project" },
+                          ...projects.map((project) => ({ value: project.id, label: project.title })),
+                          { value: "other", label: "Other" },
+                        ]}
+                        onChange={setProjectId}
+                      />
+                    </div>
                     {isOtherProject ? (
                       <label className="tm-field" htmlFor={`${fieldId}-other`}>
                         <span>
@@ -776,6 +783,18 @@ export default function TestimonialFormDialog({
 
             {step === 3 ? (
               <div className="tm-step-body">
+                <label className="tm-field is-short" htmlFor={`${fieldId}-short`}>
+                  <span>Short body</span>
+                  <textarea
+                    id={`${fieldId}-short`}
+                    rows={2}
+                    maxLength={280}
+                    value={shortBody}
+                    onChange={(event) => setShortBody(event.target.value)}
+                    placeholder="A short line for the card. Optional."
+                    disabled={submitting}
+                  />
+                </label>
                 <div className={`tm-float is-area${body ? " has-value" : ""}`}>
                   <span className="tm-float-icon" aria-hidden="true">
                     <RiChat1Line size={16} />
@@ -823,6 +842,7 @@ export default function TestimonialFormDialog({
                       </span>
                     </div>
                   </div>
+                  {shortBody.trim() ? <p className="tm-review-short">{shortBody.trim()}</p> : null}
                   <blockquote style={{ whiteSpace: "pre-wrap" }}>{body.trim() || "Your message…"}</blockquote>
                   <dl>
                     <div>

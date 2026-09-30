@@ -193,7 +193,7 @@ export default function SplitHero({
 
             {/* Social icons */}
             <div style={{ marginBottom: "2.25rem", ...delay(360) }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
+              <div className="hero-split-socials">
                 {primarySocials.map((link) => {
                   const Icon = socialIcon(link.platform);
                   return (

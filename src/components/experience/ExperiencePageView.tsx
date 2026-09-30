@@ -4,11 +4,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
+  RiArrowLeftLine,
   RiArrowRightLine,
   RiBriefcaseLine,
   RiBuilding2Line,
   RiCalendarLine,
+  RiCloseLine,
   RiExternalLinkLine,
+  RiGroupLine,
+  RiLinkM,
   RiMapPinLine,
   RiLineChartLine,
   RiGraduationCapLine,
@@ -21,6 +25,7 @@ import {
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import CustomSelect from "@/components/ui/CustomSelect";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
 
 type FilterId = "all" | "leadership" | "work" | "education" | "other";
 type SortId = "latest" | "oldest";
@@ -34,15 +39,23 @@ type TimelineEntry = {
   title: string;
   organization: string;
   summary: string;
+  description: string;
   highlights: string[];
   skills: string[];
   href?: string;
   hrefLabel?: string;
   external?: boolean;
+  website?: string;
+  relatedHref?: string;
+  status?: string;
+  industry?: string;
+  team?: string;
   sortYear: number;
   badge: string;
   logo?: string;
 };
+
+type DetailTab = "overview" | "contributions" | "projects" | "skills";
 
 function recordToEntry(item: CareerRecord): TimelineEntry {
   const category: FilterId =
@@ -70,11 +83,17 @@ function recordToEntry(item: CareerRecord): TimelineEntry {
     title: item.title,
     organization: item.organization,
     summary: item.summary || item.description,
+    description: item.description,
     highlights: item.highlights || [],
     skills: item.skills || [],
     href,
     hrefLabel: item.relatedLabel || (item.verifyUrl ? "Verify certificate" : item.website ? "Visit website" : undefined),
     external,
+    website: item.website,
+    relatedHref: item.relatedHref,
+    status: item.status,
+    industry: item.industry,
+    team: item.team,
     sortYear: item.sortYear,
     badge,
     logo: item.logo,
@@ -114,6 +133,10 @@ export default function ExperiencePageView() {
   const [yearFocus, setYearFocus] = useState<string | null>(null);
   const [yearHover, setYearHover] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [detailTab, setDetailTab] = useState<DetailTab>("overview");
+
+  useHistoryBackClose(Boolean(activeId), () => setActiveId(null));
 
   const all = useMemo(
     () => experienceTimelineRecords(career).map(recordToEntry),
@@ -185,6 +208,26 @@ export default function ExperiencePageView() {
     const frame = window.requestAnimationFrame(() => scrollToTimeline());
     return () => window.cancelAnimationFrame(frame);
   }, []);
+
+  const active = all.find((item) => item.id === activeId) || null;
+
+  useEffect(() => {
+    if (!active) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setActiveId(null);
+    };
+    document.documentElement.style.overflow = "hidden";
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.documentElement.style.overflow = "";
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [active]);
+
+  const openDetails = (item: TimelineEntry) => {
+    setDetailTab("overview");
+    setActiveId(item.id);
+  };
 
   const { page, stats } = career;
 
@@ -366,7 +409,7 @@ export default function ExperiencePageView() {
             {visible.length ? (
               visible.map((item, index) => (
                 <li key={item.id} className={index === 0 && sort === "latest" ? "is-current" : undefined}>
-                  <ExperienceCard item={item} current={index === 0 && sort === "latest"} />
+                  <ExperienceCard item={item} current={index === 0 && sort === "latest"} onOpen={() => openDetails(item)} />
                 </li>
               ))
             ) : (
@@ -399,11 +442,21 @@ export default function ExperiencePageView() {
           </div>
         </div>
       </section>
+
+      {active ? <ExperienceDrawer item={active} tab={detailTab} onTab={setDetailTab} onClose={() => setActiveId(null)} /> : null}
     </div>
   );
 }
 
-function ExperienceCard({ item, current }: { item: TimelineEntry; current?: boolean }) {
+function ExperienceCard({
+  item,
+  current,
+  onOpen,
+}: {
+  item: TimelineEntry;
+  current?: boolean;
+  onOpen: () => void;
+}) {
   return (
     <article className={`experience-card${current ? " is-current" : ""}`}>
       <div className="experience-card-top">
@@ -448,17 +501,271 @@ function ExperienceCard({ item, current }: { item: TimelineEntry; current?: bool
           ))}
         </div>
       ) : null}
-      {item.href ? (
-        item.external ? (
-          <a href={item.href} className="experience-card-link" target="_blank" rel="noopener noreferrer">
-            {item.hrefLabel || "View details"} <RiExternalLinkLine size={14} />
-          </a>
-        ) : (
-          <Link href={item.href} className="experience-card-link">
-            {item.hrefLabel || "View details"} <RiArrowRightLine size={14} />
-          </Link>
-        )
-      ) : null}
+      <button type="button" className="experience-card-link" onClick={onOpen}>
+        View details <RiArrowRightLine size={14} />
+      </button>
     </article>
+  );
+}
+
+function ExperienceDrawer({
+  item,
+  tab,
+  onTab,
+  onClose,
+}: {
+  item: TimelineEntry;
+  tab: DetailTab;
+  onTab: (tab: DetailTab) => void;
+  onClose: () => void;
+}) {
+  const related = item.relatedHref || "/projects";
+  return (
+    <div className="journey-drawer-layer" role="presentation" onClick={onClose}>
+      <aside
+        className="journey-drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-label={item.title}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="journey-drawer-top">
+          <div className="journey-drawer-tags">
+            <span className={`journey-tag is-${item.category}`}>{item.badge}</span>
+            <span className="journey-drawer-period">{item.period}</span>
+          </div>
+          <button type="button" className="journey-drawer-close" aria-label="Close details" onClick={onClose}>
+            <RiCloseLine size={18} />
+          </button>
+        </div>
+
+        <div className="journey-drawer-head">
+          <div>
+            <h3>{item.title}</h3>
+            <p className="journey-drawer-org">
+              {item.organization}
+              {item.location ? (
+                <>
+                  {" | "}
+                  <RiMapPinLine size={13} /> {item.location}
+                </>
+              ) : null}
+              {item.status ? ` · ${item.status}` : null}
+            </p>
+          </div>
+          {item.logo ? (
+            item.website ? (
+              <a className="journey-drawer-logo" href={item.website} target="_blank" rel="noopener noreferrer">
+                <Image src={item.logo} alt={`${item.organization} logo`} width={56} height={56} />
+              </a>
+            ) : (
+              <span className="journey-drawer-logo">
+                <Image src={item.logo} alt={`${item.organization} logo`} width={56} height={56} />
+              </span>
+            )
+          ) : null}
+        </div>
+
+        <div className="journey-drawer-facts">
+          {item.status ? (
+            <div>
+              <RiLineChartLine size={16} />
+              <strong>{item.status}</strong>
+              <span>Status</span>
+            </div>
+          ) : null}
+          {item.location ? (
+            <div>
+              <RiMapPinLine size={16} />
+              <strong>{item.location.split(",")[0]}</strong>
+              <span>Location</span>
+            </div>
+          ) : null}
+          <div>
+            <RiBriefcaseLine size={16} />
+            <strong>{item.badge}</strong>
+            <span>Type</span>
+          </div>
+          <div>
+            <RiCalendarLine size={16} />
+            <strong>{item.period}</strong>
+            <span>Duration</span>
+          </div>
+        </div>
+
+        <div className="journey-drawer-tabs" role="tablist">
+          {(
+            [
+              ["overview", "Overview"],
+              ["contributions", "Key Contributions"],
+              ["projects", "Projects"],
+              ["skills", "Skills & Tools"],
+            ] as const
+          ).map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              aria-selected={tab === id}
+              className={tab === id ? "is-on" : undefined}
+              onClick={() => onTab(id)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        <div className="journey-drawer-body">
+          <div className="journey-drawer-main">
+            {tab === "overview" ? (
+              <>
+                {item.summary ? (
+                  <section>
+                    <h4>About</h4>
+                    <p>{item.summary}</p>
+                  </section>
+                ) : null}
+                {item.highlights.length ? (
+                  <section>
+                    <h4>My role</h4>
+                    <ul>
+                      {item.highlights.map((point) => (
+                        <li key={point}>{point}</li>
+                      ))}
+                    </ul>
+                  </section>
+                ) : null}
+                {item.description && item.description !== item.summary ? (
+                  <section>
+                    <h4>Impact</h4>
+                    <p>{item.description}</p>
+                  </section>
+                ) : null}
+              </>
+            ) : null}
+            {tab === "contributions" ? (
+              <section>
+                <h4>Key contributions</h4>
+                {item.highlights.length ? (
+                  <ul>
+                    {item.highlights.map((point) => (
+                      <li key={point}>{point}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>No additional contribution list is published for this entry yet.</p>
+                )}
+              </section>
+            ) : null}
+            {tab === "projects" ? (
+              <section>
+                <h4>Related work</h4>
+                <p>Open the related projects path for verified systems connected to this period.</p>
+                <Link href={related} className="btn btn-outline btn-sm journey-related-btn">
+                  View related projects <RiArrowRightLine size={14} />
+                </Link>
+              </section>
+            ) : null}
+            {tab === "skills" ? (
+              <section>
+                <h4>Skills & tools</h4>
+                {item.skills.length ? (
+                  <div className="experience-card-skills">
+                    {item.skills.map((skill) => (
+                      <span key={skill}>{skill}</span>
+                    ))}
+                  </div>
+                ) : (
+                  <p>
+                    {item.industry
+                      ? `Focus area: ${item.industry}. Skills stay tied to documented work rather than a generic stack list.`
+                      : "Skills stay tied to documented work rather than a generic stack list."}
+                  </p>
+                )}
+              </section>
+            ) : null}
+          </div>
+
+          <aside className="journey-drawer-meta">
+            <div>
+              <RiCalendarLine size={15} />
+              <div>
+                <span>Duration</span>
+                <strong>{item.period}</strong>
+              </div>
+            </div>
+            <div>
+              <RiBriefcaseLine size={15} />
+              <div>
+                <span>Type</span>
+                <strong>{item.badge}</strong>
+              </div>
+            </div>
+            {item.location ? (
+              <div>
+                <RiMapPinLine size={15} />
+                <div>
+                  <span>Location</span>
+                  <strong>{item.location}</strong>
+                </div>
+              </div>
+            ) : null}
+            {item.website ? (
+              <div>
+                <RiLinkM size={15} />
+                <div>
+                  <span>Website</span>
+                  <strong>
+                    <a href={item.website} target="_blank" rel="noopener noreferrer">
+                      {item.website.replace(/^https?:\/\//, "")} <RiExternalLinkLine size={12} />
+                    </a>
+                  </strong>
+                </div>
+              </div>
+            ) : null}
+            {item.href && item.external && item.href !== item.website ? (
+              <div>
+                <RiExternalLinkLine size={15} />
+                <div>
+                  <span>{item.hrefLabel || "Link"}</span>
+                  <strong>
+                    <a href={item.href} target="_blank" rel="noopener noreferrer">
+                      Open <RiExternalLinkLine size={12} />
+                    </a>
+                  </strong>
+                </div>
+              </div>
+            ) : null}
+            {item.industry ? (
+              <div>
+                <RiLineChartLine size={15} />
+                <div>
+                  <span>Industry</span>
+                  <strong>{item.industry}</strong>
+                </div>
+              </div>
+            ) : null}
+            {item.team ? (
+              <div>
+                <RiGroupLine size={15} />
+                <div>
+                  <span>Team</span>
+                  <strong>{item.team}</strong>
+                </div>
+              </div>
+            ) : null}
+          </aside>
+        </div>
+
+        <div className="journey-drawer-foot">
+          <button type="button" className="btn btn-ghost btn-sm" onClick={onClose}>
+            <RiArrowLeftLine size={14} /> Back to timeline
+          </button>
+          <Link href={related} className="btn btn-primary btn-sm">
+            View related projects <RiArrowRightLine size={16} />
+          </Link>
+        </div>
+      </aside>
+    </div>
   );
 }

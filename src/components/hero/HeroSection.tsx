@@ -80,24 +80,7 @@ export default function HeroSection() {
       <div className={fading ? "hero-carousel-fade is-fading" : "hero-carousel-fade"}>
         <HeroRenderer settings={settingsForLayout(settings, active)} />
       </div>
-      {sequence.length > 1 ? (
-        <div className="hero-carousel-dots" role="tablist" aria-label="Hero layouts">
-          {sequence.map((layout, dot) => (
-            <button
-              key={layout}
-              type="button"
-              role="tab"
-              aria-selected={dot === index}
-              aria-label={`Show layout ${dot + 1}`}
-              className={dot === index ? "is-active" : undefined}
-              onClick={() => {
-                setFading(false);
-                setIndex(dot);
-              }}
-            />
-          ))}
-        </div>
-      ) : (
+      {sequence.length > 1 ? null : (
         <a href="#manifesto" className="hero-story-cue">
           <span>The story</span>
         </a>

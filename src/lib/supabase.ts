@@ -80,9 +80,10 @@ export interface SiteSettings {
   /** Per-slide focus for carousel/image slots (falls back to global X/Y/zoom). */
   footerCompanyMediaFocus?: { x: number; y: number; zoom: number }[];
   footerCompanyCarouselInterval?: number;
-  /** Mobile-only focal point for cinematic / featured overlay hero (0–100). */
+  /** Mobile-only focal point and zoom for cinematic / featured overlay hero. */
   heroOverlayMobilePositionX?: number;
   heroOverlayMobilePositionY?: number;
+  heroOverlayMobileZoom?: number;
   /** Optional footer copy toggles / fields (empty text stays hidden). */
   footerShowBio?: boolean;
   footerShowEmail?: boolean;
@@ -281,6 +282,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   footerCompanyCarouselInterval: 5,
   heroOverlayMobilePositionX: 78,
   heroOverlayMobilePositionY: 12,
+  heroOverlayMobileZoom: 100,
   footerShowBio: true,
   footerShowEmail: true,
   footerShowPhone: true,

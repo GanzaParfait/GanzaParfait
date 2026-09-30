@@ -17,6 +17,7 @@ export default function FeaturedOverlayHero({
   const highlights = heroHighlights(settings);
   const mobileX = settings.heroOverlayMobilePositionX ?? 78;
   const mobileY = settings.heroOverlayMobilePositionY ?? 12;
+  const mobileZoom = (settings.heroOverlayMobileZoom ?? 100) / 100;
 
   return (
     <section
@@ -38,9 +39,9 @@ export default function FeaturedOverlayHero({
           fetchPriority={isPreview ? "low" : "high"}
           style={
             {
-              objectPosition: "center 20%",
               ["--hero-mobile-pos-x" as string]: `${mobileX}%`,
               ["--hero-mobile-pos-y" as string]: `${mobileY}%`,
+              ["--hero-mobile-zoom" as string]: String(mobileZoom),
             } as CSSProperties
           }
         />

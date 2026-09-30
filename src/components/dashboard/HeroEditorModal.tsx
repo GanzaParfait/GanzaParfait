@@ -7,6 +7,7 @@ import { HERO_LAYOUTS, heroImageFor, imageKeyFor, layoutCopyFrom, layoutShows, s
 import { resolvedSocials, heroSocialsFor, socialIcon, syncHeroSocialFlags } from "@/lib/socials";
 import { PORTRAIT_PATH } from "@/lib/schema";
 import HeroPreviewFrame from "@/components/hero/HeroPreviewFrame";
+import HeroMobileFocusModal from "@/components/dashboard/HeroMobileFocusModal";
 import { useDashboardFeedback } from "@/components/dashboard/DashboardFeedback";
 import SocialMultiSelect from "@/components/ui/SocialMultiSelect";
 import { useHistoryBackClose, dismissOnBackdrop } from "@/hooks/useHistoryBackClose";
@@ -64,6 +65,7 @@ export default function HeroEditorModal({
   const [formData, setFormData] = useState<SiteSettings>(settings);
   const [previewTheme, setPreviewTheme] = useState<"light" | "dark">("light");
   const [mobilePreviewOpen, setMobilePreviewOpen] = useState(false);
+  const [focusOpen, setFocusOpen] = useState(false);
   const { runSave, saving } = useDashboardFeedback();
   const layout = formData.bannerLayout || "split_portrait";
   const show = (field: Parameters<typeof layoutShows>[1]) => layoutShows(layout, field);
@@ -101,6 +103,7 @@ export default function HeroEditorModal({
       [imageKey]: synced[imageKey],
       heroOverlayMobilePositionX: synced.heroOverlayMobilePositionX,
       heroOverlayMobilePositionY: synced.heroOverlayMobilePositionY,
+      heroOverlayMobileZoom: synced.heroOverlayMobileZoom,
       heroLayoutCopy: {
         ...settings.heroLayoutCopy,
         [active]: layoutCopyFrom(synced),
@@ -207,53 +210,15 @@ export default function HeroEditorModal({
             {layout === "featured_overlay" ? (
               <Field
                 label="Mobile image focus"
-                hint="Only affects phones. Drag the sliders until the person sits in frame, then open Mobile preview to check."
+                hint="Only affects phones and tablets. Open the frame, drag the person into place, and zoom until the face sits in view."
               >
-                <div style={{ display: "grid", gap: "0.55rem" }}>
-                  <label style={{ fontSize: "0.72rem", fontWeight: 700, color: "#475569" }}>
-                    Horizontal {formData.heroOverlayMobilePositionX ?? 78}%
-                    <input
-                      type="range"
-                      min={0}
-                      max={100}
-                      value={formData.heroOverlayMobilePositionX ?? 78}
-                      onChange={(event) => update({ heroOverlayMobilePositionX: Number(event.target.value) })}
-                      style={{ width: "100%", accentColor: "#0e52a8", marginTop: "0.25rem" }}
-                    />
-                  </label>
-                  <label style={{ fontSize: "0.72rem", fontWeight: 700, color: "#475569" }}>
-                    Vertical {formData.heroOverlayMobilePositionY ?? 12}%
-                    <input
-                      type="range"
-                      min={0}
-                      max={100}
-                      value={formData.heroOverlayMobilePositionY ?? 12}
-                      onChange={(event) => update({ heroOverlayMobilePositionY: Number(event.target.value) })}
-                      style={{ width: "100%", accentColor: "#0e52a8", marginTop: "0.25rem" }}
-                    />
-                  </label>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem" }}>
-                    {[
-                      { label: "Face right", x: 78, y: 12 },
-                      { label: "Face center", x: 55, y: 15 },
-                      { label: "Upper body", x: 70, y: 25 },
-                    ].map((preset) => (
-                      <button
-                        key={preset.label}
-                        type="button"
-                        className="btn btn-outline btn-sm"
-                        onClick={() =>
-                          update({
-                            heroOverlayMobilePositionX: preset.x,
-                            heroOverlayMobilePositionY: preset.y,
-                          })
-                        }
-                      >
-                        {preset.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                <button type="button" className="btn btn-outline" onClick={() => setFocusOpen(true)}>
+                  Position image
+                </button>
+                <p style={{ margin: "0.45rem 0 0", fontSize: "0.75rem", color: "#64748b" }}>
+                  {formData.heroOverlayMobilePositionX ?? 78}% · {formData.heroOverlayMobilePositionY ?? 12}% · zoom{" "}
+                  {formData.heroOverlayMobileZoom ?? 100}%
+                </p>
               </Field>
             ) : null}
 
@@ -501,6 +466,22 @@ export default function HeroEditorModal({
           </button>
         </div>
       </form>
+      {focusOpen ? (
+        <HeroMobileFocusModal
+          image={imageValue}
+          x={formData.heroOverlayMobilePositionX ?? 78}
+          y={formData.heroOverlayMobilePositionY ?? 12}
+          zoom={formData.heroOverlayMobileZoom ?? 100}
+          onChange={(next) =>
+            update({
+              heroOverlayMobilePositionX: next.x,
+              heroOverlayMobilePositionY: next.y,
+              heroOverlayMobileZoom: next.zoom,
+            })
+          }
+          onClose={() => setFocusOpen(false)}
+        />
+      ) : null}
     </div>
   );
 }

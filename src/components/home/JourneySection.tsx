@@ -181,23 +181,7 @@ export default function JourneySection({
               </ul>
             ) : null}
 
-            {journey.display.showMoreCard ? (
-              <aside className="journey-more">
-                <div className="journey-more-copy">
-                  <strong>{journey.moreTitle}</strong>
-                  <p>{journey.moreBody}</p>
-                  <Link href="/experience#experience-timeline" className="btn btn-primary btn-sm">
-                    {journey.moreCta || "Open full timeline"} <RiArrowRightLine size={14} />
-                  </Link>
-                </div>
-                <div className="journey-more-preview" aria-hidden="true">
-                  <span />
-                  <span />
-                  <span />
-                </div>
-              </aside>
-            ) : null}
-          </div>
+            </div>
 
           <div className="journey-panel">
             {yearRail.length > 1 ? (
@@ -327,6 +311,23 @@ export default function JourneySection({
               </div>
             ) : null}
           </div>
+
+          {journey.display.showMoreCard ? (
+            <aside className="journey-more">
+              <div className="journey-more-copy">
+                <strong>{journey.moreTitle}</strong>
+                <p>{journey.moreBody}</p>
+                <Link href="/experience#experience-timeline" className="btn btn-primary btn-sm">
+                  {journey.moreCta || "Open full timeline"} <RiArrowRightLine size={16} />
+                </Link>
+              </div>
+              <div className="journey-more-preview" aria-hidden="true">
+                <span />
+                <span />
+                <span />
+              </div>
+            </aside>
+          ) : null}
         </div>
       </Tag>
 
@@ -475,7 +476,7 @@ export default function JourneySection({
                   <section>
                     <h4>Related work</h4>
                     <p>Open the related projects path for verified systems connected to this period.</p>
-                    <Link href={active.relatedHref || "/projects"} className="btn btn-outline btn-sm">
+                    <Link href={active.relatedHref || "/projects"} className="btn btn-outline btn-sm journey-related-btn">
                       View related projects <RiArrowRightLine size={14} />
                     </Link>
                   </section>

@@ -1024,6 +1024,24 @@ export const projects: Project[] = [
       "Delivered through LERONY Ltd",
     ],
     outcome: "Public site referenced at fontaine03.org.",
+    image: "/images/projects/la-fontaine/welcome.png",
+    logo: "/images/projects/logos/la-fontaine.png",
+    pinnedMedia: [
+      "/images/projects/la-fontaine/welcome.png",
+      "/images/projects/la-fontaine/centers.png",
+    ],
+    screenshots: [
+      "/images/projects/la-fontaine/welcome.png",
+      "/images/projects/la-fontaine/centers.png",
+      "/images/projects/la-fontaine/contact.png",
+      "/images/projects/la-fontaine/footer.png",
+    ],
+    screenshotCaptions: [
+      "Homepage welcome",
+      "Education, culture and sports",
+      "Contact",
+      "Footer",
+    ],
     links: {
       live: "https://fontaine03.org/index.php",
     },
