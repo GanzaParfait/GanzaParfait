@@ -26,6 +26,16 @@ export function middleware(request: NextRequest) {
     }
   }
 
+  // `/about/subscribe` opens /about with the Stay updated dialog; root `/subscribe` lives in next.config.
+  const pathname = request.nextUrl.pathname;
+  const subscribeSuffix = pathname.match(/^(\/.+?)\/(subscribe|stay-updated)\/?$/);
+  if (subscribeSuffix && !/^\/(api|dashboard|_next)(\/|$)/.test(pathname)) {
+    const url = request.nextUrl.clone();
+    url.pathname = subscribeSuffix[1];
+    url.searchParams.set("subscribe", "1");
+    return NextResponse.redirect(url, 307);
+  }
+
   const response = NextResponse.next();
   if (request.nextUrl.pathname.startsWith("/dashboard")) {
     response.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");

@@ -26,8 +26,11 @@ const CHANNELS = [
 function buildLink(path: string, source: string, medium: string): string {
   const base = siteUrl();
   const utm = source ? buildUtmQuery({ source, medium, campaign: "newsletter" }) : "";
-  if (path === "/") return `${base}/subscribe${utm ? `?${utm}` : ""}`;
-  return `${base}${path}?subscribe=1${utm ? `&${utm}` : ""}`;
+  return `${base}${subscribePath(path)}${utm ? `?${utm}` : ""}`;
+}
+
+function subscribePath(path: string): string {
+  return path === "/" ? "/subscribe" : `${path}/subscribe`;
 }
 
 export default function SubscribeLinkPanel() {
@@ -87,7 +90,7 @@ export default function SubscribeLinkPanel() {
                 </button>
                 <a
                   className="btn btn-outline btn-sm"
-                  href={path === "/" ? "/subscribe" : `${path}?subscribe=1`}
+                  href={subscribePath(path)}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={`Test ${channel.label} link`}
@@ -101,8 +104,8 @@ export default function SubscribeLinkPanel() {
       </ul>
       <p className="dash-sublinks-note">
         Short versions also work: <code>/subscribe</code>, <code>/join</code>, <code>/newsletter</code>,{" "}
-        <code>/stay-updated</code>, <code>/updates</code>, or add <code>?subscribe=1</code> or{" "}
-        <code>#subscribe</code> to any page.
+        <code>/stay-updated</code>, <code>/updates</code>. On any page, add <code>/subscribe</code> to the path
+        (for example <code>/about/subscribe</code>), or use <code>?subscribe=1</code> or <code>#subscribe</code>.
       </p>
     </section>
   );

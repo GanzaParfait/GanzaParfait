@@ -1,19 +1,60 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { RiArrowRightLine, RiQuillPenLine, RiRssLine } from "react-icons/ri";
 import { blogPosts } from "@/data/site-data";
 import BlogCard from "@/components/ui/BlogCard";
 import AnimatedSection from "@/components/ui/AnimatedSection";
-import NewsletterForm from "@/components/ui/NewsletterForm";
 import { buildPageMetadata } from "@/lib/seo";
 
+const hasPosts = blogPosts.length > 0;
+
 export const metadata: Metadata = buildPageMetadata({
-  title: "Insights",
-  description:
-    "Writing will appear here when articles are published. This page is not a placeholder blog of invented posts.",
+  title: hasPosts ? "Insights | Prince Parfait GANZA" : "Insights (Coming Soon) | Prince Parfait GANZA",
+  absoluteTitle: true,
+  description: hasPosts
+    ? "Notes on software, research technology and data systems by Prince Parfait GANZA, software engineer in Kigali, Rwanda."
+    : "Insights from Prince Parfait GANZA are coming soon: notes on software, research technology and data systems from Kigali, Rwanda.",
   path: "/blog",
-  noIndex: true,
+  noIndex: !hasPosts,
 });
 
 export default function BlogPage() {
+  if (!hasPosts) {
+    return (
+      <section className="section insights-soon" aria-labelledby="insights-soon-title">
+        <div className="container">
+          <AnimatedSection>
+            <div className="insights-soon-card">
+              <span className="insights-soon-icon" aria-hidden="true">
+                <RiQuillPenLine size={26} />
+              </span>
+              <p className="section-label">Insights</p>
+              <h1 id="insights-soon-title">Coming soon.</h1>
+              <p className="insights-soon-copy">
+                Notes on software, research technology and data systems from Kigali, Rwanda. Until the first article
+                is published, the case studies under Work are the best place to read about the work.
+              </p>
+              <div className="insights-soon-actions">
+                <Link href="/projects" className="btn btn-primary">
+                  Browse work <RiArrowRightLine size={16} aria-hidden="true" />
+                </Link>
+                <a href="#subscribe" className="btn btn-outline">
+                  Get notified
+                </a>
+              </div>
+              <p className="insights-soon-note">
+                <RiRssLine size={14} aria-hidden="true" />
+                <span>
+                  New articles will also appear in the <a href="/feed.xml">RSS feed</a>.
+                </span>
+              </p>
+            </div>
+          </AnimatedSection>
+        </div>
+      </section>
+    );
+  }
+
   const featuredPosts = blogPosts.filter((p) => p.featured);
   const otherPosts = blogPosts.filter((p) => !p.featured);
 
@@ -23,9 +64,9 @@ export default function BlogPage() {
         <div className="container max-w-4xl">
           <AnimatedSection>
             <p className="section-label">Insights</p>
-            <h1 className="theme-heading mb-4">Writing, when it is ready.</h1>
+            <h1 className="theme-heading mb-4">Notes from the work.</h1>
             <p className="theme-copy text-lg leading-relaxed max-w-2xl">
-              This page will hold notes on software, operations systems, and building from Kigali. Invented articles are not published here.
+              Software, research technology and data systems, written from Kigali, Rwanda.
             </p>
           </AnimatedSection>
         </div>
@@ -55,22 +96,6 @@ export default function BlogPage() {
                 </AnimatedSection>
               ))}
             </div>
-          </div>
-        </section>
-      )}
-
-      {blogPosts.length === 0 && (
-        <section className="section pt-0" aria-label="No articles yet">
-          <div className="container max-w-2xl">
-            <AnimatedSection>
-              <div className="card p-10 text-center">
-                <h2 className="theme-heading text-2xl mb-3">No public essays yet.</h2>
-                <p className="theme-copy mb-8">
-                  Case studies on the Work pages are the current writing. When long-form pieces are published, they will appear here and in the RSS feed.
-                </p>
-                <NewsletterForm />
-              </div>
-            </AnimatedSection>
           </div>
         </section>
       )}
