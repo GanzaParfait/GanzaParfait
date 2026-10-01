@@ -535,9 +535,9 @@ export default function ProjectsPageView({
               <span>Updating projects…</span>
             </div>
           ) : (
-            <div className="projects-empty" role="status">
+            <div className="search-empty" role="status">
               <p>No projects match these filters.</p>
-              <button type="button" className="btn btn-outline btn-sm" onClick={clearFilters}>
+              <button type="button" className="search-empty-clear" onClick={clearFilters}>
                 Clear filters
               </button>
             </div>

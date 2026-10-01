@@ -335,6 +335,17 @@ export default function ServicesPageView({
     }, FILTER_DELAY_MS);
   };
 
+  const clearFilters = () => {
+    if (searchTimer.current) window.clearTimeout(searchTimer.current);
+    searchTimer.current = null;
+    setDraftSearch("");
+    runWithLoader(() => {
+      setSearch("");
+      setFocus(null);
+      window.history.replaceState(window.history.state, "", serviceFocusHref(null));
+    });
+  };
+
   const openPreview = (id: ServiceFocus) => {
     const index = previewSlides.findIndex((slide) => slide.id === id);
     setPreviewIndex(index >= 0 ? index : 0);
@@ -513,7 +524,12 @@ export default function ServicesPageView({
               );
             })
           ) : (
-            <p className="svc-empty">No services match that filter. Try another category or clear search.</p>
+            <div className="search-empty" role="status">
+              <p>No services match that filter. Try another category or clear search.</p>
+              <button type="button" className="search-empty-clear" onClick={clearFilters}>
+                Clear filters
+              </button>
+            </div>
           )}
         </div>
       </section>

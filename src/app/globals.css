@@ -10965,10 +10965,6 @@ fieldset.hp-field {
   height: 1px;
   background: color-mix(in srgb, var(--color-primary) 22%, transparent);
 }
-.projects-empty {
-  margin: 1.5rem 0;
-  color: var(--color-text-2);
-}
 .media-preview {
   position: fixed;
   inset: 0;
@@ -15984,15 +15980,49 @@ a.experience-org:hover {
   0% { background-position: 100% 0; }
   100% { background-position: -100% 0; }
 }
-.projects-empty {
+/* Shared "no results" state for Work and Services search/filters */
+.search-empty {
+  grid-column: 1 / -1;
   display: grid;
-  gap: 0.75rem;
-  justify-items: start;
+  place-content: center;
+  justify-items: center;
+  gap: 0.5rem;
+  min-height: clamp(14rem, 34vh, 20rem);
   margin: 1.5rem 0;
+  padding: 2rem 1.25rem;
+  border-radius: 0.85rem;
+  border: 1px dashed color-mix(in srgb, var(--color-primary) 25%, transparent);
+  text-align: center;
   color: var(--color-text-2);
 }
-.projects-empty p {
+.search-empty p {
   margin: 0;
+  max-width: 32rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+.search-empty-clear {
+  padding: 0.25rem 0.4rem;
+  border: 0;
+  background: none;
+  color: var(--color-primary);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 0.2em;
+  transition: text-decoration-color 0.15s ease;
+}
+.search-empty-clear:hover,
+.search-empty-clear:focus-visible {
+  text-decoration-color: currentColor;
+}
+.search-empty-clear:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 0.3rem;
 }
 .projects-company {
   padding: 2.5rem 0 var(--section-pad-end);
@@ -19495,15 +19525,6 @@ button.case-hero-shot {
 .svc-families-list.is-loading {
   opacity: 0.55;
   pointer-events: none;
-}
-
-.svc-empty {
-  margin: 0;
-  padding: 1.25rem;
-  border-radius: 0.85rem;
-  border: 1px dashed rgba(14, 82, 168, 0.25);
-  color: var(--color-text-2);
-  font-size: 0.9rem;
 }
 
 .svc-family-card {
