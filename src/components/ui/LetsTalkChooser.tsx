@@ -11,7 +11,8 @@ import {
   RiMessage3Line,
 } from "react-icons/ri";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
-import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
+import { useRouter } from "next/navigation";
+import { closeOverlayWithoutHistory, useHistoryBackClose } from "@/hooks/useHistoryBackClose";
 import { useSheetDrag } from "@/hooks/useSheetDrag";
 import {
   bookingOptionMeta,
@@ -31,6 +32,7 @@ type TalkAction = {
 
 export default function LetsTalkChooser({ className }: { className?: string }) {
   const settings = useSiteSettings();
+  const router = useRouter();
   const booking = primaryBookingOption(settings);
   const contacts = contactEmailsFrom(settings);
   const primaryMail = contacts.primary;
@@ -264,7 +266,13 @@ export default function LetsTalkChooser({ className }: { className?: string }) {
                 data-lets-talk-item
                 href={action.href || "/contact"}
                 className={index === activeIndex ? "is-active" : undefined}
-                onClick={close}
+                onClick={(event) => {
+                  if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+                  event.preventDefault();
+                  closeOverlayWithoutHistory();
+                  setOpen(false);
+                  router.push(action.href || "/contact");
+                }}
                 onMouseEnter={() => setActiveIndex(index)}
               >
                 {body}
@@ -285,7 +293,10 @@ export default function LetsTalkChooser({ className }: { className?: string }) {
         style={{ fontWeight: 700, letterSpacing: "-0.01em", padding: "0.48rem 1.05rem", fontSize: "0.84rem" }}
         aria-haspopup="menu"
         aria-expanded={open}
-        onClick={() => setOpen((current) => !current)}
+        onClick={() => {
+          if (!open) window.dispatchEvent(new Event("pp:dismiss-subscribe"));
+          setOpen((current) => !current);
+        }}
       >
         Let&apos;s Talk
       </button>
