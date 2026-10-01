@@ -358,7 +358,7 @@ export default function ProjectEditorModal({
                     checked={Boolean(formData.homepagePinned)}
                     onChange={(e) => set("homepagePinned", e.target.checked)}
                   />
-                  Pin as homepage featured (large card)
+                  Pin as homepage featured (large card when no homepage selection is set)
                 </label>
                 <label style={{ display: "flex", alignItems: "center", gap: "0.45rem", fontSize: "0.8rem", fontWeight: 600 }}>
                   <input

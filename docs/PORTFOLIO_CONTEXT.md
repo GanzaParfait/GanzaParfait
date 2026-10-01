@@ -138,9 +138,9 @@ provider who happens to know a few tools. Do not bury research technology
 and data systems under a generic Skills list. Do not present him as an ordinary practitioner whose ceiling is a
 job title. The words have weight:
 
-- Founder: he leads Lerony and decides what gets built.
-- Entrepreneur: the work is meant to become a venture, not a one-off task.
-- Technologist: software, systems, and practical AI are the instruments.
+- Software Engineer: he designs and builds the systems himself.
+- Technology Entrepreneur: the work is meant to become a venture, not a one-off task.
+- Founder: he leads LERONY Ltd as Founder & CEO and decides what gets built.
 
 ---
 
@@ -700,7 +700,7 @@ Order:
 8. Booking — a configured public Google Calendar appointment URL, plus email and WhatsApp. Do not hardcode a private calendar.
 9. Closing statement.
 
-A visitor should still understand within about 10 seconds: Prince Parfait GANZA, founder and technologist in Kigali, with real work and a way to start a conversation.
+A visitor should still understand within about 10 seconds: Prince Parfait GANZA, software engineer and technology entrepreneur in Kigali, with real work and a way to start a conversation.
 
 The homepage should prioritize clarity over animation. One visual behavior per section. Respect reduced motion. Light and dark themes both have to remain readable.
 

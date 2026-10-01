@@ -148,9 +148,9 @@ export const DEFAULT_CAREER: CareerContent = {
     body: "Roles, systems work, training, and education: a record of progress across software engineering, research technology and data systems.",
     asideLine: "Ideas · People · Systems · Impact",
     sideLabel: "From learning to leading",
-    sideTitle: "Evidence behind the identity.",
+    sideTitle: "Built through real work.",
     sideBody:
-      "Leadership at LERONY Ltd leads the public story. Engineering, operations, training, and education stay as verified supporting record.",
+      "Engineering, research technology, training and education, leading to Founder & CEO at LERONY Ltd.",
     sideCta: "View full timeline",
   },
   stats: [

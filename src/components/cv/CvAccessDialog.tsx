@@ -7,6 +7,7 @@ import { RiCloseLine, RiLoader4Line } from "react-icons/ri";
 import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
 import { useSheetDrag } from "@/hooks/useSheetDrag";
 import {
+  canSkipCvGate,
   cvAccessModalHeading,
   isValidEmail,
   writeCvUnlockedCookie,
@@ -159,7 +160,7 @@ export default function CvAccessDialog({
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "Something went wrong. Please try again.");
-      writeCvUnlockedCookie(access.rememberDays);
+      if (intent === "submit") writeCvUnlockedCookie(access.rememberDays);
       onUnlocked({ skipped: intent === "skip" });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
@@ -172,7 +173,10 @@ export default function CvAccessDialog({
     <div className="cv-access-form">
       <div className="cv-access-form-head">
         <h2 id={titleId}>{heading}</h2>
-        <p id={descId}>{access.modalBody}</p>
+        <p id={descId}>
+          {access.modalBody}
+          {action === "download" ? " An email is required to download the PDF." : ""}
+        </p>
       </div>
 
       <label className="cv-access-hp" htmlFor={hpId} aria-hidden="true">
@@ -252,7 +256,7 @@ export default function CvAccessDialog({
         </label>
       ) : null}
 
-      {access.allowSkip ? (
+      {canSkipCvGate(access, action) ? (
         <button
           type="button"
           className="cv-access-skip"

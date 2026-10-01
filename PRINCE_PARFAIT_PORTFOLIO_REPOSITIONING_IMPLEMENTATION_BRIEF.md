@@ -1,6 +1,8 @@
 # Prince Parfait GANZA — Portfolio Repositioning Brief
 
-**Document status:** Implemented (living identity reference)  
+> **Superseded (October 2026).** The “Founder · Entrepreneur · Technologist” identity in this brief is historical. The current public identity is **Software Engineer · Technology Entrepreneur · Founder**, defined in `src/lib/identity.ts` and `docs/PORTFOLIO_CONTEXT.md`. Do not reintroduce the wording below.
+
+**Document status:** Historical  
 **Last aligned with codebase:** September 2026  
 **Primary objective (achieved):** Reposition the portfolio from a narrow developer profile into a credible founder, entrepreneur, and technologist profile—without erasing software engineering capability.
 

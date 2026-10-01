@@ -13,7 +13,7 @@ import { DEFAULT_CV_ACCESS, normalizeCvAccess, type CvAccessConfig } from "@/lib
 import { siteUrl } from "@/lib/env";
 import { resolvedSocials } from "@/lib/socials";
 import type { SiteSettings } from "@/lib/supabase";
-import { IDENTITY_ROLE_LINE } from "@/lib/identity";
+import { CV_DEFAULT_HEADLINES, IDENTITY_ROLE_LINE, cvHeadlineOr } from "@/lib/identity";
 
 function careerRoles(settings: SiteSettings): CareerRecord[] {
   return careerFrom(settings).records.filter((item) => item.kind === "role");
@@ -394,7 +394,7 @@ function defaultFormat(template: CvTemplateId): CvFormatConfig {
       label: TEMPLATE_LABELS.compact,
       isPublic: true,
       showInHero: true,
-      headline: IDENTITY_ROLE_LINE,
+      headline: CV_DEFAULT_HEADLINES.compact,
       appearance: defaultAppearance("compact"),
       sections: sectionsFor([
         { id: "profile" },
@@ -432,7 +432,7 @@ function defaultFormat(template: CvTemplateId): CvFormatConfig {
       label: TEMPLATE_LABELS.executive,
       isPublic: true,
       showInHero: true,
-      headline: "Founder & CEO · Technology & Innovation",
+      headline: CV_DEFAULT_HEADLINES.executive,
       appearance: defaultAppearance("executive"),
       sections: sectionsFor([
         { id: "profile" },
@@ -478,7 +478,7 @@ function defaultFormat(template: CvTemplateId): CvFormatConfig {
     label: TEMPLATE_LABELS.professional,
     isPublic: true,
     showInHero: true,
-    headline: IDENTITY_ROLE_LINE,
+    headline: CV_DEFAULT_HEADLINES.professional,
     appearance: defaultAppearance("professional"),
     sections: sectionsFor([
       { id: "profile" },
@@ -590,10 +590,7 @@ function mergeFormat(base: CvFormatConfig, saved?: Partial<CvFormatConfig> & { o
     label: saved.label || base.label,
     isPublic: saved.isPublic ?? base.isPublic,
     showInHero: saved.showInHero ?? base.showInHero,
-    headline:
-      saved.headline?.trim() ||
-      legacy.overrides?.headline?.trim() ||
-      base.headline,
+    headline: cvHeadlineOr(saved.headline?.trim() || legacy.overrides?.headline, base.headline),
     profileOverride:
       saved.profileOverride ??
       legacy.overrides?.summary ??
@@ -687,7 +684,7 @@ export function getCvConfig(settings: SiteSettings | null | undefined): CvConfig
       if (stale) {
         acc[id] = {
           ...base,
-          headline: prev?.headline?.trim() || base.headline,
+          headline: cvHeadlineOr(prev?.headline, base.headline),
           profileOverride: prev?.profileOverride,
           referencesText: prev?.referencesText,
           isPublic: prev?.isPublic ?? base.isPublic,
@@ -1184,7 +1181,7 @@ export function resolveCvDocument(
   const template = templateId || config.defaultTemplate;
   const format = config.formats[template];
   const name = settings.siteTitle?.trim() || "Prince Parfait GANZA";
-  const headline = format.headline?.trim() || IDENTITY_ROLE_LINE;
+  const headline = cvHeadlineOr(format.headline, CV_DEFAULT_HEADLINES[template] || IDENTITY_ROLE_LINE);
   const profile = normalizeText(format.profileOverride) || defaultProfile(template, settings);
   const appearance = format.appearance || defaultAppearance(template);
   const photoSource =

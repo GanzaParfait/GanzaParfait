@@ -3,7 +3,7 @@
 import { useEffect, useState, type CSSProperties, type FormEvent, type ReactNode } from "react";
 import { RiCloseLine, RiSaveLine, RiImageAddLine, RiSunLine, RiMoonLine } from "react-icons/ri";
 import { SiteSettings, HeroLayoutType } from "@/lib/supabase";
-import { HERO_LAYOUTS, heroImageFor, imageKeyFor, layoutCopyFrom, layoutShows, settingsForLayout, visibleHeroLayouts } from "@/lib/hero";
+import { HERO_LAYOUTS, heroDescriptorLine, heroImageFor, imageKeyFor, layoutCopyFrom, layoutShows, settingsForLayout, visibleHeroLayouts } from "@/lib/hero";
 import { resolvedSocials, heroSocialsFor, socialIcon, syncHeroSocialFlags } from "@/lib/socials";
 import { PORTRAIT_PATH } from "@/lib/schema";
 import HeroPreviewFrame from "@/components/hero/HeroPreviewFrame";
@@ -243,8 +243,8 @@ export default function HeroEditorModal({
               </Field>
             )}
             {show("roles") && (
-              <Field label="Roles" hint="Only this layout. Separate roles with · so people can read each one.">
-                <textarea rows={2} value={formData.siteSubtitle} onChange={(event) => update({ siteSubtitle: event.target.value })} style={{ ...inputStyle, resize: "vertical" }} />
+              <Field label="Descriptors" hint="Homepage hero only, not job titles. Separate lines with ·. The site-wide role line stays in Settings.">
+                <textarea rows={3} value={formData.heroDescriptors ?? heroDescriptorLine(formData)} onChange={(event) => update({ heroDescriptors: event.target.value })} style={{ ...inputStyle, resize: "vertical" }} />
               </Field>
             )}
             {show("headline") && (

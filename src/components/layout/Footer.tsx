@@ -10,7 +10,7 @@ import { socialByPlatform, socialIcon, socialsFor } from "@/lib/socials";
 import { setting } from "@/lib/hero";
 import { contactEmailsFrom } from "@/lib/contact-emails";
 import { whatsappContactUrl } from "@/lib/whatsapp";
-import { submitSubscribe } from "@/lib/subscribe-client";
+import { INVALID_EMAIL_MESSAGE, isValidEmail, submitSubscribe } from "@/lib/subscribe-client";
 import type { SiteSettings } from "@/lib/supabase";
 
 const navGroups = footerNav;
@@ -244,16 +244,26 @@ export function FooterCompanyBand({
 function FooterSubscribe() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [errorText, setErrorText] = useState("");
+  const [alreadyJoined, setAlreadyJoined] = useState(false);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    if (!email || status === "loading") return;
+    if (status === "loading") return;
+    if (!isValidEmail(email)) {
+      setErrorText(INVALID_EMAIL_MESSAGE);
+      setStatus("error");
+      return;
+    }
     setStatus("loading");
     try {
-      await submitSubscribe(email, "footer");
+      const result = await submitSubscribe(email, "footer");
+      setAlreadyJoined(Boolean(result.alreadyConfirmed && !result.created));
       setStatus("success");
       setEmail("");
-    } catch {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "";
+      setErrorText(message === INVALID_EMAIL_MESSAGE ? message : "Could not subscribe. Try again.");
       setStatus("error");
     }
   }
@@ -263,7 +273,9 @@ function FooterSubscribe() {
       <p className="footer-subscribe-label">Stay updated</p>
       {status === "success" ? (
         <p className="footer-subscribe-ok" role="status">
-          You&apos;re on the list. Watch for a note at this address.
+          {alreadyJoined
+            ? "You're already on the list."
+            : "You're on the list. Watch for a note at this address."}
         </p>
       ) : (
         <>
@@ -298,7 +310,7 @@ function FooterSubscribe() {
           </div>
           {status === "error" ? (
             <p className="footer-subscribe-error" role="alert">
-              Could not subscribe. Try again.
+              {errorText || "Could not subscribe. Try again."}
             </p>
           ) : null}
         </>

@@ -22,7 +22,7 @@ import {
   type CvSectionId,
   type CvTemplateId,
 } from "@/lib/cv";
-import { IDENTITY_ROLE_LINE } from "@/lib/identity";
+import { CV_DEFAULT_HEADLINES, IDENTITY_ROLE_LINE, isLegacyRoleLine } from "@/lib/identity";
 import { publicEvidence } from "@/lib/project-evidence";
 import { mergeProjectCatalog } from "@/lib/projects";
 import { resolvedSocials } from "@/lib/socials";
@@ -982,6 +982,19 @@ function normalizeField(raw: unknown, fallback = ""): CvField {
   return { value: fallback };
 }
 
+function normalizeHeadlineField(field: CvField, layoutId: unknown): CvField {
+  if (!field.value.trim() || !isLegacyRoleLine(field.value)) return field;
+  const fallback =
+    layoutId === "compact" || layoutId === "professional"
+      ? CV_DEFAULT_HEADLINES[layoutId]
+      : IDENTITY_ROLE_LINE;
+  return {
+    ...field,
+    value: fallback,
+    ...(field.sourceValue !== undefined ? { sourceValue: fallback } : {}),
+  };
+}
+
 function normalizeOptionalField(raw: unknown): CvField | undefined {
   if (raw === undefined || raw === null) return undefined;
   return normalizeField(raw);
@@ -1063,7 +1076,7 @@ export function normalizeCvDocument(raw: unknown): CvDocument | null {
     createdAt: row.createdAt || now,
     updatedAt: row.updatedAt || now,
     displayName: normalizeField(row.displayName),
-    headline: normalizeField(row.headline),
+    headline: normalizeHeadlineField(normalizeField(row.headline), row.layoutId),
     email: normalizeField(row.email),
     emailSecondary: normalizeOptionalField(row.emailSecondary),
     phone: normalizeOptionalField(row.phone),

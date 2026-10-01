@@ -79,6 +79,9 @@ export type HomepageContent = {
     moreTitle: string;
     moreBody: string;
     rail: string[];
+    /** Ordered project ids for the homepage cards. The first is the large card unless a project is pinned. */
+    projectIds: string[];
+    /** Card copy overrides keyed by project id. */
     stories: WorkStory[];
   };
   knowledge: {
@@ -216,6 +219,7 @@ export const DEFAULT_HOMEPAGE: HomepageContent = {
     moreBody:
       "Platforms, business systems and research products built for real operational needs.",
     rail: ["Software", "Research", "Data"],
+    projectIds: ["askfield", "caritas-systems", "stockpro", "gotallnews"],
     stories: [
       story("askfield", {
         line: "Research surveys, connected through a real collection platform.",
@@ -401,6 +405,32 @@ export const DEFAULT_HOMEPAGE: HomepageContent = {
   },
 };
 
+export const HOMEPAGE_WORK_SLOTS = 4;
+
+export function workStoryFromProject(project: {
+  id: string;
+  title: string;
+  organization?: string;
+  tagline?: string;
+  description: string;
+  technologies?: string[];
+  image?: string;
+}): WorkStory {
+  return {
+    id: project.id,
+    title: project.title,
+    organization: project.organization || "",
+    line: project.tagline || project.description,
+    support: project.description,
+    challenge: "",
+    contribution: "",
+    status: "",
+    href: `/projects/${project.id}`,
+    tags: (project.technologies || []).slice(0, 3),
+    images: project.image ? [project.image] : [],
+  };
+}
+
 export function imagesForStory(story: WorkStory, records?: { id: string; image?: string; screenshots?: string[]; pinnedMedia?: string[] }[]) {
   const match = records?.find((item) => item.id === story.id) || projects.find((item) => item.id === story.id);
   const fromProject = [
@@ -460,11 +490,19 @@ export function homepageFrom(settings: SiteSettings): HomepageContent {
       rail: saved.work?.rail?.length ? saved.work.rail : DEFAULT_HOMEPAGE.work.rail,
       label: !saved.work?.label || saved.work.label === "01 / Selected work" || saved.work.label === "Selected work" ? DEFAULT_HOMEPAGE.work.label : saved.work.label,
       title: !saved.work?.title || saved.work.title === "Evidence, one case at a time." ? DEFAULT_HOMEPAGE.work.title : saved.work.title,
-      stories: DEFAULT_HOMEPAGE.work.stories.map((fallback) => {
-        const story = saved.work?.stories?.find((item) => item.id === fallback.id);
-        if (!story) return fallback;
-        return { ...fallback, ...story, images: story.images?.length ? story.images : fallback.images };
-      }),
+      projectIds: Array.isArray(saved.work?.projectIds)
+        ? saved.work.projectIds.filter((id, index, list): id is string => typeof id === "string" && Boolean(id) && list.indexOf(id) === index)
+        : DEFAULT_HOMEPAGE.work.projectIds,
+      stories: [
+        ...DEFAULT_HOMEPAGE.work.stories.map((fallback) => {
+          const story = saved.work?.stories?.find((item) => item.id === fallback.id);
+          if (!story) return fallback;
+          return { ...fallback, ...story, images: story.images?.length ? story.images : fallback.images };
+        }),
+        ...(saved.work?.stories || []).filter(
+          (item) => item?.id && !DEFAULT_HOMEPAGE.work.stories.some((fallback) => fallback.id === item.id),
+        ),
+      ],
     },
     knowledge: (() => {
       const savedKnowledge = saved.knowledge || {};

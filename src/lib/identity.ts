@@ -9,6 +9,20 @@ export const CANONICAL_NAME = "Prince Parfait GANZA";
 /** Public role line — the only identity headline. */
 export const IDENTITY_ROLE_LINE = "Software Engineer · Technology Entrepreneur · Founder";
 
+/**
+ * Homepage hero descriptor list only — not job titles. Never use for schema,
+ * SEO titles, CV headlines, Contact or the global role line.
+ */
+export const HERO_DESCRIPTOR_LINE =
+  "Software Engineer · Technology Entrepreneur · Research Technology · Data Systems & Analytics · Founder";
+
+/** Default CV headlines. Targeted CVs may differ; these replace inherited legacy lines only. */
+export const CV_DEFAULT_HEADLINES = {
+  professional: "Software Engineer · Digital Systems",
+  compact: "Software Engineer · Technology Entrepreneur",
+  executive: "Founder & CEO · Technology & Innovation",
+} as const;
+
 /** Company leadership title — use only for LERONY Ltd. */
 export const COMPANY_ROLE = "Founder & CEO, LERONY Ltd";
 
@@ -106,16 +120,106 @@ export function isLegacyBio(value: string | undefined | null): boolean {
   return LEGACY_BIOS.includes(v as (typeof LEGACY_BIOS)[number]);
 }
 
+/** Keep a CV headline unless it is empty or an inherited legacy role line. */
+export function cvHeadlineOr(value: string | undefined | null, fallback: string): string {
+  const v = (value || "").trim();
+  return v && !isLegacyRoleLine(v) ? v : fallback;
+}
+
+/** Saved descriptor lines that predate the five-line hero set. */
+export function isLegacyHeroDescriptors(value: string | undefined | null): boolean {
+  const v = (value || "").trim();
+  return !v || v === IDENTITY_ROLE_LINE || isLegacyRoleLine(v);
+}
+
+type IdentityCopy = { siteSubtitle?: string; bio?: string; heroDescriptors?: string };
+
+/** Per-layout hero copy overrides global settings, so it needs the same cleanup. */
+function canonicalizeLayoutCopy<T extends IdentityCopy>(copy: T): T {
+  const next = { ...copy };
+  if (typeof next.heroDescriptors === "string" && isLegacyHeroDescriptors(next.heroDescriptors)) {
+    next.heroDescriptors = HERO_DESCRIPTOR_LINE;
+  }
+  if (typeof next.siteSubtitle === "string" && isLegacyRoleLine(next.siteSubtitle)) {
+    next.siteSubtitle = IDENTITY_ROLE_LINE;
+  }
+  if (typeof next.bio === "string" && isLegacyBio(next.bio)) {
+    next.bio = IDENTITY_COMPACT_BIO;
+  }
+  return next;
+}
+
+function cvFallbackFor(key: unknown): string {
+  return key === "professional" || key === "compact" || key === "executive"
+    ? CV_DEFAULT_HEADLINES[key]
+    : IDENTITY_ROLE_LINE;
+}
+
+type LooseRecord = Record<string, unknown>;
+const isRecord = (value: unknown): value is LooseRecord =>
+  Boolean(value) && typeof value === "object" && !Array.isArray(value);
+
+/** Stored CV headlines are serialized to the client with settings, so clean them at load too. */
+function canonicalizeCvHeadlines(cvConfig: unknown, cvLibrary: unknown) {
+  let nextConfig = cvConfig;
+  if (isRecord(cvConfig) && isRecord(cvConfig.formats)) {
+    const formats = Object.fromEntries(
+      Object.entries(cvConfig.formats).map(([key, format]) => {
+        if (!isRecord(format) || typeof format.headline !== "string") return [key, format];
+        const headline = format.headline.trim();
+        return [key, headline && isLegacyRoleLine(headline) ? { ...format, headline: cvFallbackFor(key) } : format];
+      }),
+    );
+    nextConfig = { ...cvConfig, formats };
+  }
+
+  let nextLibrary = cvLibrary;
+  if (isRecord(cvLibrary) && Array.isArray(cvLibrary.documents)) {
+    const documents = cvLibrary.documents.map((doc) => {
+      if (!isRecord(doc) || !isRecord(doc.headline) || typeof doc.headline.value !== "string") return doc;
+      const value = doc.headline.value.trim();
+      if (!value || !isLegacyRoleLine(value)) return doc;
+      const fallback = doc.layoutId === "professional" || doc.layoutId === "compact"
+        ? CV_DEFAULT_HEADLINES[doc.layoutId]
+        : IDENTITY_ROLE_LINE;
+      return {
+        ...doc,
+        headline: {
+          ...doc.headline,
+          value: fallback,
+          ...("sourceValue" in doc.headline ? { sourceValue: fallback } : {}),
+        },
+      };
+    });
+    nextLibrary = { ...cvLibrary, documents };
+  }
+  return { cvConfig: nextConfig, cvLibrary: nextLibrary };
+}
+
 /** Normalize stored settings identity fields to the canonical line/bio. */
-export function canonicalizeIdentityFields<T extends { siteSubtitle?: string; bio?: string }>(
-  settings: T,
-): T {
+export function canonicalizeIdentityFields<
+  T extends IdentityCopy & { heroLayoutCopy?: Partial<Record<string, IdentityCopy>> },
+>(settings: T): T {
   const next = { ...settings };
   if (isLegacyRoleLine(next.siteSubtitle)) {
     next.siteSubtitle = IDENTITY_ROLE_LINE;
   }
   if (isLegacyBio(next.bio)) {
     next.bio = IDENTITY_COMPACT_BIO;
+  }
+  if (next.heroLayoutCopy && typeof next.heroLayoutCopy === "object") {
+    next.heroLayoutCopy = Object.fromEntries(
+      Object.entries(next.heroLayoutCopy).map(([layout, copy]) => [
+        layout,
+        copy && typeof copy === "object" ? canonicalizeLayoutCopy(copy) : copy,
+      ]),
+    ) as T["heroLayoutCopy"];
+  }
+  const loose = next as T & { cvConfig?: unknown; cvLibrary?: unknown };
+  if (loose.cvConfig !== undefined || loose.cvLibrary !== undefined) {
+    const cleaned = canonicalizeCvHeadlines(loose.cvConfig, loose.cvLibrary);
+    if (loose.cvConfig !== undefined) loose.cvConfig = cleaned.cvConfig;
+    if (loose.cvLibrary !== undefined) loose.cvLibrary = cleaned.cvLibrary;
   }
   return next;
 }

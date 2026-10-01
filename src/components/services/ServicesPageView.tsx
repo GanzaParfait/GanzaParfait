@@ -38,7 +38,7 @@ import {
   RiUserStarLine,
   RiWhatsappLine,
 } from "react-icons/ri";
-import type { ElementType } from "react";
+import type { CSSProperties, ElementType } from "react";
 import { siteConfig } from "@/data/site-data";
 import {
   SERVICE_FOCUS_IDS,
@@ -50,7 +50,7 @@ import {
   type ServiceItem,
   type ServicesPageContent,
 } from "@/lib/services-page";
-import { mergeProjectCatalog } from "@/lib/projects";
+import { listListedProjects } from "@/lib/projects";
 import { selectedWorkCategory } from "@/components/work/work-media";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { primaryEmail } from "@/lib/contact-emails";
@@ -184,7 +184,7 @@ export default function ServicesPageView({
 } = {}) {
   const settings = useSiteSettings();
   const content = contentOverride || servicesPageFrom(settings);
-  const catalog = useMemo(() => mergeProjectCatalog(settings.projectRecords), [settings.projectRecords]);
+  const catalog = useMemo(() => listListedProjects(settings.projectRecords), [settings.projectRecords]);
   const projects = useMemo(
     () =>
       projectsOverride ||
@@ -531,7 +531,10 @@ export default function ServicesPageView({
                 {content.selectedWork.ctaLabel} <RiArrowRightLine size={14} />
               </Link>
             </div>
-            <div className="svc-work-grid">
+            <div
+              className="svc-work-grid"
+              style={{ "--svc-work-cols": Math.min(selectedProjects.length, 4) } as CSSProperties}
+            >
               {selectedProjects.map((project) => (
                 <article
                   key={project.id}

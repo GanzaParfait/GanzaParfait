@@ -30,6 +30,7 @@ import {
   type CvLibrary,
 } from "@/lib/cv-library";
 import { saveLocalSettings, type SiteSettings } from "@/lib/supabase";
+import CvPdfPasswordPanel from "@/components/dashboard/cv/CvPdfPasswordPanel";
 
 function formatUpdated(iso: string) {
   try {
@@ -146,6 +147,8 @@ export default function CvLibraryManager({
           {message}
         </p>
       ) : null}
+
+      <CvPdfPasswordPanel />
 
       {library.documents.length === 0 ? (
         <div className="cv-lib-empty">

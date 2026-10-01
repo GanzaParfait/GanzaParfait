@@ -12,9 +12,8 @@ import { useState, useEffect, useRef } from "react";
 import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
 import { useSheetDrag } from "@/hooks/useSheetDrag";
 import { SiteSettings } from "@/lib/supabase";
-import { heroHighlights, heroImageFor, heroPortraitAlt, setting, splitDisplayName } from "@/lib/hero";
+import { heroHighlights, heroImageFor, heroPortraitAlt, heroRoles, setting, splitDisplayName } from "@/lib/hero";
 import { socialIcon, heroSocialsFor } from "@/lib/socials";
-import { IDENTITY_ROLE_LINE } from "@/lib/identity";
 
 export default function SplitHero({
   settings,
@@ -27,9 +26,7 @@ export default function SplitHero({
   const moreSheetRef = useRef<HTMLDivElement>(null);
   useHistoryBackClose(isMoreOpen && !isPreview, () => setIsMoreOpen(false));
   useSheetDrag(isMoreOpen && !isPreview, () => setIsMoreOpen(false), moreSheetRef, { maxWidth: 1023, variable: true });
-  const roles = settings.siteSubtitle
-    ? settings.siteSubtitle.split(/\s*[•·]\s*/).filter(Boolean)
-    : IDENTITY_ROLE_LINE.split(/\s*·\s*/);
+  const roles = heroRoles(settings);
   const [currentRoleIndex, setCurrentRoleIndex] = useState(0);
   const [visible, setVisible] = useState(false);
   const displayName = splitDisplayName(setting(settings, "siteTitle"));

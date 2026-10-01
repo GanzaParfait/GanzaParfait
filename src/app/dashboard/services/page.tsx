@@ -1,10 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   RiAddLine,
-  RiArrowDownLine,
-  RiArrowUpLine,
   RiCloseLine,
   RiComputerLine,
   RiDeleteBin6Line,
@@ -17,7 +15,8 @@ import { useDashboardFeedback } from "@/components/dashboard/DashboardFeedback";
 import CustomSelect from "@/components/ui/CustomSelect";
 import ServicesPageView from "@/components/services/ServicesPageView";
 import { getLocalSettings, saveLocalSettings, fetchRemoteSettings } from "@/lib/supabase";
-import { isProjectListed, mergeProjectCatalog } from "@/lib/projects";
+import { mergeProjectCatalog } from "@/lib/projects";
+import ProjectOrderPicker from "@/components/dashboard/ProjectOrderPicker";
 import type { Project } from "@/data/site-data";
 import {
   DEFAULT_SERVICES_PAGE,
@@ -89,77 +88,6 @@ function linesToList(value: string) {
 
 function listToLines(value: string[]) {
   return value.join("\n");
-}
-
-function SelectedWorkPicker({
-  catalog,
-  selectedIds,
-  onChange,
-}: {
-  catalog: Project[];
-  selectedIds: string[];
-  onChange: (ids: string[]) => void;
-}) {
-  const options = useMemo(() => {
-    const listed = catalog.filter((project) => isProjectListed(project) || selectedIds.includes(project.id));
-    const byId = new Map(listed.map((project) => [project.id, project]));
-    const chosen = selectedIds.map((id) => byId.get(id)).filter((project): project is Project => Boolean(project));
-    const rest = listed.filter((project) => !selectedIds.includes(project.id));
-    return { chosen, rest };
-  }, [catalog, selectedIds]);
-
-  const toggle = (id: string) => {
-    onChange(selectedIds.includes(id) ? selectedIds.filter((item) => item !== id) : [...selectedIds, id]);
-  };
-
-  const move = (id: string, direction: -1 | 1) => {
-    const index = selectedIds.indexOf(id);
-    const next = index + direction;
-    if (index < 0 || next < 0 || next >= selectedIds.length) return;
-    const copy = [...selectedIds];
-    [copy[index], copy[next]] = [copy[next], copy[index]];
-    onChange(copy);
-  };
-
-  return (
-    <fieldset className="hp-field">
-      <legend>Projects on these cards</legend>
-      <small>Choose published projects and set the order they appear in Proven in practice.</small>
-      <ul className="svc-pick-list">
-        {options.chosen.map((project, index) => (
-          <li key={project.id}>
-            <label>
-              <input type="checkbox" checked onChange={() => toggle(project.id)} />
-              <span>
-                {String(index + 1).padStart(2, "0")} {project.title}
-              </span>
-            </label>
-            <span className="svc-pick-moves">
-              <button type="button" aria-label={`Move ${project.title} earlier`} disabled={index === 0} onClick={() => move(project.id, -1)}>
-                <RiArrowUpLine size={16} />
-              </button>
-              <button
-                type="button"
-                aria-label={`Move ${project.title} later`}
-                disabled={index === options.chosen.length - 1}
-                onClick={() => move(project.id, 1)}
-              >
-                <RiArrowDownLine size={16} />
-              </button>
-            </span>
-          </li>
-        ))}
-        {options.rest.map((project) => (
-          <li key={project.id}>
-            <label>
-              <input type="checkbox" checked={false} onChange={() => toggle(project.id)} />
-              <span>{project.title}</span>
-            </label>
-          </li>
-        ))}
-      </ul>
-    </fieldset>
-  );
 }
 
 export default function ServicesEditorPage() {
@@ -460,7 +388,9 @@ export default function ServicesEditorPage() {
                   value={content.selectedWork.ctaHref}
                   onChange={(ctaHref) => patch({ selectedWork: { ...content.selectedWork, ctaHref } })}
                 />
-                <SelectedWorkPicker
+                <ProjectOrderPicker
+                  legend="Projects on these cards"
+                  hint="Choose published projects and set the order they appear in Proven in practice. Archived, unlisted and draft projects stay hidden on the site."
                   catalog={catalog}
                   selectedIds={content.selectedWork.projectIds}
                   onChange={(projectIds) => patch({ selectedWork: { ...content.selectedWork, projectIds } })}
@@ -608,7 +538,9 @@ export default function ServicesEditorPage() {
           </div>
           <div className="hp-preview-stage">
             <div className="hp-preview-frame" data-device={device} style={{ width: previewWidth, maxWidth: "100%" }}>
-              <ServicesPageView content={content} />
+              <div className="svc-preview-scope">
+                <ServicesPageView content={content} />
+              </div>
             </div>
           </div>
         </section>

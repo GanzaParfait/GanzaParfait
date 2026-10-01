@@ -582,9 +582,9 @@ export const DEFAULT_SERVICES_PAGE: ServicesPageContent = {
       title: "Practical AI Integration",
       shortTitle: "Practical AI",
       category: "transform",
-      summary: "AI features scoped to real product problems, as a delivery capability rather than a standalone job title.",
+      summary: "AI features scoped to real product problems.",
       description:
-        "Where projects support it: AI-assisted product features, intelligent interfaces and practical service integration. Not positioned as an identity label alongside Software Engineer or Founder.",
+        "Where projects support it: AI-assisted product features, intelligent interfaces and practical service integration.",
       icon: "brain",
       capabilities: [
         "AI-assisted product features",

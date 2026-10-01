@@ -185,13 +185,13 @@ export function normalizeProjectRecord(project: Project): Project {
   };
 }
 
-/** Listed on /projects, sitemap, and search. */
+/** Listed on /projects, homepage, services, sitemap, and search. Archived projects are never listed. */
 export function isProjectListed(project: Project): boolean {
   const visibility = project.visibility || "public";
-  return visibility === "public";
+  return visibility === "public" && project.status !== "archived";
 }
 
-/** Reachable at /projects/[id] (public + unlisted). Drafts stay dashboard-only. */
+/** Reachable at /projects/[id] (public + unlisted, including archived, which render noindex). Drafts stay dashboard-only. */
 export function isProjectRoutable(project: Project): boolean {
   const visibility = project.visibility || "public";
   return visibility === "public" || visibility === "unlisted";
@@ -199,7 +199,6 @@ export function isProjectRoutable(project: Project): boolean {
 
 export function isProjectIndexable(project: Project): boolean {
   if (!isProjectListed(project)) return false;
-  if (project.status === "archived") return false;
   const hasSubstance = Boolean(
     project.description?.trim() &&
       (project.longDescription?.trim() || project.whatIBuilt?.trim() || project.contributionSummary?.trim()) &&

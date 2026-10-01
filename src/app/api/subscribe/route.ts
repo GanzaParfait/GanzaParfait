@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase-server";
 import { sendMail, subscriberThanksMail } from "@/lib/mail";
 import { upsertSubscriber, type SubscriberSource } from "@/lib/subscribers";
+import { INVALID_EMAIL_MESSAGE, isValidEmail } from "@/lib/subscribe-client";
 
 function subscribeSource(value: unknown): SubscriberSource {
   if (value === "footer" || value === "link") return value;
@@ -14,8 +15,8 @@ export async function POST(request: Request) {
     const email = String(body.email || "").trim().toLowerCase();
     const name = String(body.name || "").trim() || null;
     const confirmOnly = Boolean(body.confirm);
-    if (!email || !email.includes("@")) {
-      return NextResponse.json({ error: "A valid email is required." }, { status: 400 });
+    if (!isValidEmail(email) || email.length > 254) {
+      return NextResponse.json({ error: INVALID_EMAIL_MESSAGE }, { status: 400 });
     }
 
     const supabase = createServerSupabase(true);

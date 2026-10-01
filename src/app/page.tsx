@@ -5,6 +5,7 @@ import { buildGraph, buildItemListJsonLd, buildPersonJsonLd, buildWebPageJsonLd 
 import { JsonLd } from "@/components/seo/JsonLd";
 import HeroSection from "@/components/hero/HeroSection";
 import HomeJourney from "@/components/home/HomeJourney";
+import { isProjectListed } from "@/lib/projects";
 
 export const metadata: Metadata = buildPageMetadata({
   title: identity.pageTitle,
@@ -17,7 +18,7 @@ export const metadata: Metadata = buildPageMetadata({
 
 export default async function HomePage() {
   const featured = projects
-    .filter((project) => project.featured && (project.visibility || "public") === "public")
+    .filter((project) => project.featured && isProjectListed(project))
     .slice(0, 6);
 
   return (
@@ -31,7 +32,7 @@ export default async function HomePage() {
             description: identity.description,
           }),
           buildItemListJsonLd(
-            featured.length ? featured : projects.slice(0, 4),
+            featured.length ? featured : projects.filter(isProjectListed).slice(0, 4),
             "/",
             "Featured work by Prince Parfait GANZA — software engineer and technology entrepreneur in Kigali",
           ),

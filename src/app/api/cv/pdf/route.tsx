@@ -4,11 +4,14 @@ import { CvPdfDocument } from "@/lib/cv-pdf";
 import {
   canAccessCvTemplate,
   cvPdfFilename,
+  getCvConfig,
   isCvTemplateId,
   resolveCvDocument,
   type CvResolvedDocument,
 } from "@/lib/cv";
+import { isCvActionGated } from "@/lib/cv-access";
 import { resolveLibraryDocument } from "@/lib/cv-document-resolve";
+import { CV_PDF_PASS_COOKIE, verifyCvPdfPass } from "@/lib/cv-pdf-lock";
 import {
   cvDocumentFilename,
   defaultPublicCvDocument,
@@ -34,6 +37,25 @@ export async function GET(request: NextRequest) {
     const forceDownload = request.nextUrl.searchParams.get("download") === "1";
     const rawTemplate = request.nextUrl.searchParams.get("template");
     const docId = request.nextUrl.searchParams.get("doc");
+
+    if (
+      !admin &&
+      isCvActionGated(getCvConfig(settings).access, "download") &&
+      !(await verifyCvPdfPass(request.cookies.get(CV_PDF_PASS_COOKIE)?.value))
+    ) {
+      const navigating =
+        request.headers.get("sec-fetch-mode") === "navigate" ||
+        (request.headers.get("accept") || "").includes("text/html");
+      if (navigating) {
+        const unlock = new URL("/cv/unlock", origin);
+        unlock.searchParams.set("next", `${request.nextUrl.pathname}${request.nextUrl.search}`);
+        return NextResponse.redirect(unlock, 303);
+      }
+      return NextResponse.json(
+        { error: "Enter your email to download the CV.", locked: true },
+        { status: 401, headers: { "Cache-Control": "no-store" } },
+      );
+    }
 
     let resolved: CvResolvedDocument | null = null;
     let filename = "Prince-Parfait-GANZA-CV.pdf";

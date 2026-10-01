@@ -53,6 +53,8 @@ export interface SiteSettings {
   heroImageOverlay?: string;
   siteTitle: string;
   siteSubtitle: string;
+  /** Homepage hero descriptor list (· separated). Hero only — not the global role line. */
+  heroDescriptors?: string;
   bio: string;
   location: string;
   contactEmail: string;
@@ -214,6 +216,7 @@ export interface SiteSettings {
 export type HeroLayoutCopy = {
   siteTitle?: string;
   siteSubtitle?: string;
+  heroDescriptors?: string;
   bio?: string;
   location?: string;
   contactEmail?: string;

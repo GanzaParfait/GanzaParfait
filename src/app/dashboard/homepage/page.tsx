@@ -20,7 +20,10 @@ import {
 import MediaManagerModal from "@/components/dashboard/MediaManagerModal";
 import { useDashboardFeedback } from "@/components/dashboard/DashboardFeedback";
 import ManifestoSection from "@/components/home/ManifestoSection";
-import SelectedWork from "@/components/home/SelectedWork";
+import SelectedWork, { resolveSelectedWork } from "@/components/home/SelectedWork";
+import ProjectOrderPicker from "@/components/dashboard/ProjectOrderPicker";
+import { mergeProjectCatalog } from "@/lib/projects";
+import type { Project } from "@/data/site-data";
 import KnowledgeSection from "@/components/home/KnowledgeSection";
 import JourneySection from "@/components/home/JourneySection";
 import PrinciplesSection from "@/components/home/PrinciplesSection";
@@ -28,6 +31,7 @@ import SpeakingSection from "@/components/home/SpeakingSection";
 import BookingSection from "@/components/home/BookingSection";
 import {
   DEFAULT_HOMEPAGE,
+  HOMEPAGE_WORK_SLOTS,
   homepageFrom,
   type HomepageContent,
   type KnowledgeIcon,
@@ -47,7 +51,7 @@ type PreviewDevice = "desktop" | "tablet" | "mobile";
 
 const SECTIONS: { id: SectionId; label: string }[] = [
   { id: "manifesto", label: "Manifesto" },
-  { id: "work", label: "Evidence" },
+  { id: "work", label: "Selected work" },
   { id: "knowledge", label: "Knowledge" },
   { id: "journey", label: "Journey" },
   { id: "principles", label: "Principles" },
@@ -73,7 +77,7 @@ export default function HomepageEditorPage() {
   const [section, setSection] = useState<SectionId>("knowledge");
   const [tab, setTab] = useState<EditorTab>("content");
   const [device, setDevice] = useState<PreviewDevice>("desktop");
-  const [storyIndex, setStoryIndex] = useState(0);
+  const [storyId, setStoryId] = useState("");
   const [focusIndex, setFocusIndex] = useState(0);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [mediaOpen, setMediaOpen] = useState(false);
@@ -143,15 +147,23 @@ export default function HomepageEditorPage() {
     setFocusIndex((current) => Math.max(0, Math.min(current, content.knowledge.items.length - 2)));
   };
 
-  const story = content.work.stories[storyIndex];
+  const shownWork = resolveSelectedWork(content.work, settings.projectRecords);
+  const shownStory = shownWork.find((item) => item.story.id === storyId) || shownWork[0];
+  const story = shownStory?.story;
   const patchStory = (next: Partial<WorkStory>) => {
-    setContent((current) => ({
-      ...current,
-      work: {
-        ...current.work,
-        stories: current.work.stories.map((item, index) => (index === storyIndex ? { ...item, ...next } : item)),
-      },
-    }));
+    if (!story) return;
+    setContent((current) => {
+      const exists = current.work.stories.some((item) => item.id === story.id);
+      return {
+        ...current,
+        work: {
+          ...current.work,
+          stories: exists
+            ? current.work.stories.map((item) => (item.id === story.id ? { ...item, ...next } : item))
+            : [...current.work.stories, { ...story, ...next }],
+        },
+      };
+    });
   };
 
   return (
@@ -524,9 +536,10 @@ export default function HomepageEditorPage() {
                 content={content}
                 setContent={setContent}
                 story={story}
-                storyIndex={storyIndex}
-                setStoryIndex={setStoryIndex}
+                storyOptions={shownWork.map((item) => ({ value: item.story.id, label: item.story.title || item.project.title }))}
+                setStoryId={setStoryId}
                 patchStory={patchStory}
+                projectCatalog={mergeProjectCatalog(settings.projectRecords)}
                 onMedia={() => {
                   setMediaTarget(section === "speaking" ? "speaking" : "manifesto");
                   setMediaOpen(true);
@@ -622,18 +635,20 @@ function OtherSectionFields({
   content,
   setContent,
   story,
-  storyIndex,
-  setStoryIndex,
+  storyOptions,
+  setStoryId,
   patchStory,
+  projectCatalog,
   onMedia,
 }: {
   section: SectionId;
   content: HomepageContent;
   setContent: (value: HomepageContent | ((current: HomepageContent) => HomepageContent)) => void;
   story?: WorkStory;
-  storyIndex: number;
-  setStoryIndex: (value: number) => void;
+  storyOptions: { value: string; label: string }[];
+  setStoryId: (value: string) => void;
   patchStory: (next: Partial<WorkStory>) => void;
+  projectCatalog: Project[];
   onMedia: () => void;
 }) {
   if (section === "manifesto") {
@@ -669,7 +684,7 @@ function OtherSectionFields({
     );
   }
 
-  if (section === "work" && story) {
+  if (section === "work") {
     return (
             <>
               <Field label="Section label" value={content.work.label} onChange={(label) => setContent({ ...content, work: { ...content.work, label } })} />
@@ -681,21 +696,31 @@ function OtherSectionFields({
               <Field label="More title" value={content.work.moreTitle} onChange={(moreTitle) => setContent({ ...content, work: { ...content.work, moreTitle } })} />
               <Field label="More body" value={content.work.moreBody} area onChange={(moreBody) => setContent({ ...content, work: { ...content.work, moreBody } })} />
               <Field label="Side labels" value={content.work.rail.join(", ")} onChange={(value) => setContent({ ...content, work: { ...content.work, rail: value.split(",").map((item) => item.trim()).filter(Boolean) } })} />
-        <label className="hp-field">
-          <span>Case</span>
-          <CustomSelect
-            value={String(storyIndex)}
-            options={content.work.stories.map((item, index) => ({ value: String(index), label: item.title }))}
-            onChange={(value) => setStoryIndex(Number(value))}
-          />
-        </label>
-              <Field label="Title" value={story.title} onChange={(title) => patchStory({ title })} />
-              <Field label="Line" value={story.line} onChange={(line) => patchStory({ line })} />
-              <Field label="Support" value={story.support} onChange={(support) => patchStory({ support })} />
-              <Field label="Tags" value={story.tags.join(", ")} onChange={(value) => patchStory({ tags: value.split(",").map((item) => item.trim()).filter(Boolean) })} />
-              <Field label="Challenge" value={story.challenge} area onChange={(challenge) => patchStory({ challenge })} />
-              <Field label="Contribution" value={story.contribution} area onChange={(contribution) => patchStory({ contribution })} />
-              <Field label="Status" value={story.status} area onChange={(status) => patchStory({ status })} />
+        <ProjectOrderPicker
+          legend="Projects on the homepage"
+          hint={`Choose up to ${HOMEPAGE_WORK_SLOTS} and set their order. The first is the large card. Archived, unlisted and draft projects are skipped, and empty slots fill from featured projects.`}
+          catalog={projectCatalog}
+          selectedIds={content.work.projectIds}
+          max={HOMEPAGE_WORK_SLOTS}
+          onChange={(projectIds) => setContent({ ...content, work: { ...content.work, projectIds } })}
+        />
+        {story ? (
+          <>
+            <label className="hp-field">
+              <span>Card copy</span>
+              <CustomSelect value={story.id} options={storyOptions} onChange={setStoryId} />
+            </label>
+            <Field label="Title" value={story.title} onChange={(title) => patchStory({ title })} />
+            <Field label="Line" value={story.line} onChange={(line) => patchStory({ line })} />
+            <Field label="Support" value={story.support} onChange={(support) => patchStory({ support })} />
+            <Field label="Tags" value={story.tags.join(", ")} onChange={(value) => patchStory({ tags: value.split(",").map((item) => item.trim()).filter(Boolean) })} />
+            <Field label="Challenge" value={story.challenge} area onChange={(challenge) => patchStory({ challenge })} />
+            <Field label="Contribution" value={story.contribution} area onChange={(contribution) => patchStory({ contribution })} />
+            <Field label="Status" value={story.status} area onChange={(status) => patchStory({ status })} />
+          </>
+        ) : (
+          <p className="hp-note">No listed projects yet. Publish a project in Projects to show it here.</p>
+        )}
         <p className="hp-note">Images are managed on Projects so the same screenshot is not uploaded twice.</p>
       </>
     );

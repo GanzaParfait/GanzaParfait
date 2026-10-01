@@ -8,6 +8,8 @@ import { useSheetDrag } from "@/hooks/useSheetDrag";
 import {
   consumeSubscribeInvite,
   hasSubscribeJoined,
+  INVALID_EMAIL_MESSAGE,
+  isValidEmail,
   markSubscribeJoined,
   SUBSCRIBE_HASH,
   SUBSCRIBE_JOINED_EVENT,
@@ -33,6 +35,8 @@ export default function SubscribeWidget() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [joined, setJoined] = useState(false);
   const [emailedOk, setEmailedOk] = useState(true);
+  const [alreadyJoined, setAlreadyJoined] = useState(false);
+  const [errorText, setErrorText] = useState("");
   // Opened from a shared link or an on-site shortcut: show at once, centered on desktop.
   const [invited, setInvited] = useState(false);
 
@@ -157,11 +161,17 @@ export default function SubscribeWidget() {
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     if (!email || status === "loading") return;
+    if (!isValidEmail(email)) {
+      setErrorText(INVALID_EMAIL_MESSAGE);
+      setStatus("error");
+      return;
+    }
     setStatus("loading");
     setIsVisible(true);
     try {
       // Delay localStorage mark so the success screen can hold before hide.
       const result = await submitSubscribe(email, invited ? "link" : "widget", { markJoined: false });
+      setAlreadyJoined(Boolean(result.alreadyConfirmed && !result.created));
       setEmailedOk(result.emailed !== false && !result.mailError);
       setStatus("success");
       successTimer.current = window.setTimeout(() => {
@@ -172,7 +182,9 @@ export default function SubscribeWidget() {
         setStatus("idle");
         successTimer.current = null;
       }, SUCCESS_HOLD_MS);
-    } catch {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "";
+      setErrorText(message === INVALID_EMAIL_MESSAGE ? message : "Something went wrong. Please try again.");
       setStatus("error");
     }
   };
@@ -227,11 +239,13 @@ export default function SubscribeWidget() {
         {status === "success" ? (
           <div className="subscribe-widget-success" role="status">
             <RiCheckDoubleLine size={sheet ? 64 : 48} aria-hidden="true" />
-            <h4 id={titleId}>You&apos;re in</h4>
+            <h4 id={titleId}>{alreadyJoined ? "Already on the list" : "You're in"}</h4>
             <p>
-              {emailedOk
-                ? "Thanks for joining. Watch for a welcome note — check spam if it is not in your inbox soon."
-                : "Thanks for joining. You are on the list; the welcome email may take a moment."}
+              {alreadyJoined
+                ? "This address is already subscribed. Nothing else to do."
+                : emailedOk
+                  ? "Thanks for joining. Watch for a welcome note — check spam if it is not in your inbox soon."
+                  : "Thanks for joining. You are on the list; the welcome email may take a moment."}
             </p>
           </div>
         ) : (
@@ -274,7 +288,7 @@ export default function SubscribeWidget() {
             </div>
             {status === "error" ? (
               <p className="subscribe-widget-error" role="alert">
-                Something went wrong. Please try again.
+                {errorText || "Something went wrong. Please try again."}
               </p>
             ) : null}
           </form>

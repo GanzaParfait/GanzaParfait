@@ -9,13 +9,13 @@ import CvPageClient from "@/components/cv/CvPageClient";
 export const metadata: Metadata = buildPageMetadata({
   title: "CV / Resume",
   description:
-    "Download Prince Parfait GANZA’s professional CV, compact resume, or executive profile — founder and software engineer based in Kigali, Rwanda.",
+    "Download Prince Parfait GANZA’s professional CV, compact resume, or executive profile — software engineer and technology entrepreneur based in Kigali, Rwanda.",
   path: "/cv",
   keywords: [
     "Prince Parfait GANZA CV",
     "Prince Parfait GANZA resume",
     "software engineer CV Kigali",
-    "founder CV Rwanda",
+    "technology entrepreneur CV Rwanda",
   ],
 });
 

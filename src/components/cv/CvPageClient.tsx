@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { createPortal } from "react-dom";
 import { useSearchParams } from "next/navigation";
 import {
   RiDownloadLine,
@@ -133,7 +134,7 @@ function FullPreview({
     };
   }, []);
 
-  return (
+  return createPortal(
     <div
       className="cv-preview-layer"
       role="dialog"
@@ -161,7 +162,8 @@ function FullPreview({
           <CvDocumentSheet resolved={resolved} className="is-public" />
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -255,6 +257,14 @@ export default function CvPageClient({ settings }: { settings: SiteSettings }) {
       const res = await fetch(url);
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
+        if (res.status === 401 && data.locked) {
+          setUnlocked(false);
+          const next = { key, action: "download" as const };
+          pendingRef.current = next;
+          setPending(next);
+          setGateOpen(true);
+          return;
+        }
         throw new Error(data.error || "Download failed.");
       }
       const blob = await res.blob();
@@ -296,7 +306,7 @@ export default function CvPageClient({ settings }: { settings: SiteSettings }) {
   const handleUnlocked = ({ skipped }: { skipped: boolean }) => {
     const next = pendingRef.current || pending;
     setGateOpen(false);
-    setUnlocked(true);
+    if (!skipped) setUnlocked(true);
     setPending(null);
     pendingRef.current = null;
     if (!next) return;

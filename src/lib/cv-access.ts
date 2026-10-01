@@ -28,7 +28,8 @@ export type CvAccessConfig = {
   submitLabel: string;
 };
 
-export const CV_UNLOCK_COOKIE = "ppg_cv_unlocked";
+/** Set only after an email is submitted. Skipping never sets it, so earlier skip-based unlocks are not honoured. */
+export const CV_UNLOCK_COOKIE = "cv_email_unlocked";
 
 export const DEFAULT_CV_ACCESS: CvAccessConfig = {
   mode: "email",
@@ -92,6 +93,11 @@ export function normalizeCvAccess(raw?: Partial<CvAccessConfig> | null): CvAcces
     skipLabel: raw?.skipLabel?.trim() || DEFAULT_CV_ACCESS.skipLabel,
     submitLabel: raw?.submitLabel?.trim() || DEFAULT_CV_ACCESS.submitLabel,
   };
+}
+
+/** Viewing may be skipped (when enabled); downloading always requires an email. */
+export function canSkipCvGate(access: CvAccessConfig, action: CvAccessAction): boolean {
+  return access.allowSkip && action === "view";
 }
 
 export function isCvActionGated(access: CvAccessConfig, action: CvAccessAction): boolean {

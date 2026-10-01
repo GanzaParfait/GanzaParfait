@@ -1,6 +1,7 @@
 import type { HeroLayoutCopy, HeroLayoutType, SiteSettings } from "@/lib/supabase";
 import { DEFAULT_SETTINGS } from "@/lib/supabase";
 import { siteConfig } from "@/data/site-data";
+import { canonicalizeIdentityFields, HERO_DESCRIPTOR_LINE, isLegacyHeroDescriptors } from "@/lib/identity";
 
 export const HERO_LAYOUTS: {
   id: HeroLayoutType;
@@ -113,6 +114,7 @@ export function layoutShows(layout: HeroLayoutType, field: HeroEditorField) {
 export const LAYOUT_COPY_KEYS = [
   "siteTitle",
   "siteSubtitle",
+  "heroDescriptors",
   "bio",
   "location",
   "contactEmail",
@@ -154,11 +156,17 @@ export function layoutCopyFrom(settings: SiteSettings): HeroLayoutCopy {
 export function settingsForLayout(settings: SiteSettings, layout: HeroLayoutType): SiteSettings {
   const copy = settings.heroLayoutCopy?.[layout];
   if (!copy) return { ...settings, bannerLayout: layout };
-  return { ...settings, ...copy, bannerLayout: layout };
+  return canonicalizeIdentityFields({ ...settings, ...copy, bannerLayout: layout });
+}
+
+/** Homepage hero descriptor list. Independent of the global `siteSubtitle` role line. */
+export function heroDescriptorLine(settings: SiteSettings): string {
+  const saved = settings.heroDescriptors;
+  return isLegacyHeroDescriptors(saved) ? HERO_DESCRIPTOR_LINE : saved!.trim();
 }
 
 export function heroRoles(settings: SiteSettings) {
-  return setting(settings, "siteSubtitle")
+  return heroDescriptorLine(settings)
     .split(/\s*[•·]\s*/)
     .map((role) => role.trim())
     .filter(Boolean);

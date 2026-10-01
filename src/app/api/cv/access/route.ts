@@ -1,6 +1,7 @@
 import { NextResponse, after } from "next/server";
 import {
   CV_UNLOCK_COOKIE,
+  canSkipCvGate,
   cvUnlockMaxAgeSeconds,
   isValidEmail,
   normalizeCvAccess,
@@ -8,6 +9,7 @@ import {
   type CvAccessAction,
 } from "@/lib/cv-access";
 import { isCvTemplateId, getCvConfig } from "@/lib/cv";
+import { CV_PDF_PASS_COOKIE, createCvPdfPass, cvPdfPassCookieOptions } from "@/lib/cv-pdf-lock";
 import { sendMail, subscriberThanksMail } from "@/lib/mail";
 import { getServerSiteSettings } from "@/lib/site-settings-server";
 import { createServerSupabase } from "@/lib/supabase-server";
@@ -86,12 +88,13 @@ export async function POST(request: Request) {
     const utm_campaign = String(body.utm_campaign || "").slice(0, 120) || null;
 
     if (intent === "skip") {
-      if (!access.allowSkip) {
-        return NextResponse.json({ error: "Skip is not allowed." }, { status: 403 });
+      if (!canSkipCvGate(access, action)) {
+        return NextResponse.json(
+          { error: action === "download" ? "Enter your email to download the CV." : "Skip is not allowed." },
+          { status: 403 }
+        );
       }
-      const res = NextResponse.json({ ok: true, unlocked: true, skipped: true });
-      res.headers.append("Set-Cookie", unlockCookie(access.rememberDays));
-      return res;
+      return NextResponse.json({ ok: true, unlocked: false, skipped: true });
     }
 
     const email = String(body.email || "").trim().toLowerCase();
@@ -160,7 +163,13 @@ export async function POST(request: Request) {
       format: templateRaw,
       action,
     });
-    res.headers.append("Set-Cookie", unlockCookie(access.rememberDays));
+    const passAge = cvUnlockMaxAgeSeconds(access.rememberDays);
+    res.cookies.set(CV_UNLOCK_COOKIE, "1", {
+      path: "/",
+      sameSite: "lax",
+      ...(typeof passAge === "number" ? { maxAge: passAge } : {}),
+    });
+    res.cookies.set(CV_PDF_PASS_COOKIE, createCvPdfPass("email", passAge), cvPdfPassCookieOptions(passAge));
     return res;
   } catch (error) {
     console.error(error);

@@ -4,11 +4,17 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { RiArrowRightLine } from "react-icons/ri";
 import { type Project } from "@/data/site-data";
-import { imagesForStory, type HomepageContent, type WorkStory } from "@/lib/homepage";
+import {
+  HOMEPAGE_WORK_SLOTS,
+  imagesForStory,
+  workStoryFromProject,
+  type HomepageContent,
+  type WorkStory,
+} from "@/lib/homepage";
 import MediaPreview, { type PreviewItem } from "@/components/ui/MediaPreview";
 import WorkProjectCard from "@/components/work/WorkProjectCard";
 import { mediaForProject, projectCover, projectRelatedStills, projectStillCaption } from "@/components/work/work-media";
-import { mergeProjectCatalog } from "@/lib/projects";
+import { listListedProjects } from "@/lib/projects";
 
 export default function SelectedWork({
   work,
@@ -19,7 +25,7 @@ export default function SelectedWork({
   records?: Project[];
   embedded?: boolean;
 }) {
-  const stories = useMemo(() => orderSelectedStories(work.stories, records), [work.stories, records]);
+  const stories = useMemo(() => resolveSelectedWork(work, records), [work, records]);
   const featured = stories[0];
   const rest = stories.slice(1);
   const [preview, setPreview] = useState<{ title: string; items: PreviewItem[]; start: number } | null>(null);
@@ -150,37 +156,29 @@ export default function SelectedWork({
   );
 }
 
-function storyFromProject(project: Project): WorkStory {
-  return {
-    id: project.id,
-    title: project.title,
-    organization: project.organization || "",
-    line: project.tagline || project.description,
-    support: project.description,
-    challenge: "",
-    contribution: "",
-    status: "",
-    href: `/projects/${project.id}`,
-    tags: (project.technologies || []).slice(0, 3),
-    images: project.image ? [project.image] : [],
+/**
+ * The dashboard selection decides the order; the pinned project only leads when nothing selected is listed. Only listed projects appear
+ * (archived, unlisted and draft are skipped); empty slots fill from featured, then other listed projects.
+ */
+export function resolveSelectedWork(work: Pick<HomepageContent["work"], "projectIds" | "stories">, records?: Project[]) {
+  const listed = listListedProjects(records);
+  const byId = new Map(listed.map((project) => [project.id, project]));
+  const pinned = listed.find((project) => project.homepagePinned);
+
+  const ids: string[] = [];
+  const add = (id?: string) => {
+    if (id && byId.has(id) && !ids.includes(id) && ids.length < HOMEPAGE_WORK_SLOTS) ids.push(id);
   };
-}
+  (work.projectIds || []).forEach(add);
+  if (!ids.length) add(pinned?.id);
+  listed.filter((project) => project.featured).forEach((project) => add(project.id));
+  listed.forEach((project) => add(project.id));
 
-/** Pin homepagePinned project first, then fill up to 4 from homepage stories. */
-function orderSelectedStories(stories: WorkStory[], records?: Project[]) {
-  const catalog = mergeProjectCatalog(records);
-  const pinned = catalog.find((item) => item.homepagePinned && (item.visibility || "public") === "public");
-  const byId = new Map(stories.map((story) => [story.id, story]));
-
-  const leadStory = pinned ? byId.get(pinned.id) || storyFromProject(pinned) : stories[0];
-  if (!leadStory) return [];
-
-  const rest = stories.filter((story) => story.id !== leadStory.id).slice(0, 3);
-  return [leadStory, ...rest].slice(0, 4).map((story, index) => ({
-    story,
-    index,
-    project: catalog.find((item) => item.id === story.id),
-  }));
+  const storyById = new Map(work.stories.map((story) => [story.id, story]));
+  return ids.map((id, index) => {
+    const project = byId.get(id)!;
+    return { story: storyById.get(id) || workStoryFromProject(project), index, project };
+  });
 }
 
 function featuredBody(project: Project | undefined, story: WorkStory) {

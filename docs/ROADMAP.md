@@ -9,7 +9,7 @@
 **Goal:** Establish the authoritative digital identity for Prince Parfait GANZA.
 
 ### Completed
-- [x] Public identity set to Founder · Entrepreneur · Technologist, with Software Engineer and AI Builder visible
+- [x] Public identity set to Software Engineer · Technology Entrepreneur · Founder
 - [x] About page with timeline, values, and skills by category
 - [x] Projects listing (featured + other)
 - [x] Blog listing with featured posts and category filter

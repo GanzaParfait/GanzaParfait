@@ -4,6 +4,14 @@ export const SUBSCRIBE_OPEN_EVENT = "pp:open-subscribe";
 export const SUBSCRIBE_QUERY_KEY = "subscribe";
 export const SUBSCRIBE_HASH = "#subscribe";
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+export function isValidEmail(value: string) {
+  return EMAIL_PATTERN.test(value.trim());
+}
+
+export const INVALID_EMAIL_MESSAGE = "Enter a valid email address.";
+
 /** Open the Stay updated dialog from anywhere on the site. */
 export function openSubscribe() {
   if (typeof window === "undefined") return;
@@ -69,5 +77,11 @@ export async function submitSubscribe(
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || "Subscribe failed");
   if (options?.markJoined !== false) markSubscribeJoined();
-  return data as { ok?: boolean; emailed?: boolean; mailError?: string };
+  return data as {
+    ok?: boolean;
+    emailed?: boolean;
+    mailError?: string;
+    created?: boolean;
+    alreadyConfirmed?: boolean;
+  };
 }
