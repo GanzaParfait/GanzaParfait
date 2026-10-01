@@ -4,7 +4,8 @@ import { sendMail, subscriberThanksMail } from "@/lib/mail";
 import { upsertSubscriber, type SubscriberSource } from "@/lib/subscribers";
 
 function subscribeSource(value: unknown): SubscriberSource {
-  return value === "footer" ? "footer" : "widget";
+  if (value === "footer" || value === "link") return value;
+  return "widget";
 }
 
 export async function POST(request: Request) {

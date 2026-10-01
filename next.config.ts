@@ -42,6 +42,11 @@ const nextConfig: NextConfig = {
         destination: "/about",
         statusCode: 301,
       },
+      ...["/subscribe", "/join", "/newsletter", "/stay-updated", "/updates"].map((source) => ({
+        source,
+        destination: "/?subscribe=1",
+        permanent: false,
+      })),
       {
         source: "/speaking",
         destination: "/#speaking",

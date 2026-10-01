@@ -6,9 +6,12 @@ import { RiMailSendLine, RiCloseLine, RiCheckDoubleLine, RiLoader4Line } from "r
 import { useHistoryBackClose, dismissOnBackdrop } from "@/hooks/useHistoryBackClose";
 import { useSheetDrag } from "@/hooks/useSheetDrag";
 import {
+  consumeSubscribeInvite,
   hasSubscribeJoined,
   markSubscribeJoined,
+  SUBSCRIBE_HASH,
   SUBSCRIBE_JOINED_EVENT,
+  SUBSCRIBE_OPEN_EVENT,
   submitSubscribe,
 } from "@/lib/subscribe-client";
 import { WIDGET_BLURB } from "@/lib/welcome-copy";
@@ -23,12 +26,15 @@ export default function SubscribeWidget() {
   const titleId = useId();
   const successTimer = useRef<number | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [joined, setJoined] = useState(false);
   const [emailedOk, setEmailedOk] = useState(true);
+  // Opened from a shared link or an on-site shortcut: show at once, centered on desktop.
+  const [invited, setInvited] = useState(false);
 
   useEffect(() => {
     const mq = window.matchMedia(MOBILE_MQ);
@@ -50,6 +56,7 @@ export default function SubscribeWidget() {
   }, [status]);
 
   useEffect(() => {
+    if (invited) return;
     if (joined && status !== "success") {
       setIsVisible(false);
       return;
@@ -61,7 +68,36 @@ export default function SubscribeWidget() {
     setIsVisible(false);
     const appear = window.setTimeout(() => setIsVisible(true), APPEAR_DELAY_MS);
     return () => window.clearTimeout(appear);
-  }, [pathname, joined, status]);
+  }, [pathname, joined, status, invited]);
+
+  const openInvited = useCallback(() => {
+    if (successTimer.current) {
+      window.clearTimeout(successTimer.current);
+      successTimer.current = null;
+    }
+    setStatus("idle");
+    setInvited(true);
+    setIsVisible(true);
+  }, []);
+
+  useEffect(() => {
+    const check = window.setTimeout(() => {
+      if (consumeSubscribeInvite()) openInvited();
+    }, 0);
+    return () => window.clearTimeout(check);
+  }, [pathname, openInvited]);
+
+  useEffect(() => {
+    const onHash = () => {
+      if (window.location.hash === SUBSCRIBE_HASH && consumeSubscribeInvite()) openInvited();
+    };
+    window.addEventListener(SUBSCRIBE_OPEN_EVENT, openInvited);
+    window.addEventListener("hashchange", onHash);
+    return () => {
+      window.removeEventListener(SUBSCRIBE_OPEN_EVENT, openInvited);
+      window.removeEventListener("hashchange", onHash);
+    };
+  }, [openInvited]);
 
   const handleDismiss = useCallback(() => {
     if (successTimer.current) {
@@ -69,6 +105,7 @@ export default function SubscribeWidget() {
       successTimer.current = null;
     }
     setIsVisible(false);
+    setInvited(false);
     if (status === "success") {
       markSubscribeJoined();
       setJoined(true);
@@ -77,12 +114,14 @@ export default function SubscribeWidget() {
   }, [status]);
 
   useEffect(() => {
-    if (joined || isVisible || status === "success" || status === "loading") return;
+    if (joined || invited || isVisible || status === "success" || status === "loading") return;
     const reopen = window.setTimeout(() => setIsVisible(true), REOPEN_AFTER_DISMISS_MS);
     return () => window.clearTimeout(reopen);
-  }, [joined, isVisible, status]);
+  }, [joined, invited, isVisible, status]);
 
-  useHistoryBackClose(isVisible && isMobile && status !== "loading", handleDismiss);
+  const modal = isMobile || invited;
+
+  useHistoryBackClose(isVisible && modal && status !== "loading", handleDismiss);
   useSheetDrag(isVisible && isMobile && status !== "loading", handleDismiss, panelRef, { variable: true });
 
   useEffect(() => {
@@ -95,13 +134,19 @@ export default function SubscribeWidget() {
   }, [handleDismiss, status]);
 
   useEffect(() => {
-    if (!isVisible || !isMobile) return;
+    if (!isVisible || !modal) return;
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = previous;
     };
-  }, [isVisible, isMobile]);
+  }, [isVisible, modal]);
+
+  useEffect(() => {
+    if (!isVisible || !invited || isMobile) return;
+    const focus = window.setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 120);
+    return () => window.clearTimeout(focus);
+  }, [isVisible, invited, isMobile]);
 
   useEffect(() => {
     return () => {
@@ -116,13 +161,14 @@ export default function SubscribeWidget() {
     setIsVisible(true);
     try {
       // Delay localStorage mark so the success screen can hold before hide.
-      const result = await submitSubscribe(email, "widget", { markJoined: false });
+      const result = await submitSubscribe(email, invited ? "link" : "widget", { markJoined: false });
       setEmailedOk(result.emailed !== false && !result.mailError);
       setStatus("success");
       successTimer.current = window.setTimeout(() => {
         markSubscribeJoined();
         setJoined(true);
         setIsVisible(false);
+        setInvited(false);
         setStatus("idle");
         successTimer.current = null;
       }, SUCCESS_HOLD_MS);
@@ -131,12 +177,12 @@ export default function SubscribeWidget() {
     }
   };
 
-  if (joined && status !== "success") return null;
+  if (joined && !invited && status !== "success") return null;
 
   const sheet = isMobile;
   const layerClass = [
     "subscribe-widget-layer",
-    sheet ? "is-sheet" : "is-card",
+    sheet ? "is-sheet" : modal ? "is-centered" : "is-card",
     isVisible ? "is-open" : "",
     status === "success" ? "is-success" : "",
   ]
@@ -147,9 +193,9 @@ export default function SubscribeWidget() {
     <div
       className={layerClass}
       aria-hidden={!isVisible}
-      onMouseDown={sheet && status !== "loading" ? dismissOnBackdrop(handleDismiss) : undefined}
+      onMouseDown={modal && status !== "loading" ? dismissOnBackdrop(handleDismiss) : undefined}
     >
-      {sheet ? (
+      {modal ? (
         <button
           type="button"
           className="subscribe-widget-backdrop"
@@ -162,10 +208,10 @@ export default function SubscribeWidget() {
       <div
         ref={panelRef}
         className="subscribe-widget"
-        role={sheet ? "dialog" : "complementary"}
+        role={modal ? "dialog" : "complementary"}
         aria-labelledby={titleId}
-        aria-modal={sheet && isVisible ? true : undefined}
-        onMouseDown={sheet ? (event) => event.stopPropagation() : undefined}
+        aria-modal={modal && isVisible ? true : undefined}
+        onMouseDown={modal ? (event) => event.stopPropagation() : undefined}
       >
         {sheet ? <span className="subscribe-widget-handle" aria-hidden="true" /> : null}
         <button
@@ -202,6 +248,7 @@ export default function SubscribeWidget() {
                 Email address
               </label>
               <input
+                ref={inputRef}
                 id="subscribe-widget-email"
                 type="email"
                 autoComplete="email"

@@ -14,6 +14,18 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 301);
   }
 
+  // Old project share links pointed at /projects; send them to the case study before streaming starts.
+  if (request.nextUrl.pathname === "/projects") {
+    const campaign = request.nextUrl.searchParams.get("utm_campaign") || "";
+    const content = request.nextUrl.searchParams.get("utm_content") || "";
+    const id = campaign.startsWith("project-") ? campaign.slice("project-".length) : "";
+    if (id && id === content && /^[a-z0-9-]+$/.test(id)) {
+      const url = request.nextUrl.clone();
+      url.pathname = `/projects/${id}`;
+      return NextResponse.redirect(url, 307);
+    }
+  }
+
   const response = NextResponse.next();
   if (request.nextUrl.pathname.startsWith("/dashboard")) {
     response.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");

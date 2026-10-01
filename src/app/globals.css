@@ -3995,6 +3995,25 @@ body.mobile-nav-open .subscribe-widget-layer {
   align-items: flex-end;
   justify-content: stretch;
 }
+.subscribe-widget-layer.is-centered {
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+}
+.subscribe-widget-layer.is-centered .subscribe-widget {
+  width: min(100%, 26rem);
+  border-radius: 1.25rem;
+  padding: 1.6rem 1.6rem 1.45rem;
+  transform: translateY(0.75rem) scale(0.97);
+}
+.subscribe-widget-layer.is-centered.is-open .subscribe-widget {
+  transform: none;
+}
+.subscribe-widget-layer.is-centered.is-open .subscribe-widget-backdrop {
+  opacity: 1;
+}
 .subscribe-widget-layer:not(.is-open) {
   visibility: hidden;
   transition: visibility 0s linear 0.35s;
@@ -23195,6 +23214,92 @@ body.tm-share-open .page-floaters {
   align-items: flex-end;
   gap: 0.5rem;
   margin: 0.55rem 0 0.55rem;
+}
+.dash-sublinks {
+  margin: 0.75rem 0 0.5rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.85rem;
+  background: #fff;
+}
+.dash-sublinks-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+  margin-bottom: 0.75rem;
+}
+.dash-sublinks-head h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.25rem;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+.dash-sublinks-head p {
+  margin: 0;
+  max-width: 42rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #64748b;
+}
+.dash-sublinks-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+.dash-sublinks-list li {
+  display: grid;
+  grid-template-columns: 8.5rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: 0.6rem;
+  background: #f8fafc;
+}
+.dash-sublinks-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+.dash-sublinks-list code,
+.dash-sublinks-note code {
+  font-size: 0.76rem;
+  color: #334155;
+}
+.dash-sublinks-list code {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dash-sublinks-actions {
+  display: flex;
+  gap: 0.35rem;
+}
+.dash-sublinks-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.dash-sublinks-note {
+  margin: 0.7rem 0 0;
+  font-size: 0.76rem;
+  line-height: 1.6;
+  color: #64748b;
+}
+@media (max-width: 640px) {
+  .dash-sublinks-list li {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .dash-sublinks-list code {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
 }
 .dash-tm-search {
   flex: 1 1 12rem;

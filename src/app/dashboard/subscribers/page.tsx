@@ -15,6 +15,7 @@ import {
 } from "react-icons/ri";
 import { useHistoryBackClose, dismissOnBackdrop } from "@/hooks/useHistoryBackClose";
 import { downloadCsv } from "@/lib/download-csv";
+import SubscribeLinkPanel from "@/components/dashboard/SubscribeLinkPanel";
 
 type Subscriber = {
   id: string;
@@ -304,6 +305,8 @@ export default function SubscribersPage() {
         </div>
       </header>
 
+      <SubscribeLinkPanel />
+
       <div className="dash-tm-toolbar">
         <label className="dash-tm-search">
           <RiSearchLine size={16} aria-hidden="true" />
@@ -332,6 +335,8 @@ export default function SubscribersPage() {
           <select value={source} onChange={(e) => setSource(e.target.value)}>
             <option value="">All sources</option>
             <option value="widget">Widget</option>
+            <option value="link">Shared link</option>
+            <option value="footer">Footer</option>
             <option value="contact">Contact</option>
             <option value="dashboard">Dashboard</option>
             <option value="import">Import</option>

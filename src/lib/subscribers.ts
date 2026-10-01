@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { recordAdminNotification } from "@/lib/admin-notifications";
 
-export type SubscriberSource = "widget" | "footer" | "contact" | "import" | "dashboard" | "cv" | "testimonial";
+export type SubscriberSource = "widget" | "link" | "footer" | "contact" | "import" | "dashboard" | "cv" | "testimonial";
 
 export type SubscriberRow = {
   id: string;
