@@ -36,6 +36,7 @@ import {
   primaryBookingOption,
 } from "@/lib/booking";
 import AnimatedSection from "@/components/ui/AnimatedSection";
+import AdaptiveMedia from "@/components/ui/AdaptiveMedia";
 import CustomSelect from "@/components/ui/CustomSelect";
 import { siteConfig } from "@/data/site-data";
 
@@ -249,7 +250,14 @@ export default function ContactPageClient({
             <div className="contact-portrait-wrap">
               <div className="contact-portrait-glow" aria-hidden="true" />
               {page.hero.portrait ? (
-                <img src={page.hero.portrait} alt={siteConfig.portraitAlt} className="contact-portrait" width={480} height={560} />
+                <AdaptiveMedia
+                  src={page.hero.portrait}
+                  alt={siteConfig.portraitAlt}
+                  className="contact-portrait"
+                  width={480}
+                  height={560}
+                  objectFit="cover"
+                />
               ) : null}
               {page.hero.script ? <p className="contact-script">{page.hero.script}</p> : null}
             </div>
@@ -501,7 +509,9 @@ export default function ContactPageClient({
 
             <AnimatedSection delay={80} direction="right" className="contact-media-panel">
               <div className={page.media.cityImage ? "contact-city has-image" : "contact-city"}>
-                {page.media.cityImage ? <img src={page.media.cityImage} alt="" width={800} height={420} /> : null}
+                {page.media.cityImage ? (
+                  <AdaptiveMedia src={page.media.cityImage} alt="" width={800} height={420} objectFit="cover" />
+                ) : null}
                 <div className="contact-city-copy">
                   <strong>{page.media.cityCaption}</strong>
                   <span>{page.media.cityTagline}</span>

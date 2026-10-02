@@ -250,7 +250,18 @@ export function mergeProjectCatalog(records?: Project[] | null): Project[] {
             return fromRecord.length ? fromRecord : fromBase;
           })(),
           capabilities: record.capabilities?.length ? record.capabilities : base.capabilities,
-          image: sharesShotLibrary(record, base) && usableMedia(record.image) ? record.image : base.image,
+          // Featured video must win even when screenshot libraries diverge from seed.
+          image: (() => {
+            if (usableMedia(record.image) && isVideoUrl(String(record.image))) return String(record.image);
+            return sharesShotLibrary(record, base) && usableMedia(record.image) ? record.image : base.image;
+          })(),
+          videos: usableList(record.videos).length ? usableList(record.videos) : base.videos,
+          video: usableMedia(record.video) ? String(record.video) : base.video,
+          videoPoster: usableMedia(record.videoPoster)
+            ? String(record.videoPoster)
+            : record.videoPoster === ""
+              ? ""
+              : base.videoPoster,
           logo: (() => {
             const saved = record.logo ? String(record.logo) : "";
             const stale =
@@ -308,5 +319,18 @@ export async function getPublicProject(id: string): Promise<Project | null> {
 }
 
 export function isVideoUrl(src: string) {
-  return /\.(mp4|webm|ogg|mov)(\?|$)/i.test(src) || src.includes("/video/");
+  if (!src) return false;
+  const value = src.toLowerCase();
+  if (/\.(mp4|webm|ogg|mov|m4v)(\?|#|$)/i.test(value)) return true;
+  if (value.includes("res.cloudinary.com") && /[?&/,]f_mp4\b/.test(value)) return true;
+  // Cloudinary can derive a still from a video resource — treat those as images.
+  if (
+    value.includes("/video/") &&
+    (/\.(jpe?g|png|gif|webp|avif)(\?|#|$)/i.test(value) ||
+      /(?:^|[/,])(?:f_jpe?g|f_png|f_webp|f_avif)\b/i.test(value))
+  ) {
+    return false;
+  }
+  if (value.includes("/video/upload/") || value.includes("/video/")) return true;
+  return false;
 }

@@ -190,8 +190,12 @@ export default function HeroEditorModal({
 
             {show("image") && (
               <Field
-                label="Banner image (this layout)"
-                hint={`SEO Person image stays at ${PORTRAIT_PATH}. Changing this layout image does not change Google’s URL.`}
+                label={layout === "featured_overlay" ? "Banner image or video (this layout)" : "Banner image (this layout)"}
+                hint={
+                  layout === "featured_overlay"
+                    ? `Upload MP4/WebM in Media Library (Cloudinary CDN), then pick it here. The site serves a compressed version so visitors are not pulled a heavy master file. SEO Person image stays at ${PORTRAIT_PATH}.`
+                    : `SEO Person image stays at ${PORTRAIT_PATH}. Changing this layout image does not change Google’s URL.`
+                }
               >
                 <div style={{ display: "flex", gap: "0.5rem" }}>
                   <input
@@ -199,6 +203,7 @@ export default function HeroEditorModal({
                     value={imageValue}
                     onChange={(event) => update({ [imageKeyFor(layout)]: event.target.value })}
                     style={inputStyle}
+                    placeholder={layout === "featured_overlay" ? "/images/... or https://…/video.mp4" : undefined}
                   />
                   <button type="button" onClick={onOpenMedia} className="btn btn-outline" style={{ padding: "0.5rem" }} title="Choose from media library">
                     <RiImageAddLine size={18} />
@@ -219,6 +224,38 @@ export default function HeroEditorModal({
                   {formData.heroOverlayMobilePositionX ?? 78}% · {formData.heroOverlayMobilePositionY ?? 12}% · zoom{" "}
                   {formData.heroOverlayMobileZoom ?? 100}%
                 </p>
+              </Field>
+            ) : null}
+
+            {layout === "featured_overlay" ? (
+              <Field
+                label="Background video sound"
+                hint="Browsers require muted autoplay. Visitors can still unmute with the on-page control."
+              >
+                <label style={{ display: "inline-flex", alignItems: "center", gap: "0.55rem", fontSize: "0.875rem", color: "#0f172a", fontWeight: 600, cursor: "pointer" }}>
+                  <input
+                    type="checkbox"
+                    checked={formData.heroOverlayMuted !== false}
+                    onChange={(event) => update({ heroOverlayMuted: event.target.checked })}
+                  />
+                  Start muted
+                </label>
+              </Field>
+            ) : null}
+
+            {layout === "split_portrait" ? (
+              <Field
+                label="Portrait motion"
+                hint="Slow up-and-down bob on the person. Respects prefers-reduced-motion."
+              >
+                <label style={{ display: "inline-flex", alignItems: "center", gap: "0.55rem", fontSize: "0.875rem", color: "#0f172a", fontWeight: 600, cursor: "pointer" }}>
+                  <input
+                    type="checkbox"
+                    checked={formData.heroSplitPortraitAnimate !== false}
+                    onChange={(event) => update({ heroSplitPortraitAnimate: event.target.checked })}
+                  />
+                  Animate portrait
+                </label>
               </Field>
             ) : null}
 

@@ -16,6 +16,8 @@ import { fetchRemoteSettings, getLocalSettings, saveLocalSettings } from "@/lib/
 import { useDashboardFeedback } from "@/components/dashboard/DashboardFeedback";
 import { mergeProjectCatalog } from "@/lib/projects";
 import { downloadCsv } from "@/lib/download-csv";
+import MediaThumb from "@/components/ui/MediaThumb";
+import { projectCover } from "@/components/work/work-media";
 
 const PAGE_SIZE = 10;
 
@@ -234,12 +236,16 @@ export default function ProjectsPage() {
                 {rows.map((project) => (
                   <tr key={project.id}>
                     <td>
-                      {project.image && !project.image.includes("placeholder") ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img className="dash-projects-cover" src={project.image} alt="" />
-                      ) : (
-                        <span className="dash-projects-cover is-empty">No image</span>
-                      )}
+                      {(() => {
+                        const coverSrc =
+                          (project.image && !project.image.includes("placeholder") && project.image) ||
+                          projectCover(project);
+                        return coverSrc ? (
+                          <MediaThumb className="dash-projects-cover" src={coverSrc} alt="" width={160} />
+                        ) : (
+                          <span className="dash-projects-cover is-empty">No image</span>
+                        );
+                      })()}
                     </td>
                     <td>
                       <div className="dash-tm-person is-compact dash-projects-person">

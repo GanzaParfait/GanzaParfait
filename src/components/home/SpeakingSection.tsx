@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import {
   RiBarChart2Line,
   RiBookOpenLine,
@@ -7,8 +8,12 @@ import {
   RiFlashlightLine,
   RiMapPinLine,
   RiTeamLine,
+  RiVolumeMuteLine,
+  RiVolumeUpLine,
 } from "react-icons/ri";
 import type { HomepageContent, SpeakingTopicIcon } from "@/lib/homepage";
+import { isVideoUrl } from "@/lib/projects";
+import { cloudinaryVideoDeliveryUrl, cloudinaryVideoPosterUrl } from "@/lib/cloudinary-url";
 
 function TopicIcon({ icon }: { icon: SpeakingTopicIcon }) {
   if (icon === "tools") return <RiBarChart2Line size={18} />;
@@ -34,6 +39,43 @@ export default function SpeakingSection({
 }) {
   const cite = attribution || "Prince Parfait GANZA";
   const quote = speaking.quote?.trim() || "Technology is more powerful when people can use it.";
+  const video = Boolean(speaking.image && isVideoUrl(speaking.image));
+  const preferMuted = speaking.videoMuted !== false;
+  const [muted, setMuted] = useState(preferMuted);
+  const [ready, setReady] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const [posterOk, setPosterOk] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const delivery = video && speaking.image ? cloudinaryVideoDeliveryUrl(speaking.image, { width: 900 }) : speaking.image;
+  const poster = video && speaking.image ? cloudinaryVideoPosterUrl(speaking.image, { width: 900 }) : undefined;
+
+  useEffect(() => {
+    setMuted(preferMuted);
+    setReady(false);
+    setFailed(false);
+    setPosterOk(true);
+  }, [preferMuted, speaking.image]);
+
+  useEffect(() => {
+    if (!video || !videoRef.current || failed) return;
+    const node = videoRef.current;
+    node.muted = muted;
+    const reduce = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      node.pause();
+      return;
+    }
+    void node.play().catch(() => {});
+  }, [video, delivery, muted, failed]);
+
+  const toggleMute = () => {
+    const next = !muted;
+    setMuted(next);
+    const node = videoRef.current;
+    if (!node) return;
+    node.muted = next;
+    if (!next) void node.play().catch(() => {});
+  };
 
   return (
     <section
@@ -76,8 +118,57 @@ export default function SpeakingSection({
           </div>
 
           <div className="speaking-visual">
-            {speaking.image ? (
-              <img src={speaking.image} alt="" className="speaking-photo" width={720} height={900} />
+            {speaking.image && !failed ? (
+              video ? (
+                <>
+                  {poster && posterOk ? (
+                    <img
+                      src={poster}
+                      alt=""
+                      className="speaking-photo speaking-photo-poster"
+                      width={720}
+                      height={900}
+                      onError={() => setPosterOk(false)}
+                      style={{ opacity: ready ? 0 : 1, transition: "opacity 0.35s ease" }}
+                    />
+                  ) : null}
+                  <video
+                    ref={videoRef}
+                    className="speaking-photo"
+                    src={delivery}
+                    muted={muted}
+                    autoPlay
+                    loop
+                    playsInline
+                    preload="auto"
+                    width={720}
+                    height={900}
+                    onLoadedData={() => setReady(true)}
+                    onPlaying={() => setReady(true)}
+                    onError={() => setFailed(true)}
+                    style={{ opacity: ready ? 1 : poster && posterOk ? 0 : 1, transition: "opacity 0.35s ease" }}
+                  />
+                  <button
+                    type="button"
+                    className="speaking-video-sound"
+                    onClick={toggleMute}
+                    aria-pressed={!muted}
+                    aria-label={muted ? "Unmute video" : "Mute video"}
+                  >
+                    {muted ? <RiVolumeMuteLine size={16} /> : <RiVolumeUpLine size={16} />}
+                    <span>{muted ? "Muted" : "Sound"}</span>
+                  </button>
+                </>
+              ) : (
+                <img
+                  src={speaking.image}
+                  alt=""
+                  className="speaking-photo"
+                  width={720}
+                  height={900}
+                  onError={() => setFailed(true)}
+                />
+              )
             ) : (
               <div className="speaking-photo-fallback" aria-hidden="true" />
             )}

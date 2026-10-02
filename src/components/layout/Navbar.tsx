@@ -246,26 +246,29 @@ export default function Navbar() {
             borderBottom: isPill ? "none" : `1px solid ${pillBorder}`,
             borderRadius: isPill ? "9999px" : 0,
             boxShadow: pillShadow,
-            maxWidth: isPill ? "min(92rem, 100%)" : undefined,
-            margin: isPill ? "0 auto" : undefined,
+            maxWidth: isPill ? "min(92rem, 100%)" : "none",
+            margin: isPill ? "0 auto" : 0,
             transition: "box-shadow 0.3s ease, background 0.3s ease, border-color 0.3s ease, border-radius 0.3s ease",
             boxSizing: "border-box",
-            width: isPill ? "100%" : undefined,
+            width: "100%",
           }}
         >
           <div
-            className={isPill ? undefined : "container"}
+            className={isPill ? undefined : "public-nav-full-inner"}
           style={{
             minHeight: isPill ? "3.55rem" : "3.75rem",
-            padding: isPill ? "0.35rem 0.85rem" : "0.45rem 0",
+            /* Full-width padding lives in .public-nav-full-inner so desktop can inset more. */
+            padding: isPill ? "0.35rem 0.85rem" : undefined,
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             gap: "0.5rem",
             width: "100%",
-            maxWidth: isPill ? "none" : undefined,
+            maxWidth: "none",
+            margin: 0,
             minWidth: 0,
             overflow: "visible",
+            boxSizing: "border-box",
           }}
         >
 

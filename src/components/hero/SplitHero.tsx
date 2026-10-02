@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { createPortal } from "react-dom";
 import ResilientCover from "@/components/work/ResilientCover";
 import {
   RiArrowRightLine,
   RiMapPinLine,
-  RiCloseLine,
   RiArrowDownLine,
 } from "react-icons/ri";
 import { useState, useEffect, useRef } from "react";
@@ -23,6 +23,7 @@ export default function SplitHero({
   isPreview?: boolean;
 }) {
   const [isMoreOpen, setIsMoreOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const moreSheetRef = useRef<HTMLDivElement>(null);
   useHistoryBackClose(isMoreOpen && !isPreview, () => setIsMoreOpen(false));
   useSheetDrag(isMoreOpen && !isPreview, () => setIsMoreOpen(false), moreSheetRef, { maxWidth: 1023, variable: true });
@@ -31,17 +32,30 @@ export default function SplitHero({
   const [visible, setVisible] = useState(false);
   const displayName = splitDisplayName(setting(settings, "siteTitle"));
   const greeting = setting(settings, "heroGreeting");
-  const availableText = setting(settings, "heroAvailableText");
+  const availableText = String(settings.heroAvailableText ?? "").trim();
+  const locationText = String(settings.location ?? "").trim();
   const primaryCtaLabel = setting(settings, "heroPrimaryCtaLabel");
   const primaryCtaHref = setting(settings, "heroPrimaryCtaHref");
   const secondaryCtaLabel = setting(settings, "heroSecondaryCtaLabel");
   const secondaryCtaHref = setting(settings, "heroSecondaryCtaHref");
   const splitImage = heroImageFor(settings, "split_portrait");
   const primarySocials = heroSocialsFor(settings);
+  const highlights = heroHighlights(settings).slice(0, 2);
+  const portraitAnimate = settings.heroSplitPortraitAnimate !== false;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     setVisible(true);
   }, []);
+
+  useEffect(() => {
+    if (isPreview) return;
+    document.body.classList.toggle("hero-more-open", isMoreOpen);
+    return () => document.body.classList.remove("hero-more-open");
+  }, [isMoreOpen, isPreview]);
 
   useEffect(() => {
     if (roles.length <= 1) return;
@@ -106,31 +120,31 @@ export default function SplitHero({
           {/* ── LEFT — Text Content ── */}
           <div className={isPreview ? undefined : "hero-split-copy order-2 lg:order-1"} style={isPreview ? { order: 1 } : undefined}>
 
-            {/* Status pill */}
-            <div style={{ marginBottom: "1.75rem", ...delay(0) }}>
-              <div style={{
-                display: "inline-flex", alignItems: "center", gap: "0.5rem",
-                background: "rgba(34,197,94,0.08)",
-                border: "1px solid rgba(34,197,94,0.25)",
-                borderRadius: "9999px",
-                padding: "0.375rem 1rem",
-                fontSize: "0.8125rem", fontWeight: 600,
-              }}>
-                <span style={{
-                  width: "0.45rem", height: "0.45rem", borderRadius: "50%",
-                  background: "#22c55e", display: "inline-block",
-                  boxShadow: "0 0 6px #22c55e",
-                  animation: "pulse 2s infinite",
-                }} aria-hidden="true" />
-                <span style={{ color: "#16a34a" }}>{availableText}</span>
-                <span style={{ width: "1px", height: "0.85rem", background: "var(--color-border)" }} />
-                <RiMapPinLine size={12} style={{ color: "var(--color-text-3)" }} />
-                <span style={{ color: "var(--color-text-3)" }}>{settings.location}</span>
+            {/* Status pill — availability and/or location, no orphan icons */}
+            {availableText || locationText ? (
+            <div className="hero-split-status-wrap" style={{ marginBottom: "1.75rem", ...delay(0) }}>
+              <div className="hero-split-status">
+                {availableText ? (
+                  <>
+                    <span className="hero-split-status-dot" aria-hidden="true" />
+                    <span className="hero-split-status-available">{availableText}</span>
+                  </>
+                ) : null}
+                {availableText && locationText ? (
+                  <span className="hero-split-status-divider" aria-hidden="true" />
+                ) : null}
+                {locationText ? (
+                  <>
+                    <RiMapPinLine size={12} className="hero-split-status-pin" aria-hidden="true" />
+                    <span className="hero-split-status-location">{locationText}</span>
+                  </>
+                ) : null}
               </div>
             </div>
+            ) : null}
 
             {/* Greeting */}
-            <div style={delay(80)}>
+            <div className="hero-split-greeting" style={delay(80)}>
               <p style={{
                 fontFamily: "var(--font-heading)",
                 fontSize: "clamp(1rem, 2vw, 1.2rem)",
@@ -188,8 +202,8 @@ export default function SplitHero({
               </p>
             </div>
 
-            {/* Social icons */}
-            <div style={{ marginBottom: "2.25rem", ...delay(360) }}>
+            {/* Socials + CTAs — socials sit directly above the action row */}
+            <div className="hero-split-cta-wrap" style={delay(360)}>
               <div className="hero-split-socials">
                 {primarySocials.map((link) => {
                   const Icon = socialIcon(link.platform);
@@ -207,25 +221,21 @@ export default function SplitHero({
                   );
                 })}
               </div>
-            </div>
 
-            {/* CTAs */}
-            <div style={delay(440)}>
               <div
-                className={isPreview ? undefined : "hidden lg:flex"}
-                style={{ alignItems: "center", gap: "1rem", flexWrap: "wrap", display: isPreview ? "flex" : undefined }}
+                className={isPreview ? "hero-split-actions" : "hero-split-actions hidden lg:flex"}
+                style={{ alignItems: "center", gap: "0.85rem", flexWrap: "wrap", display: isPreview ? "flex" : undefined }}
               >
-                <Link href={primaryCtaHref} className="btn btn-primary btn-lg" style={{ fontWeight: 700 }}>
+                <Link href={primaryCtaHref} className="btn btn-primary btn-lg hero-split-cta">
                   {primaryCtaLabel}
                   <RiArrowRightLine size={18} />
                 </Link>
-                <Link href={secondaryCtaHref} className="btn btn-outline btn-lg" style={{ fontWeight: 600 }}>
+                <Link href={secondaryCtaHref} className="btn btn-outline btn-lg hero-split-cta">
                   {secondaryCtaLabel}
                 </Link>
                 <Link
                   href="/cv?source=homepage"
-                  className="btn btn-ghost"
-                  style={{ color: "var(--color-text-3)", fontWeight: 500 }}
+                  className="btn btn-ghost btn-lg hero-split-cta hero-split-cv"
                 >
                   View CV
                 </Link>
@@ -233,14 +243,14 @@ export default function SplitHero({
 
               {!isPreview && (
               <div className="hero-split-mobile-actions flex lg:hidden">
-                <Link href={primaryCtaHref} className="btn btn-primary">
+                <Link href={primaryCtaHref} className="btn btn-primary hero-split-cta">
                   {primaryCtaLabel}
                   <RiArrowRightLine size={16} />
                 </Link>
                 <button
                   type="button"
                   onClick={() => setIsMoreOpen(true)}
-                  className="btn btn-outline"
+                  className="btn btn-outline hero-split-cta"
                   aria-label="More actions"
                 >
                   More
@@ -252,7 +262,7 @@ export default function SplitHero({
 
           {/* ── RIGHT — Photo + floating badges ── */}
           <div
-            className={isPreview ? undefined : "flex justify-center order-1 lg:order-2"}
+            className={isPreview ? "hero-split-media" : "hero-split-media flex justify-center order-1 lg:order-2"}
             style={{
               display: "flex",
               justifyContent: "center",
@@ -262,154 +272,122 @@ export default function SplitHero({
               transition: "opacity 0.9s ease 200ms, transform 0.9s ease 200ms",
             }}
           >
-            <div className="hero-split-photo" style={{
-              position: "relative",
-              width: isPreview ? "32rem" : "min(100%, 32rem)",
-              height: isPreview ? "38rem" : "min(72vw, 34rem)",
-              display: "flex",
-              alignItems: "flex-end",
-              justifyContent: "center",
-            }}>
-              {/* Arch backdrop — light */}
-              <div aria-hidden="true" className="light-arch" style={{
-                position: "absolute", bottom: 0, left: "50%",
-                transform: "translateX(-50%)",
-                width: "90%", height: "95%",
-                borderRadius: "50% 50% 0 0 / 55% 55% 0 0",
-                background: "linear-gradient(160deg, #dbeafe 0%, #e0e7ff 50%, #ede9fe 100%)",
-                zIndex: 0,
-              }} />
-              {/* Arch backdrop — dark */}
-              <div aria-hidden="true" className="dark-arch" style={{
-                position: "absolute", bottom: 0, left: "50%",
-                transform: "translateX(-50%)",
-                width: "90%", height: "95%",
-                borderRadius: "50% 50% 0 0 / 55% 55% 0 0",
-                background: "linear-gradient(160deg, rgba(14,82,168,0.18) 0%, rgba(99,60,180,0.14) 100%)",
-                zIndex: 0, display: "none",
-              }} />
+            <div
+              className="hero-split-photo"
+              style={isPreview ? {
+                position: "relative",
+                width: "30rem",
+                height: "34rem",
+                display: "flex",
+                alignItems: "flex-end",
+                justifyContent: "center",
+              } : {
+                position: "relative",
+              }}
+            >
+              {/* Portal stage — soft niche, rings, sparks; person stands taller */}
+              <div className="hero-split-stage" aria-hidden="true">
+                <div className="hero-split-halo" />
+                <div className="hero-split-portal light-arch" />
+                <div className="hero-split-portal dark-arch" />
+                <div className="hero-split-ring is-outer" />
+                <div className="hero-split-ring is-mid" />
+                <div className="hero-split-ring is-inner" />
+                <span className="hero-split-spark is-a" />
+                <span className="hero-split-spark is-b" />
+                <span className="hero-split-spark is-c" />
+              </div>
 
-              {/* Glow ring */}
-              <div aria-hidden="true" style={{
-                position: "absolute", bottom: "0", left: "50%",
-                transform: "translateX(-50%)",
-                width: "88%", height: "92%",
-                borderRadius: "50% 50% 0 0 / 55% 55% 0 0",
-                border: "1px solid rgba(14,82,168,0.15)",
-                zIndex: 1,
-                boxShadow: "inset 0 0 30px rgba(14,82,168,0.04)",
-              }} />
-
-              {/* Photo */}
-              <div className="hero-split-shot" style={{ position: "relative", zIndex: 2, width: "88%", height: "98%", bottom: 0 }}>
+              {/* Photo sits in front and taller than the portal */}
+              <div className={portraitAnimate ? "hero-split-shot is-bobbing" : "hero-split-shot"}>
                 <ResilientCover
                   src={splitImage}
                   alt={heroPortraitAlt(settings)}
                   priority
-                  sizes="(max-width: 1024px) 92vw, 28rem"
+                  sizes="(max-width: 767px) 100vw, (max-width: 1100px) 70vw, 28rem"
                   className="hero-split-img"
                 />
               </div>
 
-              {heroHighlights(settings).slice(0, 2).map((item, index) => (
+              {highlights.map((item, index) => (
               <div
                 key={`${item.value}-${item.label}`}
-                className="hero-stat-card animate-float"
-                style={{
-                  position: "absolute",
-                  top: index === 0 ? "2rem" : "8rem",
-                  right: index === 0 ? "-0.5rem" : undefined,
-                  left: index === 1 ? "-0.5rem" : undefined,
-                  animationDelay: index === 0 ? "0.3s" : "1s",
-                  zIndex: 3,
-                  minWidth: "8.5rem",
-                  textAlign: "center",
-                }}
+                className={`hero-split-chip is-${index === 0 ? "right" : "left"}`}
+                style={{ animationDelay: index === 0 ? "0.4s" : "1.1s" }}
               >
-                <p style={{
-                  fontFamily: "var(--font-heading)", fontSize: "1rem",
-                  fontWeight: 800, color: "var(--hover-icon)", lineHeight: 1.2,
-                }}>{item.value}</p>
-                <p style={{ fontSize: "0.7rem", color: "var(--color-text-3)", marginTop: "0.25rem", fontWeight: 500 }}>
-                  {item.label}
-                </p>
+                <span className="hero-split-chip-accent" aria-hidden="true" />
+                <div className="hero-split-chip-copy">
+                  <p className="hero-split-chip-value">{item.value}</p>
+                  <p className="hero-split-chip-label">{item.label}</p>
+                </div>
               </div>
               ))}
             </div>
           </div>
         </div>
 
-        {/* Scroll indicator */}
+        {/* Scroll indicator — hidden when THE STORY cue is present (avoids overlap) */}
         {!isPreview && (
-        <div
-          style={{
-            position: "absolute", bottom: "-3rem", left: "50%",
-            transform: "translateX(-50%)",
-            display: "flex", flexDirection: "column", alignItems: "center", gap: "0.375rem",
-            opacity: visible ? 1 : 0,
-            transition: "opacity 1s ease 1200ms",
-          }}
-        >
-          <span style={{ fontSize: "0.7rem", color: "var(--color-text-3)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-            Scroll
-          </span>
-          <RiArrowDownLine
-            size={16}
-            style={{ color: "var(--color-text-3)", animation: "float 2s ease-in-out infinite" }}
-          />
+        <div className="hero-split-scroll" aria-hidden="true">
+          <span>Scroll</span>
+          <RiArrowDownLine size={16} />
         </div>
         )}
       </div>
 
-      {!isPreview && (
-      <>
-      {/* Mobile More Sheet */}
-      <div
-        aria-hidden={!isMoreOpen}
-        onClick={() => setIsMoreOpen(false)}
-        className="lg:hidden"
-        style={{
-          position: "fixed", inset: 0, zIndex: 999,
-          background: "rgba(0,0,0,0.5)", backdropFilter: "blur(6px)",
-          transition: "opacity 0.3s ease",
-          opacity: isMoreOpen ? 1 : 0,
-          pointerEvents: isMoreOpen ? "auto" : "none",
-        }}
-      />
-      <div
-        ref={moreSheetRef}
-        role="dialog" aria-modal="true" aria-label="More actions"
-        className="hero-more-sheet lg:hidden"
-        style={{
-          position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 1000,
-          background: "var(--color-bg)",
-          borderTop: "1px solid var(--color-border)",
-          boxShadow: "0 -12px 40px rgba(0,0,0,0.16)",
-          transform: `translateY(calc(${isMoreOpen ? "0px" : "100%"} + var(--sheet-drag, 0px)))`,
-          transition: "transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)",
-        }}
-      >
-        <div className="hero-more-handle" aria-hidden="true" />
-        <div className="hero-more-head">
-          <h3>More actions</h3>
-          <button type="button" className="hero-more-close" onClick={() => setIsMoreOpen(false)} aria-label="Close">
-            <RiCloseLine size={16} />
-          </button>
-        </div>
-        <div className="hero-more-list">
-          <Link href="/contact" className="btn btn-outline" onClick={() => setIsMoreOpen(false)}>
-            Contact
-          </Link>
-          <Link href="/cv?source=homepage" className="btn btn-outline" onClick={() => setIsMoreOpen(false)}>
-            View CV
-          </Link>
-          <Link href="/experience" className="btn btn-outline" onClick={() => setIsMoreOpen(false)}>
-            Experience
-          </Link>
-        </div>
-      </div>
-      </>
-      )}
+      {!isPreview && mounted
+        ? createPortal(
+            <>
+              <div
+                aria-hidden={!isMoreOpen}
+                onClick={() => setIsMoreOpen(false)}
+                className="hero-more-backdrop lg:hidden"
+                style={{
+                  position: "fixed",
+                  inset: 0,
+                  zIndex: 12040,
+                  background: "rgba(0,0,0,0.5)",
+                  backdropFilter: "blur(6px)",
+                  transition: "opacity 0.3s ease",
+                  opacity: isMoreOpen ? 1 : 0,
+                  pointerEvents: isMoreOpen ? "auto" : "none",
+                }}
+              />
+              <div
+                ref={moreSheetRef}
+                role="dialog"
+                aria-modal="true"
+                aria-label="More actions"
+                className="hero-more-sheet lg:hidden"
+                style={{
+                  position: "fixed",
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  zIndex: 12050,
+                  pointerEvents: isMoreOpen ? "auto" : "none",
+                  transform: `translateY(calc(${isMoreOpen ? "0px" : "100%"} + var(--sheet-drag, 0px)))`,
+                  transition: "transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)",
+                }}
+              >
+                <div className="hero-more-handle" aria-hidden="true" />
+                <p className="hero-more-title">More actions</p>
+                <div className="hero-more-list">
+                  <Link href="/experience" className="hero-more-item" onClick={() => setIsMoreOpen(false)}>
+                    Experience
+                  </Link>
+                  <Link href="/contact" className="hero-more-item" onClick={() => setIsMoreOpen(false)}>
+                    Contact
+                  </Link>
+                  <Link href="/cv?source=homepage" className="hero-more-item" onClick={() => setIsMoreOpen(false)}>
+                    View CV
+                  </Link>
+                </div>
+              </div>
+            </>,
+            document.body,
+          )
+        : null}
     </section>
   );
 }

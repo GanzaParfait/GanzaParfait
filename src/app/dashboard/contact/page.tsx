@@ -24,6 +24,7 @@ import {
 import { getLocalSettings, saveLocalSettings, fetchRemoteSettings } from "@/lib/supabase";
 import { resolvedSocials, socialIcon } from "@/lib/socials";
 import CustomSelect from "@/components/ui/CustomSelect";
+import MediaThumb from "@/components/ui/MediaThumb";
 import { useSectionHash } from "@/hooks/useSectionHash";
 
 type SectionId = "hero" | "cards" | "form" | "media" | "faq";
@@ -198,7 +199,7 @@ export default function ContactEditorPage() {
                   </div>
                 ))}
                 <button type="button" className="btn btn-outline btn-sm" onClick={() => openMedia("portrait")}>
-                  <RiImageAddLine size={15} /> Change portrait
+                  <RiImageAddLine size={15} /> Change portrait media
                 </button>
               </>
             )}
@@ -310,14 +311,33 @@ export default function ContactEditorPage() {
                 />
                 <Field label="Maps button label" value={content.media.mapsLabel} onChange={(mapsLabel) => patchMedia({ mapsLabel })} />
                 <Field label="Maps URL" value={content.media.mapsUrl} onChange={(mapsUrl) => patchMedia({ mapsUrl })} />
-                <button type="button" className="btn btn-outline btn-sm" onClick={() => openMedia("city")}>
-                  <RiImageAddLine size={15} /> Change city image
-                </button>
-                {content.media.cityImage ? (
-                  <button type="button" className="btn btn-outline btn-sm" onClick={() => patchMedia({ cityImage: "" })}>
-                    <RiDeleteBin6Line size={15} /> Clear city image
+                <p className="hp-note" style={{ margin: "0 0 0.35rem" }}>
+                  City card accepts an image or video.
+                </p>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.65rem", flexWrap: "wrap" }}>
+                  {content.media.cityImage ? (
+                    <MediaThumb
+                      src={content.media.cityImage}
+                      alt=""
+                      width={200}
+                      style={{
+                        width: "6.5rem",
+                        height: "4rem",
+                        borderRadius: "0.55rem",
+                        overflow: "hidden",
+                        border: "1px solid #dbe4f0",
+                      }}
+                    />
+                  ) : null}
+                  <button type="button" className="btn btn-outline btn-sm" onClick={() => openMedia("city")}>
+                    <RiImageAddLine size={15} /> Change city media
                   </button>
-                ) : null}
+                  {content.media.cityImage ? (
+                    <button type="button" className="btn btn-outline btn-sm" onClick={() => patchMedia({ cityImage: "" })}>
+                      <RiDeleteBin6Line size={15} /> Clear city image
+                    </button>
+                  ) : null}
+                </div>
               </>
             )}
 
@@ -416,6 +436,8 @@ export default function ContactEditorPage() {
 
       <MediaManagerModal
         isOpen={mediaOpen}
+        pickerMode="any"
+        title={mediaTarget === "portrait" ? "Media Library — Select portrait media" : "Media Library — Select city media"}
         onClose={() => setMediaOpen(false)}
         onSelect={(url) => {
           if (url.startsWith("blob:")) return;

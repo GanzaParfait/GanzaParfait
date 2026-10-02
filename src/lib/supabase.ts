@@ -86,6 +86,8 @@ export interface SiteSettings {
   heroOverlayMobilePositionX?: number;
   heroOverlayMobilePositionY?: number;
   heroOverlayMobileZoom?: number;
+  /** Cinematic overlay video starts muted when true (default). Visitors can unmute on the site. */
+  heroOverlayMuted?: boolean;
   /** Optional footer copy toggles / fields (empty text stays hidden). */
   footerShowBio?: boolean;
   footerShowEmail?: boolean;
@@ -196,6 +198,8 @@ export interface SiteSettings {
   heroStat3Label?: string;
   heroStat4Value?: string;
   heroStat4Label?: string;
+  /** Split Portrait only — slow vertical bob on the person. Default on. */
+  heroSplitPortraitAnimate?: boolean;
   hiddenHeroLayouts?: HeroLayoutType[];
   heroLayoutCopy?: Partial<Record<HeroLayoutType, HeroLayoutCopy>>;
   heroCarouselEnabled?: boolean;
@@ -244,6 +248,7 @@ export type HeroLayoutCopy = {
   heroStat4Label?: string;
   heroSocialIds?: string[];
   heroSocialLimit?: number;
+  heroSplitPortraitAnimate?: boolean;
 };
 
 export const DEFAULT_SETTINGS: SiteSettings = {
@@ -286,6 +291,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   heroOverlayMobilePositionX: 78,
   heroOverlayMobilePositionY: 12,
   heroOverlayMobileZoom: 100,
+  heroOverlayMuted: true,
   footerShowBio: true,
   footerShowEmail: true,
   footerShowPhone: true,
@@ -376,6 +382,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   heroStat3Label: "Company founded",
   heroStat4Value: "Speaker",
   heroStat4Label: "Talks & training",
+  heroSplitPortraitAnimate: true,
   hiddenHeroLayouts: [],
   identityRevision: 4,
 };

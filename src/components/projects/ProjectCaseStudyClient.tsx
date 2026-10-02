@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import ResilientCover from "@/components/work/ResilientCover";
+import ProjectMediaCover from "@/components/work/ProjectMediaCover";
 import {
   RiArrowLeftLine,
   RiArrowRightLine,
@@ -31,6 +32,7 @@ import ProjectTestimonials from "@/components/testimonials/ProjectTestimonials";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { isVideoUrl, listListedProjects } from "@/lib/projects";
 import { publicEvidence } from "@/lib/project-evidence";
+import { projectCover, projectCoverMedia, projectVideoPoster } from "@/components/work/work-media";
 
 function PosterVideo({ src, poster, title }: { src: string; poster?: string; title: string }) {
   const [ready, setReady] = useState(false);
@@ -172,17 +174,24 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
   const previous = index > 0 ? list[index - 1] : null;
   const next = index >= 0 && index < list.length - 1 ? list[index + 1] : null;
 
-  const cover = project.image && !project.image.includes("placeholder") ? project.image : undefined;
+  const coverMedia = projectCoverMedia(project);
+  const coverStill = coverMedia?.kind === "image" ? coverMedia.src : coverMedia?.poster || projectCover(project) || undefined;
+  const cover = coverStill;
   const category =
     project.category === "other" && project.categoryNote ? project.categoryNote : CATEGORY[project.category] || project.category;
   const flourish = (project.flourish || "").trim() || "Data People Impact";
 
   const mediaItems = useMemo<MediaItem[]>(() => {
     const pinned = (project.pinnedMedia || []).filter((src) => src && !src.includes("placeholder"));
-    const shots = (project.screenshots?.length ? project.screenshots : cover ? [cover] : []).filter(
+    const featured = project.image && !project.image.includes("placeholder") ? project.image : undefined;
+    const shots = (project.screenshots?.length ? project.screenshots : featured && !isVideoUrl(featured) ? [featured] : []).filter(
       (src) => src && !src.includes("placeholder"),
     );
-    const orderedImages = [cover, ...pinned.filter((src) => !isVideoUrl(src)), ...shots].filter(
+    const orderedImages = [
+      featured && !isVideoUrl(featured) ? featured : undefined,
+      ...pinned.filter((src) => !isVideoUrl(src)),
+      ...shots,
+    ].filter(
       (src, index, all): src is string => Boolean(src && !src.includes("placeholder") && all.indexOf(src) === index),
     );
     const images: MediaItem[] = orderedImages.map((src, absolute) => ({
@@ -191,7 +200,9 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
       caption: project.screenshotCaptions?.[absolute] || `View ${absolute + 1}`,
     }));
     const pinnedVideos = pinned.filter(isVideoUrl);
+    const featuredVideo = featured && isVideoUrl(featured) ? [featured] : [];
     const videos = [
+      ...featuredVideo,
       ...pinnedVideos,
       ...(project.videos?.length ? project.videos : project.video ? [project.video] : []),
     ].filter((src, index, all) => src && all.indexOf(src) === index);
@@ -200,8 +211,8 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
       src,
       caption: `Video ${videoIndex + 1}`,
     }));
-    return [...images, ...videoItems];
-  }, [cover, project.pinnedMedia, project.screenshotCaptions, project.screenshots, project.video, project.videos]);
+    return [...videoItems, ...images];
+  }, [project.image, project.pinnedMedia, project.screenshotCaptions, project.screenshots, project.video, project.videos]);
 
   const tabs = [
     {
@@ -309,19 +320,37 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
           </div>
           <div className="case-hero-visual">
             <div className="case-hero-glow" aria-hidden="true" />
-            <button
-              type="button"
+            <div
               className="case-hero-shot"
-              onClick={() => openPreview(0)}
+              role="button"
+              tabIndex={mediaItems.length || cover ? 0 : -1}
+              onClick={() => {
+                if (!mediaItems.length && !cover) return;
+                openPreview(0);
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  if (!mediaItems.length && !cover) return;
+                  openPreview(0);
+                }
+              }}
               aria-label={`View ${project.title} media`}
-              disabled={!mediaItems.length && !cover}
+              aria-disabled={!mediaItems.length && !cover}
             >
-              {cover ? (
-                <ResilientCover src={cover} alt={`${project.title} — work by Prince Parfait GANZA`} wide priority />
+              {coverMedia ? (
+                <ProjectMediaCover
+                  src={coverMedia.src}
+                  poster={coverMedia.poster || cover}
+                  alt={`${project.title} — work by Prince Parfait GANZA`}
+                  wide
+                  priority
+                  allowSound={coverMedia.kind === "video" && project.videoMuted === false}
+                />
               ) : (
                 <span>{project.title}</span>
               )}
-            </button>
+            </div>
             <p className="case-flourish" aria-hidden="true">
               {flourish}
             </p>
@@ -608,7 +637,7 @@ export default function ProjectCaseStudyClient({ project: seed }: { project: Pro
                 return (
                   <figure key={`${item.src}-${absolute}`} className={video ? "is-video" : undefined}>
                     {video ? (
-                      <PosterVideo src={item.src} poster={project.videoPoster || cover} title={`${project.title} ${item.caption}`} />
+                      <PosterVideo src={item.src} poster={projectVideoPoster(project) || cover} title={`${project.title} ${item.caption}`} />
                     ) : (
                       <button
                         type="button"

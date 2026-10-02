@@ -61,6 +61,8 @@ export type HomepageContent = {
     title: string;
     body: string;
     image: string;
+    /** When image is a video: start muted (default) or offer sound control. */
+    videoMuted?: boolean;
     points: HomePoint[];
     quote: string;
     attribution: string;
@@ -143,6 +145,8 @@ export type HomepageContent = {
     title: string;
     body: string;
     image: string;
+    /** When image is a video: start muted (default) or offer sound control. */
+    videoMuted?: boolean;
     brandName: string;
     brandTagline: string;
     brandNote: string;

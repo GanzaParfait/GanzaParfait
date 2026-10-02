@@ -296,6 +296,8 @@ export default function ProfilePage() {
 
       <MediaManagerModal
         isOpen={isMediaOpen}
+        pickerMode="any"
+        title="Media Library — Select media"
         onClose={() => setIsMediaOpen(false)}
         onSelect={handleMediaSelect}
       />

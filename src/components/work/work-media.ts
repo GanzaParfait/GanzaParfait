@@ -1,6 +1,7 @@
 import type { Project } from "@/data/site-data";
 import type { PreviewItem } from "@/components/ui/MediaPreview";
 import { isVideoUrl } from "@/lib/projects";
+import { cloudinaryVideoPosterUrl } from "@/lib/cloudinary-url";
 
 export const WORK_CATEGORY: Record<string, string> = {
   web: "Web app",
@@ -55,6 +56,65 @@ function uniqueMedia(list: unknown[]) {
   return strings.filter((src, index) => strings.indexOf(src) === index);
 }
 
+export type ProjectCoverMedia = {
+  src: string;
+  kind: "image" | "video";
+  poster?: string;
+};
+
+/** Resolved poster for a project video (explicit poster → Cloudinary frame → first still). */
+export function projectVideoPoster(project: Project, videoSrc?: string): string {
+  const explicit = asMediaSrc(project.videoPoster);
+  if (explicit && !explicit.includes("placeholder") && !isVideoUrl(explicit)) {
+    return cloudinaryVideoPosterUrl(explicit, { width: 1280 }) || explicit;
+  }
+
+  const video =
+    asMediaSrc(videoSrc) ||
+    (isVideoUrl(asMediaSrc(project.image)) ? asMediaSrc(project.image) : "") ||
+    asMediaSrc(project.video) ||
+    asMediaSrc(project.videos?.[0]);
+  if (video) {
+    const frame = cloudinaryVideoPosterUrl(video, { width: 1280 });
+    if (frame) return frame;
+  }
+
+  const still =
+    (project.pinnedMedia || []).map(asMediaSrc).find((src) => src && !isVideoUrl(src) && !src.includes("placeholder")) ||
+    (project.screenshots || []).map(asMediaSrc).find((src) => src && !isVideoUrl(src) && !src.includes("placeholder")) ||
+    "";
+  return still;
+}
+
+/** Featured cover for cards/hero — may be a video URL when the editor sets video as featured. */
+export function projectCoverMedia(project?: Project): ProjectCoverMedia | null {
+  if (!project) return null;
+  const image = asMediaSrc(project.image);
+  if (image && !image.includes("placeholder")) {
+    if (isVideoUrl(image)) {
+      return { src: image, kind: "video", poster: projectVideoPoster(project, image) || undefined };
+    }
+    return { src: image, kind: "image" };
+  }
+
+  const pinnedVideo = (project.pinnedMedia || []).map(asMediaSrc).find((src) => src && isVideoUrl(src));
+  if (pinnedVideo) {
+    return { src: pinnedVideo, kind: "video", poster: projectVideoPoster(project, pinnedVideo) || undefined };
+  }
+
+  const libraryVideo = asMediaSrc(project.video) || asMediaSrc(project.videos?.[0]);
+  if (libraryVideo && isVideoUrl(libraryVideo)) {
+    return { src: libraryVideo, kind: "video", poster: projectVideoPoster(project, libraryVideo) || undefined };
+  }
+
+  const pinned = (project.pinnedMedia || []).map(asMediaSrc).find((src) => src && !src.includes("placeholder") && !isVideoUrl(src));
+  if (pinned) return { src: pinned, kind: "image" };
+
+  const shot = (project.screenshots || []).map(asMediaSrc).find((src) => src && !src.includes("placeholder") && !isVideoUrl(src));
+  if (shot) return { src: shot, kind: "image" };
+  return null;
+}
+
 /** Pinned media first (homepage / cards), then screenshots and cover. */
 export function projectPreviewMedia(project?: Project): string[] {
   if (!project) return [];
@@ -77,26 +137,28 @@ export function mediaForProject(project: Project | undefined, images: string[]):
     }));
   const fromPinnedVideos = (project?.pinnedMedia || []).filter(isVideoUrl);
   const fromVideos = project?.videos?.length ? project.videos : project?.video ? [project.video] : [];
-  const videos = uniqueMedia([...fromPinnedVideos, ...fromVideos]).map((src) => ({
+  const featuredVideo = project?.image && isVideoUrl(project.image) ? [project.image] : [];
+  const videos = uniqueMedia([...featuredVideo, ...fromPinnedVideos, ...fromVideos]).map((src) => ({
     src,
     kind: "video" as const,
   }));
   const seen = new Set<string>();
-  return [...shots, ...videos].filter((item) => {
+  return [...videos, ...shots].filter((item) => {
     if (!item.src || seen.has(item.src)) return false;
     seen.add(item.src);
     return true;
   });
 }
 
-/** Featured image (`image`) is the default cover. Pinned and screenshots follow. */
+/**
+ * Still-image cover URL (OG, schema, legacy callers).
+ * When featured is a video, returns the poster frame — not the video URL.
+ */
 export function projectCover(project: Project) {
-  const image = asMediaSrc(project.image);
-  if (image && !image.includes("placeholder") && !isVideoUrl(image)) return image;
-  const pinned = (project.pinnedMedia || []).map(asMediaSrc).find((src) => src && !src.includes("placeholder") && !isVideoUrl(src));
-  if (pinned) return pinned;
-  const shots = (project.screenshots || []).map(asMediaSrc).filter((src) => src && !src.includes("placeholder") && !isVideoUrl(src));
-  return shots[0] || "";
+  const media = projectCoverMedia(project);
+  if (!media) return "";
+  if (media.kind === "video") return media.poster || "";
+  return media.src;
 }
 
 /** Caption for a still, matched to the screenshot library when one exists. */

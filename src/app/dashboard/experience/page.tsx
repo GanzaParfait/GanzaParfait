@@ -458,6 +458,8 @@ export default function ExperienceEditorPage() {
 
       <MediaManagerModal
         isOpen={mediaOpen}
+        pickerMode="any"
+        title="Media Library — Select media"
         onClose={() => setMediaOpen(false)}
         onSelect={(url) => {
           if (url.startsWith("blob:") || !active) return;

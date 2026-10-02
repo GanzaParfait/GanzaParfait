@@ -52,7 +52,7 @@ export default function FullCenteredHero({
             src={image}
             alt={portraitAlt}
             priority={!isPreview}
-            sizes="(max-width: 767px) 72vw, (max-width: 1100px) 40vw, 472px"
+            sizes="(max-width: 767px) 100vw, (max-width: 1100px) 52vw, 472px"
             className="hero-centered-photo"
           />
         </div>

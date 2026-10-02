@@ -53,6 +53,7 @@ export default function PageFloaters() {
   const [scrolled, setScrolled] = useState(false);
   const [atEnd, setAtEnd] = useState(false);
   const [cue, setCue] = useState("01 / Introduction");
+  const [chapterIndex, setChapterIndex] = useState(0);
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -77,6 +78,7 @@ export default function PageFloaters() {
       const hasNext = Boolean(nextSectionEl(nextChapters, currentIndex));
       setScrolled(window.scrollY > 280);
       setAtEnd(nearBottom || lastReached || !hasNext);
+      setChapterIndex(currentIndex < 0 ? 0 : currentIndex);
       if (current) {
         setCue(`${current.indexLabel} / ${current.label}`);
       } else {
@@ -123,9 +125,19 @@ export default function PageFloaters() {
     window.requestAnimationFrame(() => scrollTo(chapter.el));
   };
 
+  const onFirstSection = chapterIndex <= 0;
+  const floaterClass = [
+    "page-floaters",
+    atEnd ? "is-end" : "",
+    scrolled ? "has-top" : "",
+    onFirstSection ? "is-first" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <>
-      <div className={`page-floaters${atEnd ? " is-end" : ""}${scrolled ? " has-top" : ""}`}>
+      <div className={floaterClass}>
         <div className="section-advance-group">
           <button
             type="button"
@@ -175,6 +187,7 @@ export default function PageFloaters() {
                 aria-labelledby={titleId}
                 onMouseDown={(event) => event.stopPropagation()}
               >
+                <div className="chapter-sheet-handle" aria-hidden="true" />
                 <div className="chapter-sheet-head">
                   <div>
                     <p className="section-label">On this page</p>

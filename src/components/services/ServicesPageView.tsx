@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import ProjectMediaCover from "@/components/work/ProjectMediaCover";
 import ResilientCover from "@/components/work/ResilientCover";
 import Link from "next/link";
 import {
@@ -51,7 +52,7 @@ import {
   type ServicesPageContent,
 } from "@/lib/services-page";
 import { listListedProjects } from "@/lib/projects";
-import { selectedWorkCategory } from "@/components/work/work-media";
+import { projectCoverMedia, selectedWorkCategory } from "@/components/work/work-media";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { primaryEmail } from "@/lib/contact-emails";
 import { whatsappContactUrl } from "@/lib/whatsapp";
@@ -61,6 +62,8 @@ export type ServicesProjectCard = {
   title: string;
   description: string;
   image: string;
+  poster?: string;
+  allowSound?: boolean;
   organization?: string;
   tag?: string;
 };
@@ -188,14 +191,19 @@ export default function ServicesPageView({
   const projects = useMemo(
     () =>
       projectsOverride ||
-      catalog.map((project) => ({
-        id: project.id,
-        title: project.title,
-        description: project.description,
-        image: project.image || project.logo || "/images/projects/project-placeholder.png",
-        organization: project.organization,
-        tag: PROJECT_TAGS[project.id] || selectedWorkCategory(project),
-      })),
+      catalog.map((project) => {
+        const cover = projectCoverMedia(project);
+        return {
+          id: project.id,
+          title: project.title,
+          description: project.description,
+          image: cover?.src || project.image || project.logo || "/images/projects/project-placeholder.png",
+          poster: cover?.poster,
+          allowSound: cover?.kind === "video" && project.videoMuted === false,
+          organization: project.organization,
+          tag: PROJECT_TAGS[project.id] || selectedWorkCategory(project),
+        };
+      }),
     [catalog, projectsOverride],
   );
   const whatsappUrl =
@@ -559,10 +567,12 @@ export default function ServicesPageView({
                   data-advance-label={project.title}
                 >
                   <Link href={`/projects/${project.id}`} className="svc-work-media">
-                    <ResilientCover
+                    <ProjectMediaCover
                       src={project.image}
+                      poster={project.poster}
                       alt={`${project.title} — project by ${siteConfig.name}`}
                       sizes="(max-width: 860px) 92vw, 280px"
+                      allowSound={project.allowSound}
                     />
                   </Link>
                   <div className="svc-work-copy">

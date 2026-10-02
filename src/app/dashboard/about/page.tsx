@@ -474,6 +474,8 @@ export default function AboutEditorPage() {
 
       <MediaManagerModal
         isOpen={mediaOpen}
+        pickerMode="any"
+        title="Media Library — Select media"
         onClose={() => setMediaOpen(false)}
         onSelect={(url) => {
           if (!url.startsWith("blob:")) patchHero({ portrait: url });

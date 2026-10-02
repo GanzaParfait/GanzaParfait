@@ -1,6 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import { type Project } from "@/data/site-data";
 import { RiExternalLinkLine, RiGithubFill, RiArrowRightLine } from "react-icons/ri";
+import ProjectMediaCover from "@/components/work/ProjectMediaCover";
+import { projectCoverMedia } from "@/components/work/work-media";
 
 interface ProjectCardProps {
   project: Project;
@@ -30,14 +34,23 @@ const categoryLabels: Record<Project["category"], string> = {
 
 export default function ProjectCard({ project, featured = false }: ProjectCardProps) {
   const status = statusConfig[project.status];
+  const cover = projectCoverMedia(project);
 
   return (
     <article
       className={`card group relative flex flex-col h-full ${featured ? "p-7" : "p-6"}`}
       aria-label={`Project: ${project.title}`}
     >
-      {project.image && !project.image.includes("placeholder") ? (
-        <img src={project.image} alt="" loading="lazy" decoding="async" className="case-shot mb-4 rounded-xl border border-[var(--color-border)]" />
+      {cover ? (
+        <div className="case-shot mb-4 rounded-xl border border-[var(--color-border)] overflow-hidden" style={{ aspectRatio: "16 / 10" }}>
+          <ProjectMediaCover
+            src={cover.src}
+            poster={cover.poster}
+            alt=""
+            sizes="(max-width: 900px) 92vw, 420px"
+            allowSound={cover.kind === "video" && project.videoMuted === false}
+          />
+        </div>
       ) : null}
       {/* Status + Category */}
       <div className="flex items-center justify-between mb-4">

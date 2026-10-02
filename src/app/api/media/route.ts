@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isDashboardAuthorized } from "@/lib/admin-auth";
+import { isCloudinaryConfigured } from "@/lib/cloudinary";
 import { mediaMaxBytesFor, mediaMaxLabel } from "@/lib/media";
 import { listMediaAssets, mediaAdminClient, uploadMediaBuffer } from "@/lib/media-server";
 
@@ -14,7 +15,10 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = mediaAdminClient();
     const assets = await listMediaAssets(supabase);
-    return NextResponse.json({ assets });
+    return NextResponse.json({
+      assets,
+      cloudinary: isCloudinaryConfigured(),
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Could not load media.";
     return NextResponse.json({ error: message }, { status: 500 });
@@ -75,6 +79,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ assets });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Could not upload that file.";
+    console.error("[api/media] upload failed:", error);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

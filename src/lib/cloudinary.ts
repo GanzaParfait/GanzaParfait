@@ -1,6 +1,12 @@
 import { v2 as cloudinary } from "cloudinary";
 import { cloudinary as cloudinaryEnv } from "@/lib/env";
 
+export {
+  cloudinaryOptimizedUrl,
+  cloudinaryVideoDeliveryUrl,
+  cloudinaryVideoPosterUrl,
+} from "@/lib/cloudinary-url";
+
 let configured = false;
 
 function ensureConfigured() {
@@ -62,11 +68,12 @@ export async function uploadToCloudinary(
   }
 
   const folder = options.folder || "princeparfait/library";
-  const resourceType = options.mime?.startsWith("video/")
-    ? "video"
-    : options.mime?.startsWith("image/")
-      ? "image"
-      : "auto";
+  const looksVideo =
+    Boolean(options.mime?.startsWith("video/")) || /\.(mp4|webm|mov|m4v|ogg)$/i.test(options.filename);
+  const looksImage =
+    Boolean(options.mime?.startsWith("image/")) || /\.(jpe?g|png|gif|webp|avif|svg|bmp|ico)$/i.test(options.filename);
+  const resourceType = looksVideo ? "video" : looksImage ? "image" : "auto";
+  const isVideo = resourceType === "video";
 
   const result = await new Promise<{
     url: string;
@@ -86,19 +93,31 @@ export async function uploadToCloudinary(
         use_filename: true,
         unique_filename: true,
         overwrite: false,
-        quality: "auto:eco",
+        // Image-only upload knobs break some video uploads on Cloudinary.
+        ...(isVideo
+          ? {
+              eager_async: true,
+              eager: [{ format: "mp4", quality: "auto:good" }],
+            }
+          : {
+              quality: "auto:eco",
+              eager_async: !options.transformation,
+              eager:
+                !options.transformation
+                  ? [{ fetch_format: "auto", quality: "auto:eco" }]
+                  : undefined,
+            }),
         transformation: options.transformation,
-        eager_async: !options.transformation,
-        eager:
-          !options.transformation && resourceType === "image"
-            ? [{ fetch_format: "auto", quality: "auto:eco" }]
-            : undefined,
         context: `alt=${options.filename}|source=dashboard`,
-        tags: ["ppg", "library", "seo"],
+        tags: ["ppg", "library", "seo", isVideo ? "video" : "image"],
       },
       (error, uploadResult) => {
         if (error || !uploadResult) {
-          reject(error || new Error("Cloudinary upload failed."));
+          const message =
+            error && typeof error === "object" && "message" in error
+              ? String((error as { message?: string }).message || "Cloudinary upload failed.")
+              : "Cloudinary upload failed.";
+          reject(new Error(message));
           return;
         }
         resolve(uploadResult as {
@@ -128,17 +147,36 @@ export async function uploadToCloudinary(
   };
 }
 
-/** Insert SEO-friendly delivery transforms into a Cloudinary URL when possible. */
-export function cloudinaryOptimizedUrl(
-  url: string,
-  opts?: { width?: number; height?: number; crop?: "fill" | "limit" | "fit" },
-): string {
-  if (!url || !/res\.cloudinary\.com\//.test(url)) return url;
-  const crop = opts?.crop || "limit";
-  const parts: string[] = ["f_auto", "q_auto:good"];
-  if (opts?.width) parts.push(`w_${Math.round(opts.width)}`);
-  if (opts?.height) parts.push(`h_${Math.round(opts.height)}`);
-  if (opts?.width || opts?.height) parts.push(`c_${crop}`);
-  const transform = parts.join(",");
-  return url.replace("/upload/", `/upload/${transform}/`);
+export const CLOUDINARY_LIBRARY_FOLDER = "princeparfait/library";
+
+/** Signed params for browser → Cloudinary direct upload (real progress, no Next body limit). */
+export function createCloudinaryUploadSignature(options?: {
+  folder?: string;
+  resourceType?: "image" | "video" | "auto";
+}) {
+  if (!ensureConfigured()) {
+    throw new Error("Cloudinary is not configured.");
+  }
+  const folder = options?.folder || CLOUDINARY_LIBRARY_FOLDER;
+  const timestamp = Math.round(Date.now() / 1000);
+  // Keep the signed field set minimal — extra form fields that aren't signed will be rejected.
+  const paramsToSign: Record<string, string | number> = {
+    timestamp,
+    folder,
+  };
+  const signature = cloudinary.utils.api_sign_request(paramsToSign, cloudinary.config().api_secret as string);
+  const cloudName = cloudinary.config().cloud_name;
+  const apiKey = cloudinary.config().api_key;
+  if (!cloudName || !apiKey) {
+    throw new Error("Cloudinary cloud name or API key is missing.");
+  }
+  return {
+    cloudName: String(cloudName),
+    apiKey: String(apiKey),
+    timestamp,
+    signature,
+    folder,
+    resourceType: options?.resourceType || "auto",
+    uploadPreset: cloudinaryEnv.uploadPreset() || undefined,
+  };
 }

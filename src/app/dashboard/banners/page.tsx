@@ -20,10 +20,51 @@ import {
   settingsForLayout,
   visibleHeroLayouts,
 } from "@/lib/hero";
+import { isVideoUrl } from "@/lib/media";
+import { cloudinaryVideoPosterUrl } from "@/lib/cloudinary-url";
 import HeroEditorModal from "@/components/dashboard/HeroEditorModal";
 import MediaManagerModal from "@/components/dashboard/MediaManagerModal";
 import { useDashboardFeedback } from "@/components/dashboard/DashboardFeedback";
 import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
+
+function layoutCardPreview(src: string) {
+  if (!isVideoUrl(src)) {
+    return <img src={src} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }} />;
+  }
+  const poster = cloudinaryVideoPosterUrl(src, { width: 320 });
+  return (
+    <div style={{ position: "relative", width: "100%", height: "100%", background: "#0b1329" }}>
+      {poster ? (
+        <img src={poster} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} />
+      ) : (
+        <video
+          src={src}
+          muted
+          playsInline
+          preload="metadata"
+          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+        />
+      )}
+      <span
+        style={{
+          position: "absolute",
+          left: "0.35rem",
+          bottom: "0.35rem",
+          fontSize: "0.58rem",
+          fontWeight: 800,
+          letterSpacing: "0.04em",
+          textTransform: "uppercase",
+          color: "#fff",
+          background: "rgba(11,25,44,0.72)",
+          padding: "0.12rem 0.35rem",
+          borderRadius: "999px",
+        }}
+      >
+        Video
+      </span>
+    </div>
+  );
+}
 
 const menuItemStyle: CSSProperties = {
   width: "100%",
@@ -268,7 +309,7 @@ export default function BannersPage() {
                   flexShrink: 0,
                   border: "1px solid #e2e8f0",
                 }}>
-                  <img src={image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }} />
+                  {layoutCardPreview(image)}
                 </div>
                 <div style={{ minWidth: 0, flex: 1 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "0.45rem" }}>

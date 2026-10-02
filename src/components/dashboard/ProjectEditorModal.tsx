@@ -11,9 +11,15 @@ import {
   PROJECT_EVIDENCE_VERIFICATION,
   type ProjectEvidenceItem,
 } from "@/lib/project-evidence";
+import { isVideoUrl } from "@/lib/projects";
+import { cloudinaryVideoPosterUrl } from "@/lib/cloudinary-url";
 
 function projectVideos(project: Partial<Project>) {
   return project.videos?.length ? project.videos : project.video ? [project.video] : [];
+}
+
+function mediaIsVideo(src?: string) {
+  return Boolean(src && isVideoUrl(src));
 }
 
 function linesFromTextarea(value: string) {
@@ -811,7 +817,7 @@ export default function ProjectEditorModal({
                       <div key={`pin-${index}`} className="project-pin-slot">
                         {src ? (
                           <>
-                            {/\.(mp4|webm|ogg|mov)(\?|$)/i.test(src) ? (
+                            {mediaIsVideo(src) ? (
                               <video src={src} muted playsInline preload="metadata" />
                             ) : (
                               <img src={src} alt="" />
@@ -819,7 +825,16 @@ export default function ProjectEditorModal({
                             <button
                               type="button"
                               className="btn btn-ghost btn-sm"
-                              onClick={() => setFormData((prev) => ({ ...prev, image: src }))}
+                              onClick={() =>
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  image: src,
+                                  videoPoster:
+                                    mediaIsVideo(src)
+                                      ? prev.videoPoster || cloudinaryVideoPosterUrl(src, { width: 1280 }) || prev.image
+                                      : prev.videoPoster,
+                                }))
+                              }
                             >
                               {formData.image === src ? "Featured" : "Use as featured"}
                             </button>
@@ -862,14 +877,26 @@ export default function ProjectEditorModal({
                 </div>
               </div>
               <div>
-                <label style={{ ...labelStyle, marginBottom: "0.45rem" }}>Featured image &amp; stills</label>
+                <label style={{ ...labelStyle, marginBottom: "0.45rem" }}>Featured media &amp; stills</label>
                 <p style={{ margin: "0 0 0.55rem", fontSize: "0.75rem", color: "var(--color-text-3)" }}>
-                  The featured image is the default cover on cards and the case study. Choose it from a pinned still or any screenshot.
+                  Featured media is the cover on cards, homepage, services, and the case study hero. It can be an image or a video (with an optional poster frame).
                 </p>
                 <div style={{ display: "flex", gap: "0.7rem", alignItems: "stretch", flexWrap: "wrap" }}>
                   <div style={{ flex: "1 1 18rem", minHeight: "14rem", borderRadius: "0.85rem", overflow: "hidden", border: "1px solid var(--color-border)", background: "#0b192c" }}>
                     {formData.image && !formData.image.includes("placeholder") ? (
-                      <img src={formData.image} alt="" style={{ width: "100%", height: "14rem", objectFit: "cover" }} />
+                      mediaIsVideo(formData.image) ? (
+                        <video
+                          src={formData.image}
+                          poster={formData.videoPoster || cloudinaryVideoPosterUrl(formData.image, { width: 1280 }) || undefined}
+                          muted
+                          playsInline
+                          controls
+                          preload="metadata"
+                          style={{ width: "100%", height: "14rem", objectFit: "cover" }}
+                        />
+                      ) : (
+                        <img src={formData.image} alt="" style={{ width: "100%", height: "14rem", objectFit: "cover" }} />
+                      )
                     ) : (
                       <div style={{ height: "14rem", display: "grid", placeItems: "center", color: "#94a3b8", fontSize: "0.8rem" }}>Cover preview</div>
                     )}
@@ -930,14 +957,14 @@ export default function ProjectEditorModal({
               <div>
                 <label style={{ ...labelStyle, marginBottom: "0.45rem" }}>Videos</label>
                 <p style={{ margin: "0 0 0.55rem", fontSize: "0.75rem", color: "var(--color-text-3)" }}>
-                  Upload MP4/WebM from Media Manager. Videos render with a poster play control on the case study.
+                  Upload MP4/WebM from Media Manager. Set one as featured to autoplay a short teaser on cards and the case study hero.
                 </p>
                 <div style={{ display: "flex", gap: "0.7rem", flexWrap: "wrap" }}>
                   {projectVideos(formData).map((src, index) => (
                     <div key={`${src}-${index}`} style={{ width: "14rem" }}>
                       <video
                         src={src}
-                        poster={formData.videoPoster || formData.image}
+                        poster={formData.videoPoster || cloudinaryVideoPosterUrl(src, { width: 640 }) || formData.image}
                         controls
                         preload="metadata"
                         playsInline
@@ -949,8 +976,38 @@ export default function ProjectEditorModal({
                         onClick={() =>
                           setFormData((prev) => ({
                             ...prev,
+                            image: src,
+                            video: prev.video || src,
+                            videoPoster:
+                              prev.videoPoster ||
+                              cloudinaryVideoPosterUrl(src, { width: 1280 }) ||
+                              (prev.image && !mediaIsVideo(prev.image) ? prev.image : prev.videoPoster),
+                          }))
+                        }
+                      >
+                        {formData.image === src ? "Featured" : "Use as featured"}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm"
+                        onClick={() =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            videoPoster: cloudinaryVideoPosterUrl(src, { width: 1280 }) || prev.videoPoster,
+                          }))
+                        }
+                      >
+                        Use video frame as poster
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm"
+                        onClick={() =>
+                          setFormData((prev) => ({
+                            ...prev,
                             videos: projectVideos(prev).filter((_, videoIndex) => videoIndex !== index),
                             video: projectVideos(prev).filter((_, videoIndex) => videoIndex !== index)[0] || "",
+                            image: prev.image === src ? "" : prev.image,
                           }))
                         }
                       >
@@ -968,7 +1025,7 @@ export default function ProjectEditorModal({
                           ...prev,
                           videos: [...projectVideos(prev), url],
                           video: prev.video || url,
-                          videoPoster: prev.videoPoster || prev.image,
+                          videoPoster: prev.videoPoster || cloudinaryVideoPosterUrl(url, { width: 1280 }) || prev.image,
                         })),
                       )
                     }
@@ -978,20 +1035,74 @@ export default function ProjectEditorModal({
                 </div>
               </div>
             <div>
-                <label style={labelStyle}>Video poster image URL</label>
-                <div style={{ display: "flex", gap: "0.5rem" }}>
-              <input
+                <label style={labelStyle}>Video poster / thumbnail</label>
+                <p style={{ margin: "0 0 0.45rem", fontSize: "0.75rem", color: "var(--color-text-3)" }}>
+                  Optional still shown before the video plays. Leave empty to use the first Cloudinary frame automatically.
+                </p>
+                <div style={{ display: "flex", gap: "0.5rem", alignItems: "flex-start", flexWrap: "wrap" }}>
+                  {(formData.videoPoster ||
+                    (formData.image && mediaIsVideo(formData.image)
+                      ? cloudinaryVideoPosterUrl(formData.image, { width: 320 })
+                      : "")) && (
+                    <img
+                      src={
+                        formData.videoPoster ||
+                        (formData.image ? cloudinaryVideoPosterUrl(formData.image, { width: 320 }) : "") ||
+                        ""
+                      }
+                      alt=""
+                      style={{
+                        width: "5.5rem",
+                        height: "3.5rem",
+                        objectFit: "cover",
+                        borderRadius: "0.5rem",
+                        border: "1px solid var(--color-border)",
+                        background: "#07111f",
+                        flex: "0 0 auto",
+                      }}
+                    />
+                  )}
+                  <input
                     type="text"
-                    placeholder="/images/projects/… poster"
+                    placeholder="/images/projects/… poster or Cloudinary frame"
                     value={formData.videoPoster || ""}
                     onChange={(e) => set("videoPoster", e.target.value)}
-                    style={fieldStyle}
+                    style={{ ...fieldStyle, flex: "1 1 12rem" }}
                   />
                   <button type="button" className="btn btn-outline btn-sm" onClick={() => onPickMedia((url) => set("videoPoster", url))}>
                     Choose
                   </button>
+                  {mediaIsVideo(formData.image || formData.video) ? (
+                    <button
+                      type="button"
+                      className="btn btn-outline btn-sm"
+                      onClick={() => {
+                        const src = formData.image && mediaIsVideo(formData.image) ? formData.image : formData.video || projectVideos(formData)[0];
+                        if (!src) return;
+                        set("videoPoster", cloudinaryVideoPosterUrl(src, { width: 1280 }) || "");
+                      }}
+                    >
+                      Capture frame
+                    </button>
+                  ) : null}
                 </div>
               </div>
+              {mediaIsVideo(formData.image) || projectVideos(formData).length ? (
+                <div>
+                  <label style={labelStyle}>Video sound on cards &amp; case study</label>
+                  <p style={{ margin: "0 0 0.45rem", fontSize: "0.75rem", color: "var(--color-text-3)" }}>
+                    Browsers always start autoplay muted. Turn this off to show an unmute control for visitors.
+                  </p>
+                  <label style={{ display: "inline-flex", alignItems: "center", gap: "0.55rem", fontSize: "0.875rem", fontWeight: 600, cursor: "pointer" }}>
+                    <input
+                      type="checkbox"
+                      checked={formData.videoMuted !== false}
+                      onChange={(e) => set("videoMuted", e.target.checked)}
+                    />
+                    Start muted
+                  </label>
+                </div>
+              ) : null}
             </>
           )}
 

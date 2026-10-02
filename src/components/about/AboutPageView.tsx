@@ -24,6 +24,7 @@ import {
   type AboutValueIcon,
 } from "@/lib/about-page";
 import AnimatedSection from "@/components/ui/AnimatedSection";
+import AdaptiveMedia from "@/components/ui/AdaptiveMedia";
 import EngineeringToolkitSection from "@/components/about/EngineeringToolkitSection";
 import { siteConfig } from "@/data/site-data";
 
@@ -70,14 +71,13 @@ export default function AboutPageView({
             <span className="about-portrait-aura" aria-hidden />
             <div className="about-portrait-wrap">
               {page.hero.portrait ? (
-                <img
+                <AdaptiveMedia
                   src={page.hero.portrait}
                   alt={siteConfig.portraitAlt}
                   className="about-portrait"
                   width={480}
                   height={640}
-                  fetchPriority="high"
-                  decoding="async"
+                  objectFit="cover"
                 />
               ) : null}
               <span className="about-portrait-place">

@@ -34,33 +34,48 @@ export default function HeroSection() {
   const rotating = carouselLayouts(settings);
   const enabled = Boolean(settings.heroCarouselEnabled) && rotating.length > 1;
   const sequence = enabled ? rotating : [live];
+  const sequenceKey = sequence.join("|");
   const active = sequence[index] && sequence.includes(sequence[index]) ? sequence[index] : sequence[0];
   const intervalSeconds = Math.min(20, Math.max(4, settings.heroCarouselInterval || 8));
 
   useEffect(() => {
     const start = sequence.indexOf(live);
     setIndex(start >= 0 ? start : 0);
-  }, [live, sequence.join("|")]);
+  }, [live, sequenceKey]);
 
   useEffect(() => {
     if (sequence.length < 2 || paused) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced) return;
 
+    let cancelled = false;
+    let waitTimer = 0;
     let fadeTimer = 0;
-    const timer = window.setInterval(() => {
-      setFading(true);
-      fadeTimer = window.setTimeout(() => {
-        setIndex((current) => (current + 1) % sequence.length);
-        setFading(false);
-      }, 280);
-    }, intervalSeconds * 1000);
+    const fadeMs = 280;
+    const waitMs = intervalSeconds * 1000;
+
+    const scheduleNext = () => {
+      waitTimer = window.setTimeout(() => {
+        if (cancelled) return;
+        setFading(true);
+        fadeTimer = window.setTimeout(() => {
+          if (cancelled) return;
+          setIndex((current) => (current + 1) % sequence.length);
+          setFading(false);
+          // Schedule from completed transition so loop wrap never double-waits.
+          scheduleNext();
+        }, fadeMs);
+      }, waitMs);
+    };
+
+    scheduleNext();
 
     return () => {
-      window.clearInterval(timer);
+      cancelled = true;
+      window.clearTimeout(waitTimer);
       window.clearTimeout(fadeTimer);
     };
-  }, [sequence.length, paused, intervalSeconds, sequence.join("|")]);
+  }, [sequence.length, paused, intervalSeconds, sequenceKey]);
 
   const pauseOnFinePointer = () => {
     if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
@@ -80,11 +95,9 @@ export default function HeroSection() {
       <div className={fading ? "hero-carousel-fade is-fading" : "hero-carousel-fade"}>
         <HeroRenderer settings={settingsForLayout(settings, active)} />
       </div>
-      {sequence.length > 1 ? null : (
-        <a href="#manifesto" className="hero-story-cue">
-          <span>The story</span>
-        </a>
-      )}
+      <a href="#manifesto" className="hero-story-cue">
+        <span>The story</span>
+      </a>
     </div>
   );
 }

@@ -198,6 +198,8 @@ export type Project = {
   video?: string;
   videos?: string[];
   videoPoster?: string;
+  /** When featured media is video: start muted (default) or offer sound. Autoplay still starts muted in browsers. */
+  videoMuted?: boolean;
   documents?: string[];
   tagline?: string;
   highlights?: string[];

@@ -138,8 +138,8 @@ export function classifyMediaType(mime?: string | null, nameOrUrl?: string): Med
   const ext = fileExtension(nameOrUrl);
   const type = (mime || "").toLowerCase();
 
+  if (type.startsWith("video/") || inList(ext, VIDEO_EXT) || isVideoUrl(nameOrUrl)) return "video";
   if (type.startsWith("image/") || inList(ext, IMAGE_EXT)) return "image";
-  if (type.startsWith("video/") || inList(ext, VIDEO_EXT)) return "video";
   if (type === "application/pdf" || inList(ext, PDF_EXT)) return "pdf";
   if (
     type.includes("spreadsheet") ||
@@ -212,4 +212,22 @@ export function looksLikeMediaUrl(value: string) {
   } catch {
     return false;
   }
+}
+
+/** True for common video file URLs and Cloudinary video delivery paths. */
+export function isVideoUrl(src?: string | null) {
+  if (!src) return false;
+  const value = src.toLowerCase();
+  if (/\.(mp4|webm|ogg|mov|m4v)(\?|#|$)/i.test(value)) return true;
+  if (value.includes("res.cloudinary.com") && /[?&/,]f_mp4\b/.test(value)) return true;
+  // Cloudinary can derive a still from a video resource — treat those as images.
+  if (
+    value.includes("/video/") &&
+    (/\.(jpe?g|png|gif|webp|avif)(\?|#|$)/i.test(value) ||
+      /(?:^|[/,])(?:f_jpe?g|f_png|f_webp|f_avif)\b/i.test(value))
+  ) {
+    return false;
+  }
+  if (value.includes("/video/upload/") || value.includes("/video/")) return true;
+  return false;
 }

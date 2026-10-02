@@ -773,6 +773,12 @@ export default function SettingsPage() {
 
       <MediaManagerModal
         isOpen={mediaTarget !== null}
+        pickerMode={(settings.footerCompanyMediaType || "image") === "video" ? "video" : "image"}
+        title={
+          (settings.footerCompanyMediaType || "image") === "video"
+            ? "Media Library — Select a video"
+            : "Media Library — Select an image"
+        }
         onClose={() => setMediaTarget(null)}
         onSelect={(url) => {
           if (isBlobUrl(url)) return;

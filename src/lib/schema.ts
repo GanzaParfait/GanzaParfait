@@ -9,6 +9,7 @@ import {
   type Project,
 } from "@/data/site-data";
 import { IDENTITY_PORTRAIT_ALT, PORTRAIT_PATHS } from "@/lib/identity";
+import { isVideoUrl } from "@/lib/projects";
 
 /** Production canonical origin. Always used for JSON-LD @id values. */
 export const CANONICAL_ORIGIN =
@@ -632,7 +633,11 @@ export function buildCreativeWorkJsonLd(project: Project) {
             name: `${project.title} walkthrough`,
             description: project.description,
             contentUrl: absoluteAssetUrl(src),
-            thumbnailUrl: absoluteAssetUrl(project.videoPoster || project.image || OG_IMAGE_PATH),
+            thumbnailUrl: absoluteAssetUrl(
+              project.videoPoster ||
+                (project.image && !isVideoUrl(project.image) ? project.image : "") ||
+                OG_IMAGE_PATH,
+            ),
             uploadDate: project.year ? `${project.year}-01-01` : SITE_CONTENT_REVISED,
           })),
         }

@@ -2,7 +2,7 @@ import { randomUUID } from "crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   MEDIA_BUCKET,
-  MEDIA_MAX_FILE_BYTES,
+  MEDIA_MAX_VIDEO_BYTES,
   classifyMediaType,
   formatBytes,
   isAllowedLibraryFile,
@@ -13,7 +13,7 @@ import {
   type MediaAssetType,
   type MediaSource,
 } from "@/lib/media";
-import { isCloudinaryConfigured, uploadToCloudinary, cloudinaryOptimizedUrl } from "@/lib/cloudinary";
+import { isCloudinaryConfigured, uploadToCloudinary, cloudinaryOptimizedUrl, CLOUDINARY_LIBRARY_FOLDER } from "@/lib/cloudinary";
 import { createServerSupabase, hasServiceRoleKey } from "@/lib/supabase-server";
 
 export interface MediaAssetRow {
@@ -116,10 +116,18 @@ function storageError(error: { message?: string } | null, fallback: string) {
 
 export async function ensureMediaBucket(supabase: SupabaseClient) {
   const listed = await supabase.storage.listBuckets();
-  if (listed.data?.some((bucket) => bucket.name === MEDIA_BUCKET || bucket.id === MEDIA_BUCKET)) return;
+  const existing = listed.data?.find((bucket) => bucket.name === MEDIA_BUCKET || bucket.id === MEDIA_BUCKET);
+  if (existing) {
+    // Keep video-capable size limit on existing buckets (create-only path used to cap at 50MB).
+    await supabase.storage.updateBucket(MEDIA_BUCKET, {
+      public: true,
+      fileSizeLimit: MEDIA_MAX_VIDEO_BYTES,
+    });
+    return;
+  }
   const { error } = await supabase.storage.createBucket(MEDIA_BUCKET, {
     public: true,
-    fileSizeLimit: MEDIA_MAX_FILE_BYTES,
+    fileSizeLimit: MEDIA_MAX_VIDEO_BYTES,
   });
   if (error && !/already exists|duplicate/i.test(error.message)) {
     throw storageError(error, "Could not create the media bucket.");
@@ -205,6 +213,7 @@ export async function uploadMediaBuffer(
   const createdAt = new Date().toISOString();
 
   // Prefer Cloudinary for images/videos when configured (CDN + auto format/quality).
+  // Never fall back to Supabase for media files — that hits storage size limits and Vercel body caps.
   if (isCloudinaryConfigured() && (type === "image" || type === "video")) {
     const uploaded = await uploadToCloudinary(file.buffer, {
       filename: title,
@@ -214,7 +223,7 @@ export async function uploadMediaBuffer(
     const delivery =
       type === "image"
         ? cloudinaryOptimizedUrl(uploaded.secureUrl || uploaded.url, { width: 1920, crop: "limit" })
-        : uploaded.secureUrl || uploaded.url;
+        : cloudinaryOptimizedUrl(uploaded.secureUrl || uploaded.url);
 
     const asset: MediaAsset = {
       id,
@@ -234,11 +243,18 @@ export async function uploadMediaBuffer(
     try {
       const catalog = await readCatalog(supabase);
       await writeCatalog(supabase, [asset, ...catalog.filter((item) => item.id !== asset.id)]);
-    } catch {
-      // Cloudinary already holds the file; catalog sync is best-effort.
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "catalog write failed";
+      throw new Error(`Uploaded to Cloudinary, but library catalog sync failed (${message}).`);
     }
     void syncTableInsert(supabase, asset);
     return asset;
+  }
+
+  if (type === "image" || type === "video") {
+    throw new Error(
+      "Cloudinary is required for image and video uploads. Set NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET.",
+    );
   }
 
   await withRetry(() => ensureMediaBucket(supabase));
@@ -250,6 +266,11 @@ export async function uploadMediaBuffer(
       upsert: false,
     });
     if (uploadError && !/already exists|duplicate/i.test(uploadError.message)) {
+      if (/maximum allowed size|entity too large|payload too large/i.test(uploadError.message)) {
+        throw new Error(
+          `That file is larger than the storage bucket allows. Use Cloudinary (set CLOUDINARY_* env vars) for videos up to ${mediaMaxLabel(MEDIA_MAX_VIDEO_BYTES)}, or compress the file first.`,
+        );
+      }
       throw storageError(uploadError, "Could not store that file.");
     }
   });
@@ -278,6 +299,82 @@ export async function uploadMediaBuffer(
     throw error;
   }
 
+  void syncTableInsert(supabase, asset);
+  return asset;
+}
+
+/** Persist a browser→Cloudinary direct upload into the media catalog. */
+export async function registerCloudinaryAsset(
+  supabase: SupabaseClient,
+  input: {
+    publicId: string;
+    secureUrl: string;
+    bytes?: number;
+    resourceType?: string;
+    format?: string;
+    width?: number;
+    height?: number;
+    originalFilename?: string;
+    alt?: string;
+    mimeType?: string;
+  },
+): Promise<MediaAsset> {
+  const publicId = String(input.publicId || "").trim();
+  const secureUrl = String(input.secureUrl || "").trim();
+  if (!publicId || !secureUrl) {
+    throw new Error("Cloudinary upload result is incomplete.");
+  }
+  if (!publicId.startsWith(`${CLOUDINARY_LIBRARY_FOLDER}/`) && !publicId.startsWith("princeparfait/")) {
+    throw new Error("That Cloudinary asset is outside the media library folder.");
+  }
+  if (!/res\.cloudinary\.com\//i.test(secureUrl)) {
+    throw new Error("Delivery URL must be a Cloudinary URL.");
+  }
+
+  const resourceType = (input.resourceType || "").toLowerCase();
+  const looksVideo =
+    resourceType === "video" ||
+    /\.(mp4|webm|mov|m4v|ogg)$/i.test(input.originalFilename || publicId) ||
+    /\/video\/upload\//i.test(secureUrl);
+  const type: MediaAssetType = looksVideo ? "video" : "image";
+  const title = sanitizeFileName(input.originalFilename || publicId.split("/").pop() || "asset");
+  const mime =
+    input.mimeType ||
+    mimeFromName(title) ||
+    (looksVideo ? "video/mp4" : input.format ? `image/${input.format}` : "application/octet-stream");
+  const delivery =
+    type === "image"
+      ? cloudinaryOptimizedUrl(secureUrl, { width: 1920, crop: "limit" })
+      : cloudinaryOptimizedUrl(secureUrl);
+  const id = randomUUID();
+  const createdAt = new Date().toISOString();
+  const bytes = typeof input.bytes === "number" && input.bytes > 0 ? input.bytes : 0;
+
+  const asset: MediaAsset = {
+    id,
+    name: title,
+    url: delivery,
+    type,
+    size: formatBytes(bytes) || undefined,
+    sizeBytes: bytes || undefined,
+    uploadedAt: createdAt.slice(0, 10),
+    alt: input.alt || title.replace(/[-_]/g, " "),
+    source: "upload",
+    storagePath: `cloudinary:${publicId}`,
+    originalUrl: secureUrl,
+    mimeType: mime,
+  };
+
+  try {
+    await withRetry(() => ensureMediaBucket(supabase));
+    const catalog = await readCatalog(supabase);
+    await writeCatalog(supabase, [asset, ...catalog.filter((item) => item.id !== asset.id)]);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Could not save media catalog.";
+    throw new Error(
+      `Uploaded to Cloudinary, but the library catalog could not be updated (${message}). Retry once — the file is already on the CDN.`,
+    );
+  }
   void syncTableInsert(supabase, asset);
   return asset;
 }
@@ -331,9 +428,16 @@ export async function listMediaAssets(supabase: SupabaseClient): Promise<MediaAs
     unique.set(asset.id, asset);
   }
 
-  const merged = [...unique.values()].sort((a, b) => (b.uploadedAt || "").localeCompare(a.uploadedAt || ""));
+  const merged = [...unique.values()]
+    .map((asset) => {
+      // Heal legacy catalog rows that stored videos as "image" or lost mime type.
+      const healedType = classifyMediaType(asset.mimeType, `${asset.name} ${asset.url || ""} ${asset.originalUrl || ""}`);
+      return healedType !== asset.type ? { ...asset, type: healedType } : asset;
+    })
+    .sort((a, b) => (b.uploadedAt || "").localeCompare(a.uploadedAt || ""));
 
   // Heal incomplete catalogs so reopen always sees storage + catalog together.
+  // Prefer keeping Cloudinary-only catalog rows even when Supabase object storage is shorter.
   if (fromStorage.length && merged.length !== catalog.length) {
     try {
       await writeCatalog(supabase, merged);
@@ -359,7 +463,7 @@ async function syncTableDelete(supabase: SupabaseClient, id: string) {
 export async function deleteMediaAsset(supabase: SupabaseClient, id: string) {
   const catalog = await readCatalog(supabase);
   const asset = catalog.find((item) => item.id === id);
-  if (asset?.storagePath) {
+  if (asset?.storagePath && !asset.storagePath.startsWith("cloudinary:")) {
     await supabase.storage.from(MEDIA_BUCKET).remove([asset.storagePath]);
   }
   await writeCatalog(supabase, catalog.filter((item) => item.id !== id));

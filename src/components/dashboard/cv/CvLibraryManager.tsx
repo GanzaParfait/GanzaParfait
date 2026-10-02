@@ -177,35 +177,12 @@ export default function CvLibraryManager({
                       {doc.name.slice(0, 1).toUpperCase()}
                     </span>
                     <div className="cv-lib-card-titles">
-                      <h2>{doc.name}</h2>
-                      {doc.targetRole ? <p className="cv-lib-target">{doc.targetRole}</p> : null}
-                      {isDefault ? <p className="cv-lib-badge">Default public CV</p> : null}
-                    </div>
-                  </div>
-                  <div className="cv-lib-card-menu">
-                    <button
-                      type="button"
-                      className="cv-lib-icon-btn"
-                      aria-label="More actions"
-                      aria-expanded={menuId === doc.id}
-                      onClick={() => setMenuId((current) => (current === doc.id ? null : doc.id))}
-                    >
-                      <RiMore2Line size={18} />
-                    </button>
-                    {menuId === doc.id ? (
-                      <div className="cv-lib-menu" role="menu">
-                        <button type="button" role="menuitem" onClick={() => void setDefault(doc)}>
-                          {isDefault ? <RiStarFill size={14} /> : <RiStarLine size={14} />}
-                          {isDefault ? "Default public" : "Set as default public"}
-                        </button>
-                        <button type="button" role="menuitem" onClick={() => void duplicate(doc)}>
-                          <RiFileCopy2Line size={14} /> Duplicate
-                        </button>
-                        <button type="button" role="menuitem" className="is-danger" onClick={() => void remove(doc)}>
-                          <RiDeleteBinLine size={14} /> Delete
-                        </button>
+                      <div className="cv-lib-title-row">
+                        <h2>{doc.name}</h2>
+                        {isDefault ? <span className="cv-lib-badge">Default</span> : null}
                       </div>
-                    ) : null}
+                      {doc.targetRole ? <p className="cv-lib-target">{doc.targetRole}</p> : null}
+                    </div>
                   </div>
                 </div>
 
@@ -236,27 +213,46 @@ export default function CvLibraryManager({
                 {overflow ? <p className="cv-lib-warn">{overflow}</p> : null}
 
                 <div className="cv-lib-card-actions">
-                  <Link href={`/dashboard/cv/${doc.id}`} className="btn btn-primary btn-sm">
-                    <RiEditLine size={14} /> Edit
-                  </Link>
                   <Link
                     href={`/dashboard/cv/${doc.id}?tab=preview`}
                     className="btn btn-outline btn-sm"
-                    aria-label={`Preview ${doc.name}`}
-                    title="Preview"
                   >
-                    <RiEyeLine size={14} />
+                    <RiEyeLine size={14} /> Preview
                   </Link>
-                  <a
-                    className="btn btn-outline btn-sm"
-                    href={`/api/cv/pdf?doc=${encodeURIComponent(doc.id)}&download=1`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`Export ${doc.name} PDF`}
-                    title="Export PDF"
+                  <Link href={`/dashboard/cv/${doc.id}`} className="btn btn-primary btn-sm">
+                    <RiEditLine size={14} /> Edit
+                  </Link>
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm cv-lib-card-more"
+                    aria-label={`More actions for ${doc.name}`}
+                    aria-expanded={menuId === doc.id}
+                    onClick={() => setMenuId((current) => (current === doc.id ? null : doc.id))}
                   >
-                    <RiDownloadLine size={14} />
-                  </a>
+                    <RiMore2Line size={16} />
+                  </button>
+                  {menuId === doc.id ? (
+                    <div className="cv-lib-menu" role="menu">
+                      <button type="button" role="menuitem" onClick={() => void setDefault(doc)}>
+                        {isDefault ? <RiStarFill size={14} /> : <RiStarLine size={14} />}
+                        {isDefault ? "Default public" : "Set as default public"}
+                      </button>
+                      <button type="button" role="menuitem" onClick={() => void duplicate(doc)}>
+                        <RiFileCopy2Line size={14} /> Duplicate
+                      </button>
+                      <a
+                        role="menuitem"
+                        href={`/api/cv/pdf?doc=${encodeURIComponent(doc.id)}&download=1`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <RiDownloadLine size={14} /> Export PDF
+                      </a>
+                      <button type="button" role="menuitem" className="is-danger" onClick={() => void remove(doc)}>
+                        <RiDeleteBinLine size={14} /> Delete
+                      </button>
+                    </div>
+                  ) : null}
                 </div>
               </li>
             );

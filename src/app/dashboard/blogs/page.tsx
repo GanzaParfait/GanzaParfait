@@ -110,6 +110,8 @@ export default function BlogsPage() {
 
       <MediaManagerModal
         isOpen={isMediaOpen}
+        pickerMode="any"
+        title="Media Library — Select cover media"
         onClose={() => setIsMediaOpen(false)}
         onSelect={handleMediaSelect}
       />

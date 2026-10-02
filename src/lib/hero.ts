@@ -78,7 +78,11 @@ export function imageKeyFor(layout: HeroLayoutType): HeroImageKey {
 export function heroImageFor(settings: SiteSettings, layout?: HeroLayoutType): string {
   const id = layout || settings.bannerLayout || "split_portrait";
   const key = imageKeyFor(id);
-  return settings[key] || settings.heroImageUrl || LAYOUT_HERO_IMAGES[id];
+  const specific = settings[key]?.trim();
+  if (specific) return specific;
+  // Never fall back to the SEO portrait for cinematic overlay — that flashes a person photo before video.
+  if (id === "featured_overlay") return LAYOUT_HERO_IMAGES[id];
+  return settings.heroImageUrl || LAYOUT_HERO_IMAGES[id];
 }
 
 export type HeroEditorField =
@@ -102,7 +106,7 @@ export type HeroEditorField =
   | "heroSocials";
 
 export const LAYOUT_EDITOR_FIELDS: Record<HeroLayoutType, HeroEditorField[]> = {
-  split_portrait: ["image", "name", "greeting", "availability", "location", "roles", "bio", "primaryCta", "secondaryCta", "heroSocials"],
+  split_portrait: ["image", "name", "greeting", "availability", "location", "roles", "bio", "primaryCta", "secondaryCta", "heroSocials", "stat1", "stat2"],
   full_centered_floating: ["image", "name", "roles", "location", "email", "invite", "heroSocials", "stat1", "stat2", "stat3", "stat4"],
   featured_overlay: ["image", "availability", "location", "headline", "card", "primaryCta", "stat1", "stat2", "stat3", "stat4"],
 };
@@ -142,6 +146,7 @@ export const LAYOUT_COPY_KEYS = [
   "heroStat4Label",
   "heroSocialIds",
   "heroSocialLimit",
+  "heroSplitPortraitAnimate",
 ] as const;
 
 export function layoutCopyFrom(settings: SiteSettings): HeroLayoutCopy {

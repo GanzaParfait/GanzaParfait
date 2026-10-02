@@ -4,8 +4,10 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 import { RiArrowRightLine, RiExternalLinkLine, RiLockLine } from "react-icons/ri";
 import type { Project } from "@/data/site-data";
+import ProjectMediaCover from "@/components/work/ProjectMediaCover";
 import ResilientCover from "@/components/work/ResilientCover";
-import { selectedWorkCategory, selectedWorkTone } from "@/components/work/work-media";
+import { projectCoverMedia, selectedWorkCategory, selectedWorkTone } from "@/components/work/work-media";
+import { isVideoUrl } from "@/lib/projects";
 import { useAdaptiveGlow } from "@/hooks/useAdaptiveGlow";
 
 export default function WorkProjectCard({
@@ -44,7 +46,28 @@ export default function WorkProjectCard({
   const tone = selectedWorkTone(project);
   const live = project?.links?.live;
   const tech = (project?.technologies || []).filter(Boolean).slice(0, wide ? 4 : 3);
-  const glow = useAdaptiveGlow(wide ? cover : undefined);
+  const coverMedia = project
+    ? projectCoverMedia(project)
+    : cover
+      ? {
+          src: cover,
+          kind: (isVideoUrl(cover) ? "video" : "image") as "image" | "video",
+          poster: undefined as string | undefined,
+        }
+      : null;
+  const glowSrc = coverMedia?.kind === "video" ? coverMedia.poster || coverMedia.src : coverMedia?.src || cover;
+  const glow = useAdaptiveGlow(wide ? glowSrc : undefined);
+
+  const mediaNode = coverMedia ? (
+    <ProjectMediaCover
+      src={coverMedia.src}
+      poster={coverMedia.poster}
+      alt={`${title} — work by Prince Parfait GANZA`}
+      wide={wide}
+      priority={wide}
+      allowSound={coverMedia.kind === "video" && project?.videoMuted === false}
+    />
+  ) : null;
 
   return (
     <article
@@ -79,12 +102,12 @@ export default function WorkProjectCard({
                 ))}
               </ul>
             ) : null}
-            <div className="selected-actions">
+            <div className={live ? "selected-actions has-live" : "selected-actions"}>
               <Link href={href} className="btn btn-primary">
                 View case study <RiArrowRightLine size={16} />
               </Link>
               {live ? (
-                <a href={live} className="selected-live" target="_blank" rel="noopener noreferrer">
+                <a href={live} className="btn btn-outline selected-live" target="_blank" rel="noopener noreferrer">
                   Live site <RiExternalLinkLine size={15} />
                 </a>
               ) : null}
@@ -120,26 +143,28 @@ export default function WorkProjectCard({
         )}
       </div>
       <div className="selected-visual">
-        {cover ? (
+        {mediaNode ? (
           onPreview ? (
-            <button type="button" className="selected-shot" onClick={onPreview} aria-label={`Preview ${title}`}>
-              <ResilientCover
-                src={cover}
-                alt={`${title} — work by Prince Parfait GANZA`}
-                wide={wide}
-                priority={wide}
-              />
+            <div
+              className="selected-shot"
+              role="button"
+              tabIndex={0}
+              onClick={onPreview}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  onPreview();
+                }
+              }}
+              aria-label={`Preview ${title}`}
+            >
+              {mediaNode}
               {mediaCount > 1 ? <em>{mediaCount}</em> : null}
               {locked ? <ProgressMark /> : null}
-            </button>
+            </div>
           ) : (
             <Link href={href} className="selected-shot" aria-label={`Open ${title}`}>
-              <ResilientCover
-                src={cover}
-                alt={`${title} — work by Prince Parfait GANZA`}
-                wide={wide}
-                priority={wide}
-              />
+              {mediaNode}
               {mediaCount > 1 ? <em>{mediaCount}</em> : null}
               {locked ? <ProgressMark /> : null}
             </Link>

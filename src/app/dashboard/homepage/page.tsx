@@ -22,8 +22,9 @@ import { useDashboardFeedback } from "@/components/dashboard/DashboardFeedback";
 import ManifestoSection from "@/components/home/ManifestoSection";
 import SelectedWork, { resolveSelectedWork } from "@/components/home/SelectedWork";
 import ProjectOrderPicker from "@/components/dashboard/ProjectOrderPicker";
-import { mergeProjectCatalog } from "@/lib/projects";
+import { isVideoUrl, mergeProjectCatalog } from "@/lib/projects";
 import type { Project } from "@/data/site-data";
+import MediaThumb from "@/components/ui/MediaThumb";
 import KnowledgeSection from "@/components/home/KnowledgeSection";
 import JourneySection from "@/components/home/JourneySection";
 import PrinciplesSection from "@/components/home/PrinciplesSection";
@@ -605,22 +606,35 @@ export default function HomepageEditorPage() {
 
       <MediaManagerModal
         isOpen={mediaOpen}
+        pickerMode="any"
         onClose={() => {
           setMediaOpen(false);
           setMediaTarget(null);
         }}
         onSelect={(url) => {
           if (url.startsWith("blob:")) return;
-          if (mediaTarget === "manifesto") {
-            setContent({ ...content, manifesto: { ...content.manifesto, image: url } });
-          } else if (mediaTarget === "speaking") {
-            setContent({ ...content, speaking: { ...content.speaking, image: url } });
-          } else if (mediaTarget?.startsWith("journey:")) {
-            const entryId = mediaTarget.slice("journey:".length);
-            const entries = content.journey.entries.map((item) =>
-              item.id === entryId ? { ...item, logo: url } : item,
-            );
-            setContent({ ...content, journey: { ...content.journey, entries } });
+          const target = mediaTarget;
+          if (target === "manifesto") {
+            setContent((current) => ({
+              ...current,
+              manifesto: { ...current.manifesto, image: url },
+            }));
+          } else if (target === "speaking") {
+            setContent((current) => ({
+              ...current,
+              speaking: { ...current.speaking, image: url },
+            }));
+          } else if (target?.startsWith("journey:")) {
+            const entryId = target.slice("journey:".length);
+            setContent((current) => ({
+              ...current,
+              journey: {
+                ...current.journey,
+                entries: current.journey.entries.map((item) =>
+                  item.id === entryId ? { ...item, logo: url } : item,
+                ),
+              },
+            }));
           }
           setMediaOpen(false);
           setMediaTarget(null);
@@ -657,7 +671,34 @@ function OtherSectionFields({
               <Field label="Label" value={content.manifesto.label} onChange={(label) => setContent({ ...content, manifesto: { ...content.manifesto, label } })} />
               <Field label="Title" value={content.manifesto.title} onChange={(title) => setContent({ ...content, manifesto: { ...content.manifesto, title } })} />
               <Field label="Body" value={content.manifesto.body} area onChange={(body) => setContent({ ...content, manifesto: { ...content.manifesto, body } })} />
-        <button type="button" className="btn btn-outline btn-sm" onClick={onMedia}><RiImageAddLine size={15} /> Change portrait</button>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
+          {content.manifesto.image ? (
+            <MediaThumb
+              src={content.manifesto.image}
+              alt=""
+              width={160}
+              style={{ width: "4.5rem", height: "4.5rem", borderRadius: "0.65rem", overflow: "hidden", border: "1px solid #dbe4f0" }}
+            />
+          ) : null}
+          <button type="button" className="btn btn-outline btn-sm" onClick={onMedia}>
+            <RiImageAddLine size={15} /> Change media
+          </button>
+        </div>
+        {isVideoUrl(content.manifesto.image) ? (
+          <label style={{ display: "inline-flex", alignItems: "center", gap: "0.55rem", fontSize: "0.875rem", fontWeight: 600, cursor: "pointer" }}>
+            <input
+              type="checkbox"
+              checked={content.manifesto.videoMuted !== false}
+              onChange={(event) =>
+                setContent({
+                  ...content,
+                  manifesto: { ...content.manifesto, videoMuted: event.target.checked },
+                })
+              }
+            />
+            Start video muted
+          </label>
+        ) : null}
               <Field label="Quote" value={content.manifesto.quote} area onChange={(quote) => setContent({ ...content, manifesto: { ...content.manifesto, quote } })} />
               <Field label="Name" value={content.manifesto.attribution} onChange={(attribution) => setContent({ ...content, manifesto: { ...content.manifesto, attribution } })} />
               <Field label="Roles" value={content.manifesto.roles} onChange={(roles) => setContent({ ...content, manifesto: { ...content.manifesto, roles } })} />
@@ -863,7 +904,34 @@ function OtherSectionFields({
         <Field label="Cover title" value={content.speaking.coverTitle} onChange={(coverTitle) => setContent({ ...content, speaking: { ...content.speaking, coverTitle } })} />
         <Field label="Cover subtitle" value={content.speaking.coverSubtitle} onChange={(coverSubtitle) => setContent({ ...content, speaking: { ...content.speaking, coverSubtitle } })} />
         <Field label="Footer quote" value={content.speaking.footQuote} area onChange={(footQuote) => setContent({ ...content, speaking: { ...content.speaking, footQuote } })} />
-        <button type="button" className="btn btn-outline btn-sm" onClick={onMedia}><RiImageAddLine size={15} /> Change image</button>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
+          {content.speaking.image ? (
+            <MediaThumb
+              src={content.speaking.image}
+              alt=""
+              width={200}
+              style={{ width: "6rem", height: "7.5rem", borderRadius: "0.65rem", overflow: "hidden", border: "1px solid #dbe4f0" }}
+            />
+          ) : null}
+          <button type="button" className="btn btn-outline btn-sm" onClick={onMedia}>
+            <RiImageAddLine size={15} /> Change media
+          </button>
+        </div>
+        {isVideoUrl(content.speaking.image) ? (
+          <label style={{ display: "inline-flex", alignItems: "center", gap: "0.55rem", fontSize: "0.875rem", fontWeight: 600, cursor: "pointer" }}>
+            <input
+              type="checkbox"
+              checked={content.speaking.videoMuted !== false}
+              onChange={(event) =>
+                setContent({
+                  ...content,
+                  speaking: { ...content.speaking, videoMuted: event.target.checked },
+                })
+              }
+            />
+            Start video muted
+          </label>
+        ) : null}
         {content.speaking.stats.map((stat, index) => (
           <div key={`${stat.label}-${index}`} className="hp-mini-card">
             <Field

@@ -15,11 +15,11 @@ export default function CvLibraryPage() {
   }, []);
 
   if (!settings) {
-    return (
+  return (
       <div className="cv-lib" style={{ padding: "1.5rem" }}>
         <p className="cv-lib-lead">Loading CV library…</p>
-      </div>
-    );
+    </div>
+  );
   }
 
   return <CvLibraryManager initialSettings={{ ...DEFAULT_SETTINGS, ...settings }} />;
