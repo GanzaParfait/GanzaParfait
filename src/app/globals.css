@@ -919,7 +919,7 @@ code, pre {
 .hero-story-cue {
   position: absolute;
   left: 50%;
-  bottom: 1.1rem;
+  bottom: 0.75rem;
   z-index: 8;
   transform: translateX(-50%);
   display: inline-flex;
@@ -937,6 +937,14 @@ code, pre {
   width: 1px;
   height: 1.4rem;
   background: var(--color-primary);
+}
+/* Leave clear space between the invite line and THE STORY at the bottom of the hero. */
+.hero-carousel:has(> .hero-story-cue) .hero-centered-box {
+  padding-bottom: 5rem !important;
+}
+.hero-carousel:has(> .hero-story-cue) .hero-split:not(.hero-layout-preview),
+.hero-carousel:has(> .hero-story-cue) .hero-cinematic:not(.hero-layout-preview) {
+  padding-bottom: 4.5rem;
 }
 
 /* Default split hero — start under nav; do not vertically center (creates empty band) */
@@ -5247,8 +5255,12 @@ body.mobile-nav-open .subscribe-widget-layer {
     display: inline-flex;
     width: 100%;
     justify-content: center;
-    margin: 0.35rem 0 0;
-    padding: 1.35rem 1rem 0.85rem;
+    margin: 2rem 0 0.5rem;
+    padding: 0.25rem 1rem 0.75rem;
+  }
+
+  .hero-carousel:has(> .hero-story-cue) .hero-centered-box {
+    padding-bottom: 0.5rem !important;
   }
 
   .hero-cinematic:not(.hero-layout-preview) {
@@ -10445,9 +10457,8 @@ fieldset.hp-field {
       var(--color-surface)
     );
   box-shadow:
-    0 0 0 1px color-mix(in srgb, rgb(var(--selected-glow)) 12%, transparent),
-    0 28px 60px -20px rgba(var(--selected-glow), 0.38),
-    0 12px 28px -14px rgba(15, 23, 42, 0.08);
+    0 0 0 1px color-mix(in srgb, rgb(var(--selected-glow)) 10%, transparent),
+    var(--shadow-md);
 }
 .selected-card.is-compact {
   display: flex;
@@ -10661,8 +10672,8 @@ fieldset.hp-field {
   background:
     radial-gradient(
       ellipse 78% 72% at 58% 62%,
-      rgba(var(--selected-glow), 0.2),
-      rgba(var(--selected-glow), 0.06) 46%,
+      rgba(var(--selected-glow), 0.08),
+      rgba(var(--selected-glow), 0.03) 46%,
       transparent 74%
     );
 }
@@ -10698,12 +10709,10 @@ fieldset.hp-field {
   min-height: 16.5rem;
   max-height: none;
   margin: 0;
-  border: 0;
   border-radius: 1rem;
   overflow: hidden;
-  box-shadow:
-    0 22px 42px -8px rgba(var(--selected-glow), 0.7),
-    0 8px 18px -6px rgba(var(--selected-glow), 0.42);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 8%, var(--color-border));
+  box-shadow: var(--shadow-sm);
   background: var(--color-surface);
 }
 .selected-card.is-wide .selected-shot img,
@@ -10791,9 +10800,8 @@ fieldset.hp-field {
   border-radius: 0.7rem;
   overflow: hidden;
   background: var(--color-bg-2);
-  box-shadow:
-    0 14px 28px -16px rgba(var(--selected-glow), 0.45),
-    0 6px 14px -8px rgba(15, 23, 42, 0.18);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 8%, var(--color-border));
+  box-shadow: var(--shadow-sm);
 }
 .selected-related-name {
   display: -webkit-box;

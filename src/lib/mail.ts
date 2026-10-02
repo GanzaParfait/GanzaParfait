@@ -39,7 +39,9 @@ function bareEmail(address: string) {
 function formatFrom(address: string) {
   const email = bareEmail(address);
   if (!email) return address;
-  return `"${FROM_DISPLAY}" <${email}>`;
+  // noreply is site-branded; human mailboxes use the personal name.
+  const name = email === bareEmail(mailboxes.noreply()) ? "PrinceParfait.com" : FROM_DISPLAY;
+  return `"${name}" <${email}>`;
 }
 
 function smtpConfigured() {
@@ -151,22 +153,35 @@ async function sendWithSmtp(mail: OutboundMail) {
   if (!host) return false;
 
   const preferredFrom = mail.from || mailboxes.noreply();
-  const primary = smtpAuthForFrom(preferredFrom);
+  const preferredAddress = bareEmail(preferredFrom);
   const attempts: { from: string; user: string; pass: string }[] = [];
-  if (primary.user && primary.pass) {
-    attempts.push({ from: preferredFrom, user: primary.user, pass: primary.pass });
+  const seen = new Set<string>();
+  const pushAttempt = (from: string, user: string, pass: string) => {
+    const key = `${bareEmail(from)}|${user}`;
+    if (!user || !pass || seen.has(key)) return;
+    seen.add(key);
+    attempts.push({ from, user, pass });
+  };
+
+  // Prefer authenticating as the intended From mailbox (thanks@, hello@, …).
+  const primary = smtpAuthForFrom(preferredFrom);
+  pushAttempt(preferredFrom, primary.user, primary.pass);
+
+  const thanksUser = process.env.SMTP_THANKS_USER || mailboxes.thanks();
+  const thanksPass = smtpSecret(process.env.SMTP_THANKS_PASS || "");
+  if (preferredAddress === bareEmail(mailboxes.thanks())) {
+    pushAttempt(mailboxes.thanks(), thanksUser, thanksPass);
   }
 
-  const fallbackUser = process.env.SMTP_USER || "";
-  const fallbackPass = smtpSecret(process.env.SMTP_PASS || "");
   const helloUser = process.env.SMTP_HELLO_USER || mailboxes.hello();
   const helloPass = smtpSecret(process.env.SMTP_HELLO_PASS || "");
-  if (helloUser && helloPass && helloUser !== primary.user) {
-    attempts.push({ from: helloUser, user: helloUser, pass: helloPass });
-  }
-  if (fallbackUser && fallbackPass && fallbackUser !== primary.user && fallbackUser !== helloUser) {
-    attempts.push({ from: fallbackUser, user: fallbackUser, pass: fallbackPass });
-  }
+  // Last resorts: hello@ then the generic SMTP_USER. Hosting often requires From = auth user.
+  pushAttempt(helloUser, helloUser, helloPass);
+  pushAttempt(
+    process.env.SMTP_USER || "",
+    process.env.SMTP_USER || "",
+    smtpSecret(process.env.SMTP_PASS || ""),
+  );
 
   if (!attempts.length) {
     throw new Error(`SMTP auth missing for From ${preferredFrom}`);
@@ -176,8 +191,14 @@ async function sendWithSmtp(mail: OutboundMail) {
   for (const attempt of attempts) {
     try {
       const transporter = smtpTransport(attempt.user, attempt.pass);
+      // Keep the preferred From when the authenticated mailbox is that address;
+      // otherwise send as the authenticated mailbox (cPanel usually requires it).
+      const sendAs =
+        bareEmail(attempt.user) === preferredAddress || bareEmail(attempt.from) === preferredAddress
+          ? preferredFrom
+          : attempt.from;
       const info = await transporter.sendMail({
-        from: formatFrom(attempt.from),
+        from: formatFrom(sendAs),
         to: mail.to,
         subject: mail.subject,
         html: mail.html,
@@ -185,7 +206,7 @@ async function sendWithSmtp(mail: OutboundMail) {
         replyTo: mail.replyTo || mailboxes.replyTo(),
         headers: mail.headers,
       });
-      mail.from = bareEmail(attempt.from) || attempt.from;
+      mail.from = bareEmail(sendAs) || sendAs;
       console.info(
         `SMTP accepted to=${mail.to} from=${mail.from} id=${info.messageId || "?"} response=${info.response || "?"}`,
       );
@@ -274,11 +295,10 @@ export async function subscriberThanksMail(to: string, settings?: SiteSettings) 
   const withUnsub = { ...site, emailUnsubscribeUrl: unsubscribePathFor(to) };
   const content = welcomeEmailContent(emailBrandFromSettings(withUnsub));
   const unsub = unsubscribeLinkFor(to);
-  // Prefer hello@ — transactional welcome from a personal mailbox lands better than thanks@.
-  const from = mailboxes.hello() || mailboxes.thanks();
+  // Welcome / newsletter mail uses thanks@; Reply-To stays hello@ so people can write back.
   return {
     to,
-    from,
+    from: mailboxes.thanks(),
     replyTo: mailboxes.replyTo(),
     subject: `${content.title.replace(/!$/, "")} — ${site.siteTitle || "Prince Parfait GANZA"}`,
     text: brandEmailText(content, withUnsub),
@@ -340,7 +360,7 @@ export async function testimonialAckMail(
   };
   return {
     to: input.email,
-    from: mailboxes.hello() || mailboxes.thanks(),
+    from: mailboxes.thanks(),
     replyTo: mailboxes.replyTo(),
     subject: `Thanks for your testimonial — ${site.siteTitle || "Prince Parfait GANZA"}`,
     text: brandEmailText(content, site),
@@ -410,7 +430,7 @@ export async function testimonialPublishedMail(
   };
   return {
     to,
-    from: mailboxes.hello() || mailboxes.thanks(),
+    from: mailboxes.thanks(),
     replyTo: mailboxes.replyTo(),
     subject: `Your testimonial is published — ${site.siteTitle || "Prince Parfait GANZA"}`,
     text: brandEmailText(content, site),
@@ -423,7 +443,7 @@ export async function newsletterSampleMail(settings?: SiteSettings) {
   const content = newsletterEmailContent(emailBrandFromSettings(site));
   return {
     to: site.contactEmail || mailboxes.hello(),
-    from: mailboxes.noreply(),
+    from: mailboxes.thanks(),
     replyTo: mailboxes.replyTo(),
     subject: content.title,
     text: brandEmailText(content, site),
@@ -450,7 +470,7 @@ export async function bulkNewsletterMail(
   const unsub = unsubscribeLinkFor(input.to);
   return {
     to: input.to,
-    from: mailboxes.noreply(),
+    from: mailboxes.thanks(),
     replyTo: mailboxes.replyTo(),
     subject: input.subject,
     text: brandEmailText(content, withUnsub),

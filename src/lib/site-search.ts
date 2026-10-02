@@ -14,6 +14,8 @@ import {
   primaryBookingOption,
   type BookingSettingsSlice,
 } from "@/lib/booking";
+import { resolvedSocials, type SocialLink } from "@/lib/socials";
+import type { SiteSettings } from "@/lib/supabase";
 
 export type SiteSearchGroup =
   | "Quick"
@@ -24,7 +26,8 @@ export type SiteSearchGroup =
   | "Certifications"
   | "Services"
   | "Writing"
-  | "Speaking";
+  | "Speaking"
+  | "Social";
 
 export type SiteSearchItem = {
   id: string;
@@ -34,6 +37,8 @@ export type SiteSearchItem = {
   group: SiteSearchGroup;
   keywords: string;
   action?: "navigate" | "mailto" | "tel" | "external" | "booking";
+  /** Social platform id for icon lookup (instagram, linkedin, …). */
+  platform?: string;
 };
 
 function normalize(value: string) {
@@ -41,7 +46,7 @@ function normalize(value: string) {
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9@+.\s]/g, " ")
+    .replace(/[^a-z0-9@+.\s/_-]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -50,12 +55,81 @@ function reverseWords(value: string) {
   return value.split(/\s+/).reverse().join(" ");
 }
 
-export function buildSiteSearchIndex(bookingSettings?: BookingSettingsSlice | null): SiteSearchItem[] {
+/** Handles and aliases from a social URL for search (e.g. `_prince_parfait_`, `princeparfait`). */
+function socialHandleTokens(url: string): string[] {
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.replace(/^www\./, "");
+    const parts = parsed.pathname.split("/").filter(Boolean);
+    const last = (parts[parts.length - 1] || "").replace(/^@/, "");
+    const tokens = new Set<string>();
+    if (last) {
+      tokens.add(last);
+      tokens.add(last.replace(/^_+|_+$/g, "").replace(/_/g, " "));
+      tokens.add(last.replace(/[_-]/g, ""));
+    }
+    for (const part of parts) {
+      const clean = part.replace(/^@/, "");
+      if (clean && clean !== "user" && clean !== "in" && clean !== "channel") tokens.add(clean);
+    }
+    tokens.add(host.split(".")[0] || "");
+    return [...tokens].filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+function socialSearchItem(link: SocialLink): SiteSearchItem {
+  const handles = socialHandleTokens(link.url);
+  const platformAliases: Record<string, string> = {
+    twitter: "twitter x tweet",
+    buymeacoffee: "buymeacoffee coffee tip support",
+    linkedin: "linkedin linked in",
+    github: "github git hub code",
+    instagram: "instagram ig insta",
+    youtube: "youtube yt video",
+    tiktok: "tiktok",
+    threads: "threads",
+    whatsapp: "whatsapp wa chat",
+    luma: "luma events",
+    facebook: "facebook fb",
+  };
+  return {
+    id: `social-${link.id}`,
+    title: link.label,
+    subtitle: handles[0] ? `@${handles[0].replace(/^@/, "")}` : "Social profile",
+    href: link.url,
+    group: "Social",
+    action: "external",
+    platform: link.platform,
+    keywords: [
+      link.label,
+      link.platform,
+      platformAliases[link.platform] || "",
+      "social",
+      "profile",
+      "follow",
+      "princeparfait",
+      "prince parfait",
+      ...handles,
+    ].join(" "),
+  };
+}
+
+type SearchSettings = BookingSettingsSlice & {
+  socialLinks?: SiteSettings["socialLinks"];
+  whatsappNumber?: string;
+};
+
+export function buildSiteSearchIndex(settings?: SearchSettings | null): SiteSearchItem[] {
   const email = siteConfig.contact.email;
   const emailSecondary = siteConfig.contact.emailSecondary || "";
   const phone = "+250 792 054 846";
   const phoneDigits = "250792054846";
-  const booking = bookingSettings ? primaryBookingOption(bookingSettings) : null;
+  const booking = settings ? primaryBookingOption(settings) : null;
+  const socials = settings
+    ? resolvedSocials(settings as SiteSettings).filter((link) => link.enabled && link.url)
+    : [];
 
   const items: SiteSearchItem[] = [
     {
@@ -199,6 +273,10 @@ export function buildSiteSearchIndex(bookingSettings?: BookingSettingsSlice | nu
     },
   );
 
+  for (const social of socials) {
+    items.push(socialSearchItem(social));
+  }
+
   for (const project of projects) {
     items.push({
       id: `project-${project.id}`,
@@ -292,10 +370,10 @@ export function buildSiteSearchIndex(bookingSettings?: BookingSettingsSlice | nu
 export function searchSiteIndex(
   query: string,
   limit = 12,
-  bookingSettings?: BookingSettingsSlice | null,
+  settings?: SearchSettings | null,
 ): SiteSearchItem[] {
   const needle = normalize(query);
-  const index = buildSiteSearchIndex(bookingSettings);
+  const index = buildSiteSearchIndex(settings);
   if (!needle) {
     return index
       .filter((item) => item.group === "Quick" || item.group === "Navigate" || item.group === "Work")
@@ -311,6 +389,7 @@ export function searchSiteIndex(
       if (normalize(item.title).startsWith(needle)) score += 70;
       if (hay.includes(needle)) score += 45;
       if (item.group === "Quick" && hay.includes(needle)) score += 25;
+      if (item.group === "Social" && hay.includes(needle)) score += 20;
       for (const part of needle.split(" ")) {
         if (part.length >= 2 && hay.includes(part)) score += 10;
       }

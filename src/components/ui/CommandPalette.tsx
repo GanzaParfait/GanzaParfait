@@ -25,6 +25,7 @@ import { useSheetDrag } from "@/hooks/useSheetDrag";
 import { searchSiteIndex, type SiteSearchItem } from "@/lib/site-search";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { openBookingLink } from "@/lib/booking";
+import { socialIcon } from "@/lib/socials";
 
 const OPEN_EVENT = "pp:open-search";
 
@@ -34,6 +35,10 @@ export function openSiteSearch() {
 }
 
 function GroupIcon({ item }: { item: SiteSearchItem }) {
+  if (item.platform) {
+    const Icon = socialIcon(item.platform);
+    return <Icon size={16} />;
+  }
   if (item.action === "mailto") return <RiMailLine size={16} />;
   if (item.action === "tel") return <RiPhoneLine size={16} />;
   if (item.action === "booking" || item.id === "quick-booking") return <RiCalendarEventLine size={16} />;

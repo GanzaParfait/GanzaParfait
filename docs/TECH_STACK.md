@@ -134,7 +134,7 @@ EMAIL_HELLO=hello@princeparfait.com
 EMAIL_REPLY_TO=hello@princeparfait.com
 ```
 
-Subscriber thank-you mail is sent from `EMAIL_THANKS` after a successful `/api/subscribe`. Dashboard login uses `ADMIN_EMAIL` / `ADMIN_PASSWORD` via `/api/auth/login`.
+Subscriber thank-you and newsletter mail are sent from `EMAIL_THANKS` (`thanks@`), with `EMAIL_REPLY_TO` (`hello@`) so replies reach the personal inbox. Contact-form acknowledgements still send from `EMAIL_HELLO`. Automated admin notices use `EMAIL_NOREPLY`. Set `SMTP_THANKS_USER` / `SMTP_THANKS_PASS` so welcome mail authenticates as `thanks@` instead of falling back to `hello@`.
 
 ---
 
