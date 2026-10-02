@@ -9,7 +9,7 @@ import {
   RiArrowDownLine,
 } from "react-icons/ri";
 import { useState, useEffect, useRef } from "react";
-import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
+import { closeOverlayWithoutHistory, useHistoryBackClose } from "@/hooks/useHistoryBackClose";
 import { useSheetDrag } from "@/hooks/useSheetDrag";
 import { SiteSettings } from "@/lib/supabase";
 import { heroHighlights, heroImageFor, heroPortraitAlt, heroRoles, setting, splitDisplayName } from "@/lib/hero";
@@ -67,6 +67,11 @@ export default function SplitHero({
     return () => window.clearInterval(interval);
   }, [roles.length]);
 
+  const closeMoreForNav = () => {
+    closeOverlayWithoutHistory();
+    setIsMoreOpen(false);
+  };
+
   const delay = (ms: number) => ({
     opacity: visible ? 1 : 0,
     transform: visible ? "translateY(0)" : "translateY(28px)",
@@ -122,7 +127,7 @@ export default function SplitHero({
 
             {/* Status pill — availability and/or location, no orphan icons */}
             {availableText || locationText ? (
-            <div className="hero-split-status-wrap" style={{ marginBottom: "1.75rem", ...delay(0) }}>
+            <div className="hero-split-status-wrap" style={{ ...delay(0) }}>
               <div className="hero-split-status">
                 {availableText ? (
                   <>
@@ -373,13 +378,13 @@ export default function SplitHero({
                 <div className="hero-more-handle" aria-hidden="true" />
                 <p className="hero-more-title">More actions</p>
                 <div className="hero-more-list">
-                  <Link href="/experience" className="hero-more-item" onClick={() => setIsMoreOpen(false)}>
+                  <Link href="/experience" className="hero-more-item" onClick={closeMoreForNav}>
                     Experience
                   </Link>
-                  <Link href="/contact" className="hero-more-item" onClick={() => setIsMoreOpen(false)}>
+                  <Link href="/contact" className="hero-more-item" onClick={closeMoreForNav}>
                     Contact
                   </Link>
-                  <Link href="/cv?source=homepage" className="hero-more-item" onClick={() => setIsMoreOpen(false)}>
+                  <Link href="/cv?source=homepage" className="hero-more-item" onClick={closeMoreForNav}>
                     View CV
                   </Link>
                 </div>
