@@ -164,7 +164,6 @@ export function AnnouncementCard({
   const visuals = media.filter((item) => item.type !== "document");
   const documents = media.filter((item) => item.type === "document");
   const [index, setIndex] = useState(0);
-  const [paused, setPaused] = useState(false);
   const [holding, setHolding] = useState(false);
   const [videoPaused, setVideoPaused] = useState(false);
   const [muted, setMuted] = useState(true);
@@ -185,6 +184,7 @@ export function AnnouncementCard({
     settings.announcementLayout === "stack" || dock === "left" || dock === "right" ? "stack" : "side";
   const showMediaPanel = settings.announcementShowMedia !== false && visuals.length > 0;
   const sheetLayout = showMediaPanel ? layout : "stack";
+  const mediaOnRight = sheetLayout === "side" && settings.announcementMediaSide === "right";
   const isBottomSheet = !showMediaPanel && !preview && Boolean(onClose);
   const headline = settings.announcementHeadline?.trim() || settings.announcementText?.trim() || "Announcement";
   const detail = settings.announcementDetail?.trim() || "";
@@ -197,9 +197,8 @@ export function AnnouncementCard({
   const isVideoFrame = Boolean(frame?.type === "video" && !preview);
   const adminMuted = settings.announcementVideoMuted !== false;
   const allowSoundControl = !adminMuted;
-  const storyPaused = paused || holding;
-  // Hover pause is for image story bars only — video keeps playing unless held
-  const videoPlaying = Boolean(isVideoFrame && !videoPaused && !holding);
+  // Pause only while holding the media (WhatsApp-status style) — not on hover.
+  const storyPaused = holding;
   const platforms = settings.announcementShare === false ? [] : announcementSharePlatforms(settings);
   const mediaKicker = settings.announcementMediaKicker?.trim() || "";
   const mediaTitle = settings.announcementMediaTitle?.trim() || "";
@@ -238,7 +237,7 @@ export function AnnouncementCard({
     if (adminMuted) setMuted(true);
   }, [adminMuted, index]);
 
-  // Image slides: advance on dashboard interval (paused while holding / hover-pause)
+  // Image slides: advance on interval (paused only while holding media)
   useEffect(() => {
     if (preview || visuals.length < 2 || storyPaused || isVideoFrame) return;
     if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -451,14 +450,12 @@ export function AnnouncementCard({
   return (
     <div
       ref={sheetRef}
-      className={`announcement-sheet is-${sheetLayout}${showMediaPanel ? "" : " is-content-only"}${preview ? " is-preview" : ""}`}
+      className={`announcement-sheet is-${sheetLayout}${mediaOnRight ? " is-media-right" : ""}${showMediaPanel ? "" : " is-content-only"}${preview ? " is-preview" : ""}`}
       data-scroll-lock-allow={preview ? undefined : "true"}
       role={preview ? undefined : "dialog"}
       aria-modal={preview ? undefined : true}
       aria-labelledby={titleId}
       onClick={(event) => event.stopPropagation()}
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
       onTouchStart={isBottomSheet ? onSheetTouchStart : undefined}
       onTouchMove={isBottomSheet ? onSheetTouchMove : undefined}
       onTouchEnd={isBottomSheet ? onSheetTouchEnd : undefined}
@@ -546,10 +543,10 @@ export function AnnouncementCard({
           )
         ) : null}
 
-        {mediaTitle && !videoPlaying ? (
+        {mediaTitle || mediaKicker ? (
           <div className="announcement-media-copy">
             {mediaKicker ? <p className="announcement-media-kicker">{mediaKicker}</p> : null}
-            <p className="announcement-media-title">{accentMediaTitle(mediaTitle)}</p>
+            {mediaTitle ? <p className="announcement-media-title">{accentMediaTitle(mediaTitle)}</p> : null}
           </div>
         ) : null}
 
@@ -557,7 +554,8 @@ export function AnnouncementCard({
           <div className="announcement-media-meta">
             {dateShort ? (
               <span>
-                <RiCalendarLine size={13} aria-hidden="true" /> {dateShort}
+                <RiCalendarLine size={12} aria-hidden="true" />
+                <span>{dateShort}</span>
               </span>
             ) : null}
             {placeShort ? (
@@ -570,11 +568,13 @@ export function AnnouncementCard({
                   onClick={(event) => event.stopPropagation()}
                   onPointerDown={(event) => event.stopPropagation()}
                 >
-                  <RiMapPinLine size={13} aria-hidden="true" /> {placeShort}
+                  <RiMapPinLine size={12} aria-hidden="true" />
+                  <span>{placeShort}</span>
                 </a>
               ) : (
                 <span>
-                  <RiMapPinLine size={13} aria-hidden="true" /> {placeShort}
+                  <RiMapPinLine size={12} aria-hidden="true" />
+                  <span>{placeShort}</span>
                 </span>
               )
             ) : null}

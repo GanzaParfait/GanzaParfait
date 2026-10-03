@@ -19,8 +19,8 @@ function safeHref(raw: string): string | null {
   return null;
 }
 
-function linkifyPlain(escaped: string) {
-  return escaped.replace(
+function linkifyText(text: string) {
+  return text.replace(
     /(https?:\/\/[^\s<]+)|(www\.[^\s<]+)|([a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,})|(\+?\d[\d\s().-]{6,}\d)/gi,
     (match) => {
       const href = safeHref(match);
@@ -29,6 +29,11 @@ function linkifyPlain(escaped: string) {
       return `<a href="${href}"${external ? ' target="_blank" rel="noopener noreferrer"' : ""}>${match}</a>`;
     },
   );
+}
+
+/** Linkify only text nodes — never rewrite URLs already inside tags/attributes. */
+function linkifyPlain(html: string) {
+  return html.replace(/(^|>)([^<]+)/g, (_, prefix: string, text: string) => `${prefix}${linkifyText(text)}`);
 }
 
 function applyInlineMarkdown(escaped: string) {
@@ -66,14 +71,16 @@ export function wrapAnnouncementSelection(
   end: number,
   kind: "bold" | "italic" | "link",
   linkUrl?: string,
+  linkLabel?: string,
 ) {
-  const selected = value.slice(start, end) || (kind === "link" ? "link text" : "text");
+  const selected = value.slice(start, end);
   let next = "";
-  if (kind === "bold") next = `**${selected}**`;
-  else if (kind === "italic") next = `*${selected}*`;
+  if (kind === "bold") next = `**${selected || "text"}**`;
+  else if (kind === "italic") next = `*${selected || "text"}*`;
   else {
     const href = (linkUrl || "https://").trim() || "https://";
-    next = `[${selected}](${href})`;
+    const label = (linkLabel?.trim() || selected || href).trim() || href;
+    next = `[${label}](${href})`;
   }
   return {
     value: `${value.slice(0, start)}${next}${value.slice(end)}`,

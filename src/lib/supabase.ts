@@ -21,6 +21,8 @@ export type AnnouncementSharePlatform = "linkedin" | "twitter" | "facebook" | "w
 export type AnnouncementBarPosition = "top" | "bottom" | "left" | "right";
 /** Desktop-only: where the open announcement sheet docks. */
 export type AnnouncementModalDock = "center" | "left" | "right";
+/** Desktop side layout: which column holds media. Mobile always stacks media on top. */
+export type AnnouncementMediaSide = "left" | "right";
 
 export type AnnouncementMedia = {
   id: string;
@@ -132,6 +134,8 @@ export interface SiteSettings {
   announcementLayout?: "side" | "stack";
   /** Desktop sheet placement when the announcement opens. */
   announcementModalDock?: AnnouncementModalDock;
+  /** Desktop side layout only: media column on left (default) or right. */
+  announcementMediaSide?: AnnouncementMediaSide;
   announcementMedia?: AnnouncementMedia[];
   /** When false, hide the left media panel even if media exists. */
   announcementShowMedia?: boolean;
@@ -334,6 +338,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   announcementPlaceUrl: "",
   announcementLayout: "side",
   announcementModalDock: "center",
+  announcementMediaSide: "left",
   announcementShowMedia: true,
   announcementVideoMuted: true,
   announcementSecondaryLabel: "Add to Calendar",

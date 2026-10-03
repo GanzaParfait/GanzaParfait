@@ -4,11 +4,15 @@ import { useState, type ReactNode } from "react";
 import {
   RiAddLine,
   RiArrowDownSLine,
+  RiArrowRightLine,
+  RiComputerLine,
   RiDraggable,
   RiImageAddLine,
   RiLockLine,
   RiLockUnlockLine,
+  RiMegaphoneLine,
   RiSaveLine,
+  RiSmartphoneLine,
 } from "react-icons/ri";
 import MediaManagerModal from "@/components/dashboard/MediaManagerModal";
 import AnnouncementDetailEditor from "@/components/dashboard/AnnouncementDetailEditor";
@@ -23,6 +27,7 @@ import {
 import type {
   AnnouncementBarPosition,
   AnnouncementMedia,
+  AnnouncementMediaSide,
   AnnouncementModalDock,
   AnnouncementSharePlatform,
   SiteSettings,
@@ -45,6 +50,24 @@ const inputStyle = {
 } as const;
 
 type AccordionId = "banner" | "copy" | "event" | "media" | "share";
+type PreviewDevice = "desktop" | "mobile";
+
+const PREVIEW_DEVICES: { id: PreviewDevice; label: string; Icon: typeof RiComputerLine }[] = [
+  { id: "desktop", label: "Desktop", Icon: RiComputerLine },
+  { id: "mobile", label: "Mobile", Icon: RiSmartphoneLine },
+];
+
+function barPositionOf(settings: SiteSettings): AnnouncementBarPosition {
+  const value = settings.announcementBarPosition;
+  if (value === "bottom" || value === "left" || value === "right") return value;
+  return "top";
+}
+
+function modalDockOf(settings: SiteSettings): AnnouncementModalDock {
+  const value = settings.announcementModalDock;
+  if (value === "left" || value === "right") return value;
+  return "center";
+}
 
 export default function AnnouncementEditor({
   settings,
@@ -64,6 +87,8 @@ export default function AnnouncementEditor({
   const [openPanels, setOpenPanels] = useState<AccordionId[]>(["banner", "copy"]);
   const [replaceIndex, setReplaceIndex] = useState<number | null>(null);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [previewDevice, setPreviewDevice] = useState<PreviewDevice>("desktop");
+  const [stageSheetOpen, setStageSheetOpen] = useState(true);
   const media = settings.announcementMedia || [];
   const sharePlatforms = announcementSharePlatforms(settings);
   const shareOptions = announcementShareOptionsFromSettings(settings);
@@ -147,10 +172,110 @@ export default function AnnouncementEditor({
   useHistoryBackClose(editing, () => closeEditor(true));
   useLockPageScroll(editing);
 
+  const barPosition = barPositionOf(settings);
+  const isEdgeChip = barPosition === "left" || barPosition === "right";
+  const requestedDock = modalDockOf(settings);
+  const layoutIsStack = settings.announcementLayout === "stack" || requestedDock === "left" || requestedDock === "right";
+  const desktopDock =
+    layoutIsStack && (requestedDock === "left" || requestedDock === "right") ? requestedDock : "center";
+  const stageDock = previewDevice === "mobile" ? "center" : desktopDock;
+  const barText =
+    settings.announcementText?.trim() ||
+    settings.announcementHeadline?.trim() ||
+    settings.announcementEyebrow?.trim() ||
+    "Announcement";
+
   return (
     <div className="ann-editor-root">
-      <div className="ann-editor-preview">
-        <AnnouncementCard settings={settings} preview />
+      <div className="ann-live-preview">
+        <div className="ann-live-preview-top">
+          <p>Live preview</p>
+          <div className="hp-devices" role="group" aria-label="Preview device">
+            {PREVIEW_DEVICES.map((item) => {
+              const Icon = item.Icon;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={previewDevice === item.id ? "is-on" : undefined}
+                  onClick={() => setPreviewDevice(item.id)}
+                >
+                  <Icon size={14} />
+                  {item.label}
+                </button>
+              );
+            })}
+          </div>
+          <button
+            type="button"
+            className="btn btn-outline btn-sm"
+            onClick={() => setStageSheetOpen((open) => !open)}
+          >
+            {stageSheetOpen ? "Hide sheet" : "Show sheet"}
+          </button>
+        </div>
+
+        <div className="ann-live-preview-stage">
+          <div
+            className={`ann-live-frame is-${previewDevice}`}
+            data-device={previewDevice}
+            data-dock={stageDock}
+            data-bar={barPosition}
+          >
+            <div className="ann-live-site">
+              <div className="ann-live-site-bg">
+                <span className="ann-live-site-nav">About · Work · Experience · Services · Contact</span>
+                <span className="ann-live-site-hero">Portfolio surface</span>
+              </div>
+
+              {settings.announcementIsActive ? (
+                <button
+                  type="button"
+                  className={`announcement-bar is-${barPosition}${isEdgeChip ? " is-chip" : ""} is-stage`}
+                  onClick={() => setStageSheetOpen(true)}
+                  aria-label={isEdgeChip ? `Announcement: ${barText}` : undefined}
+                >
+                  {isEdgeChip ? (
+                    <>
+                      <span className="announcement-bar-mark" aria-hidden="true">
+                        <RiMegaphoneLine size={16} />
+                      </span>
+                      <span className="announcement-bar-copy">
+                        <span className="announcement-bar-title">{barText}</span>
+                        <span className="announcement-bar-cta">
+                          Continue <RiArrowRightLine size={14} />
+                        </span>
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span>{barText}</span>
+                      <span className="announcement-bar-cta">
+                        Continue <RiArrowRightLine size={14} />
+                      </span>
+                    </>
+                  )}
+                </button>
+              ) : (
+                <p className="ann-live-inactive">Banner is off — turn on “Show announcement banner”.</p>
+              )}
+
+              {stageSheetOpen ? (
+                <div
+                  className={`announcement-layer is-dock-${stageDock} is-stage is-device-${previewDevice}`}
+                  role="presentation"
+                  onClick={() => setStageSheetOpen(false)}
+                >
+                  <AnnouncementCard
+                    settings={settings}
+                    preview
+                    onClose={() => setStageSheetOpen(false)}
+                  />
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="ann-editor-gate">
@@ -443,7 +568,7 @@ export default function AnnouncementEditor({
                     <CustomSelect
                       value={settings.announcementLayout || "side"}
                       options={[
-                        { value: "side", label: "Details on the right" },
+                        { value: "side", label: "Side by side (desktop)" },
                         { value: "stack", label: "Details underneath" },
                       ]}
                       onChange={(value) => {
@@ -456,6 +581,20 @@ export default function AnnouncementEditor({
                       }}
                     />
                   </label>
+                  {(settings.announcementLayout || "side") === "side" ? (
+                    <label className="ann-field">
+                      Desktop media column
+                      <CustomSelect
+                        value={settings.announcementMediaSide || "left"}
+                        options={[
+                          { value: "left", label: "Media left · content right" },
+                          { value: "right", label: "Media right · content left" },
+                        ]}
+                        onChange={(value) => patch({ announcementMediaSide: value as AnnouncementMediaSide })}
+                      />
+                      <span className="ann-field-hint">Desktop only. Mobile always stacks media on top.</span>
+                    </label>
+                  ) : null}
                   <label className="ann-field">
                     Desktop modal position
                     <CustomSelect
@@ -530,8 +669,26 @@ export default function AnnouncementEditor({
                 </Accordion>
               </div>
 
-              <div className="ann-edit-preview" data-scroll-lock-allow="true">
-                <AnnouncementCard settings={settings} preview />
+              <div
+                className="ann-edit-preview"
+                data-scroll-lock-allow="true"
+                data-dock={
+                  settings.announcementLayout === "stack" &&
+                  (settings.announcementModalDock === "left" || settings.announcementModalDock === "right")
+                    ? settings.announcementModalDock
+                    : "center"
+                }
+              >
+                <div
+                  className={`ann-edit-stage is-dock-${
+                    settings.announcementLayout === "stack" &&
+                    (settings.announcementModalDock === "left" || settings.announcementModalDock === "right")
+                      ? settings.announcementModalDock
+                      : "center"
+                  }`}
+                >
+                  <AnnouncementCard settings={settings} preview />
+                </div>
               </div>
             </div>
           </div>
