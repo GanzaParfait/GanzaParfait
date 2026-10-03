@@ -3,6 +3,8 @@
 import { useCallback, useRef } from "react";
 import { RiCloseLine, RiZoomInLine, RiZoomOutLine } from "react-icons/ri";
 import { dismissOnBackdrop } from "@/hooks/useHistoryBackClose";
+import { mediaStillUrl } from "@/lib/cloudinary-url";
+import { isVideoUrl } from "@/lib/media";
 
 const ZOOM_MIN = 100;
 const ZOOM_MAX = 180;
@@ -24,6 +26,10 @@ export default function HeroMobileFocusModal({
   y,
   zoom,
   saving = false,
+  /** phone = tall hero frame; wide = speaking / landscape card */
+  frame = "phone",
+  title = "Place the person in frame",
+  eyebrow = "Image focus",
   onChange,
   onClose,
   onApply,
@@ -33,6 +39,9 @@ export default function HeroMobileFocusModal({
   y: number;
   zoom: number;
   saving?: boolean;
+  frame?: "phone" | "wide";
+  title?: string;
+  eyebrow?: string;
   onChange: (next: { x: number; y: number; zoom: number }) => void;
   onClose: () => void;
   onApply: (next: { x: number; y: number; zoom: number }) => void;
@@ -40,6 +49,7 @@ export default function HeroMobileFocusModal({
   const surface = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
   const safeZoom = clampZoom(zoom);
+  const previewSrc = mediaStillUrl(image, { width: 900, isVideo: isVideoUrl(image) }) || image;
 
   const applyPoint = useCallback(
     (clientX: number, clientY: number) => {
@@ -84,13 +94,13 @@ export default function HeroMobileFocusModal({
         className="hero-focus-modal"
         role="dialog"
         aria-modal="true"
-        aria-label="Position the mobile hero image"
+        aria-label={title}
         onMouseDown={(event) => event.stopPropagation()}
       >
         <div className="hero-focus-head">
           <div>
-            <p>Mobile image focus</p>
-            <h2>Place the person in frame</h2>
+            <p>{eyebrow}</p>
+            <h2>{title}</h2>
           </div>
           <button type="button" className="hero-focus-close" onClick={onClose} aria-label="Close">
             <RiCloseLine size={18} />
@@ -99,16 +109,16 @@ export default function HeroMobileFocusModal({
 
         <div
           ref={surface}
-          className="hero-focus-frame"
+          className={`hero-focus-frame${frame === "wide" ? " is-wide" : ""}`}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}
         >
-          {image ? (
+          {previewSrc ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={image}
+              src={previewSrc}
               alt=""
               draggable={false}
               style={{
@@ -118,7 +128,7 @@ export default function HeroMobileFocusModal({
               }}
             />
           ) : (
-            <span>Choose a banner image first.</span>
+            <span>Choose an image first.</span>
           )}
           <em>Drag to reposition</em>
         </div>

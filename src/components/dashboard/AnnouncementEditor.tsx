@@ -1,8 +1,17 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { RiAddLine, RiArrowDownSLine, RiImageAddLine, RiLockLine, RiLockUnlockLine, RiSaveLine, RiVideoAddLine } from "react-icons/ri";
+import {
+  RiAddLine,
+  RiArrowDownSLine,
+  RiDraggable,
+  RiImageAddLine,
+  RiLockLine,
+  RiLockUnlockLine,
+  RiSaveLine,
+} from "react-icons/ri";
 import MediaManagerModal from "@/components/dashboard/MediaManagerModal";
+import AnnouncementDetailEditor from "@/components/dashboard/AnnouncementDetailEditor";
 import { AnnouncementCard, AnnouncementOverlay } from "@/components/layout/AnnouncementBar";
 import {
   ANNOUNCEMENT_SHARE_MAX,
@@ -11,11 +20,18 @@ import {
   fileName,
   mediaKind,
 } from "@/lib/announcement";
-import type { AnnouncementBarPosition, AnnouncementMedia, AnnouncementSharePlatform, SiteSettings } from "@/lib/supabase";
+import type {
+  AnnouncementBarPosition,
+  AnnouncementMedia,
+  AnnouncementModalDock,
+  AnnouncementSharePlatform,
+  SiteSettings,
+} from "@/lib/supabase";
 import CustomSelect from "@/components/ui/CustomSelect";
 import SocialMultiSelect from "@/components/ui/SocialMultiSelect";
 import { resolvedSocials } from "@/lib/socials";
 import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
+import { useLockPageScroll } from "@/hooks/useLockPageScroll";
 
 const inputStyle = {
   width: "100%",
@@ -42,17 +58,16 @@ export default function AnnouncementEditor({
   saving?: boolean;
 }) {
   const [mediaOpen, setMediaOpen] = useState(false);
-  const [kind, setKind] = useState<AnnouncementMedia["type"]>("image");
   const [fullPreview, setFullPreview] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editUnlocked, setEditUnlocked] = useState(Boolean(settings.announcementIsActive));
   const [openPanels, setOpenPanels] = useState<AccordionId[]>(["banner", "copy"]);
-  const [replaceCoverMode, setReplaceCoverMode] = useState(false);
+  const [replaceIndex, setReplaceIndex] = useState<number | null>(null);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
   const media = settings.announcementMedia || [];
   const sharePlatforms = announcementSharePlatforms(settings);
   const shareOptions = announcementShareOptionsFromSettings(settings);
   const canEdit = editUnlocked;
-  const pickerMode = kind === "video" ? "video" : kind === "image" ? "image" : "any";
 
   const applyAndSave = (next: Partial<SiteSettings>) => {
     const merged = { ...next };
@@ -70,31 +85,47 @@ export default function AnnouncementEditor({
     onSave?.(merged);
   };
 
+  const syncLegacyImage = (list: AnnouncementMedia[]) => {
+    const firstImage = list.find((item) => item.type === "image");
+    return firstImage?.url || "";
+  };
+
   const addMedia = (url: string) => {
     if (!url || url.startsWith("blob:")) return;
-    const detected = mediaKind(url);
-    const type: AnnouncementMedia["type"] =
-      kind === "video" ? "video" : kind === "document" ? "document" : detected === "video" ? "video" : detected === "document" ? "document" : "image";
+    const type = mediaKind(url);
     const item: AnnouncementMedia = {
       id: `${Date.now()}`,
       type,
       url,
       name: fileName(url),
     };
+    const next = [...media, item];
     patch({
-      announcementMedia: [...media, item],
-      announcementImage: settings.announcementImage || (type === "image" ? url : settings.announcementImage),
+      announcementMedia: next,
+      announcementImage: syncLegacyImage(next) || settings.announcementImage,
     });
   };
 
-  const replaceCover = (url: string) => {
-    if (!url || url.startsWith("blob:")) return;
+  const replaceMediaAt = (url: string, index: number) => {
+    if (!url || url.startsWith("blob:") || index < 0 || index >= media.length) return;
     const type = mediaKind(url);
-    const cover: AnnouncementMedia = { id: `cover-${Date.now()}`, type, url, name: fileName(url) };
-    const rest = media.slice(1);
+    const next = media.map((item, i) =>
+      i === index ? { id: item.id, type, url, name: fileName(url) } : item,
+    );
     patch({
-      announcementMedia: [cover, ...rest],
-      announcementImage: type === "image" ? url : settings.announcementImage,
+      announcementMedia: next,
+      announcementImage: syncLegacyImage(next),
+    });
+  };
+
+  const moveMedia = (from: number, to: number) => {
+    if (to < 0 || to >= media.length || from === to) return;
+    const next = [...media];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    patch({
+      announcementMedia: next,
+      announcementImage: syncLegacyImage(next),
     });
   };
 
@@ -103,7 +134,9 @@ export default function AnnouncementEditor({
   };
 
   const togglePanel = (id: AccordionId) => {
-    setOpenPanels((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]));
+    setOpenPanels((current) =>
+      current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
+    );
   };
 
   const closeEditor = (save = false) => {
@@ -112,6 +145,7 @@ export default function AnnouncementEditor({
   };
 
   useHistoryBackClose(editing, () => closeEditor(true));
+  useLockPageScroll(editing);
 
   return (
     <div className="ann-editor-root">
@@ -171,7 +205,7 @@ export default function AnnouncementEditor({
             </header>
 
             <div className="ann-edit-grid">
-              <div className="ann-edit-form">
+              <div className="ann-edit-form" data-scroll-lock-allow="true">
                 <Accordion
                   id="banner"
                   title="Banner"
@@ -193,6 +227,8 @@ export default function AnnouncementEditor({
                       options={[
                         { value: "top", label: "Top of site" },
                         { value: "bottom", label: "Bottom of site" },
+                        { value: "left", label: "Left edge chip" },
+                        { value: "right", label: "Right edge chip" },
                       ]}
                       onChange={(value) => patch({ announcementBarPosition: value as AnnouncementBarPosition })}
                     />
@@ -213,12 +249,14 @@ export default function AnnouncementEditor({
                     onChange={(announcementHeadline) => patch({ announcementHeadline })}
                     placeholder="Uses the bar text if empty"
                   />
-                  <Field
-                    label="Detail"
-                    value={settings.announcementDetail || ""}
-                    area
-                    onChange={(announcementDetail) => patch({ announcementDetail })}
-                  />
+                  <label className="ann-field is-tall">
+                    Detail
+                    <AnnouncementDetailEditor
+                      value={settings.announcementDetail || ""}
+                      onChange={(announcementDetail) => patch({ announcementDetail })}
+                      placeholder={"Event overview…\n• Lists and line breaks keep as typed\n• Select text → Link for maps or RSVP URLs"}
+                    />
+                  </label>
                   <Field
                     label="Closing line"
                     value={settings.announcementClosing || ""}
@@ -238,6 +276,12 @@ export default function AnnouncementEditor({
                     <Field label="Time" value={settings.announcementTime || ""} onChange={(announcementTime) => patch({ announcementTime })} />
                   </div>
                   <Field label="Place" value={settings.announcementPlace || ""} onChange={(announcementPlace) => patch({ announcementPlace })} />
+                  <Field
+                    label="Place map / location link"
+                    value={settings.announcementPlaceUrl || ""}
+                    onChange={(announcementPlaceUrl) => patch({ announcementPlaceUrl })}
+                    placeholder="https://maps.google.com/… or Google Maps share link"
+                  />
                   <Field
                     label="Audience line"
                     value={settings.announcementAudience || ""}
@@ -260,7 +304,10 @@ export default function AnnouncementEditor({
                     />
                     Show media panel (image / video)
                   </label>
-                  <p style={{ margin: "0 0 0.75rem", fontSize: "0.72rem", color: "#64748b", lineHeight: 1.45 }}>
+                  <p
+                    className="ann-field-hint"
+                    style={{ margin: "0 0 0.75rem", lineHeight: 1.45, overflowWrap: "anywhere" }}
+                  >
                     When off — or when no image/video is uploaded — the modal uses a content-only layout
                     instead of an empty blue panel.
                   </p>
@@ -301,97 +348,84 @@ export default function AnnouncementEditor({
                     placeholder="Leave empty to use date/time"
                   />
                   <div className="ann-media-tools">
-                    <CustomSelect
-                      value={kind}
-                      options={[
-                        { value: "image", label: "Image" },
-                        { value: "video", label: "Video" },
-                        { value: "document", label: "Document" },
-                      ]}
-                      onChange={(value) => setKind(value as AnnouncementMedia["type"])}
-                      className="dash-cselect-sm"
-                    />
                     <button
                       type="button"
                       className="btn btn-outline btn-sm"
                       onClick={() => {
-                        setReplaceCoverMode(false);
+                        setReplaceIndex(null);
                         setMediaOpen(true);
                       }}
                     >
-                      {kind === "video" ? <RiVideoAddLine size={15} /> : <RiImageAddLine size={15} />}
-                      {kind === "video" ? "Add video" : kind === "document" ? "Add file" : "Add image"}
+                      <RiImageAddLine size={15} />
+                      Add media
                     </button>
-                    {media[0] ? (
-                      <button
-                        type="button"
-                        className="btn btn-ghost btn-sm"
-                        onClick={() => {
-                          setKind(media[0].type === "video" ? "video" : media[0].type === "document" ? "document" : "image");
-                          setReplaceCoverMode(true);
-                          setMediaOpen(true);
-                        }}
-                      >
-                        Change cover
-                      </button>
-                    ) : null}
+                    <span className="ann-media-tools-hint">Images, videos, or files — drag to reorder</span>
                   </div>
                   {!media.length ? (
                     <button
                       type="button"
                       className="ann-media-empty"
                       onClick={() => {
-                        setReplaceCoverMode(false);
+                        setReplaceIndex(null);
                         setMediaOpen(true);
                       }}
-                    >                      <RiAddLine size={18} />
-                      <span>Browse media library to add an image or video</span>
+                    >
+                      <RiAddLine size={18} />
+                      <span>Browse media library — add images, videos, or files</span>
                     </button>
                   ) : (
                     <div className="ann-media-list">
                       {media.map((item, index) => (
-                        <div key={item.id} className="ann-media-row">
+                        <div
+                          key={item.id}
+                          className={`ann-media-row${dragIndex === index ? " is-dragging" : ""}`}
+                          draggable
+                          onDragStart={() => setDragIndex(index)}
+                          onDragOver={(event) => event.preventDefault()}
+                          onDrop={() => {
+                            if (dragIndex === null) return;
+                            moveMedia(dragIndex, index);
+                            setDragIndex(null);
+                          }}
+                          onDragEnd={() => setDragIndex(null)}
+                        >
+                          <span className="ann-media-handle" aria-hidden="true" title="Drag to reorder">
+                            <RiDraggable size={16} />
+                          </span>
                           {item.type === "image" ? (
                             <img src={item.url} alt="" />
-                          ) : item.type === "video" ? (
-                            <span className="ann-media-badge">video</span>
                           ) : (
                             <span className="ann-media-badge">{item.type}</span>
                           )}
-                          <em>
-                            {index === 0 ? "Cover · " : ""}
+                          <em title={item.name || item.url}>
+                            {index === 0 && item.type !== "document" ? "First · " : ""}
                             {item.name || item.url}
                           </em>
-                          {index === 0 ? (
+                          <div className="ann-media-row-actions">
                             <button
                               type="button"
                               className="btn btn-ghost btn-sm"
                               onClick={() => {
-                                setKind(item.type === "video" ? "video" : "image");
-                                setReplaceCoverMode(true);
+                                setReplaceIndex(index);
                                 setMediaOpen(true);
                               }}
                             >
                               Change
                             </button>
-                          ) : null}
-                          <button
-                            type="button"
-                            className="btn btn-ghost btn-sm"
-                            onClick={() =>
-                              patch({
-                                announcementMedia: media.filter((entry) => entry.id !== item.id),
-                                announcementImage:
-                                  index === 0
-                                    ? media[1]?.type === "image"
-                                      ? media[1].url
-                                      : ""
-                                    : settings.announcementImage,
-                              })
-                            }
-                          >
-                            Remove
-                          </button>
+                            <button
+                              type="button"
+                              className="btn btn-ghost btn-sm"
+                              onClick={() => {
+                                const next = media.filter((entry) => entry.id !== item.id);
+                                patch({
+                                  announcementMedia: next,
+                                  announcementImage: syncLegacyImage(next),
+                                });
+                              }}
+                            >
+                              Remove
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -412,9 +446,43 @@ export default function AnnouncementEditor({
                         { value: "side", label: "Details on the right" },
                         { value: "stack", label: "Details underneath" },
                       ]}
-                      onChange={(value) => patch({ announcementLayout: value as "side" | "stack" })}
+                      onChange={(value) => {
+                        const layout = value as "side" | "stack";
+                        patch({
+                          announcementLayout: layout,
+                          // Side dock only supports the stack sheet
+                          ...(layout === "side" ? { announcementModalDock: "center" as AnnouncementModalDock } : null),
+                        });
+                      }}
                     />
                   </label>
+                  <label className="ann-field">
+                    Desktop modal position
+                    <CustomSelect
+                      value={
+                        settings.announcementLayout === "stack"
+                          ? settings.announcementModalDock || "center"
+                          : "center"
+                      }
+                      options={[
+                        { value: "center", label: "Center of screen" },
+                        { value: "left", label: "From left sidebar (underneath layout)" },
+                        { value: "right", label: "From right sidebar (underneath layout)" },
+                      ]}
+                      onChange={(value) => {
+                        const dock = value as AnnouncementModalDock;
+                        patch({
+                          announcementModalDock: dock,
+                          ...(dock === "left" || dock === "right"
+                            ? { announcementLayout: "stack" as const }
+                            : null),
+                        });
+                      }}
+                    />
+                  </label>
+                  <p className="ann-field-hint" style={{ marginTop: "-0.35rem" }}>
+                    Left / right dock uses full height and only with “Details underneath”.
+                  </p>
                   <label className="ann-field">
                     Auto-scroll seconds
                     <input
@@ -425,6 +493,14 @@ export default function AnnouncementEditor({
                       value={settings.announcementInterval || 5}
                       onChange={(event) => patch({ announcementInterval: Number(event.target.value) })}
                     />
+                  </label>
+                  <label className="ann-check">
+                    <input
+                      type="checkbox"
+                      checked={settings.announcementVideoMuted !== false}
+                      onChange={(event) => patch({ announcementVideoMuted: event.target.checked })}
+                    />
+                    Keep announcement videos muted (hides sound control)
                   </label>
                   <label className="ann-check">
                     <input
@@ -454,7 +530,7 @@ export default function AnnouncementEditor({
                 </Accordion>
               </div>
 
-              <div className="ann-edit-preview">
+              <div className="ann-edit-preview" data-scroll-lock-allow="true">
                 <AnnouncementCard settings={settings} preview />
               </div>
             </div>
@@ -465,16 +541,17 @@ export default function AnnouncementEditor({
       {fullPreview ? <AnnouncementOverlay settings={settings} onClose={() => setFullPreview(false)} /> : null}
       <MediaManagerModal
         isOpen={mediaOpen}
-        pickerMode={pickerMode}
+        pickerMode="any"
+        title="Media Library — Select media"
         onClose={() => {
           setMediaOpen(false);
-          setReplaceCoverMode(false);
+          setReplaceIndex(null);
         }}
         onSelect={(url) => {
-          if (replaceCoverMode) replaceCover(url);
+          if (replaceIndex !== null) replaceMediaAt(url, replaceIndex);
           else addMedia(url);
           setMediaOpen(false);
-          setReplaceCoverMode(false);
+          setReplaceIndex(null);
         }}
       />
     </div>
@@ -515,19 +592,30 @@ function Field({
   onChange,
   placeholder,
   area = false,
+  tall = false,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
   area?: boolean;
+  tall?: boolean;
 }) {
   return (
-    <label className="ann-field">
+    <label className={`ann-field${tall ? " is-tall" : ""}`}>
       {label}
       {area ? (
         <textarea
-          style={{ ...inputStyle, minHeight: "3.4rem", resize: "vertical" }}
+          className={tall ? "ann-field-area is-tall" : "ann-field-area"}
+          style={{
+            ...inputStyle,
+            minHeight: tall ? "8.5rem" : "3.4rem",
+            resize: "vertical",
+            whiteSpace: "pre-wrap",
+            overflowWrap: "anywhere",
+            lineHeight: 1.5,
+          }}
+          rows={tall ? 8 : 4}
           value={value}
           placeholder={placeholder}
           onChange={(event) => onChange(event.target.value)}

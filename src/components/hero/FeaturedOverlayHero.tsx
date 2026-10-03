@@ -6,7 +6,7 @@ import { RiArrowRightLine, RiArrowRightSLine } from "react-icons/ri";
 import { SiteSettings } from "@/lib/supabase";
 import { heroHighlights, heroImageFor, heroPortraitAlt, setting } from "@/lib/hero";
 import { isVideoUrl } from "@/lib/media";
-import { cloudinaryVideoDeliveryUrl, cloudinaryVideoPosterUrl } from "@/lib/cloudinary-url";
+import { cloudinaryOptimizedUrl, cloudinaryVideoDeliveryUrl, cloudinaryVideoPosterUrl } from "@/lib/cloudinary-url";
 
 export default function FeaturedOverlayHero({
   settings,
@@ -105,7 +105,7 @@ export default function FeaturedOverlayHero({
           </video>
         ) : (
           <img
-            src={media}
+            src={cloudinaryOptimizedUrl(media, { width: 1800, height: 2200, crop: "fill" }) || media}
             alt={alt}
             width={1600}
             height={2000}

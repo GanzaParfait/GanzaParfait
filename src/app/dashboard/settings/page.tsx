@@ -156,24 +156,31 @@ export default function SettingsPage() {
   const imageFieldValue = (value?: string) => (value && isBlobUrl(value) ? "" : value || "");
 
   return (
-    <div className="dash-settings">
-      <div className="dash-page-head">
-        <div>
-          <p style={{ fontSize: "0.7rem", fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "#0e52a8" }}>Control center</p>
-          <h1 style={{ fontSize: "1.2rem", fontWeight: 800, color: "#0b192c" }}>{activeView.label}</h1>
-          <p style={{ fontSize: "0.8rem", color: "#64748b" }}>{activeView.hint}</p>
-        </div>
-        {view !== "announcement" ? (
+    <div className={`dash-settings${view === "announcement" ? " is-announcement" : ""}`}>
+      {view !== "announcement" ? (
+        <div className="dash-page-head">
+          <div>
+            <p style={{ fontSize: "0.7rem", fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "#0e52a8" }}>Control center</p>
+            <h1 style={{ fontSize: "1.2rem", fontWeight: 800, color: "#0b192c" }}>{activeView.label}</h1>
+            <p style={{ fontSize: "0.8rem", color: "#64748b" }}>{activeView.hint}</p>
+          </div>
           <div className="dash-page-head-actions">
             <button type="button" className="btn btn-primary" onClick={() => persist()} disabled={saving}>
               <RiSaveLine size={16} /> {saving ? "Saving..." : "Save"}
             </button>
           </div>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
 
       <div className="dash-settings-body">
         <nav className="dash-settings-nav" aria-label="Settings sections">
+          {view === "announcement" ? (
+            <div className="dash-settings-nav-head">
+              <p>Control center</p>
+              <h2>Announcement</h2>
+              <p>Bar, sheet, and preview</p>
+            </div>
+          ) : null}
           {VIEWS.map((item) => {
             const Icon = item.icon;
             const active = view === item.id;

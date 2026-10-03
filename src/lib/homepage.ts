@@ -147,6 +147,10 @@ export type HomepageContent = {
     image: string;
     /** When image is a video: start muted (default) or offer sound control. */
     videoMuted?: boolean;
+    /** Object-position / zoom for the speaking visual (same idea as cinematic focus). */
+    imagePositionX?: number;
+    imagePositionY?: number;
+    imageZoom?: number;
     brandName: string;
     brandTagline: string;
     brandNote: string;
@@ -367,6 +371,9 @@ export const DEFAULT_HOMEPAGE: HomepageContent = {
     title: "Practical knowledge for real-world impact.",
     body: "I deliver hands-on training and speaking sessions through Eshuri Learning, focused on data systems, practical tools, and skills that help students and teams solve real problems.",
     image: "/images/profile/prince-parfait-ganza-kigali-casual.webp",
+    imagePositionX: 50,
+    imagePositionY: 28,
+    imageZoom: 100,
     brandName: "Eshuri Learning",
     brandTagline: "Learn. Practice. Apply.",
     brandNote: "Practical training for students, professionals and organizations.",
@@ -587,6 +594,9 @@ export function homepageFrom(settings: SiteSettings): HomepageContent {
             : savedSpeaking.title,
         quote: savedSpeaking.quote?.trim() || DEFAULT_HOMEPAGE.speaking.quote,
         visualCaption: savedSpeaking.visualCaption || DEFAULT_HOMEPAGE.speaking.visualCaption,
+        imagePositionX: savedSpeaking.imagePositionX ?? DEFAULT_HOMEPAGE.speaking.imagePositionX,
+        imagePositionY: savedSpeaking.imagePositionY ?? DEFAULT_HOMEPAGE.speaking.imagePositionY,
+        imageZoom: savedSpeaking.imageZoom ?? DEFAULT_HOMEPAGE.speaking.imageZoom,
         stats: savedSpeaking.stats?.length ? savedSpeaking.stats : DEFAULT_HOMEPAGE.speaking.stats,
         topics: savedSpeaking.topics?.length ? savedSpeaking.topics : DEFAULT_HOMEPAGE.speaking.topics,
       };

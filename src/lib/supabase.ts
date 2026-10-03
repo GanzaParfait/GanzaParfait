@@ -18,7 +18,9 @@ import {
 } from "@/lib/booking";
 
 export type AnnouncementSharePlatform = "linkedin" | "twitter" | "facebook" | "whatsapp" | "link";
-export type AnnouncementBarPosition = "top" | "bottom";
+export type AnnouncementBarPosition = "top" | "bottom" | "left" | "right";
+/** Desktop-only: where the open announcement sheet docks. */
+export type AnnouncementModalDock = "center" | "left" | "right";
 
 export type AnnouncementMedia = {
   id: string;
@@ -125,10 +127,16 @@ export interface SiteSettings {
   announcementDate?: string;
   announcementTime?: string;
   announcementPlace?: string;
+  /** Optional maps / location URL opened when place is clicked. */
+  announcementPlaceUrl?: string;
   announcementLayout?: "side" | "stack";
+  /** Desktop sheet placement when the announcement opens. */
+  announcementModalDock?: AnnouncementModalDock;
   announcementMedia?: AnnouncementMedia[];
   /** When false, hide the left media panel even if media exists. */
   announcementShowMedia?: boolean;
+  /** When true (default), videos stay muted and the sound control is hidden. */
+  announcementVideoMuted?: boolean;
   announcementSecondaryLabel?: string;
   announcementSecondaryHref?: string;
   announcementShare?: boolean;
@@ -290,8 +298,8 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   footerCompanyMedia: [],
   footerCompanyMediaFocus: [],
   footerCompanyCarouselInterval: 5,
-  heroOverlayMobilePositionX: 78,
-  heroOverlayMobilePositionY: 12,
+  heroOverlayMobilePositionX: 50,
+  heroOverlayMobilePositionY: 20,
   heroOverlayMobileZoom: 100,
   heroOverlayMuted: true,
   heroOverlayVolume: 80,
@@ -323,8 +331,11 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   announcementDate: "Saturday, Sep 20, 2026",
   announcementTime: "2:00 PM (GMT+2)",
   announcementPlace: "Kigali Marriott Hotel, Kigali, Rwanda",
+  announcementPlaceUrl: "",
   announcementLayout: "side",
+  announcementModalDock: "center",
   announcementShowMedia: true,
+  announcementVideoMuted: true,
   announcementSecondaryLabel: "Add to Calendar",
   announcementSecondaryHref: "",
   announcementShare: true,

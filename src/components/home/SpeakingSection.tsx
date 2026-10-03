@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { createPortal } from "react-dom";
 import {
   RiBarChart2Line,
   RiBookOpenLine,
+  RiCloseLine,
   RiDatabase2Line,
   RiFlashlightLine,
   RiMapPinLine,
@@ -13,7 +15,8 @@ import {
 } from "react-icons/ri";
 import type { HomepageContent, SpeakingTopicIcon } from "@/lib/homepage";
 import { isVideoUrl } from "@/lib/projects";
-import { cloudinaryVideoDeliveryUrl, cloudinaryVideoPosterUrl } from "@/lib/cloudinary-url";
+import { cloudinaryOptimizedUrl, cloudinaryVideoDeliveryUrl, cloudinaryVideoPosterUrl, mediaStillUrl } from "@/lib/cloudinary-url";
+import { useHistoryBackClose } from "@/hooks/useHistoryBackClose";
 
 function TopicIcon({ icon }: { icon: SpeakingTopicIcon }) {
   if (icon === "tools") return <RiBarChart2Line size={18} />;
@@ -45,9 +48,31 @@ export default function SpeakingSection({
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
   const [posterOk, setPosterOk] = useState(true);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const delivery = video && speaking.image ? cloudinaryVideoDeliveryUrl(speaking.image, { width: 900 }) : speaking.image;
-  const poster = video && speaking.image ? cloudinaryVideoPosterUrl(speaking.image, { width: 900 }) : undefined;
+  useHistoryBackClose(lightboxOpen && !embedded, () => setLightboxOpen(false));
+  const delivery = video && speaking.image
+    ? cloudinaryVideoDeliveryUrl(speaking.image, { width: 1200 })
+    : speaking.image
+      ? cloudinaryOptimizedUrl(speaking.image, { width: 1200, height: 1500, crop: "fill" })
+      : speaking.image;
+  const poster = video && speaking.image ? cloudinaryVideoPosterUrl(speaking.image, { width: 1200 }) : undefined;
+  const posX = speaking.imagePositionX ?? 50;
+  const posY = speaking.imagePositionY ?? 28;
+  const zoom = (speaking.imageZoom ?? 100) / 100;
+  const mediaStyle = {
+    ["--speaking-pos-x" as string]: `${posX}%`,
+    ["--speaking-pos-y" as string]: `${posY}%`,
+    ["--speaking-zoom" as string]: String(zoom),
+  } as CSSProperties;
+  const photoAlt =
+    speaking.visualCaption?.trim() ||
+    `Speaking and training with ${cite}`;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     setMuted(preferMuted);
@@ -55,6 +80,15 @@ export default function SpeakingSection({
     setFailed(false);
     setPosterOk(true);
   }, [preferMuted, speaking.image]);
+
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setLightboxOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [lightboxOpen]);
 
   useEffect(() => {
     if (!video || !videoRef.current || failed) return;
@@ -76,6 +110,16 @@ export default function SpeakingSection({
     node.muted = next;
     if (!next) void node.play().catch(() => {});
   };
+
+  const openLightbox = () => {
+    if (embedded || !speaking.image || failed) return;
+    setLightboxOpen(true);
+  };
+
+  const lightboxSrc =
+    mediaStillUrl(speaking.image, { width: 1600, isVideo: video }) ||
+    delivery ||
+    speaking.image;
 
   return (
     <section
@@ -117,7 +161,19 @@ export default function SpeakingSection({
             </div>
           </div>
 
-          <div className="speaking-visual">
+          <div
+            className={`speaking-visual${speaking.image && !failed && !embedded ? " is-openable" : ""}`}
+            style={mediaStyle}
+            role={speaking.image && !failed && !embedded ? "button" : undefined}
+            tabIndex={speaking.image && !failed && !embedded ? 0 : undefined}
+            aria-label={speaking.image && !failed && !embedded ? `View ${photoAlt}` : undefined}
+            onClick={openLightbox}
+            onKeyDown={(event) => {
+              if (event.key !== "Enter" && event.key !== " ") return;
+              event.preventDefault();
+              openLightbox();
+            }}
+          >
             {speaking.image && !failed ? (
               video ? (
                 <>
@@ -151,7 +207,10 @@ export default function SpeakingSection({
                   <button
                     type="button"
                     className="speaking-video-sound"
-                    onClick={toggleMute}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      toggleMute();
+                    }}
                     aria-pressed={!muted}
                     aria-label={muted ? "Unmute video" : "Mute video"}
                   >
@@ -161,8 +220,8 @@ export default function SpeakingSection({
                 </>
               ) : (
                 <img
-                  src={speaking.image}
-                  alt=""
+                  src={delivery}
+                  alt={photoAlt}
                   className="speaking-photo"
                   width={720}
                   height={900}
@@ -224,6 +283,38 @@ export default function SpeakingSection({
           </div>
         </div>
       </div>
+
+      {mounted && lightboxOpen && lightboxSrc
+        ? createPortal(
+            <div
+              className="speaking-lightbox svc-lightbox"
+              role="dialog"
+              aria-modal="true"
+              aria-label={photoAlt}
+              onClick={() => setLightboxOpen(false)}
+            >
+              <button
+                type="button"
+                className="svc-lightbox-close"
+                aria-label="Close image"
+                onClick={() => setLightboxOpen(false)}
+              >
+                <RiCloseLine size={20} />
+              </button>
+              <figure className="svc-lightbox-frame" onClick={(event) => event.stopPropagation()}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={lightboxSrc} alt={photoAlt} className="svc-lightbox-img" />
+                {(speaking.visualCaption || speaking.brandName) ? (
+                  <figcaption>
+                    <strong>{speaking.brandName || "Speaking"}</strong>
+                    {speaking.visualCaption ? <span>{speaking.visualCaption}</span> : null}
+                  </figcaption>
+                ) : null}
+              </figure>
+            </div>,
+            document.body,
+          )
+        : null}
     </section>
   );
 }

@@ -155,9 +155,11 @@ export default function Navbar() {
     settings.announcementHeadline?.trim() ||
     settings.announcementEyebrow?.trim() ||
     "";
-  const barPosition = settings.announcementBarPosition === "bottom" ? "bottom" : "top";
+  const barPosition = settings.announcementBarPosition || "top";
   const showTopBar = Boolean(settings.announcementIsActive && barText && barPosition === "top");
-  const showBottomBar = Boolean(settings.announcementIsActive && barText && barPosition === "bottom");
+  const showDockedBar = Boolean(
+    settings.announcementIsActive && barText && (barPosition === "bottom" || barPosition === "left" || barPosition === "right"),
+  );
 
   const logoSrc = isDark
     ? "/brand/logos/logo-horizontal-light.webp"
@@ -644,7 +646,7 @@ export default function Navbar() {
           </div>
         </div>
       </div>
-      {showBottomBar ? <AnnouncementBar settings={settings} /> : null}
+      {showDockedBar ? <AnnouncementBar settings={settings} /> : null}
     </>
   );
 }

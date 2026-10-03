@@ -216,14 +216,14 @@ export default function HeroEditorModal({
 
             {layout === "featured_overlay" ? (
               <Field
-                label="Mobile image focus"
-                hint="Only affects phones and tablets. Open the frame, drag the person into place, and zoom until the face sits in view."
+                label="Image focus"
+                hint="Works for photos and video posters. Drag the person into frame and zoom — applies on the live site (desktop and mobile)."
               >
-                <button type="button" className="btn btn-outline" onClick={() => setFocusOpen(true)}>
+                <button type="button" className="btn btn-outline" onClick={() => setFocusOpen(true)} disabled={!imageValue}>
                   Position image
                 </button>
                 <p style={{ margin: "0.45rem 0 0", fontSize: "0.75rem", color: "#64748b" }}>
-                  {formData.heroOverlayMobilePositionX ?? 78}% · {formData.heroOverlayMobilePositionY ?? 12}% · zoom{" "}
+                  {formData.heroOverlayMobilePositionX ?? 50}% · {formData.heroOverlayMobilePositionY ?? 20}% · zoom{" "}
                   {formData.heroOverlayMobileZoom ?? 100}%
                 </p>
               </Field>
@@ -521,10 +521,12 @@ export default function HeroEditorModal({
       {focusOpen ? (
         <HeroMobileFocusModal
           image={imageValue}
-          x={formData.heroOverlayMobilePositionX ?? 78}
-          y={formData.heroOverlayMobilePositionY ?? 12}
+          x={formData.heroOverlayMobilePositionX ?? 50}
+          y={formData.heroOverlayMobilePositionY ?? 20}
           zoom={formData.heroOverlayMobileZoom ?? 100}
           saving={saving}
+          eyebrow="Featured overlay focus"
+          title="Place the person in frame"
           onChange={(next) =>
             update({
               heroOverlayMobilePositionX: next.x,
@@ -545,7 +547,7 @@ export default function HeroEditorModal({
                 heroOverlayMobilePositionY: next.y,
                 heroOverlayMobileZoom: next.zoom,
               });
-            }, "Mobile image position saved.");
+            }, "Image position saved.");
             if (ok) setFocusOpen(false);
           }}
         />

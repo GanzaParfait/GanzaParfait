@@ -18,7 +18,9 @@ import {
   RiTabletLine,
 } from "react-icons/ri";
 import MediaManagerModal from "@/components/dashboard/MediaManagerModal";
+import HeroMobileFocusModal from "@/components/dashboard/HeroMobileFocusModal";
 import { useDashboardFeedback } from "@/components/dashboard/DashboardFeedback";
+import { cloudinaryOptimizedUrl } from "@/lib/cloudinary-url";
 import ManifestoSection from "@/components/home/ManifestoSection";
 import SelectedWork, { resolveSelectedWork } from "@/components/home/SelectedWork";
 import ProjectOrderPicker from "@/components/dashboard/ProjectOrderPicker";
@@ -83,6 +85,7 @@ export default function HomepageEditorPage() {
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [mediaOpen, setMediaOpen] = useState(false);
   const [mediaTarget, setMediaTarget] = useState<"manifesto" | "speaking" | `journey:${string}` | null>(null);
+  const [speakingFocusOpen, setSpeakingFocusOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const { runSave, saving } = useDashboardFeedback();
   const selectSection = useSectionHash(SECTIONS, setSection);
@@ -545,6 +548,7 @@ export default function HomepageEditorPage() {
                   setMediaTarget(section === "speaking" ? "speaking" : "manifesto");
                   setMediaOpen(true);
                 }}
+                onSpeakingFocus={() => setSpeakingFocusOpen(true)}
               />
             )}
             {section !== "knowledge" && section !== "journey" && tab !== "content" && (
@@ -615,14 +619,23 @@ export default function HomepageEditorPage() {
           if (url.startsWith("blob:")) return;
           const target = mediaTarget;
           if (target === "manifesto") {
+            const optimized = cloudinaryOptimizedUrl(url, { width: 1600, height: 2000, crop: "limit" }) || url;
             setContent((current) => ({
               ...current,
-              manifesto: { ...current.manifesto, image: url },
+              manifesto: { ...current.manifesto, image: optimized },
             }));
           } else if (target === "speaking") {
+            const optimized = cloudinaryOptimizedUrl(url, { width: 1600, height: 2000, crop: "limit" }) || url;
             setContent((current) => ({
               ...current,
-              speaking: { ...current.speaking, image: url },
+              speaking: {
+                ...current.speaking,
+                image: optimized,
+                // Reset framing toward upper body when media changes
+                imagePositionX: current.speaking.imagePositionX ?? 50,
+                imagePositionY: current.speaking.imagePositionY ?? 28,
+                imageZoom: current.speaking.imageZoom ?? 100,
+              },
             }));
           } else if (target?.startsWith("journey:")) {
             const entryId = target.slice("journey:".length);
@@ -640,6 +653,50 @@ export default function HomepageEditorPage() {
           setMediaTarget(null);
         }}
       />
+
+      {speakingFocusOpen ? (
+        <HeroMobileFocusModal
+          image={content.speaking.image}
+          x={content.speaking.imagePositionX ?? 50}
+          y={content.speaking.imagePositionY ?? 28}
+          zoom={content.speaking.imageZoom ?? 100}
+          frame="wide"
+          eyebrow="Speaking media focus"
+          title="Place the person in frame"
+          saving={saving}
+          onChange={(next) =>
+            setContent((current) => ({
+              ...current,
+              speaking: {
+                ...current.speaking,
+                imagePositionX: next.x,
+                imagePositionY: next.y,
+                imageZoom: next.zoom,
+              },
+            }))
+          }
+          onClose={() => setSpeakingFocusOpen(false)}
+          onApply={async (next) => {
+            let nextContent: HomepageContent | null = null;
+            setContent((current) => {
+              nextContent = {
+                ...current,
+                speaking: {
+                  ...current.speaking,
+                  imagePositionX: next.x,
+                  imagePositionY: next.y,
+                  imageZoom: next.zoom,
+                },
+              };
+              return nextContent;
+            });
+            const ok = await runSave(async () => {
+              if (nextContent) await saveLocalSettings({ homepage: nextContent });
+            }, "Speaking image position saved.");
+            if (ok) setSpeakingFocusOpen(false);
+          }}
+        />
+      ) : null}
             </div>
   );
 }
@@ -654,6 +711,7 @@ function OtherSectionFields({
   patchStory,
   projectCatalog,
   onMedia,
+  onSpeakingFocus,
 }: {
   section: SectionId;
   content: HomepageContent;
@@ -664,6 +722,7 @@ function OtherSectionFields({
   patchStory: (next: Partial<WorkStory>) => void;
   projectCatalog: Project[];
   onMedia: () => void;
+  onSpeakingFocus: () => void;
 }) {
   if (section === "manifesto") {
     return (
@@ -908,7 +967,7 @@ function OtherSectionFields({
           {content.speaking.image ? (
             <MediaThumb
               src={content.speaking.image}
-              alt=""
+              alt="Speaking section media"
               width={200}
               style={{ width: "6rem", height: "7.5rem", borderRadius: "0.65rem", overflow: "hidden", border: "1px solid #dbe4f0" }}
             />
@@ -916,7 +975,21 @@ function OtherSectionFields({
           <button type="button" className="btn btn-outline btn-sm" onClick={onMedia}>
             <RiImageAddLine size={15} /> Change media
           </button>
+          <button
+            type="button"
+            className="btn btn-outline btn-sm"
+            onClick={onSpeakingFocus}
+            disabled={!content.speaking.image}
+          >
+            <RiDragMove2Line size={15} /> Position image
+          </button>
         </div>
+        {content.speaking.image ? (
+          <p style={{ margin: 0, fontSize: "0.75rem", color: "#64748b" }}>
+            Focus {content.speaking.imagePositionX ?? 50}% · {content.speaking.imagePositionY ?? 28}% · zoom{" "}
+            {content.speaking.imageZoom ?? 100}% — matches the live speaking card.
+          </p>
+        ) : null}
         {isVideoUrl(content.speaking.image) ? (
           <label style={{ display: "inline-flex", alignItems: "center", gap: "0.55rem", fontSize: "0.875rem", fontWeight: 600, cursor: "pointer" }}>
             <input
