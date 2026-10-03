@@ -88,6 +88,8 @@ export interface SiteSettings {
   heroOverlayMobileZoom?: number;
   /** Cinematic overlay video starts muted when true (default). Visitors can unmute on the site. */
   heroOverlayMuted?: boolean;
+  /** 0–100; applied when visitors unmute the featured overlay video. */
+  heroOverlayVolume?: number;
   /** Optional footer copy toggles / fields (empty text stays hidden). */
   footerShowBio?: boolean;
   footerShowEmail?: boolean;
@@ -292,6 +294,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   heroOverlayMobilePositionY: 12,
   heroOverlayMobileZoom: 100,
   heroOverlayMuted: true,
+  heroOverlayVolume: 80,
   footerShowBio: true,
   footerShowEmail: true,
   footerShowPhone: true,

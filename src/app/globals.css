@@ -5664,19 +5664,22 @@ body.mobile-nav-open .subscribe-widget-layer {
     bottom: auto;
     transform: none;
     display: inline-flex;
+    flex-direction: column;
     align-items: center;
     width: 100%;
     justify-content: center;
-    /* Equal air above/below comes from hero pad-bottom + manifesto pad-top. */
+    /* Own equal padding so the cue looks vertically centered between hero + manifesto */
     margin: 0;
-    padding: 0 1rem;
+    padding: 1.25rem 1rem;
+    gap: 0.4rem;
+    box-sizing: border-box;
   }
 
-  /* Cue is in-flow on mobile — equal air above/below via matching pads. */
+  /* Tight hero/manifesto pads — cue padding owns the equal top/bottom air */
   .hero-carousel:has(> .hero-story-cue) .hero-centered:not(.hero-layout-preview),
   .hero-carousel:has(> .hero-story-cue) .hero-split:not(.hero-layout-preview),
   .hero-carousel:has(> .hero-story-cue) .hero-cinematic:not(.hero-layout-preview) {
-    padding-bottom: 1.15rem !important;
+    padding-bottom: 0.35rem !important;
   }
   .hero-carousel:has(> .hero-story-cue) .hero-centered:not(.hero-layout-preview) .hero-centered-info {
     margin-bottom: 0;
@@ -5687,7 +5690,7 @@ body.mobile-nav-open .subscribe-widget-layer {
   }
   .hero-carousel:has(> .hero-story-cue) + .manifesto,
   .hero-carousel:has(> .hero-story-cue) ~ .manifesto {
-    padding-top: 1.15rem !important;
+    padding-top: 0.35rem !important;
   }
   .hero-carousel:has(> .hero-story-cue) ~ .manifesto .manifesto-intro > .section-label,
   .hero-carousel:has(> .hero-story-cue) ~ .manifesto .section-label {
@@ -6239,20 +6242,18 @@ body.mobile-nav-open .subscribe-widget-layer {
   .hero-centered:not(.hero-layout-preview) .hero-centered-socials {
     grid-column: auto;
     order: unset;
-    width: 100%;
-    justify-content: flex-start;
-    margin-top: 0.35rem;
-    padding: 0 0 0 0.5rem;
-    gap: 0.95rem;
+    display: flex !important;
+    width: 100% !important;
+    justify-content: space-between !important;
+    margin-top: 0.45rem;
+    padding: 0.15rem 0 0 !important;
+    gap: 0.35rem;
   }
 
   .hero-centered:not(.hero-layout-preview) .hero-centered-social {
     width: 2.15rem;
     height: 2.15rem;
-  }
-
-  .hero-carousel:has(> .hero-story-cue) .hero-centered:not(.hero-layout-preview) {
-    padding-bottom: 0.35rem !important;
+    flex: none;
   }
 
   .hero-carousel:has(> .hero-story-cue) .hero-centered:not(.hero-layout-preview) .hero-centered-info {
@@ -6482,11 +6483,11 @@ body.mobile-nav-open .subscribe-widget-layer {
   }
 
   .hero-carousel:has(> .hero-story-cue) .hero-split:not(.hero-layout-preview) {
-    padding-bottom: 0.85rem !important;
+    padding-bottom: 0.35rem !important;
   }
 
   .hero-carousel:has(> .hero-story-cue) .hero-split:not(.hero-layout-preview) .hero-split-cta-wrap {
-    padding-bottom: calc(1.15rem + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: calc(0.55rem + env(safe-area-inset-bottom, 0px)) !important;
   }
 
   .hero-split:not(.hero-layout-preview) .hero-split-cta-wrap .hero-split-socials {

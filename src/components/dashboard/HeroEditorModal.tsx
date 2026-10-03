@@ -104,6 +104,8 @@ export default function HeroEditorModal({
       heroOverlayMobilePositionX: synced.heroOverlayMobilePositionX,
       heroOverlayMobilePositionY: synced.heroOverlayMobilePositionY,
       heroOverlayMobileZoom: synced.heroOverlayMobileZoom,
+      heroOverlayMuted: synced.heroOverlayMuted,
+      heroOverlayVolume: synced.heroOverlayVolume,
       heroLayoutCopy: {
         ...settings.heroLayoutCopy,
         [active]: layoutCopyFrom(synced),
@@ -230,7 +232,7 @@ export default function HeroEditorModal({
             {layout === "featured_overlay" ? (
               <Field
                 label="Background video sound"
-                hint="Browsers require muted autoplay. Visitors can still unmute with the on-page control."
+                hint="Admin-only (no mute button on the public site). Applies when Featured Overlay media is a video. Browsers may still force mute for autoplay."
               >
                 <label style={{ display: "inline-flex", alignItems: "center", gap: "0.55rem", fontSize: "0.875rem", color: "#0f172a", fontWeight: 600, cursor: "pointer" }}>
                   <input
@@ -238,7 +240,20 @@ export default function HeroEditorModal({
                     checked={formData.heroOverlayMuted !== false}
                     onChange={(event) => update({ heroOverlayMuted: event.target.checked })}
                   />
-                  Start muted
+                  Play muted
+                </label>
+                <label style={{ display: "grid", gap: "0.35rem", marginTop: "0.75rem", fontSize: "0.8rem", color: "#475569", fontWeight: 600 }}>
+                  Volume if sound is allowed ({formData.heroOverlayVolume ?? 80}%)
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    step={5}
+                    value={formData.heroOverlayVolume ?? 80}
+                    onChange={(event) => update({ heroOverlayVolume: Number(event.target.value) })}
+                    style={{ width: "100%" }}
+                    disabled={formData.heroOverlayMuted !== false}
+                  />
                 </label>
               </Field>
             ) : null}

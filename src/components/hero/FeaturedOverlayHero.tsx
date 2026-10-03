@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
-import { RiArrowRightLine, RiArrowRightSLine, RiVolumeMuteLine, RiVolumeUpLine } from "react-icons/ri";
+import { RiArrowRightLine, RiArrowRightSLine } from "react-icons/ri";
 import { SiteSettings } from "@/lib/supabase";
 import { heroHighlights, heroImageFor, heroPortraitAlt, setting } from "@/lib/hero";
 import { isVideoUrl } from "@/lib/media";
@@ -20,8 +20,9 @@ export default function FeaturedOverlayHero({
   const mobileX = settings.heroOverlayMobilePositionX ?? 78;
   const mobileY = settings.heroOverlayMobilePositionY ?? 12;
   const mobileZoom = (settings.heroOverlayMobileZoom ?? 100) / 100;
-  const preferMuted = settings.heroOverlayMuted !== false;
-  const [muted, setMuted] = useState(preferMuted);
+  /** Dashboard-only: no public mute control on the site. */
+  const muted = settings.heroOverlayMuted !== false;
+  const volume = Math.min(1, Math.max(0, (settings.heroOverlayVolume ?? 80) / 100));
   const [mediaReady, setMediaReady] = useState(!isVideoUrl(media));
   const kicker = [setting(settings, "heroAvailableText").trim(), String(settings.location || "").trim()]
     .filter(Boolean)
@@ -50,10 +51,6 @@ export default function FeaturedOverlayHero({
   }, [video, media]);
 
   useEffect(() => {
-    setMuted(preferMuted);
-  }, [preferMuted, media]);
-
-  useEffect(() => {
     setMediaReady(!video);
   }, [video, media]);
 
@@ -61,25 +58,21 @@ export default function FeaturedOverlayHero({
     if (!video || !videoRef.current) return;
     const node = videoRef.current;
     node.muted = muted;
+    node.volume = volume;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) {
       node.pause();
       node.removeAttribute("autoplay");
       return;
     }
-    void node.play().catch(() => {});
-  }, [video, desktopVideoSrc, mobileVideoSrc, muted]);
-
-  const toggleMute = () => {
-    const next = !muted;
-    setMuted(next);
-    const node = videoRef.current;
-    if (!node) return;
-    node.muted = next;
-    if (!next) {
-      void node.play().catch(() => {});
-    }
-  };
+    // Unmuted autoplay is often blocked — fall back to muted so the clip still plays.
+    void node.play().catch(() => {
+      if (!muted) {
+        node.muted = true;
+        void node.play().catch(() => {});
+      }
+    });
+  }, [video, desktopVideoSrc, mobileVideoSrc, muted, volume]);
 
   return (
     <section
@@ -123,18 +116,6 @@ export default function FeaturedOverlayHero({
           />
         )}
         <div className="hero-cinematic-shade" aria-hidden="true" />
-        {video && !isPreview ? (
-          <button
-            type="button"
-            className="hero-cinematic-mute"
-            onClick={toggleMute}
-            aria-pressed={!muted}
-            aria-label={muted ? "Unmute background video" : "Mute background video"}
-          >
-            {muted ? <RiVolumeMuteLine size={16} /> : <RiVolumeUpLine size={16} />}
-            <span>{muted ? "Muted" : "Sound"}</span>
-          </button>
-        ) : null}
       </div>
 
       <div className="container hero-cinematic-inner">
